@@ -16,13 +16,23 @@ __pycache__/
 .venv/
 venv/
 
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn
+.pnp.*
+
 # Environment
 .env
 .env.local
 .env.*.local
 
-# Build artifacts (dist is committed as the deploy target)
-# dist/
-
-# Node
-node_modules/
+# Build artifacts
+dist/
+build/
+out/
+.next/
+.nuxt/
