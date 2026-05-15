@@ -1456,13 +1456,13 @@ for name, entity in data.items():
 # Get all Whitepapers entity names
 try:
     req = urllib.request.Request('https://subscript.fibery.io/api/commands',
-        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Blog','q/select':['Website/name'],'q/limit':50}}}]).encode(),
+        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Whitepapers','q/select':['Website/name'],'q/limit':50}}}]).encode(),
         headers={'Authorization':'Token '+token,'Content-Type':'application/json'})
     resp = urllib.request.urlopen(req)
     wp_data = json.loads(resp.read())
     wp_names = set(e.get('Website/name','') for e in wp_data[0].get('result',[]))
 except:
-    print('ERROR:could not query Blog database')
+    print('ERROR:could not query Whitepapers database')
     sys.exit(0)
 missing = [t for t in downloadable if t not in wp_names]
 if missing:
@@ -1472,18 +1472,18 @@ else:
 " 2>/dev/null)
 if [[ "$WP_MATCH" == ALL_MATCHED* ]]; then
   COUNT=$(echo "$WP_MATCH" | sed 's/ALL_MATCHED://')
-  pass "All $COUNT downloadable posts have matching Blog entities in Fibery"
+  pass "All $COUNT downloadable posts have matching Whitepapers entities in Fibery"
 elif [[ "$WP_MATCH" == ERROR* ]]; then
-  skip "Could not query Blog database"
+  skip "Could not query Whitepapers database"
 else
   MISSING=$(echo "$WP_MATCH" | sed 's/MISSING://')
-  fail "All downloadable posts have matching Blog entities" "Missing: $MISSING"
+  fail "All downloadable posts have matching Whitepapers entities" "Missing: $MISSING"
 fi
 
 # Test: Lead capture endpoint responds (dev server)
 WP_LEAD_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/whitepaper-lead" \
   -H "Content-Type: application/json" \
-  -d '{"email":"kyle.adriany@gmail.com","whitepaper":"Chat Advance Case Study"}' 2>/dev/null)
+  -d '{"email":"kyle.adriany@gmail.com","whitepaper":"How Chat Advance funded a declined deal in 5 minutes"}' 2>/dev/null)
 if [ "$WP_LEAD_RESPONSE" = "200" ]; then
   pass "POST /api/whitepaper-lead returns 200"
 else

@@ -1,8 +1,8 @@
 /**
- * Cloudflare Worker — Blog lead capture relay
+ * Cloudflare Worker — Whitepaper lead capture relay
  *
  * Accepts POST { email, whitepaper } from undersight.ai,
- * creates a "Blog Leads" entity in Fibery, and returns JSON.
+ * creates a "Whitepaper Leads" entity in Fibery, and returns JSON.
  *
  * Secrets (set via `wrangler secret put`):
  *   FIBERY_TOKEN — Fibery API token for subscript.fibery.io
@@ -49,7 +49,7 @@ export default {
           command: 'fibery.entity/query',
           args: {
             query: {
-              'q/from': 'Website/Blog',
+              'q/from': 'Website/Whitepapers',
               'q/select': ['fibery/id'],
               'q/where': ['=', ['Website/name'], '$name'],
               'q/limit': 1,
@@ -70,14 +70,14 @@ export default {
       const leadEntity = {
         'Website/Email': email,
       };
-      if (wpId) leadEntity['Website/Blog Post'] = { 'fibery/id': wpId };
+      if (wpId) leadEntity['Website/Whitepaper'] = { 'fibery/id': wpId };
 
       const fiberyResp = await fetch('https://subscript.fibery.io/api/commands', {
         method: 'POST',
         headers: fiberyHeaders,
         body: JSON.stringify([{
           command: 'fibery.entity/create',
-          args: { type: 'Website/Blog Leads', entity: leadEntity },
+          args: { type: 'Website/Whitepaper Leads', entity: leadEntity },
         }]),
       });
 
