@@ -249,7 +249,7 @@
             <h3>How Chat Advance turned a decline into a funded deal</h3>
             <p>A small business owner was auto-declined by a rules-based underwriter. The undersight platform saw what the rules engine couldn't. Through agentic intake, enrichment, and pre-underwriting, two funders matched and extended offers in under five minutes.</p>
             <a class="cs-link" href="javascript:void(0)" onclick="openCaseStudy()">Read the full case study &rarr;</a>
-            <button class="btn btn-ghost" onclick="openWhitepaperModal('Chat Advance Case Study')" style="margin-top:12px;">
+            <button class="btn btn-ghost" onclick="openWhitepaperModal('How Chat Advance funded a declined deal in 5 minutes')" style="margin-top:12px;">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
               Download as PDF
             </button>
@@ -298,6 +298,10 @@
             <h3>How a 2-person fund gets institutional-grade underwriting</h3>
             <p>4D Financing is a direct MCA lender built on a simple conviction: merchants deserve transparency. With a lean team and undersight's AI underwriting agent, 4DF analyzes bank statements, cross-references financial documents, flags inconsistencies, and proposes terms — all with full audit trails. Every approval and every decline comes with evidence-backed reasoning, not gut feel.</p>
             <a class="cs-link placeholder" href="javascript:void(0)">Read the full case study &rarr;</a>
+            <button class="btn btn-ghost" onclick="openWhitepaperModal('How 4D Financing gets institutional-grade underwriting with a 2-person team')" style="margin-top:12px;">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+              Download as PDF
+            </button>
           </div>
         </div>
       </div>
@@ -427,8 +431,8 @@
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
     </button>
     <div class="wp-form" id="wpForm">
-      <h3 id="wpTitle">Get the Case Study</h3>
-      <p class="wp-desc">Enter your email and we'll send you the full Chat Advance case study as a PDF.</p>
+      <h3 id="wpTitle">Get the PDF</h3>
+      <p class="wp-desc" id="wpDesc">Enter your email and we'll send you the full article as a PDF.</p>
       <input type="email" class="wp-input" id="wpEmail" placeholder="you@company.com" autocomplete="email" required>
       <div class="wp-error-msg" id="wpError">Please enter a valid email address.</div>
       <button class="btn btn-primary wp-submit" onclick="submitWhitepaperEmail()">Send me the PDF</button>
@@ -438,7 +442,7 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <h4>Check your inbox</h4>
-      <p>We've sent the case study to your email. It should arrive within a minute or two.</p>
+      <p>We've sent the PDF to your email. It should arrive within a minute or two.</p>
     </div>
   </div>
 </div>
@@ -808,7 +812,7 @@
       metaParts.join(' &middot; ');
 
     // Map blog post to whitepaper name (must match Website/Whitepapers entity names in Fibery)
-    const wpName = post.title.includes('Chat Advance') ? 'Chat Advance Case Study' : post.title;
+    const wpName = post.title;
     const dlBtn = `<button class="btn btn-ghost" onclick="openWhitepaperModal('${wpName.replace(/'/g, "\\'")}')" style="margin-top:16px;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
         Download as PDF
@@ -887,9 +891,14 @@
   const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? '/api/whitepaper-lead'
     : ''; // TODO: set to Cloudflare Worker URL when deployed
-  var _activeWhitepaper = 'Chat Advance Case Study';
+  var _activeWhitepaper = '';
   function openWhitepaperModal(name) {
     if (name) _activeWhitepaper = name;
+    // Update modal text based on the content type
+    document.getElementById('wpTitle').textContent = 'Get the PDF';
+    document.getElementById('wpDesc').textContent = name
+      ? 'Enter your email and we\u2019ll send you \u201c' + name + '\u201d as a PDF.'
+      : 'Enter your email and we\u2019ll send you the full article as a PDF.';
     document.getElementById('wpOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById('wpEmail').focus(), 200);
