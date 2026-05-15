@@ -57,6 +57,7 @@ header {
   header { background: rgba(26, 29, 33, 0.92); }
 }
 html.theme-light header { background: rgba(255, 255, 255, 0.92); }
+html.theme-dark header { background: rgba(26, 29, 33, 0.92); }
 header.scrolled { box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06); }
 
 .nav-inner {
@@ -73,6 +74,7 @@ header.scrolled { box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06); }
   .nav-logo-img { filter: invert(1); }
 }
 html.theme-light .nav-logo-img { filter: none; }
+html.theme-dark .nav-logo-img { filter: invert(1); }
 .nav-links { display: flex; align-items: center; gap: 32px; }
 .nav-links > a, .nav-dropdown > .nav-dropdown-trigger {
   font-size: 15px; font-weight: 510; color: var(--mid);

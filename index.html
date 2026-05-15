@@ -957,7 +957,17 @@
 
   // ---- Theme toggle ----
   function toggleTheme() {
-    document.documentElement.classList.toggle('theme-light');
+    var el = document.documentElement;
+    if (el.classList.contains('theme-dark')) {
+      el.classList.remove('theme-dark');
+      el.classList.add('theme-light');
+    } else if (el.classList.contains('theme-light')) {
+      el.classList.remove('theme-light');
+      // Back to OS default
+    } else {
+      // OS default → force dark
+      el.classList.add('theme-dark');
+    }
   }
 
   // ---- Scroll reveal ----
