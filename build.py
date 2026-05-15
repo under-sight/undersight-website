@@ -541,8 +541,16 @@ def format_size(nbytes):
 def main():
     do_verify = "--verify" in sys.argv
 
+    # Parse --env flag (production or dev)
+    env_name = "dev"
+    for i, arg in enumerate(sys.argv[1:], 1):
+        if arg.startswith("--env="):
+            env_name = arg.split("=", 1)[1]
+        elif arg == "--env" and i + 1 < len(sys.argv):
+            env_name = sys.argv[i + 1]
+
     print("=" * 60)
-    print("undersight.ai static site builder")
+    print(f"undersight.ai static site builder  [env={env_name}]")
     print("=" * 60)
 
     start_time = time.time()
@@ -551,6 +559,7 @@ def main():
     print("\n[1/6] Retrieving Fibery API token...")
     content_map = None
     file_map = {}
+    site_mode = "live"
     try:
         token = get_token()
         print("  OK")
@@ -566,6 +575,21 @@ def main():
             entity_names = list(content_map.keys())
             print(f"  Entities: {', '.join(entity_names)}")
             print(f"  File attachments: {len(file_map)}")
+
+            # Extract Site Mode from Site Config
+            site_config_md = content_map.get("Site Config", {}).get("content", "")
+            for line in site_config_md.split("\n"):
+                if "**Site Mode:**" in line:
+                    site_mode = line.split("**Site Mode:**")[1].strip().rstrip("\\").strip().lower()
+                    break
+            print(f"  Site Mode: {site_mode}")
+
+            # Production respects Site Mode; dev always builds full site
+            if env_name == "production" and site_mode == "under-construction":
+                print(f"\n  Site Mode is 'under-construction' — building fallback page")
+                content_map = None
+                file_map = {}
+
         except Exception as e:
             print(f"WARNING: Failed to fetch content from Fibery: {e}")
             print("  Building under-construction fallback page...")
@@ -608,6 +632,12 @@ def main():
         print("=" * 60)
         print(f"  Output: {DIST_DIR}")
         print(f"  Time:   {elapsed:.1f}s")
+
+        # Write build metadata for deploy-report.py
+        meta = {"site_mode": "under-construction", "env": env_name,
+                "entity_count": 0, "content_hash": "none"}
+        with open(os.path.join(DIST_DIR, ".build-meta.json"), "w") as f:
+            json.dump(meta, f)
         return
 
     # 4. Copy static files (before file downloads so directory structure exists)
@@ -658,6 +688,15 @@ def main():
     html_size = os.path.getsize(dist_html_path)
     print(f"  Written: dist/index.html ({format_size(html_size)})")
 
+    # Write build metadata for deploy-report.py
+    content_hash = hashlib.sha256(
+        json.dumps(content_map, sort_keys=True).encode()
+    ).hexdigest()[:16]
+    meta = {"site_mode": site_mode, "env": env_name,
+            "entity_count": len(content_map), "content_hash": content_hash}
+    with open(os.path.join(DIST_DIR, ".build-meta.json"), "w") as f:
+        json.dump(meta, f)
+
     # Summary
     total_size = html_size + static_bytes
     elapsed = time.time() - start_time
@@ -670,6 +709,8 @@ def main():
     print(f"  Total size:  {format_size(total_size)}")
     print(f"  Time:        {elapsed:.1f}s")
     print(f"  Entities:    {len(content_map)}")
+    print(f"  Site Mode:   {site_mode}")
+    print(f"  Content Hash: {content_hash}")
 
     # 7. Verify (if requested or always do a quick sanity check)
     if do_verify:

@@ -1,4 +1,4 @@
-name: Deploy Dev (Fibery → Cloudflare Pages)
+name: Deploy Production (Fibery → undersight.ai)
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-dev
+  group: deploy-production
   cancel-in-progress: true
 
 jobs:
@@ -19,19 +19,24 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Build site from Fibery
+      - name: Build site from Fibery (respects Site Mode)
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
-        run: python3 build.py --verify --env dev
+        run: python3 build.py --verify --env production
 
-      - name: Deploy to Cloudflare Pages (dev)
+      - name: Deploy to Cloudflare Pages (production)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name undersight-website --branch dev --commit-dirty=true
+          command: pages deploy dist --project-name undersight-website --branch main --commit-dirty=true
 
       - name: Report deployment to Fibery
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
-        run: python3 deploy-report.py --env dev --url "https://dev.undersight-website.pages.dev"
+        run: python3 deploy-report.py --env production --url "https://undersight.ai"
+
+      - name: Verify deployment matches Fibery intent
+        env:
+          FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
+        run: python3 deploy-report.py --verify --env production
