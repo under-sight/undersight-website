@@ -888,10 +888,9 @@
   }
 
   // ---- Whitepaper modal ----
-  // Dev: /api/whitepaper-lead (local dev server). Prod: Cloudflare Worker URL.
-  const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-    ? '/api/whitepaper-lead'
-    : ''; // TODO: set to Cloudflare Worker URL when deployed
+  // Dev: handled by undersight-serve.py. Prod: Cloudflare Pages Function (functions/api/whitepaper-lead.js).
+  // Same path works in both environments — no URL switch needed.
+  const WORKER_URL = '/api/whitepaper-lead';
   var _activeWhitepaper = '';
   function openWhitepaperModal(name) {
     if (name) _activeWhitepaper = name;

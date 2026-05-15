@@ -355,15 +355,18 @@ the correct whitepaper, with `Sent` eventually set to true by the automation.
 
 ### Production Status
 
-- **Dev server**: Working — POST `/api/whitepaper-lead` handled by `undersight-serve.py`
-- **Prod (WORKER_URL)**: TODO — needs Cloudflare Worker deployment with same logic
+- **Dev server**: POST `/api/whitepaper-lead` handled by `undersight-serve.py`
+- **Production**: POST `/api/whitepaper-lead` handled by Cloudflare Pages Function
+  (`functions/api/whitepaper-lead.js` — deploys automatically with the site)
 - **Fibery automation**: Active — "undersight research dispatch" triggers on new leads
+- **Setup required**: Set `FIBERY_TOKEN` in Cloudflare Pages dashboard →
+  Settings → Environment variables (Production + Preview)
 
 ---
 
 ## Known Issues
 
-- WORKER_URL not yet set for production (whitepaper capture works in dev only)
+- Cloudflare Pages needs `FIBERY_TOKEN` env var set in dashboard for whitepaper leads
 - Sign In link points to `staging.app.underchat.ai` (intentional until prod auth)
 - Font stack validated (Inter) but display font TBD
 - Test suite has curl flakes on large HTML responses from Python dev server
