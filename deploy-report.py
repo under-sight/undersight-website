@@ -112,7 +112,7 @@ def read_build_meta():
 
 def get_site_mode_from_fibery(token):
     """Read current Site Mode from Site Config entity (same query pattern as build.py)."""
-    CMS_DB = "Website/Database 1"
+    CMS_DB = "Website/Pages"
     entities = api_post("/api/commands", [{
         "command": "fibery.entity/query",
         "args": {
@@ -139,9 +139,11 @@ def get_site_mode_from_fibery(token):
     )
     content = docs[0].get("content", "") if docs else ""
 
-    for line in content.split("\n"):
-        if "**Site Mode:**" in line:
-            return line.split("**Site Mode:**")[1].strip().rstrip("\\").strip().lower()
+    # Check per-env mode first, then fallback to generic Site Mode
+    for key in ["**Production Mode:**", "**Dev Mode:**", "**Site Mode:**"]:
+        for line in content.split("\n"):
+            if key in line:
+                return line.split(key)[1].strip().rstrip("\\").strip().lower()
     return "live"
 
 
