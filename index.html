@@ -608,6 +608,21 @@
 
 
   function renderContent(data) {
+    // ---- Whitepapers catalog (name → slug mapping from Fibery) ----
+    const wpCatalog = (data._whitepapers && data._whitepapers._data) || [];
+    function findWhitepaper(blogTitle) {
+      // Match blog title to whitepaper by fuzzy keyword match
+      const lower = blogTitle.toLowerCase();
+      const wp = wpCatalog.find(w => {
+        const wl = w.name.toLowerCase();
+        // Check if key words overlap
+        return lower.includes(wl.split(' ')[0].toLowerCase()) ||
+               wl.includes(blogTitle.split(' ')[0]) ||
+               lower.includes(w.slug.replace(/-/g, ' '));
+      });
+      return wp ? wp.name : blogTitle;
+    }
+
     // ---- Hero ----
     const hero = parseMeta(getContent(data, 'Home - Hero'));
     const heroEl = document.getElementById('heroTitle');
@@ -731,7 +746,7 @@
                 <h3>${title}</h3>
                 <p>${desc}</p>
                 ${blogTitle ? `<a class="cs-link" href="javascript:void(0)" onclick="openPost(blogEntries.find(p=>p.name==='${blogTitle}'))">Read the full case study &rarr;</a>` : ''}
-                <button class="btn btn-ghost" onclick="openWhitepaperModal('${blogTitle ? blogTitle.replace('Blog - ','') : title}')" style="margin-top:12px;">
+                <button class="btn btn-ghost" onclick="openWhitepaperModal('${findWhitepaper(blogTitle ? blogTitle.replace('Blog - ','') : title)}')" style="margin-top:12px;">
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
                   Download as PDF
                 </button>
@@ -989,7 +1004,7 @@
       metaParts.join(' &middot; ');
 
     // Map blog post to whitepaper name (must match Website/Whitepapers entity names in Fibery)
-    const wpName = post.title;
+    const wpName = findWhitepaper(post.title);
     const dlBtn = `<button class="btn btn-ghost" onclick="openWhitepaperModal('${wpName.replace(/'/g, "\\'")}')" style="margin-top:16px;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
         Download as PDF

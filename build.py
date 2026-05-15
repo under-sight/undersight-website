@@ -170,6 +170,31 @@ def fetch_all(token):
             "files": files,
         }
 
+    # Fetch whitepapers catalog (Website/Blog) for slug/name mapping
+    try:
+        wp_entities = api_post(
+            "/api/commands",
+            [{
+                "command": "fibery.entity/query",
+                "args": {
+                    "query": {
+                        "q/from": "Website/Blog",
+                        "q/select": {
+                            "Name": "Website/name",
+                            "Slug": "Website/Slug",
+                        },
+                        "q/limit": 50,
+                    }
+                },
+            }],
+            token,
+        )[0]["result"]
+        whitepapers = [{"name": w["Name"], "slug": w.get("Slug") or ""} for w in wp_entities if w.get("Slug")]
+        result["_whitepapers"] = {"content": "", "files": [], "_data": whitepapers}
+        print(f"  Whitepapers catalog: {len(whitepapers)} entries")
+    except Exception as e:
+        print(f"  WARNING: Could not fetch whitepapers catalog: {e}")
+
     return result, file_map
 
 
