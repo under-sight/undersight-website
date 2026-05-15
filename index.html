@@ -597,6 +597,178 @@
     ],
   };
 
+  const UNDERSCORE_LOGOS = {"Plaid": "data:image/png;base64,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", "Salesforce": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACU0lEQVRYhe3XP4hUVxTH8c95DIOFhEVEREQWZ5EgEoJYiJWlhYhYWsloISFlCrGykCBWKSwsZIoUQcRKxEJEQpAUFiIiIsuOyBLCEiQsiywyDHss7tt1V/cfjs40/uBV9973+57z7r3nvMjMMEJVozT/BgCNtQaiM1URW9DEAnpkL9sTC18SID7ehNHpVthKjhM/Ym8ByBfES0xnuzX3YZ6xOpAeOStjPs+2Ng25AqBEbQ9xEuex78PU7NcAN3CvNj5aP7swjQd4hMlst+Y/A6C7A5dq87X0P/mcGMMPq4w/xq81zGKWYB5vs70yO0sA0ek2yRP4vf72g+iv8h5N7CMRr/EEk+Sbxb20HGCsXnR8QPP1NIVbtc9UtlsLy49hE0e+ojlM4CIuYDef3gODpn6zOoPT0ek2lgP0MTkkAFIb2yuWjt82ZacOR2ECB+sMxHb8jANDAyj6vlFutDxFnFc24jDVr9Agzo3AHJ5WqOTQUw+vpRcVSYwk+uvCbEUs4N/heudN/JHtVr9Sav3tIRm/whXisixBR2ZGdLr7lTJ7+Mv65V0Rc+T8smL0BG8Wq+JiR/QSv5A/EceUS2lAc3dFXCVniD7mMLtOOZ6qiHGMK4ViN07i0AZWM3imHONttdF93FEak3frLV69JUtNYStO4Jr1i9RN/FYbN5WaMrNatJsC+AhmJ84pHdKuFYOpJzzEFfyd7VZ/I7PVtGZXXJv8R14T8UjJxgGlxZoWHuBP/PO55myQgaVJnW4D32GLVAk9vMW7zaR5YICvqZH/GX0DeA+7dNwMD/MVCgAAAABJRU5ErkJggg==", "QuickBooks": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAJ1BMVEUjbP////8ocP83d/8caf/x9v/s9P8uc//g7P/l7//1+f/c6v8pa/8FEzsCAAAAnklEQVR4nO3buxHEIAxAQR02/pzpv14XAJHGA8m+AsSOYhFnWdoZJZZWAAAAAAAAAAAAkoB90FTANqjNA+zbXbuulhFkAf9fV42ZgNoDjqkbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWA5YftB4HV3PxA1EG5aZlL2q/er9NOCzAAAAAAAAAAAASqz+/v8CB90a7VJYMKcAAAAASUVORK5CYII=", "Xero": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAY1BMVEUTter///8As+ru+f0AselkzfEkuOvZ9Pz7/v+A0PFbxO7n9/3r+f04vezy+/625/hFxO7G6/mk4vd50/KD1PLN7/pZye+w4vfV8PuE2PNsyvCf3PW96/lr0fJ30PLe8/yS3PV9NtvVAAAE4ElEQVR4nO1b2bajKhBFgqhRFI1TkqPx/7+yoQCn2I3ddyXcB/ZTJEBta2AqQcGC+PJzDzlFHwTl4b3M45VQNP9KO44JxviT8hESAghqu/SNgBT/YdlrFnymoAk07dekaw5tsyZQtt8VL9GWC4GSf18+Qrw0BCIn8gWDSBHIxi/b3wCPGRDoiBv5CJFOEkgdGUCCp4JA5UwBwghdgGLmTr5QQYxSl/KREO/SAsINKzQ4ikEFPCDulgBHzC0Bhj66/rDDsXgPDw8PDw8PDw8PDw8PD48DYHR0ar8rlVkFfJBa0CXiz7emm7I/gD6S8e3MBIvSZC7FiIlHgSvbdApN5Q8+Jok5/MSYXhNVm57JR+A6D4JuxwDTOhOl5rF9lrnKcZTPx4rCKEorilEiEwGROn3ELCkilReIuoTZtUBeMnVUbBgI+VJgzFWP3WuV8Ek7bk75qDx8z69kUuxuWOoq0VwBeZlQGwPSB3sGGIH8IJZlmDfBFmlINE140yvXCam7MDqdLtvK+WRjgENVs1jOjvBNdVmB/CjYIxvJmkCvi4W66TPeV44rmwoMgx/jMWTQlKR8pt8/K+5De9dkUjhp1AQqJbMJpeaM2KaqZsUNtoNZohk0QADjWb5UqcrypDdI72Gi+bzYQkDq/DUgIlrrjvIBE4k2U8/Wg1E8xNoKMnRva5MoZ2iWgKQ/oNfnQkAIfCKlEWAXl8bqmCrtRBb5s5xAeCKtoU3cQVAxUEC08iOtk54vBOKaKN0Ns+UMtE/crCpAtXLegmv/VwMDfuRvKsQcIrTGMwFz+E5AAT0wN2OmeoPeqgEd+EHcZ0YVUD6BAcD8M0ghCztqCORz+gN6SJTgcVSOOl7Aae0MUL0KIC0fM5BVtOEarWLF5igwfXAoB1mPPsteA0SRDNLcagO0OJ92RkUAlJpftgBdRVdDYDQ9DHNb1S6WP3EJPntmTjDjgRgQTBl7H4QMFgJX08Ed9CGD56rqhKIjAm5YnsjR/CWBTsx0RwS6HQF8lsCxCcojE0g0V/ymgXB2n7UJinMmOHZC2h04ITgi9L0loJwwgsfFCSk4YW0dCEwYNumagQrDaBuGCuidwHEYyri+2AZjy0AU7pqbZdiOAIFRejMQ4bMD0W+GYsygz9dmtUL41B4S0F5cLIsgMz3fbRYYLZNRz8k8G+EpjdPpyAR6ogoKUxmjCTpOLWuS30zH1Wo6zitKpCeIKbaRffZHTijCT71I1OrpWEexJVF6bkESN9VtuBd6vdezQwJoNHG0XpBYMsX/sCQTCwByYAJ0uCQLGpsB/npRGqRPehiGsmjKt3XzzpanPLEsL9J1l3EZamOB0+VrAvtledDX1jwplgvJ441JYR4fXWN6vZT1UleaqtppeLUxyX6e/MT2jCbWrRmiXG3NkuSx3utApbc3WrZmJ/ZFps1BGdq0NkPbtuof97Uf/0rOw8PDw8PDw8PDw8PDw8Pj3+H843bnn/c7v+Dg/IqH80suzq/5xC6dAPMYBdaM+icJdP+Hy25B4e66XwH3DS8ncqkfAXwyI7NbLwdXXiVaeTavLr26GI91/kVd+y2+H4uYr679BkE0ftkTyajzCObqd/ZkX6RA2NN8YjRffo/TjpGzn5z9BwgRhHXpnM9abt8LDq+pZfSz1/8pa6fXOpv2C/DiOnhwZisWAAAAAElFTkSuQmCC", "Ocrolus": "data:image/png;base64,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", "Yodlee": "data:image/png;base64,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", "MX": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAY1BMVEUAAAD///8iIiLT09P5+flWVlb09PRGRkbZ2dn8/Pzu7u7W1tZ6enqpqane3t7q6uoSEhIZGRkvLy+cnJyUlJSGhobJycmioqJoaGg5OTmAgIC+vr5cXFy0tLRPT08pKSlycnIrzW3GAAAEPUlEQVR4nO2Y25aqMAyGOSOoHFQQlBHe/yk3pUnaQkFwrX2X72qQ0qbJnzQdx2EYhmEYhmEYhmEYhmEYhmFW8CaKzTGFHOQ4Ze95+Pf6ZJ7Xl7vXb+uz7/vn56YFlS+oY6fxz74kto2L4e3Z73Yb0ASuIGo2xsTZNMa9OOWfC5xby2ZO+Pa93wNVIj+pN8bcYdqH4/S0xt9iWPEm626716fJXatP5cQpDLmOD12EH7wWe8E30Wf/+g5Z/V4d8sAhtRDKJcBlZlFrwJducDmwvlfj7OmabtoMh/i9eL7i48lwtBLA9cD62uyWoEooSG4uw0Q2G7rxycwj6zsfCqkb2VVwy2lEIJ30IaMfFjOzdTHZaFyF3XUPbcQgfxow2tGAoy64kWCwTbJOpU1vFW+bayNwx2RUDtUgxkRxq2PrO09teqsLdAeQTEqVO7KC1rPn/bz1+S2JEOsOUPrqSXLC6IISwz9QgSRnfX5LItyN9xn9TuIVSf/C0hAcqUATVOQkyaLAm+8DdQhWuGgat2TMUQGMOQafnhK7C1CjuISWYqSejLLyeXh9J4T5G4hpbvrwBhHKK7BAq76FGT0hgJUmYQvYYeZhhTddgClw90CLd+1lnJnrZ5YD+isgX7/0wAWRPksJS+Qxbtewj44l+eXww/qYhWP2DpY4Xui3AhK9NtLcqBEP5wcwncWqsNtU6cyD8y3yyFXmAahXkfXTfAsMo7AeBa9cgC4WteaBwTC/pzKVHzuCkE6m+dRBYGeQYiLcTtrcL5mnsybkjqeSm/wUAWeQ2SVL8MtVG9afn7qpRqnpNBUG4S8GoGOl9DHkEGcUxfQy/pqHB/sACUgrk000iv5qPElNeLCYloeqm5PU+1txAlQMrZWHdU/sBRMEssKSh1d3xt2ywjZFZkZdlz3eFzApYLmcyi16yI3woEgWjfo3PPgUFYwuECrQU0AAcgmwUn4wA5MK1ermR4UYw4eUW1gOr7Q/cis2j6Fp6+Qu1agf7IdwUqVfVH6n+cI0Fi4ddEesx5j0JMe/Y0LEWq6+wnKYJqY6xoPJcAm1I9LrH+xbkmMtCWwjVb941OtN6LkNa0w1vyHdQRfZUFO2/17uUC+rX2VehgF6mwxBESl7W/ZASgYHuoJyWVxI/dI1+tkna0YyjG5STTkFT13N3/v7ojbVwwpcNAOMHu9OY1U3qBnY59avNgkhkoZwetXqpUZ1r3B76hpuHI0D6WLrny0G9iOWmvzZVoTwsjHPQ1WBzOmwdu6vR3DpmHXC2AfNHOCE6WSqOoL+5lWHZODvrEd4Fs50i+Vwdra0WSKKEFWg06LmqOit/avBpMQsnMtWuiCaXfM8X0xLt+nckvDdsXp0OyfBSLIw9zX9PL8qF8Pt6xKXLfMWFG08sbjQyhfWdG67ULJyC4W3YffLJYVhGIZhGIZhGIZhGIZhGIb5z/wDuQEtX4WtoykAAAAASUVORK5CYII=", "LendSaaS": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAMFBMVEUFCApHcEw8erqSlJc8erpUe6ZWgK5KfrU8ero7ebk8ero8erqSlJeSlJeSlJeSlJcZCVt6AAAAEHRSTlMCAP7+4woXR74slmzXbKYvjA1WQgAAC59JREFUeJzlG9d25CrMyhpwm/H//+2lqILscbLZp8ueTSY2IKFemGmiAZMZ3Z8fx6f5cPPXzyD+ztK7TS9JcgHv22j8E7z/N+OfUg8mRwLkJeCcQay/h1Te6G7BJQIXcL4N36wAPLQAuFNT6B7+xGDYPaBRAypJ6h9AjwVgfQj8qfzUo66bcAO9d8NR3uPqSe89nswhAtAiBBjWlHYe4fOhP094ggCD3rZtKWMuY1niDVCA8ZwjGyYiCzCNvEUhrmuGvsxfesxLvJDM+6N7Z7ydHmLaO9gNgSsWfFsx/TX4KBToDvivr2X9FqBrDK5kMv8R4kB4IcAW7XQrUlYr/MfmNxApQJiypm0Z4Fb5K/9SQB0hrcPNBprqI8JnptPIkrfNA/Bl2bamg8nRgd8cMIBftj2tMdSR8Zs+WIHrnZ1PDngj+POypXWNMdy7ku8iYGw6iDcEyNRf+qOjLWxzmd+guSrS5Nm4Sa35cIyYNgV+2dcAv3DyxyPrnlB/3rKw/yvgviHV0pfBr6F/3znEv0GA1yvBjKtI31aJb+aHeKZXGymdZ7hE4iK2cLyN/aDYv2xV8ngGwn6XcRzvo/zOaJyn75OeIOA8VvD3qKgcMvhXhvunH8f7dWbjABLK9BQA9f865mw/Y5qZ+6sibSjAB9gGiRBMCGDML0AHSaOkR0is/TsLX17un11jUFB4ZKSuPZ+Bn8kfiPkfTm9YcSFiD0aRg7Buiv2E1DPwdRRGjNDB++UjwPZnF/KH11PwhQqvOLLBet8bqgSyP0viZ/HlkbragPLTkYwsCgznSuJdRgELwJw40jm74x9N77PmnzHG8uHVM+h4J04lro7t+uOwEvwN9SlLn9m8QD8jhdDNOGQa9Tgc70EWw2DPHbKsO8Gn5TG91bYZfPQUujyKlhd5psEg03b7GL8CWaCNBABOBb9sGswpLAiD7J/Mhe5s8/4RPjIgh9rIQc3+dyE9HznDqyMwHlBYoen1CowCVOVe0o34T6IBczEA1ay/3mq7M1AeG9ean21L/pej05QIs2KvBOX3i+E15a4x/M1AApAAZKcrTM3wMe6q0Bfx1jlGbnFqgxY10vQwxAV1e4grpmYjytYRCbDU2AuK/inyB2gJ2uomaNlsrpUbeY5Sm/fZ2EMIfGEmywZRZfjZBiMDNlSx+Do0/Dov+uDzqoJCWxeUIGS6tTPuSN0UWsALRpkqNkQAVhaGf7Tz5ylX4NvmGQVorGMaZEGk3VG/LuMWIsCCuqLOgWYtOClah8LWeAzChYO4npgEPWQ0ahFt0La2EF8Y8E5VVsKQJHlEwP0Z++Mdm4SRjWtUGpAAtgEJFZsPcTT6S5hEwGasktinLVnMCiTot0EUTuiiOgmAvZOAHP2dNfZsXAy7Jn9md0nS8r9aNNE45Ciizq9LX9ljhU7G3IIGAIYh887WCyoOZ/M8026StJQdS9MLCKVsZFK4ukXWhbNC5+1CoiOCzgXIhCEHqN4BLBwtSpEwseSIK5lkUuEcxot+tJKB8pfomckY7QjSBoaNPsULe2Pd1AE9RSoaKlPW4AkaxlrFzjjDN5VAu0uadOnUBcl5cyWdyLg4O7AR6JwFWnKdJ7iHaxgwmvPuOp2AcpYGlw6oY5kDHnn5bDPriM090HeLodgSdEyun5EHxES1CapIlg8P8d3sez00pq6uoZwoc0xeaSURGAEAvfwcTygM/Kn4WpUWSZlWpaLDIALMrvwbBFha5s2biuZ+7mNDXiepiH5NBHDCGTYHDILEYC7B4xCZIwK7FTXgbMijGymI58dMVNzPjtJl4Nl00C51Ij2fE4AS6vY5JmJrmKhf4FCCH5JFbPzqADVLUJN+GzJvnZDD8E5ryPhB7bVzZN1romy2rP3zxcigKSuQDkiu6NScHYRnyS1/gIDamXOV28aIPAuUXHlul9RACxuIFmJIR6JT0WArtNsqj8KUvCs6uV0JAUhDrL7rEODnIpyTiVWAcc4HYuQ4pp6kJN+8cn1DnnvH2M4ggBKd1HyFgFd6ZxlUVLu3x1RhM/UtHIERsPWKawTAQ+B2aASGd5cI4OPR1DICH/yQGD1Z0SMANxT4jMBjFgjTHMeiEDBQmAXPELgddyz4hIDn7UgLrinQE5q04DEC4CAg760aKgPB+tpFN3cIwBUFrCFiOHWJGKJheEzhDMeJHkAZIjEmKubxcFameOz0WYK1zQIFRarHwrbVt4QGAWtr8yBnhHro1UB14KGckXFaoF8ua6eG9DzBpPlqN9wc92rMcvu0axG4dscmIFABSX88plpp0w8vncGlXk+lVECiqjQKgZ07x3xA6EOyiy4VruTZ1agYpztNXUim9+CgtF9SfnNQ+qBRL0Gp9xb8oFRHJO4qCcs/wn8Wlg/BEnAZz9tVZRufqs3pPofxE5MqBJSa4VOjIzo161RfpleR16lZp7QVEslgHJQ9cHLq4B10cjpOYJsSok1Oh1lBJ6dWjqlPQKpml+v03IlZJlQNgc+VLtG2ioBNzy0QKp9473SBYkkj/SoCIUmRpkkrTBL31TqfKlAoVcYJXKKBYXfNhC+syOqldbt1lymbPSJtN5RobFBki1TtPeOvi1Stl26E0F40qUUqipPVPClS9Qesb6lMJ73CEGpPKmoEGYWI10jKrDXpSiECCGdpaQXpsEiZzoPP5oYvZoXSJH+/j3fre/SFyq1WKmNrHswGfqxUeZXGemmvkVzH+0IchXJYT6+l2tauOKrY5ZzCVqpbpXao1aKQhrOtPY73SVzkUi2aiEHSUYIwKglvqfa20md6Vqxu8KVYjQjcF6vL4HI9IqDK9XUPmD6Wy6Vcz72WAylqi+Ed9VtqScperFh9JA2TUjCv29yjUG+6wKRbJscLKU21aDLD3UWHSblycmSqY0Atk+mqY/TV+iVof1TTqLS6moxLy+aCBaCbVu2Rblq9EPMwXmn8Qq1oZfUsrRp+OyaZ+mbKbdQnCLGpJLaFIG27eiugUa5c7mvSP3+1S53LhrecoGA9tO3KElKB68arRNSiqEoMMjfVjc/YWoftXt1OlrGTHBYACdQ2dnZgzk7wiqSYeMm2jvFWwHCLSVT6tK1eojXnFkoFfVHIorIpKkHXPL+7o4L9cwX/Ra6bI3sd07n7lOt7yQSMYDvi7brQoEJVMrprJm+6yAFcxvcrwSYLySceqqjR3o5411tTIdBdvdI1yi4rDRcYUP6kzKUaKcqRY0THrpu68UpVzuF+RsYhCP9DD/1PM55gM4XKAHP5oYsXroZtBhMS5TYF3icbL9i8U1N3ZV+/FscL6rjmdsT+HgtjUX4Mj19S7eJelttH4nCtM8pgcKt/xccXmZqqEHyVKHgRPUFwsrhuUmnmP7rKdWDDfqqWlIPZEuopBCz3rdj7TJhK2P8RBbxPhxtxiKFNMAhVLdkt9PFDyzzurpRV5dD3vCWAWcgHqkzpgeg5hAn1xtJwd+uo4V81UTxfHPe8eIXzjsld0k/i6VGiqn3RPh4VerDmZJUgtnaz1dHp4vo3aaDwbeanttbPZpn7koXqJM8XneS/H2HC++XDiCpLc/PZXxy9LENhvm7l7w9usGGUqPc0kTtoDZZZqnmBXqXwpYCXUG3buRyltJ9V8XeGhHSxgDe38eNj9rtm4fHSKoOh/xJMSdIe8/8Cgd5C25fkjul2WQdec3+I/q5fPR6RvmxVv/fU3eYpX4WwoZXz8e+koFRE5v4WEfJ+LsL3aPsHk642ildZWvkiyE9l7zsjLj74je71/XR4Oup8JyjsIwHwZuPHUOthLOitkb+DUTnMz5L6KsIvjwGBuJTU8Kulhzo/++7G4sio0YztXjbQV0K4lots+T997Qh/iJVoi+mxMS3jfcqL43JP3CJdfrYiWmwO8WKzaym4p5W2FPeYouP6SXShIxQkvoqDdFRudregQDwiuMdq4Y+mqBN4DRj1iaeWBQvHvT9AL4A/WAx4Rh7/Aanwb5jlVVTDAAAAAElFTkSuQmCC", "Onboard": "data:image/png;base64,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", "Receivabull": "data:image/png;base64,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"};
+
+  function renderUnderscorePage(pageEl, tag, title, desc, contactEmail) {
+    const logoCards = Object.entries(UNDERSCORE_LOGOS).map(([name, src]) =>
+      `<div class="integration-logo-card"><img src="${src}" alt="${name}" loading="lazy"><div class="int-name">${name}</div></div>`
+    ).join('');
+
+    pageEl.innerHTML = `
+      <div class="sol-hero">
+        <span class="tag">${tag}</span>
+        <h1>150+ SMB-specific metrics from a single API call</h1>
+        <p>ML and agentic scoring models built for alternative finance. Send bank statements, QuickBooks exports, or Plaid connections &mdash; get back institutional-grade risk intelligence in seconds.</p>
+        <div class="hero-code-tease">POST /v1/score &mdash; bank statements, CSVs, QuickBooks, Plaid, Yodlee, or raw PDFs</div>
+      </div>
+
+      <div class="api-preview">
+        <div class="container">
+          <div class="home-section-label">API Preview</div>
+          <div class="section-title">Deep SMB intelligence, not just a number</div>
+          <div class="section-subtitle">Every response includes a composite score, 5 weighted dimension scores, 21 sub-scorecards, and 150+ granular metrics &mdash; all derived from business context, not generic credit bureau data.</div>
+          <div class="api-preview-grid">
+            <div class="api-preview-col">
+              <div class="api-preview-label">Request</div>
+              <div class="code-block"><span class="mth">POST</span> /v1/score
+<span class="cmt">Authorization: Bearer us_live_...</span>
+
+{
+  <span class="key">"applicant"</span>: {
+    <span class="key">"legal_name"</span>: <span class="str">"Riverside Cafe LLC"</span>,
+    <span class="key">"industry_naics"</span>: <span class="str">"722511"</span>
+  },
+  <span class="key">"bank_data"</span>: {
+    <span class="key">"source"</span>: <span class="str">"plaid"</span>,
+    <span class="key">"access_token"</span>: <span class="str">"access-sandbox-..."</span>
+  },
+  <span class="key">"supplemental"</span>: [
+    { <span class="key">"type"</span>: <span class="str">"quickbooks"</span>,
+      <span class="key">"file"</span>: <span class="str">"base64..."</span> }
+  ]
+}</div>
+            </div>
+            <div class="api-preview-col">
+              <div class="api-preview-label">Response (abridged)</div>
+              <div class="code-block">{
+  <span class="key">"score"</span>: <span class="num">47.5</span>,
+  <span class="key">"rating"</span>: <span class="str">"R4"</span>,
+  <span class="key">"dimensions"</span>: {
+    <span class="key">"revenue_quality"</span>:  { <span class="key">"score"</span>: <span class="num">56.0</span>, <span class="key">"weight"</span>: <span class="str">"22%"</span> },
+    <span class="key">"existing_debt"</span>:    { <span class="key">"score"</span>: <span class="num">66.6</span>, <span class="key">"weight"</span>: <span class="str">"26%"</span> },
+    <span class="key">"inflow_quality"</span>:   { <span class="key">"score"</span>: <span class="num">33.5</span>, <span class="key">"weight"</span>: <span class="str">"10%"</span> },
+    <span class="key">"outflow_quality"</span>:  { <span class="key">"score"</span>: <span class="num">61.8</span>, <span class="key">"weight"</span>: <span class="str">"14%"</span> },
+    <span class="key">"net_cashflow"</span>:     { <span class="key">"score"</span>: <span class="num">20.8</span>, <span class="key">"weight"</span>: <span class="str">"28%"</span> }
+  },
+  <span class="key">"mca_positions"</span>: {
+    <span class="key">"active_funder_count"</span>:     <span class="num">2</span>,
+    <span class="key">"daily_remittance_burden"</span>: <span class="num">0.576</span>,
+    <span class="key">"stacking_score"</span>:          <span class="num">67.0</span>,
+    <span class="key">"refinance_dependency"</span>:    <span class="num">96.0</span>,
+    <span class="key">"mca_deposit_pct"</span>:         <span class="num">0.333</span>
+  },
+  <span class="key">"signals"</span>: {
+    <span class="key">"monthly_coverage_ratio"</span>: <span class="num">3.06</span>,
+    <span class="key">"revenue_hhi"</span>:            <span class="num">0.776</span>,
+    <span class="key">"nsf_rate"</span>:               <span class="num">0.0</span>,
+    <span class="key">"survival_horizon_days"</span>:  <span class="num">1.6</span>,
+    <span class="key">"cash_decay_velocity"</span>:    <span class="num">3.0</span>,
+    <span class="key">"balance_cv"</span>:             <span class="num">1.786</span>,
+    <span class="key">"core_rev_retention"</span>:     <span class="num">0.877</span>
+  }
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-section">
+        <div class="container">
+          <div class="home-section-head">
+            <div class="home-section-label">Capabilities</div>
+            <h2>Built for the metrics that matter in alternative finance</h2>
+          </div>
+          <div class="card-grid cols-4">
+            <div class="card"><div class="metric-highlight">150+</div><h3>SMB-specific metrics</h3><p>Revenue sufficiency, concentration HHI, deposit regularity, expense rigidity, cash decay velocity, balance volatility, and more.</p></div>
+            <div class="card"><div class="metric-highlight">21</div><h3>Weighted sub-scorecards</h3><p>Organized across 5 dimensions: revenue quality, existing debt, inflow quality, outflow quality, and net cash flow. Industry-tuned weights by NAICS code.</p></div>
+            <div class="card"><div class="metric-highlight">ML+</div><h3>Agentic scoring</h3><p>ML models trained on deal outcomes combined with agentic reasoning that understands business context &mdash; industry patterns, seasonal cycles, and growth trajectories.</p></div>
+            <div class="card"><div class="metric-highlight">&lt; 3s</div><h3>API response time</h3><p>Full scorecard with all 150+ metrics, dimension scores, MCA position detection, and recommendations returned in a single synchronous API call.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mca-callout">
+        <div class="container">
+          <div class="mca-callout-grid">
+            <div class="mca-callout-text">
+              <div class="home-section-label">MCA Position Detection</div>
+              <h2>Especially strong where it matters most</h2>
+              <p><span class="product-name">underscore</span> detects existing MCA positions directly from bank transaction data &mdash; no self-reporting required. It identifies active funders, approximates remaining balances, estimates daily payment amounts, and flags stacking risk.</p>
+              <ul>
+                <li>Detect active funder count and daily debit overlap patterns</li>
+                <li>Estimate daily remittance burden as a percentage of deposits</li>
+                <li>Identify refinancing dependency and debt treadmill behavior</li>
+                <li>Flag new funder entries and same-day funding-and-debt events</li>
+                <li>Score stacking structure, creditor behavior, and payment performance</li>
+              </ul>
+            </div>
+            <div class="mca-metrics-grid">
+              <div class="mca-metric-card"><div class="label">Active funders</div><div class="value">2</div><div class="desc">Detected from ACH debit patterns</div></div>
+              <div class="mca-metric-card"><div class="label">Daily remittance</div><div class="value">57.6%</div><div class="desc">Of daily deposits consumed</div></div>
+              <div class="mca-metric-card"><div class="label">Payment freq.</div><div class="value">95%</div><div class="desc">Debits on nearly every business day</div></div>
+              <div class="mca-metric-card"><div class="label">Stacking score</div><div class="value">67.0</div><div class="desc">Manageable structure, low overlap</div></div>
+              <div class="mca-metric-card"><div class="label">MCA deposit %</div><div class="value">33.3%</div><div class="desc">Financing vs organic revenue</div></div>
+              <div class="mca-metric-card"><div class="label">Refinance dep.</div><div class="value">96.0</div><div class="desc">Low dependency &mdash; no debt treadmill</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-section">
+        <div class="container">
+          <div class="home-section-head">
+            <div class="home-section-label">Input Data</div>
+            <h2>Derives insight from whatever you have</h2>
+            <p><span class="product-name">underscore</span> works with the data you already collect. No special formats, no pre-processing.</p>
+          </div>
+          <div class="card-grid cols-3">
+            <div class="card"><h3>Bank connections</h3><p>Plaid, Yodlee, MX, or any aggregator. Real-time transaction feeds with automated categorization and pattern detection.</p></div>
+            <div class="card"><h3>Bank statement PDFs</h3><p>Upload scanned or digital PDF statements. OCR + agentic parsing extracts transactions, identifies MCA positions, and builds the full metric set.</p></div>
+            <div class="card"><h3>Accounting exports</h3><p>QuickBooks, Xero, or CSV/Excel exports. Business context &mdash; P&amp;L, AR/AP, payroll patterns &mdash; enriches the scoring model beyond what bank data alone reveals.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-section">
+        <div class="container">
+          <div class="home-section-head">
+            <div class="home-section-label">Use Cases</div>
+            <h2>How teams use <span class="product-name">underscore</span></h2>
+          </div>
+          <div class="serve-grid">
+            <div class="serve-card"><div class="cat">Direct Funders</div><h3>Replace spreadsheets with ML-scored decisions</h3><p>Score applications via API or batch. Monitor active portfolios for pre-default signals. Get audit-ready reasoning for every decision.</p></div>
+            <div class="serve-card"><div class="cat">ISO / Brokerages</div><h3>Pre-qualify before submission</h3><p>Know which deals will fund before you send them. Reduce declines and speed up the submission cycle with pre-scored packages.</p></div>
+            <div class="serve-card"><div class="cat">Marketplaces</div><h3>Score and match in one workflow</h3><p>Embed scoring into your matching engine. Route deals to funders based on risk appetite with full metric transparency.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-section">
+        <div class="container">
+          <div class="home-section-head">
+            <div class="home-section-label">Integrations</div>
+            <h2>Connects to your stack</h2>
+          </div>
+          <div class="integration-logo-grid">${logoCards}</div>
+          <div class="integration-caps">
+            <div class="integration-cap">Bank Statement PDFs</div>
+            <div class="integration-cap">CSV / Excel</div>
+            <div class="integration-cap">Webhooks</div>
+            <div class="integration-cap">REST API</div>
+            <div class="integration-cap">Batch API</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-section">
+        <h2>See <span class="product-name">underscore</span> in action</h2>
+        <p>Schedule a discovery call and we&rsquo;ll walk through a live scorecard with your data.</p>
+        <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+        <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:${contactEmail}">${contactEmail}</a></div>
+      </div>`;
+  }
+
+
   function renderContent(data) {
     // ---- Hero ----
     const hero = parseMeta(getContent(data, 'Homepage - Hero'));
@@ -679,35 +851,39 @@
         </div>`;
       homeSolutions.appendChild(row);
 
-      // Detail page - narrative scroll
+      // Detail page
       const pageEl = document.getElementById('page-' + cfg.page);
-      const narrative = SOLUTION_NARRATIVES[cfg.page] || [];
-      const narrativeHtml = narrative.map((step, i) => `
-        <div class="sol-row${i % 2 === 1 ? '' : ''}">
-          <div class="sol-row-img"><img src="${step.img}" alt="${step.title}" loading="lazy"></div>
-          <div class="sol-row-text">
-            <h3>${step.title}</h3>
-            <p>${step.desc}</p>
+      if (cfg.page === 'underscore') {
+        renderUnderscorePage(pageEl, tag, title, desc, config['Contact Email'] || 'contact@undersight.ai');
+      } else {
+        const narrative = SOLUTION_NARRATIVES[cfg.page] || [];
+        const narrativeHtml = narrative.map((step, i) => `
+          <div class="sol-row${i % 2 === 1 ? '' : ''}">
+            <div class="sol-row-img"><img src="${step.img}" alt="${step.title}" loading="lazy"></div>
+            <div class="sol-row-text">
+              <h3>${step.title}</h3>
+              <p>${step.desc}</p>
+            </div>
+          </div>`).join('');
+        pageEl.innerHTML = `
+          <div class="sol-hero">
+            <span class="tag">${tag}</span>
+            <h1>${title}</h1>
+            <p>${desc}</p>
           </div>
-        </div>`).join('');
-      pageEl.innerHTML = `
-        <div class="sol-hero">
-          <span class="tag">${tag}</span>
-          <h1>${title}</h1>
-          <p>${desc}</p>
-        </div>
-        <div class="home-section">
-          <div class="container">
-            ${narrativeHtml}
+          <div class="home-section">
+            <div class="container">
+              ${narrativeHtml}
+            </div>
           </div>
-        </div>
-        <div class="sol-body">${mdToHtml(stripContents(meta._body))}</div>
-        <div class="cta-section">
-          <h2>See ${title} in action</h2>
-          <p>Schedule a discovery call and we'll walk through how ${title} fits your workflow.</p>
-          <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
-          <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:${config['Contact Email'] || 'contact@undersight.ai'}">${config['Contact Email'] || 'contact@undersight.ai'}</a></div>
-        </div>`;
+          <div class="sol-body">${mdToHtml(stripContents(meta._body))}</div>
+          <div class="cta-section">
+            <h2>See ${title} in action</h2>
+            <p>Schedule a discovery call and we'll walk through how ${title} fits your workflow.</p>
+            <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+            <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:${config['Contact Email'] || 'contact@undersight.ai'}">${config['Contact Email'] || 'contact@undersight.ai'}</a></div>
+          </div>`;
+      }
     }
 
     // ---- Blog ----
