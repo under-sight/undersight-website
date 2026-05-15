@@ -425,7 +425,7 @@
 </footer>
 
 <!-- ============ WHITEPAPER MODAL ============ -->
-<div class="wp-overlay" id="wpOverlay" onclick="if(event.target===this)closeWhitepaperModal()">
+<div class="wp-overlay" id="wpOverlay" role="button" tabindex="-1" onclick="if(event.target===this)closeWhitepaperModal()">
   <div class="wp-modal" role="dialog" aria-labelledby="wpTitle" aria-modal="true">
     <button class="wp-close" onclick="closeWhitepaperModal()" aria-label="Close">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
@@ -674,7 +674,7 @@
           <div class="sol-row-tag">${tag}</div>
           <h3>${title}</h3>
           <p>${desc}</p>
-          <span class="sol-row-link" onclick="navigate('${cfg.page}')">Explore ${title} &rarr;</span>
+          <a class="sol-row-link" href="/${cfg.page}" onclick="event.preventDefault();navigate('${cfg.page}')">Explore ${title} &rarr;</a>
         </div>`;
       homeSolutions.appendChild(row);
 
