@@ -37,6 +37,16 @@ const WHITEPAPERS = [
     author: 'Kyle Adriany',
     date: '2026-05-01',
   },
+  {
+    slug: '4d-financing',
+    md: '/tmp/wp-4d-financing.md',
+    out: path.resolve(__dirname, '4d-financing-case-study.pdf'),
+    tag: 'undersight Case Study',
+    title: 'How 4D Financing gets institutional-grade underwriting with a 2-person team',
+    subtitle: 'Evidence-backed underwriting on every deal, with full audit trails',
+    author: 'Kyle Adriany',
+    date: '2026-05-12',
+  },
 ];
 
 function mdToHtml(md) {
