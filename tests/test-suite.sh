@@ -1208,11 +1208,78 @@ else
   fail "openWhitepaperModal() function defined"
 fi
 
-# Test: Download button in case study section
-if grep -q "openWhitepaperModal('Chat Advance" "$SITE_ROOT/index.html"; then
-  pass "Download button passes 'Chat Advance Case Study' to modal"
+# Test: Download button in Chat Advance case study section
+if grep -q "openWhitepaperModal('How Chat Advance" "$SITE_ROOT/index.html"; then
+  pass "Download button present in Chat Advance case study"
 else
-  fail "Download button passes whitepaper name to modal"
+  fail "Download button present in Chat Advance case study"
+fi
+
+# Test: Download button in 4D Financing case study section
+if grep -q "openWhitepaperModal('How 4D Financing" "$SITE_ROOT/index.html"; then
+  pass "Download button present in 4D Financing case study"
+else
+  fail "Download button present in 4D Financing case study"
+fi
+
+# Test: Modal title is generic (not hardcoded to a specific case study)
+MODAL_TITLE=$(grep 'id="wpTitle"' "$SITE_ROOT/index.html" | head -1)
+if echo "$MODAL_TITLE" | grep -qi "chat advance"; then
+  fail "Modal title is generic" "Hardcoded to 'Chat Advance'"
+else
+  pass "Modal title is generic (not hardcoded to a specific post)"
+fi
+
+# Test: Modal description is generic (not hardcoded to a specific case study)
+MODAL_DESC=$(grep 'id="wpDesc"\|class="wp-desc"' "$SITE_ROOT/index.html" | head -1)
+if echo "$MODAL_DESC" | grep -qi "chat advance"; then
+  fail "Modal description is generic" "Hardcoded to 'Chat Advance'"
+else
+  pass "Modal description is generic (not hardcoded to a specific post)"
+fi
+
+# Test: Modal description is dynamically set by openWhitepaperModal
+if grep -q "wpDesc.*textContent" "$SITE_ROOT/index.html"; then
+  pass "openWhitepaperModal() dynamically sets modal description"
+else
+  fail "openWhitepaperModal() dynamically sets modal description"
+fi
+
+# Test: Success message is generic (not "case study")
+SUCCESS_MSG=$(sed -n '/id="wpSuccess"/,/<\/div>/p' "$SITE_ROOT/index.html" | head -10)
+if echo "$SUCCESS_MSG" | grep -qi "case study"; then
+  fail "Success message is generic" "Still mentions 'case study'"
+else
+  pass "Success message is generic (says 'PDF' not 'case study')"
+fi
+
+# Test: No hardcoded 'staging.app' URLs in HTML
+if grep -q "staging\.app" "$SITE_ROOT/index.html"; then
+  STAGING_URL=$(grep -o 'https://staging[^"]*' "$SITE_ROOT/index.html" | head -1)
+  fail "No staging URLs in source HTML" "Found: $STAGING_URL"
+else
+  pass "No staging URLs in source HTML"
+fi
+
+# Test: Dist modal has no hardcoded "Chat Advance" in static HTML
+# (catches the bug where baked dist still shows old hardcoded modal text)
+if [ -d "$DIST_DIR" ] && [ -f "$DIST_DIR/index.html" ]; then
+  # Check the static modal HTML (not JS-generated content)
+  DIST_MODAL=$(sed -n '/id="wpTitle"/,/id="wpSuccess"/p' "$DIST_DIR/index.html" | head -5)
+  if echo "$DIST_MODAL" | grep -qi "chat advance"; then
+    fail "Dist modal text is generic" "Baked dist still has hardcoded 'Chat Advance' in modal HTML"
+  else
+    pass "Dist modal text is generic (no hardcoded post name)"
+  fi
+
+  # Check that the default _activeWhitepaper is empty (not pre-set to Chat Advance)
+  if grep -q "_activeWhitepaper = 'Chat Advance" "$DIST_DIR/index.html"; then
+    fail "Dist _activeWhitepaper is not hardcoded" "Default is still 'Chat Advance Case Study'"
+  else
+    pass "Dist _activeWhitepaper is not hardcoded to a specific post"
+  fi
+else
+  skip "dist/ not present — skipping baked modal checks"
 fi
 
 # Test: WORKER_URL has localhost detection
