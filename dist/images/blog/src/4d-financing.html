@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 800px; height: 533px; background: #EBEBEB; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 533" width="800" height="533">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto">
+        <path d="M 0 1 L 10 5 L 0 9" fill="none" stroke="#3A3F47" stroke-width="1.5"/>
+      </marker>
+      <marker id="arrow-down" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 1 0 L 5 10 L 9 0" fill="none" stroke="#3A3F47" stroke-width="1.5"/>
+      </marker>
+    </defs>
+
+    <!-- Background subtle grid dots -->
+    <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1" fill="#D1D5DB" opacity="0.5"/>
+    </pattern>
+    <rect width="800" height="533" fill="#EBEBEB"/>
+    <rect width="800" height="533" fill="url(#dots)"/>
+
+    <!-- Title: "undersight workflow" small label top -->
+    <text x="400" y="42" text-anchor="middle" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.08em" text-transform="uppercase">UNDERSIGHT WORKFLOW</text>
+
+    <!-- ===== ROW 1: Client Intake ===== -->
+    <!-- Client Intake box -->
+    <rect x="48" y="72" width="160" height="56" rx="6" fill="#FFFFFF" stroke="#3A3F47" stroke-width="1.5"/>
+    <rect x="48" y="72" width="160" height="20" rx="6" fill="#C97A54"/>
+    <rect x="48" y="86" width="160" height="6" fill="#C97A54"/>
+    <text x="128" y="86" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF" letter-spacing="0.04em">Client Intake</text>
+    <!-- Icon: chat bubble -->
+    <rect x="72" y="100" width="24" height="18" rx="3" fill="none" stroke="#6B7280" stroke-width="1.2"/>
+    <path d="M78 106 L90 106 M78 110 L86 110" stroke="#6B7280" stroke-width="1" stroke-linecap="round"/>
+    <text x="104" y="112" font-family="Inter, sans-serif" font-size="9" fill="#6B7280">Chat Agent</text>
+
+    <!-- Arrow right -->
+    <line x1="218" y1="100" x2="276" y2="100" stroke="#3A3F47" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Business & Banking Data box -->
+    <rect x="286" y="72" width="200" height="56" rx="6" fill="#FFFFFF" stroke="#3A3F47" stroke-width="1.5"/>
+    <rect x="286" y="72" width="200" height="20" rx="6" fill="#C97A54"/>
+    <rect x="286" y="86" width="200" height="6" fill="#C97A54"/>
+    <text x="386" y="86" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF" letter-spacing="0.04em">Business & Banking Data</text>
+    <!-- Icons: document + bank -->
+    <rect x="310" y="98" width="16" height="20" rx="2" fill="none" stroke="#6B7280" stroke-width="1.2"/>
+    <path d="M314 104 L322 104 M314 108 L320 108 M314 112 L318 112" stroke="#6B7280" stroke-width="0.8" stroke-linecap="round"/>
+    <text x="334" y="112" font-family="Inter, sans-serif" font-size="9" fill="#6B7280">Plaid · Unstract</text>
+
+    <!-- Arrow right -->
+    <line x1="496" y1="100" x2="554" y2="100" stroke="#3A3F47" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- RFI box (right) -->
+    <rect x="564" y="72" width="188" height="56" rx="6" fill="#23262C" stroke="#23262C" stroke-width="1.5"/>
+    <text x="658" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF" letter-spacing="0.04em">Requests for Information</text>
+    <text x="658" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#9CA3AF">Automated follow-up</text>
+
+    <!-- ===== Arrow down from Data to Analysis ===== -->
+    <line x1="386" y1="138" x2="386" y2="182" stroke="#3A3F47" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- ===== ROW 2: Deterministic + Agentic Analysis ===== -->
+    <!-- Traditional Deterministic Analysis -->
+    <rect x="168" y="192" width="188" height="56" rx="6" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+    <text x="262" y="216" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#6B7280">Traditional Deterministic</text>
+    <text x="262" y="232" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#6B7280">Analysis</text>
+
+    <!-- Arrow right -->
+    <line x1="366" y1="220" x2="414" y2="220" stroke="#3A3F47" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Agentic Analysis -->
+    <rect x="424" y="192" width="188" height="56" rx="6" fill="#FFFFFF" stroke="#3A3F47" stroke-width="1.5"/>
+    <rect x="424" y="192" width="188" height="20" rx="6" fill="#C97A54"/>
+    <rect x="424" y="206" width="188" height="6" fill="#C97A54"/>
+    <text x="518" y="206" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF" letter-spacing="0.04em">Agentic Analysis</text>
+    <text x="518" y="234" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7280">undersight</text>
+
+    <!-- Right label: Extracting Insights -->
+    <rect x="640" y="200" width="120" height="36" rx="6" fill="#23262C"/>
+    <text x="700" y="222" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Extracting Insights</text>
+
+    <!-- ===== Arrow down ===== -->
+    <line x1="518" y1="258" x2="518" y2="302" stroke="#3A3F47" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- ===== ROW 3: Agentic Scoring ===== -->
+    <rect x="424" y="312" width="188" height="56" rx="6" fill="#FFFFFF" stroke="#3A3F47" stroke-width="1.5"/>
+    <rect x="424" y="312" width="188" height="20" rx="6" fill="#C97A54"/>
+    <rect x="424" y="326" width="188" height="6" fill="#C97A54"/>
+    <text x="518" y="326" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF" letter-spacing="0.04em">Agentic Scoring</text>
+    <text x="518" y="354" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7280">undersight</text>
+
+    <!-- Right label: Synthesising Risk Scores -->
+    <rect x="640" y="320" width="120" height="36" rx="6" fill="#23262C"/>
+    <text x="700" y="336" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#FFFFFF">Synthesising</text>
+    <text x="700" y="349" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#FFFFFF">Risk Scores</text>
+
+    <!-- ===== Arrow down ===== -->
+    <line x1="518" y1="378" x2="518" y2="412" stroke="#3A3F47" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- ===== ROW 4: Agentic Decisioning + CoPilot ===== -->
+    <!-- Agentic Decisioning -->
+    <rect x="424" y="422" width="188" height="56" rx="6" fill="#FFFFFF" stroke="#3A3F47" stroke-width="1.5"/>
+    <rect x="424" y="422" width="188" height="20" rx="6" fill="#C97A54"/>
+    <rect x="424" y="436" width="188" height="6" fill="#C97A54"/>
+    <text x="518" y="436" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF" letter-spacing="0.04em">Agentic Decisioning</text>
+    <text x="518" y="464" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7280">undersight</text>
+
+    <!-- Right label: Pre-underwriting -->
+    <rect x="640" y="432" width="120" height="36" rx="6" fill="#23262C"/>
+    <text x="700" y="455" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Pre-underwriting</text>
+
+    <!-- Arrow left to CoPilot -->
+    <line x1="414" y1="450" x2="356" y2="450" stroke="#3A3F47" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Underwriting CoPilot -->
+    <rect x="168" y="422" width="188" height="56" rx="6" fill="#FFFFFF" stroke="#3A3F47" stroke-width="1.5"/>
+    <rect x="168" y="422" width="188" height="20" rx="6" fill="#C97A54"/>
+    <rect x="168" y="436" width="188" height="6" fill="#C97A54"/>
+    <text x="262" y="436" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF" letter-spacing="0.04em">Underwriting CoPilot</text>
+    <text x="262" y="464" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#6B7280">undersight</text>
+
+    <!-- Left label: HITL Approval -->
+    <rect x="28" y="432" width="120" height="36" rx="6" fill="#23262C"/>
+    <text x="88" y="449" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#FFFFFF">HITL Approval</text>
+    <text x="88" y="462" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#FFFFFF">& Close</text>
+
+    <!-- Connecting dots on flow lines -->
+    <circle cx="386" cy="138" r="3" fill="#3A3F47"/>
+    <circle cx="386" cy="192" r="3" fill="#3A3F47"/>
+    <circle cx="518" cy="258" r="3" fill="#3A3F47"/>
+    <circle cx="518" cy="312" r="3" fill="#3A3F47"/>
+    <circle cx="518" cy="378" r="3" fill="#3A3F47"/>
+    <circle cx="518" cy="422" r="3" fill="#3A3F47"/>
+
+    <!-- Vertical connector from Deterministic down to join -->
+    <line x1="262" y1="248" x2="262" y2="280" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="4,3"/>
+    <line x1="262" y1="280" x2="518" y2="280" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="4,3"/>
+
+    <!-- RFI feedback loop arrow (from RFI back to Client Intake) -->
+    <path d="M 658 128 L 658 156 L 128 156 L 128 138" fill="none" stroke="#D1D5DB" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <polygon points="124,142 128,132 132,142" fill="#D1D5DB"/>
+
+  </svg>
+</body>
+</html>

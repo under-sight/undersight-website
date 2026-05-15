@@ -548,20 +548,29 @@ def main():
     start_time = time.time()
 
     # 1. Get Fibery token
-    print("\n[1/6] Retrieving Fibery API token from Keychain...")
-    token = get_token()
-    print("  OK")
+    print("\n[1/6] Retrieving Fibery API token...")
+    content_map = None
+    file_map = {}
+    try:
+        token = get_token()
+        print("  OK")
+    except SystemExit:
+        print("  No token available — will build under-construction fallback")
+        token = None
 
     # 2. Fetch content from Fibery
-    print("\n[2/6] Fetching content from Fibery...")
-    try:
-        content_map, file_map = fetch_all(token)
-    except Exception as e:
-        print(f"ERROR: Failed to fetch content from Fibery: {e}")
-        sys.exit(1)
-    entity_names = list(content_map.keys())
-    print(f"  Entities: {', '.join(entity_names)}")
-    print(f"  File attachments: {len(file_map)}")
+    if token:
+        print("\n[2/6] Fetching content from Fibery...")
+        try:
+            content_map, file_map = fetch_all(token)
+            entity_names = list(content_map.keys())
+            print(f"  Entities: {', '.join(entity_names)}")
+            print(f"  File attachments: {len(file_map)}")
+        except Exception as e:
+            print(f"WARNING: Failed to fetch content from Fibery: {e}")
+            print("  Building under-construction fallback page...")
+    else:
+        print("\n[2/6] Skipping Fibery fetch (no token)")
 
     # 3. Prepare dist directory
     print("\n[3/6] Preparing dist/ directory...")
@@ -569,6 +578,37 @@ def main():
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR, exist_ok=True)
     print(f"  Created {DIST_DIR}")
+
+    # --- Under-construction fallback if Fibery content unavailable ---
+    if content_map is None:
+        print("\n[4/6] Building under-construction fallback...")
+        # Copy only essential static files for the fallback page
+        for static_dir in ["css", "images/brand"]:
+            src = os.path.join(SRC_DIR, static_dir)
+            dst = os.path.join(DIST_DIR, static_dir)
+            if os.path.isdir(src):
+                shutil.copytree(src, dst, dirs_exist_ok=True)
+        for f_name in ["favicon.svg", "favicon-16.png", "favicon-32.png",
+                        "apple-touch-icon.png", "manifest.json", "robots.txt"]:
+            src = os.path.join(SRC_DIR, f_name)
+            if os.path.isfile(src):
+                shutil.copy2(src, os.path.join(DIST_DIR, f_name))
+
+        fallback_path = os.path.join(SRC_DIR, "under-construction.html")
+        if os.path.isfile(fallback_path):
+            shutil.copy2(fallback_path, os.path.join(DIST_DIR, "index.html"))
+        else:
+            # Inline minimal fallback if template doesn't exist
+            with open(os.path.join(DIST_DIR, "index.html"), "w") as f:
+                f.write("<html><body><h1>undersight — coming soon</h1></body></html>")
+
+        elapsed = time.time() - start_time
+        print("\n" + "=" * 60)
+        print("BUILD COMPLETE (under-construction fallback)")
+        print("=" * 60)
+        print(f"  Output: {DIST_DIR}")
+        print(f"  Time:   {elapsed:.1f}s")
+        return
 
     # 4. Copy static files (before file downloads so directory structure exists)
     print("\n[4/6] Copying static files...")
@@ -629,7 +669,7 @@ def main():
     print(f"  Static files: {file_count}")
     print(f"  Total size:  {format_size(total_size)}")
     print(f"  Time:        {elapsed:.1f}s")
-    print(f"  Entities:    {len(entity_names)}")
+    print(f"  Entities:    {len(content_map)}")
 
     # 7. Verify (if requested or always do a quick sanity check)
     if do_verify:

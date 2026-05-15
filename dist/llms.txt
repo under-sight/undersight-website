@@ -28,7 +28,7 @@ Single-pane underwriting workspace where underwriters can analyze transactions, 
 
 ## Contact
 - Website: https://undersight.ai
-- Email: contact@underchat.ai
+- Email: contact@undersight.ai
 - Book a call: https://calendly.com/kyle-undersight/30min
 
 ## Links

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>undersight | Coming Soon</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta name="description" content="undersight - AI underwriting infrastructure for alternative finance. Coming soon.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --graphite-900: #23262C;
+    --graphite-500: #6B7280;
+    --amber-rust: #C97A54;
+    --paper-white: #FFFFFF;
+    --bg-dark: #1A1D21;
+    --ink: var(--graphite-900);
+    --surface: var(--paper-white);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #E5E7EB;
+      --surface: var(--bg-dark);
+    }
+    .tagline { color: #9CA3AF; }
+    .contact { color: #9CA3AF; }
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .container {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* --- Logo --- */
+  .logo {
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 0.2s forwards;
+  }
+  .logo img { height: 56px; width: auto; }
+
+  /* --- Writing animation --- */
+  .writing-stage {
+    position: relative;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    overflow: visible;
+  }
+
+  .cursive-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.75rem;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    position: relative;
+  }
+
+  /* Both nib and text are driven by the same JS timeline for perfect sync */
+  .cursive-text .reveal {
+    display: inline-block;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .pen-nib {
+    position: absolute;
+    top: 50%;
+    width: 48px;
+    height: 86px;
+    transform: translate(-50%, -60%) rotate(20deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Eye blink — runs independently */
+  .nib-eye {
+    transform-origin: 16px 16px;
+    animation: blink 3.5s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 88%, 94%, 100% { transform: scaleY(1); }
+    91% { transform: scaleY(0.05); }
+  }
+
+  /* --- Tagline --- */
+  .tagline {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--graphite-500);
+    line-height: 1.65;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 2s forwards;
+  }
+
+  /* --- Contact --- */
+  .contact {
+    font-size: 0.8125rem;
+    color: var(--graphite-500);
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 2.5s forwards;
+  }
+  .contact a {
+    color: var(--amber-rust);
+    text-decoration: none;
+    font-weight: 510;
+  }
+  .contact a:hover { text-decoration: underline; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .cursive-text .reveal { clip-path: none !important; }
+    .pen-nib { display: none !important; }
+    .logo, .tagline, .contact { opacity: 1 !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="logo">
+      <img src="images/brand/logo-horizontal-line-primary.svg" alt="undersight" width="160" height="28">
+    </div>
+
+    <div class="writing-stage">
+      <div class="pen-nib" id="nib">
+        <!-- Exact replica of favicon.svg nib, scaled to 18x32 -->
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="var(--ink)">
+            <rect x="11" y="4" width="10" height="5" rx="0.5"/>
+            <path d="M10 10.5 L22 10.5 L22 18 L16 28 L10 18 Z"/>
+          </g>
+          <rect x="15.5" y="10.5" width="1" height="17.5" fill="var(--surface)"/>
+          <g class="nib-eye">
+            <circle cx="16" cy="16" r="2.5" fill="var(--surface)"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="cursive-text">
+        <span class="reveal" id="revealText">under construction</span>
+      </div>
+    </div>
+
+    <p class="tagline">
+      AI underwriting infrastructure for alternative finance.<br>
+      We're putting the finishing touches on something new.
+    </p>
+
+    <p class="contact">
+      Get in touch &mdash; <a href="mailto:contact@undersight.ai">contact@undersight.ai</a>
+    </p>
+
+  </div>
+
+  <script>
+    // JS-driven animation loop — keeps nib and text perfectly synced
+    const nib = document.getElementById('nib');
+    const reveal = document.getElementById('revealText');
+    const stage = document.querySelector('.writing-stage');
+
+    // Timing (ms)
+    const WRITE_DURATION = 3000;   // how long the nib takes to write
+    const HOLD_DURATION  = 1800;   // pause with text fully visible
+    const FADE_DURATION  = 600;    // fade out
+    const PAUSE_DURATION = 1000;   // blank pause before next loop
+    const CYCLE = WRITE_DURATION + HOLD_DURATION + FADE_DURATION + PAUSE_DURATION;
+
+    function easeInOut(t) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    let startTime = null;
+
+    function animate(now) {
+      if (!startTime) startTime = now;
+      const elapsed = (now - startTime) % CYCLE;
+
+      if (elapsed < WRITE_DURATION) {
+        // Phase 1: Writing
+        const t = easeInOut(elapsed / WRITE_DURATION);
+        const pct = t * 100;
+        reveal.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+        nib.style.opacity = '1';
+
+        // Position nib at the reveal edge
+        const textRect = reveal.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        const nibX = textRect.left - stageRect.left + (textRect.width * t);
+        nib.style.left = nibX + 'px';
+
+      } else if (elapsed < WRITE_DURATION + HOLD_DURATION) {
+        // Phase 2: Hold — text fully visible, nib fades out
+        reveal.style.clipPath = 'inset(0 0% 0 0)';
+        const holdT = (elapsed - WRITE_DURATION) / HOLD_DURATION;
+        nib.style.opacity = holdT < 0.3 ? String(1 - holdT / 0.3) : '0';
+
+      } else if (elapsed < WRITE_DURATION + HOLD_DURATION + FADE_DURATION) {
+        // Phase 3: Fade out text
+        const fadeT = (elapsed - WRITE_DURATION - HOLD_DURATION) / FADE_DURATION;
+        reveal.style.clipPath = 'inset(0 0% 0 0)';
+        reveal.style.opacity = String(1 - fadeT);
+        nib.style.opacity = '0';
+
+      } else {
+        // Phase 4: Blank pause
+        reveal.style.clipPath = 'inset(0 100% 0 0)';
+        reveal.style.opacity = '1';
+        nib.style.opacity = '0';
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // Wait for font to load before starting
+    document.fonts.ready.then(() => {
+      // Small delay so layout settles
+      setTimeout(() => requestAnimationFrame(animate), 800);
+    });
+  </script>
+</body>
+</html>
