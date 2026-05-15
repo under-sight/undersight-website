@@ -158,7 +158,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "Website/Whitepapers",
+                        "q/from": "Website/Blog",
                         "q/select": ["fibery/id"],
                         "q/where": ["=", ["Website/name"], "$name"],
                         "q/limit": 1,
@@ -177,12 +177,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             }
             # 3. Link to whitepaper if found
             if wp_id:
-                lead_entity["Website/Whitepaper"] = {"fibery/id": wp_id}
+                lead_entity["Website/Blog Post"] = {"fibery/id": wp_id}
 
             api_post("/api/commands", [{
                 "command": "fibery.entity/create",
                 "args": {
-                    "type": "Website/Whitepaper Leads",
+                    "type": "Website/Blog Leads",
                     "entity": lead_entity,
                 },
             }])
