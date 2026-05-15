@@ -69,7 +69,6 @@ export default {
       // 2. Create the lead, linking to whitepaper if found
       const leadEntity = {
         'Website/Email': email,
-        'Website/Source': 'website-modal',
       };
       if (wpId) leadEntity['Website/Whitepaper'] = { 'fibery/id': wpId };
 

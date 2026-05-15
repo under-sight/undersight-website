@@ -174,7 +174,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             # 2. Create the lead entity
             lead_entity = {
                 "Website/Email": email,
-                "Website/Source": "website-modal",
             }
             # 3. Link to whitepaper if found
             if wp_id:

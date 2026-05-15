@@ -229,11 +229,10 @@ Website modal → submitWhitepaperEmail()
       1. Query Website/Whitepapers by name → get fibery/id
       2. Create Website/Whitepaper Leads entity
          - Website/Email: submitted email
-         - Website/Source: "website-modal"
          - Website/Whitepaper: linked to whitepaper entity
   → Fibery Automation triggers on new lead
   → Sends email with PDF attachment from whitepaper entity
-  → Sets Website/Sent = true on the lead
+  → Sets Website/Sent At = current timestamp on the lead
 ```
 
 ### Fibery Schema
@@ -253,10 +252,9 @@ Website modal → submitWhitepaperEmail()
 | Field | Type | Purpose |
 |-------|------|---------|
 | `Website/Email` | text | Visitor's email |
-| `Website/Source` | text | Always "website-modal" |
 | `Website/Whitepaper` | relation (M:1) | Link to the whitepaper entity |
-| `Website/Sent` | bool | Set true by Fibery automation after email sent |
-| `Website/Requested At` | date | When the request was made |
+| `Website/Sent At` | date-time | Set by Fibery automation when email is sent |
+| `fibery/creation-date` | date-time | (system) When the lead was captured |
 
 ### Current Whitepapers (must exist in Fibery with PDF attached)
 
