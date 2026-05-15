@@ -9,7 +9,7 @@ Usage:
     python3 build.py            # Build to dist/
     python3 build.py --verify   # Build + run security checks on output
 
-Requires: macOS Keychain entry for Fibery token (same as undersight-serve.py)
+Requires: FIBERY_TOKEN env var, or macOS Keychain entry (service='mcp-credentials', account='fibery-undersight')
 """
 
 import hashlib
@@ -54,7 +54,10 @@ STATIC_FILES = [
 
 
 def get_token():
-    """Retrieve Fibery API token from macOS Keychain."""
+    """Retrieve Fibery API token from env var or macOS Keychain."""
+    token = os.environ.get("FIBERY_TOKEN")
+    if token:
+        return token
     try:
         return subprocess.check_output(
             [
@@ -69,9 +72,10 @@ def get_token():
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
-    except subprocess.CalledProcessError:
-        print("ERROR: Could not retrieve Fibery token from macOS Keychain.")
-        print("       Expected keychain entry: service='mcp-credentials', account='fibery-undersight'")
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("ERROR: Could not retrieve Fibery token.")
+        print("       Set FIBERY_TOKEN env var, or on macOS add keychain entry:")
+        print("       service='mcp-credentials', account='fibery-undersight'")
         sys.exit(1)
 
 

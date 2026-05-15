@@ -11,6 +11,7 @@ Usage:
 
 import http.server
 import json
+import os
 import subprocess
 import sys
 import time
@@ -25,6 +26,9 @@ _cache = {"data": None, "ts": 0}
 
 
 def get_token():
+    token = os.environ.get("FIBERY_TOKEN")
+    if token:
+        return token
     return subprocess.check_output(
         ["security", "find-generic-password", "-s", "mcp-credentials",
          "-a", "fibery-undersight", "-w"],
