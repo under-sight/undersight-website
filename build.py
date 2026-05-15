@@ -27,7 +27,7 @@ import urllib.request
 # ---------------------------------------------------------------------------
 
 WORKSPACE = "subscript.fibery.io"
-DB = "Website/Database 1"
+DB = "Website/Pages"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")
 
@@ -576,13 +576,17 @@ def main():
             print(f"  Entities: {', '.join(entity_names)}")
             print(f"  File attachments: {len(file_map)}")
 
-            # Extract Site Mode from Site Config
+            # Extract Site Mode from Site Config (per-env: Production Mode / Dev Mode)
             site_config_md = content_map.get("Site Config", {}).get("content", "")
+            mode_key = f"**{'Production' if env_name == 'production' else 'Dev'} Mode:**"
+            fallback_key = "**Site Mode:**"
             for line in site_config_md.split("\n"):
-                if "**Site Mode:**" in line:
-                    site_mode = line.split("**Site Mode:**")[1].strip().rstrip("\\").strip().lower()
+                if mode_key in line:
+                    site_mode = line.split(mode_key)[1].strip().rstrip("\\").strip().lower()
                     break
-            print(f"  Site Mode: {site_mode}")
+                elif fallback_key in line:
+                    site_mode = line.split(fallback_key)[1].strip().rstrip("\\").strip().lower()
+            print(f"  Site Mode: {site_mode} (env={env_name})")
 
             # Production respects Site Mode; dev always builds full site
             if env_name == "production" and site_mode == "under-construction":
