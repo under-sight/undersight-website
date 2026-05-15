@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px;
+    height: 630px;
+    background: #23262C;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Subtle grid background */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Gradient overlay */
+  .gradient {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(201,122,84,0.08) 0%, transparent 60%);
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    height: 100%;
+    padding: 48px 56px;
+    gap: 48px;
+  }
+
+  /* Left side: text + branding */
+  .left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #C97A54;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    max-width: 420px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #9CA3AF;
+    line-height: 1.6;
+    max-width: 380px;
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: -0.02em;
+  }
+
+  /* Right side: conceptual illustration */
+  .right {
+    flex: 0 0 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Chat conversation mockup */
+  .chat-window {
+    width: 280px;
+    background: #2E3138;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 16px;
+    position: absolute;
+    left: 0;
+    top: 80px;
+    z-index: 2;
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .chat-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C97A54, #B56A45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+
+  .chat-status {
+    font-size: 10px;
+    color: #6B9E8C;
+    margin-left: auto;
+  }
+
+  .msg {
+    margin-bottom: 8px;
+    max-width: 85%;
+  }
+
+  .msg-agent {
+    background: rgba(201,122,84,0.12);
+    border: 1px solid rgba(201,122,84,0.15);
+    color: #D1D5DB;
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 8px 12px;
+    border-radius: 10px 10px 10px 2px;
+  }
+
+  .msg-user {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.05);
+    color: #9CA3AF;
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 8px 12px;
+    border-radius: 10px 10px 2px 10px;
+    margin-left: auto;
+  }
+
+  /* Data enrichment card */
+  .enrich-card {
+    width: 220px;
+    background: #2E3138;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 14px;
+    position: absolute;
+    right: 20px;
+    top: 60px;
+    z-index: 3;
+  }
+
+  .enrich-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6B9E8C;
+    margin-bottom: 10px;
+  }
+
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .metric-row:last-child { border-bottom: none; }
+
+  .metric-label {
+    font-size: 10px;
+    color: #9CA3AF;
+  }
+
+  .metric-value {
+    font-size: 10px;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+
+  .metric-value.good { color: #6B9E8C; }
+
+  /* Result badge */
+  .result-badge {
+    position: absolute;
+    right: 40px;
+    bottom: 100px;
+    z-index: 4;
+    background: linear-gradient(135deg, #C97A54, #B56A45);
+    border-radius: 10px;
+    padding: 14px 20px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(201,122,84,0.3);
+  }
+
+  .result-badge .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+  }
+
+  .result-badge .label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.8);
+    margin-top: 2px;
+  }
+
+  /* Connection lines */
+  .connector {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #C97A54;
+    position: absolute;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="gradient"></div>
+
+  <div class="container">
+    <div class="left">
+      <div class="tag">Case Study</div>
+      <div class="title">How Chat Advance Funded a Declined Deal in 5 Minutes</div>
+      <div class="subtitle">An AI intake agent saw what the rules engine couldn't — turning a false negative into a funded deal.</div>
+      <div class="logo">
+        <svg viewBox="0 0 64 64" width="20" height="20"><g fill="rgba(255,255,255,0.5)"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g><rect x="31" y="21" width="2" height="35" fill="#23262C"/><circle cx="32" cy="32" r="5" fill="#23262C"/></svg>
+        undersight
+      </div>
+    </div>
+
+    <div class="right">
+      <!-- Chat conversation -->
+      <div class="chat-window">
+        <div class="chat-header">
+          <div class="chat-avatar">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="5" r="3" stroke="#FFF" stroke-width="1.2" fill="none"/>
+              <path d="M2 12c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="#FFF" stroke-width="1.2" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="chat-name">Macy</div>
+          </div>
+          <div class="chat-status">Online</div>
+        </div>
+        <div class="msg"><div class="msg-agent">Hi! I can help you apply for funding. Can you share your business details?</div></div>
+        <div class="msg" style="display:flex"><div class="msg-user">Sure — we do $45K/mo revenue, 3 years in business</div></div>
+        <div class="msg"><div class="msg-agent">Great. Let me connect your bank data via Plaid to verify...</div></div>
+      </div>
+
+      <!-- Enrichment card -->
+      <div class="enrich-card">
+        <div class="enrich-label">Risk Assessment</div>
+        <div class="metric-row">
+          <span class="metric-label">Revenue stability</span>
+          <span class="metric-value good">Strong</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Cash flow pattern</span>
+          <span class="metric-value good">Healthy</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Time in business</span>
+          <span class="metric-value">3.2 years</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Stacking risk</span>
+          <span class="metric-value good">Low</span>
+        </div>
+      </div>
+
+      <!-- Result badge -->
+      <div class="result-badge">
+        <div class="value">2 Offers</div>
+        <div class="label">in 5 minutes</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
