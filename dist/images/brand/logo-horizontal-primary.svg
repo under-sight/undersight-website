@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48" width="280" height="48">
+  <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&amp;display=swap');</style>
+
+  <!-- Simplified icon (0.625x scale, centered in composition) -->
+  <g transform="translate(49, 4)">
+    <g fill="#23262C">
+      <!-- Cap -->
+      <rect x="14" y="5" width="12" height="6" rx="0.5"/>
+      <!-- Nib body -->
+      <path d="M12 13 L28 13 L28 23 L20 35 L12 23 Z"/>
+    </g>
+    <!-- Slit -->
+    <rect x="19.5" y="13" width="1" height="22" fill="#FFFFFF"/>
+    <!-- Circle (insight eye) -->
+    <circle cx="20" cy="20" r="3" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="101" y="32" font-family="Inter, sans-serif" font-weight="600" font-size="24" fill="#23262C" letter-spacing="-0.02em">undersight</text>
+</svg>

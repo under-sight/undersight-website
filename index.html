@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>undersight | AI Underwriting for Alternative Finance</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="description" content="AI agents that intake, enrich, score, and monitor across the funding lifecycle. Built for alternative finance: MCA, revenue-based financing, and factoring.">
+<link rel="canonical" href="https://undersight.ai">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="undersight | AI Underwriting for Alternative Finance">
+<meta property="og:description" content="AI agents that intake, enrich, score, and monitor across the funding lifecycle. 71% faster deal processing. Built for funds, brokers, and marketplaces.">
+<meta property="og:url" content="https://undersight.ai">
+<meta property="og:site_name" content="undersight">
+<meta property="og:image" content="https://undersight.ai/images/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="undersight | AI Underwriting for Alternative Finance">
+<meta name="twitter:description" content="AI agents that intake, enrich, score, and monitor across the funding lifecycle.">
+<meta name="twitter:image" content="https://undersight.ai/images/og-image.png">
+
+<!-- Structured Data for search engines and AI agents -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "undersight",
+  "url": "https://undersight.ai",
+  "description": "AI underwriting infrastructure for alternative finance. Agentic tools that automate intake, enrich data, score risk, and assist underwriters across every stage of small business lending.",
+  "foundingDate": "2025-10",
+  "industry": "Financial Technology",
+  "slogan": "AI Underwriting for Alternative Finance",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "contact@undersight.ai",
+    "contactType": "sales"
+  },
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "underscore",
+      "description": "API-first agentic and ML risk scoring for small business portfolios. Continuous monitoring with pre-default signal detection."
+    },
+    {
+      "@type": "Offer",
+      "name": "Agentic Client RFI",
+      "description": "Conversational AI intake agent that collects documents, answers questions, and builds funder-ready submission packages automatically."
+    },
+    {
+      "@type": "Offer",
+      "name": "AI Underwriting Copilot",
+      "description": "Single-pane underwriting workspace with AI-powered transaction analysis, risk scoring, and decision support. 30% faster screening."
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "undersight",
+  "url": "https://undersight.ai",
+  "description": "AI underwriting infrastructure for alternative finance"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/" onclick="event.preventDefault();navigate('home')">
+      <img src="images/brand/logo-horizontal-line-primary.svg" alt="undersight" class="nav-logo-img" width="160" height="40">
+    </a>
+    <button class="nav-toggle" onclick="toggleMobileNav()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <nav class="nav-links" id="navLinks">
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger">
+          Solutions
+          <svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="2,4 6,8 10,4"/></svg>
+        </button>
+        <div class="nav-dropdown-menu">
+          <div class="nav-dropdown-menu-inner" id="solutionsDropdown">
+            <!-- populated from Fibery -->
+          </div>
+        </div>
+      </div>
+      <a href="/docs" onclick="event.preventDefault();navigate('docs')">Docs</a>
+      <a href="/blog" onclick="event.preventDefault();navigate('blog')">Blog</a>
+    </nav>
+    <div class="nav-actions" id="navActions">
+      <a id="signInLink" href="https://staging.app.underchat.ai/login" class="btn btn-ghost" target="_blank">Sign In</a>
+      <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div><strong style="font-size:12px;color:var(--light);text-transform:uppercase;letter-spacing:1px;">Solutions</strong></div>
+    <div class="mobile-sub" id="mobileSolutions"><!-- populated from Fibery --></div>
+    <a href="/docs" onclick="event.preventDefault();navigate('docs');closeMobile();">Docs</a>
+    <a href="/blog" onclick="event.preventDefault();navigate('blog');closeMobile();">Blog</a>
+    <div class="mobile-section">
+      <a href="https://staging.app.underchat.ai/login" class="btn btn-ghost" target="_blank">Sign In</a>
+      <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HOME ============ -->
+<section class="page active loading" id="page-home">
+  <!-- Skeleton shown while Fibery content loads -->
+  <div class="skeleton-wrap">
+    <div class="hero">
+      <div class="skel skel-pulse skel-heading" style="width:70%;"></div>
+      <div class="skel skel-pulse skel-line w60" style="margin:12px auto 0;"></div>
+      <div class="skel skel-pulse" style="width:48px;height:3px;border-radius:2px;margin:24px auto 0;"></div>
+    </div>
+    <div class="home-section">
+      <div class="container">
+        <div class="skel skel-pulse skel-line w40" style="margin-bottom:40px;"></div>
+        <div class="skel skel-pulse skel-block" style="margin-bottom:24px;"></div>
+        <div class="skel skel-pulse skel-block" style="margin-bottom:24px;"></div>
+        <div class="skel skel-pulse skel-block"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Live content (hidden until loaded) -->
+  <div class="live-content">
+    <div class="hero">
+      <h1 id="heroTitle"></h1>
+      <p id="heroSubtitle"></p>
+      <div class="hero-bar"></div>
+    </div>
+
+    <!-- 1. WHO WE SERVE -->
+    <div class="home-section">
+      <div class="container">
+        <div class="home-section-label">Who we serve</div>
+        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;">Built for alternative finance</h2>
+        <p style="font-size:15px;color:var(--mid);margin-bottom:32px;">Revenue-based financing, MCA, and factoring. A $20B annual market with over 250 originators.</p>
+        <div class="serve-grid">
+          <div class="serve-card">
+            <div class="cat">Funds</div>
+            <h3>Underwrite faster</h3>
+            <p>Score deals via API, monitor portfolios continuously, flag pre-default signals before collections. Stop sticking to known industries — model risk across diverse small businesses.</p>
+          </div>
+          <div class="serve-card">
+            <div class="cat">Brokerages</div>
+            <h3>Convert more</h3>
+            <p>AI intake agent handles applicants 24/7, builds funder-ready submission packages automatically. No more siloed data or incomplete submissions — everything structured and verified.</p>
+          </div>
+          <div class="serve-card">
+            <div class="cat">Marketplaces</div>
+            <h3>Scale the workflow</h3>
+            <p>End-to-end from application to funded deal. Fully agentic intake, scoring, and matching. Replace manual document review that kills good deals with seconds-fast analysis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. HOW IT WORKS -->
+    <div class="how-section">
+      <div class="container">
+        <div class="home-section-label">How it works</div>
+        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;">From application to funded deal</h2>
+        <div class="how-timeline">
+          <div class="how-step">
+            <h3>An applicant or broker starts a conversation</h3>
+            <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time.</p>
+          </div>
+          <div class="how-step">
+            <h3>Documents are enriched and verified</h3>
+            <p>Raw data becomes structured intelligence. Revenue patterns, existing positions, and anomalies surfaced automatically.</p>
+          </div>
+          <div class="how-step">
+            <h3>Risk is scored in seconds</h3>
+            <p>ML models trained on deal outcomes deliver a risk score with full supporting analysis.</p>
+          </div>
+          <div class="how-step">
+            <h3>The underwriter makes the call</h3>
+            <p>AI surfaces what matters. The human decides. 30% faster screening, institutional-grade consistency.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SOLUTIONS -->
+    <div class="home-section">
+      <div class="container">
+        <div class="home-section-head">
+          <div class="home-section-label">Solutions</div>
+          <h2>Tools for every stage of the funding lifecycle</h2>
+        </div>
+        <div id="homeSolutions"></div>
+      </div>
+    </div>
+
+    <!-- 4. METRICS -->
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-num">71%</div><div class="stat-label">Reduction in deal time</div></div>
+      <div class="stat-item"><div class="stat-num">22%</div><div class="stat-label">More booked receivables</div></div>
+      <div class="stat-item"><div class="stat-num">650<span> bps</span></div><div class="stat-label">Loss ratio reduction</div></div>
+    </div>
+    <div style="text-align:center;padding:12px 24px;font-size:11px;color:rgba(255,255,255,0.4);background:var(--color-graphite-900);">Based on production data across active customer deployments as of November 2025.</div>
+
+    <!-- 5. CASE STUDY -->
+    <div class="case-study">
+      <div class="container">
+        <div class="home-section-label">Case study</div>
+        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">See it in action</h2>
+        <div class="case-study-inner">
+          <div class="case-study-graphic">
+            <div class="cs-label">Case Study: Chat Advance</div>
+            <h3>An auto-declined deal gets funded in under 5 minutes</h3>
+            <div class="cs-steps">
+              <div class="cs-step"><div class="cs-num">1</div><p>Applicant engages via chat with Macy, the AI intake agent</p></div>
+              <div class="cs-step"><div class="cs-num">2</div><p>Bank data ingested via Plaid and enriched automatically</p></div>
+              <div class="cs-step"><div class="cs-num">3</div><p>RFIs addressed directly with the applicant by the agent</p></div>
+              <div class="cs-step"><div class="cs-num">4</div><p>Matching funders receive a rich submission package</p></div>
+            </div>
+            <div class="cs-stats">
+              <div class="cs-stat"><div class="num">24/7</div><div class="label">Availability</div></div>
+              <div class="cs-stat"><div class="num">60s</div><div class="label">Screening</div></div>
+              <div class="cs-stat"><div class="num">$0</div><div class="label">Acquisition Cost</div></div>
+              <div class="cs-stat"><div class="num">2</div><div class="label">Offers in 5 min</div></div>
+            </div>
+          </div>
+          <div class="case-study-text">
+            <div class="cs-tag">Funding Marketplace</div>
+            <h3>How Chat Advance turned a decline into a funded deal</h3>
+            <p>A small business owner was auto-declined by a rules-based underwriter. The undersight platform saw what the rules engine couldn't. Through agentic intake, enrichment, and pre-underwriting, two funders matched and extended offers in under five minutes.</p>
+            <a class="cs-link" href="javascript:void(0)" onclick="openCaseStudy()">Read the full case study &rarr;</a>
+            <button class="btn btn-ghost" onclick="openWhitepaperModal('Chat Advance Case Study')" style="margin-top:12px;">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+              Download as PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. TESTIMONIAL -->
+    <div class="testimonial-section">
+      <div class="container">
+        <blockquote class="testimonial-quote">
+          We started 4D because merchants deserve a better deal. undersight gives us the underwriting rigor of a large institution without the headcount. Every decision is backed by data, cross-referenced across documents, and fully auditable. That's how we keep our promise to merchants — we only fund deals that make sense for them.
+        </blockquote>
+        <cite class="testimonial-cite">
+          <strong>Josh James</strong>
+          <span>Director, 4D Financing</span>
+        </cite>
+      </div>
+    </div>
+
+    <!-- 7. CASE STUDY: 4D FINANCING -->
+    <div class="case-study case-study--alt">
+      <div class="container">
+        <div class="home-section-label">Case study</div>
+        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">Institutional-grade underwriting, lean team</h2>
+        <div class="case-study-inner">
+          <div class="case-study-graphic">
+            <div class="cs-label">Case Study: 4D Financing</div>
+            <h3>Evidence-based underwriting for every deal, every time</h3>
+            <div class="cs-steps">
+              <div class="cs-step"><div class="cs-num">1</div><p>Bank statements and financials are uploaded to undersight</p></div>
+              <div class="cs-step"><div class="cs-num">2</div><p>AI cross-references deposits vs. revenue vs. tax returns, flags anomalies</p></div>
+              <div class="cs-step"><div class="cs-num">3</div><p>Risk profile built with fraud detection, volatility analysis, and stress testing</p></div>
+              <div class="cs-step"><div class="cs-num">4</div><p>Terms proposed or decline issued — with full reasoning and document citations</p></div>
+            </div>
+            <div class="cs-stats">
+              <div class="cs-stat"><div class="num placeholder">Minutes</div><div class="label">Time to underwrite</div></div>
+              <div class="cs-stat"><div class="num">100%</div><div class="label">Audit trail</div></div>
+              <div class="cs-stat"><div class="num">3-way</div><div class="label">Doc cross-check</div></div>
+              <div class="cs-stat"><div class="num">24hr</div><div class="label">Funding after approval</div></div>
+            </div>
+          </div>
+          <div class="case-study-text">
+            <div class="cs-tag">Direct Funder</div>
+            <h3>How a 2-person fund gets institutional-grade underwriting</h3>
+            <p>4D Financing is a direct MCA lender built on a simple conviction: merchants deserve transparency. With a lean team and undersight's AI underwriting agent, 4DF analyzes bank statements, cross-references financial documents, flags inconsistencies, and proposes terms — all with full audit trails. Every approval and every decline comes with evidence-backed reasoning, not gut feel.</p>
+            <a class="cs-link placeholder" href="javascript:void(0)">Read the full case study &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <h2>Ready to see undersight in action?</h2>
+      <p>Schedule a 30-minute discovery call. We'll walk through your workflow and show you what's possible.</p>
+      <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+      <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:contact@undersight.ai">contact@undersight.ai</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOLUTION PAGES (generated dynamically) ============ -->
+<section class="page" id="page-underscore"></section>
+<section class="page" id="page-rfi"></section>
+<section class="page" id="page-copilot"></section>
+
+<!-- ============ DOCS (Clerk-gated) ============ -->
+<section class="page" id="page-docs">
+  <div class="docs-gate" id="docsGate">
+    <div class="lock-icon">&#128274;</div>
+    <h2>API Documentation</h2>
+    <p>Access our API reference, integration guides, and developer resources. Sign in with your undersight account to continue.</p>
+    <button class="btn btn-primary" onclick="clerkSignIn()">Sign In to View Docs</button>
+    <div class="note">Powered by Clerk. Only authorized undersight customers can access documentation.</div>
+  </div>
+  <div id="docsContent" style="display:none;">
+    <div class="section-header">
+      <h2>API Documentation</h2>
+      <p>Reference guides, SDKs, and integration resources for the undersight platform.</p>
+    </div>
+    <div class="container" style="padding-bottom: 80px;">
+      <div class="card-grid cols-3">
+        <div class="card"><h3>Getting Started</h3><p>Authentication, API keys, and your first API call.</p></div>
+        <div class="card"><h3>underscore API</h3><p>Submit accounts for scoring, retrieve results, and manage scoring models.</p></div>
+        <div class="card"><h3>RFI API</h3><p>Create intake sessions, manage submissions, and retrieve structured data.</p></div>
+        <div class="card"><h3>Copilot API</h3><p>Integrate underwriting assistance into your existing workflow tools.</p></div>
+        <div class="card"><h3>Webhooks</h3><p>Subscribe to events and receive real-time notifications.</p></div>
+        <div class="card"><h3>SDKs</h3><p>Client libraries for Python, Node.js, and REST.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BLOG ============ -->
+<section class="page" id="page-blog">
+  <div class="container" style="padding-top:48px;">
+    <div class="home-section-label">Insights</div>
+    <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:16px;">Blog</h2>
+    <div class="blog-filters" id="blogFilters"></div>
+    <div class="blog-grid" id="blogGrid">
+      <!-- populated from Fibery -->
+    </div>
+  </div>
+</section>
+
+<!-- ============ BLOG POST ============ -->
+<section class="page" id="page-post">
+  <div class="post-content">
+    <h1 id="postTitle"></h1>
+    <div class="meta" id="postMeta"></div>
+    <div class="post-body" id="postBody"></div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="page" id="page-contact">
+  <div class="contact-wrap">
+    <h2 id="contactTitle">Ready to see undersight in action?</h2>
+    <p id="contactSubtitle">Schedule a 30-minute discovery call. We'll walk through your workflow and show you what's possible.</p>
+    <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary" style="padding:14px 32px;font-size:16px;">Book a Discovery Call</a>
+    <div class="contact-email">Or email us at <a id="contactEmailLink" class="contact-email-link" href="mailto:contact@undersight.ai">contact@undersight.ai</a></div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="footer-top">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a class="nav-logo" href="/" onclick="event.preventDefault();navigate('home')" style="margin-bottom:12px;">
+            <svg viewBox="0 0 64 64" width="24" height="24" style="flex-shrink:0" role="img" aria-label="undersight"><title>undersight</title><g fill="currentColor"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g><rect x="31" y="21" width="2" height="35" fill="var(--white)"/><circle cx="32" cy="32" r="5" fill="var(--white)"/></svg>
+            undersight
+          </a>
+          <p style="font-size:13px;color:var(--mid);max-width:240px;">AI underwriting infrastructure for alternative finance.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <a href="/underscore" onclick="event.preventDefault();navigate('underscore')">underscore</a>
+          <a href="/rfi" onclick="event.preventDefault();navigate('rfi')">Agentic Client RFI</a>
+          <a href="/copilot" onclick="event.preventDefault();navigate('copilot')">AI Underwriting Copilot</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="/docs" onclick="event.preventDefault();navigate('docs')">API Docs</a>
+          <a href="/blog" onclick="event.preventDefault();navigate('blog')">Blog</a>
+          <a href="https://legal.undersight.ai" target="_blank" rel="noopener">Privacy Policy</a>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener">Book a Discovery Call</a>
+          <a class="contact-email-link" href="mailto:contact@undersight.ai">contact@undersight.ai</a>
+          <a href="https://linkedin.com/company/undersight-ai" target="_blank" rel="noopener" class="footer-social">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:6px;"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+      <span id="footerCopy">&copy; <script>document.write(new Date().getFullYear())</script> undersight. All rights reserved.</span>
+      <button onclick="toggleTheme()" style="background:none;border:1px solid var(--pale);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--mid);cursor:pointer;font-family:inherit;">Toggle theme</button>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ WHITEPAPER MODAL ============ -->
+<div class="wp-overlay" id="wpOverlay" onclick="if(event.target===this)closeWhitepaperModal()">
+  <div class="wp-modal" role="dialog" aria-labelledby="wpTitle" aria-modal="true">
+    <button class="wp-close" onclick="closeWhitepaperModal()" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+    </button>
+    <div class="wp-form" id="wpForm">
+      <h3 id="wpTitle">Get the Case Study</h3>
+      <p class="wp-desc">Enter your email and we'll send you the full Chat Advance case study as a PDF.</p>
+      <input type="email" class="wp-input" id="wpEmail" placeholder="you@company.com" autocomplete="email" required>
+      <div class="wp-error-msg" id="wpError">Please enter a valid email address.</div>
+      <button class="btn btn-primary wp-submit" onclick="submitWhitepaperEmail()">Send me the PDF</button>
+    </div>
+    <div class="wp-success" id="wpSuccess">
+      <div class="wp-success-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h4>Check your inbox</h4>
+      <p>We've sent the case study to your email. It should arrive within a minute or two.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Helpers ----
+  function getContent(data, key) { return (data[key] || {}).content || ''; }
+  function getFiles(data, key) { return (data[key] || {}).files || []; }
+  function firstImage(files) {
+    const img = files.find(f => (f.type || '').startsWith('image/'));
+    return img ? img.url : '';
+  }
+
+  function parseMeta(md) {
+    const meta = {};
+    const bodyLines = [];
+    let pastSeparator = false;
+    for (const line of (md || '').split('\n')) {
+      const clean = line.replace(/\\$/,'');
+      const m = clean.match(/^\*\*(.+?):\*\*\s*(.+)/);
+      if (m) {
+        meta[m[1].trim()] = m[2].trim();
+      } else if (clean.startsWith('# ')) {
+        meta._title = clean.replace(/^#+\s*/, '');
+      } else if (clean.trim() === '---') {
+        pastSeparator = true;
+      } else if (pastSeparator || (!m && !clean.startsWith('#'))) {
+        bodyLines.push(clean);
+      }
+    }
+    meta._body = bodyLines.join('\n').trim();
+    return meta;
+  }
+
+  function mdToHtml(md) {
+    if (!md) return '';
+    function inline(text) {
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+      text = text.replace(/\[(.+?)\]\((.+?)\)/g, (_, t, u) => {
+        const safe = /^(https?:\/\/|\/|#)/.test(u.trim());
+        return safe ? `<a href="${u}">${t}</a>` : t;
+      });
+      return text;
+    }
+    const lines = md.replace(/\\$/gm, '').split('\n');
+    let html = '', state = null, paraBuf = [];
+    function flushPara() {
+      if (paraBuf.length) { html += `<p>${inline(paraBuf.join(' '))}</p>\n`; paraBuf = []; }
+    }
+    function closeState() {
+      flushPara();
+      if (state === 'table') html += '</tbody></table>\n';
+      if (state === 'ul') html += '</ul>\n';
+      if (state === 'ol') html += '</ol>\n';
+      if (state === 'bq') html += '</blockquote>\n';
+      state = null;
+    }
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].replace(/\\$/, '');
+      const trimmed = line.trim();
+      if (!trimmed) { closeState(); continue; }
+      if (trimmed === '---') { closeState(); html += '<hr>\n'; continue; }
+      if (trimmed.startsWith('# ')) { closeState(); html += `<h1>${inline(trimmed.slice(2))}</h1>\n`; continue; }
+      if (trimmed.startsWith('## ')) { closeState(); html += `<h2>${inline(trimmed.slice(3))}</h2>\n`; continue; }
+      if (trimmed.startsWith('### ')) { closeState(); html += `<h3>${inline(trimmed.slice(4))}</h3>\n`; continue; }
+      // Table rows
+      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        if (state !== 'table') {
+          closeState(); state = 'table';
+          // First row is header
+          const cells = trimmed.split('|').slice(1, -1).map(c => `<th>${inline(c.trim())}</th>`).join('');
+          html += `<table><thead><tr>${cells}</tr></thead><tbody>\n`;
+        } else if (/^\|[\s\-:|]+\|$/.test(trimmed)) {
+          // Separator row — skip
+        } else {
+          const cells = trimmed.split('|').slice(1, -1).map(c => `<td>${inline(c.trim())}</td>`).join('');
+          html += `<tr>${cells}</tr>\n`;
+        }
+        continue;
+      }
+      // Unordered list
+      if (/^[-*]\s/.test(trimmed)) {
+        if (state !== 'ul') { closeState(); state = 'ul'; html += '<ul>\n'; }
+        html += `<li>${inline(trimmed.replace(/^[-*]\s+/, ''))}</li>\n`;
+        continue;
+      }
+      // Ordered list
+      if (/^\d+\.\s/.test(trimmed)) {
+        if (state !== 'ol') { closeState(); state = 'ol'; html += '<ol>\n'; }
+        html += `<li>${inline(trimmed.replace(/^\d+\.\s+/, ''))}</li>\n`;
+        continue;
+      }
+      // Blockquote
+      if (trimmed.startsWith('> ')) {
+        if (state !== 'bq') { closeState(); state = 'bq'; html += '<blockquote>\n'; }
+        html += `<p>${inline(trimmed.slice(2))}</p>\n`;
+        continue;
+      }
+      // Paragraph text
+      if (state) closeState();
+      paraBuf.push(trimmed);
+    }
+    closeState();
+    return html;
+  }
+
+  function stripContents(md) {
+    if (!md) return md;
+    // Remove "## Contents" / "## Table of Contents" sections (heading + list items until next heading or gap)
+    return md.replace(/^#{1,3}\s+(Contents|Table of Contents)\s*\n([\s\S]*?)(?=\n#{1,3}\s|\n\n\n|$)/gim, '').trim();
+  }
+
+  // ---- Rendering ----
+  const SOLUTION_MAP = {
+    'Solutions - underscore': { page: 'underscore', icon: 'S', tag: 'Risk Scoring' },
+    'Solutions - Agentic Client RFI': { page: 'rfi', icon: 'R', tag: 'Client Intake' },
+    'Solutions - AI Underwriting Copilot': { page: 'copilot', icon: 'C', tag: 'Copilot' },
+  };
+
+  const BLOG_IMAGES = {
+    'Building an underwriting copilot': 'images/blog/copilot-building.png',
+    'The RFI bottleneck': 'images/blog/rfi-bottleneck.png',
+    'Why AI underwriting is not about replacing underwriters': 'images/blog/ai-underwriting.png',
+    'How Chat Advance funded a declined deal in 5 minutes': 'images/blog/chat-advance-hero.png',
+    'Unlocking Institutional Capital for Mid-Tier MCA Funds': 'images/blog/institutional-capital.png',
+    'From Deterministic Scorecards to Agentic Credit Assessments': 'images/blog/agentic-credit.png',
+  };
+
+  const SOLUTION_IMAGES = {
+    'underscore': 'images/solutions/us1.png',
+    'rfi': 'images/solutions/rfi1.png',
+    'copilot': 'images/solutions/cop1.png',
+  };
+
+  const SOLUTION_NARRATIVES = {
+    'underscore': [
+      { img: 'images/solutions/us1.png', title: 'Submit a deal via API', desc: 'Send application data, bank statements, and existing positions. underscore ingests and parses everything automatically.' },
+      { img: 'images/solutions/us2.png', title: 'Get a risk score in seconds', desc: 'ML models trained on deal outcomes score the applicant across revenue patterns, existing positions, and anomaly signals.' },
+      { img: 'images/solutions/us3.png', title: 'Monitor your portfolio continuously', desc: 'Every active deal is re-underwritten automatically. Pre-default signals are flagged before collections, not after.' },
+    ],
+    'rfi': [
+      { img: 'images/solutions/rfi1.png', title: 'AI agent collects documents', desc: 'Macy conducts an intelligent conversation with the applicant or broker, collecting bank statements and resolving gaps automatically.' },
+      { img: 'images/solutions/rfi2.png', title: 'Data is enriched and verified', desc: 'Raw documents are parsed into structured transaction intelligence. Revenue patterns, existing positions, and anomalies identified.' },
+      { img: 'images/solutions/rfi3.png', title: 'Funder-ready package delivered', desc: 'Complete submission packages are assembled from raw inputs, including RFI responses, enriched data, and preliminary risk signals.' },
+    ],
+    'copilot': [
+      { img: 'images/solutions/cop1.png', title: 'Screen deals in minutes', desc: 'AI identifies clear declines instantly. Deal queues are prioritized by risk signal strength, freeing capacity for complex deals.' },
+      { img: 'images/solutions/cop2.png', title: 'Analyze transactions with AI', desc: 'Revenue patterns, anomalies, and risk factors surfaced in a unified transaction viewer. Every deal gets institutional-grade analysis.' },
+      { img: 'images/solutions/cop3.png', title: 'Ask questions, get answers', desc: 'Chat about deals, raise RFIs, and get structured responses with inline data citations. The underwriter makes the call, with better data.' },
+    ],
+  };
+
+  function renderContent(data) {
+    // ---- Hero ----
+    const hero = parseMeta(getContent(data, 'Homepage - Hero'));
+    const heroEl = document.getElementById('heroTitle');
+    const heroTitle = hero._title || "Manual underwriting can't scale. Agentic underwriting can.";
+    // Render accent color on second sentence if it contains a period
+    const parts = heroTitle.split(/(?<=\.)\s*/);
+    if (parts.length > 1) {
+      heroEl.innerHTML = parts[0] + '<br><span class="accent">' + parts.slice(1).join(' ') + '</span>';
+    } else {
+      heroEl.textContent = heroTitle;
+    }
+    document.getElementById('heroSubtitle').textContent = hero._body || '';
+
+    // ---- Site Config ----
+    const config = parseMeta(getContent(data, 'Site Config'));
+    const signInEl = document.getElementById('signInLink');
+    if (config['Sign In URL'] && signInEl) signInEl.href = config['Sign In URL'];
+    const privacyEl = document.getElementById('footerPrivacy');
+    if (config['Privacy Policy URL'] && privacyEl) privacyEl.href = config['Privacy Policy URL'];
+    if (config['Contact Email']) {
+      document.querySelectorAll('.contact-email-link').forEach(el => {
+        el.href = 'mailto:' + config['Contact Email'];
+        el.textContent = config['Contact Email'];
+      });
+    }
+    const copyEl = document.getElementById('footerCopy');
+    if (config['Copyright'] && copyEl) copyEl.innerHTML = '&copy; ' + config['Copyright'];
+
+    // ---- Contact ----
+    const contact = parseMeta(getContent(data, 'Contact Page'));
+    if (contact._title) document.getElementById('contactTitle').textContent = contact._title;
+    if (contact._body) document.getElementById('contactSubtitle').textContent = contact._body.split('\n')[0];
+
+    // ---- Solutions ----
+    const dropdown = document.getElementById('solutionsDropdown');
+    const homeSolutions = document.getElementById('homeSolutions');
+    const mobileSol = document.getElementById('mobileSolutions');
+    dropdown.innerHTML = '';
+    homeSolutions.innerHTML = '';
+    mobileSol.innerHTML = '';
+
+    for (const [entityName, cfg] of Object.entries(SOLUTION_MAP)) {
+      const md = getContent(data, entityName);
+      const meta = parseMeta(md);
+      const title = meta._title || entityName.replace('Solutions - ', '');
+      const bodyParas = (meta._body || '').split('\n\n').filter(p => p.trim() && !p.startsWith('#'));
+      const desc = bodyParas[0] || '';
+      const tag = meta.Tag || cfg.tag;
+      const solImg = SOLUTION_IMAGES[cfg.page] || '';
+
+      // Dropdown
+      const ddItem = document.createElement('a');
+      ddItem.href = '/' + cfg.page;
+      ddItem.onclick = (e) => { e.preventDefault(); closeDropdowns(); navigate(cfg.page); };
+      const shortDesc = desc.length > 70 ? desc.substring(0, desc.lastIndexOf(' ', 70)) + '...' : desc;
+      ddItem.innerHTML = `${title}<span class="dd-sub">${shortDesc}</span>`;
+      dropdown.appendChild(ddItem);
+
+      // Mobile solutions
+      const mobItem = document.createElement('a');
+      mobItem.href = '/' + cfg.page;
+      mobItem.onclick = () => { closeMobile(); navigate(cfg.page); };
+      mobItem.textContent = title;
+      mobileSol.appendChild(mobItem);
+
+      // Home horizontal solution section
+      const row = document.createElement('div');
+      row.className = 'sol-row';
+      const imgHtml = solImg
+        ? `<img src="${solImg}" alt="${title}" loading="lazy">`
+        : `[ placeholder ]`;
+      row.innerHTML = `
+        <div class="sol-row-img">${imgHtml}</div>
+        <div class="sol-row-text">
+          <div class="sol-row-tag">${tag}</div>
+          <h3>${title}</h3>
+          <p>${desc}</p>
+          <span class="sol-row-link" onclick="navigate('${cfg.page}')">Explore ${title} &rarr;</span>
+        </div>`;
+      homeSolutions.appendChild(row);
+
+      // Detail page - narrative scroll
+      const pageEl = document.getElementById('page-' + cfg.page);
+      const narrative = SOLUTION_NARRATIVES[cfg.page] || [];
+      const narrativeHtml = narrative.map((step, i) => `
+        <div class="sol-row${i % 2 === 1 ? '' : ''}">
+          <div class="sol-row-img"><img src="${step.img}" alt="${step.title}" loading="lazy"></div>
+          <div class="sol-row-text">
+            <h3>${step.title}</h3>
+            <p>${step.desc}</p>
+          </div>
+        </div>`).join('');
+      pageEl.innerHTML = `
+        <div class="sol-hero">
+          <span class="tag">${tag}</span>
+          <h1>${title}</h1>
+          <p>${desc}</p>
+        </div>
+        <div class="home-section">
+          <div class="container">
+            ${narrativeHtml}
+          </div>
+        </div>
+        <div class="sol-body">${mdToHtml(stripContents(meta._body))}</div>
+        <div class="cta-section">
+          <h2>See ${title} in action</h2>
+          <p>Schedule a discovery call and we'll walk through how ${title} fits your workflow.</p>
+          <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+          <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:${config['Contact Email'] || 'contact@undersight.ai'}">${config['Contact Email'] || 'contact@undersight.ai'}</a></div>
+        </div>`;
+    }
+
+    // ---- Blog ----
+    const blogGrid = document.getElementById('blogGrid');
+    blogGrid.innerHTML = '';
+    const blogEntries = Object.keys(data)
+      .filter(k => k.startsWith('Blog - '))
+      .map(name => {
+        const md = getContent(data, name);
+        const files = getFiles(data, name);
+        const meta = parseMeta(md);
+        const heroImg = firstImage(files) || BLOG_IMAGES[name.replace('Blog - ', '')] || '';
+        return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '' };
+      })
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    blogEntries.forEach(post => {
+      if (post.title.includes('Chat Advance')) _caseStudyPost = post;
+      const card = document.createElement('div');
+      card.className = 'blog-card';
+      card.dataset.tag = post.tag;
+      card.onclick = () => openPost(post);
+
+      let thumbHtml;
+      if (post.heroImg) {
+        thumbHtml = `<div class="blog-thumb" style="background:url('${post.heroImg}') center/cover no-repeat"></div>`;
+      } else {
+        thumbHtml = `<div class="blog-thumb">[ Hero image ]</div>`;
+      }
+
+      const tagHtml = post.tag ? `<span class="blog-tag">${post.tag}</span> ` : '';
+      card.innerHTML = `
+        ${thumbHtml}
+        <div class="blog-card-body">
+          ${tagHtml}<div class="date">${post.date}</div>
+          <h3>${post.title}</h3>
+          <p>${post.excerpt}</p>
+        </div>`;
+      blogGrid.appendChild(card);
+    });
+
+    // Build filter pills
+    const tags = [...new Set(blogEntries.map(p => p.tag).filter(Boolean))];
+    const filtersEl = document.getElementById('blogFilters');
+    if (tags.length) {
+      filtersEl.innerHTML = '<button class="blog-filter active" data-filter="all" onclick="filterBlog(\'all\')">All</button>' +
+        tags.map(t => `<button class="blog-filter" data-filter="${t}" onclick="filterBlog('${t}')">${t}</button>`).join('');
+    }
+  }
+
+  // ---- Fetch ----
+  async function loadContent() {
+    try {
+      const resp = await fetch('/api/content');
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      renderContent(await resp.json());
+    } catch (err) {
+      console.error('Content load failed:', err);
+      document.getElementById('heroTitle').innerHTML = `
+        <svg viewBox="0 0 64 64" width="48" height="48" style="margin-bottom:24px;animation:penWrite 2s ease-in-out infinite">
+          <g fill="var(--black)"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g>
+          <rect x="31" y="21" width="2" height="35" fill="var(--white)"/>
+          <circle cx="32" cy="32" r="5" fill="var(--white)"/>
+        </svg><br>undersight`;
+      document.getElementById('heroSubtitle').textContent = 'Loading content...';
+      // Retry after 3 seconds
+      setTimeout(loadContent, 3000);
+    }
+    // Swap skeleton for live content on all pages
+    document.querySelectorAll('.page.loading').forEach(p => p.classList.remove('loading'));
+  }
+
+  // ---- Navigation ----
+  function navigate(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.nav-links > a').forEach(a => a.classList.remove('active'));
+    const link = document.querySelector(`.nav-links > a[href="/${page}"], .nav-links > a[href="#${page}"]`);
+    if (link) link.classList.add('active');
+    closeMobileNav();
+    window.scrollTo(0, 0);
+    var path = page === 'home' ? '/' : '/' + page;
+    if (location.pathname !== path) {
+      history.pushState({ page: page }, '', path);
+    }
+  }
+
+  function openPost(post) {
+    // Enhanced meta: tag badge + date + author + reading time
+    const wordCount = (post.body || '').split(/\s+/).length;
+    const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+    let metaParts = [];
+    if (post.date) metaParts.push(post.date);
+    if (post.author) metaParts.push(post.author);
+    metaParts.push(`${readingTime} min read`);
+
+    document.getElementById('postTitle').style.display = '';
+    document.getElementById('postMeta').style.display = '';
+    document.getElementById('postTitle').textContent = post.title;
+    document.getElementById('postMeta').innerHTML =
+      (post.tag ? `<span class="blog-tag">${post.tag}</span> ` : '') +
+      metaParts.join(' &middot; ');
+
+    // Map blog post to whitepaper name (must match Website/Whitepapers entity names in Fibery)
+    const wpName = post.title.includes('Chat Advance') ? 'Chat Advance Case Study' : post.title;
+    const dlBtn = `<button class="btn btn-ghost" onclick="openWhitepaperModal('${wpName.replace(/'/g, "\\'")}')" style="margin-top:16px;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+        Download as PDF
+      </button>`;
+
+    let heroHtml = '';
+    if (post.heroImg) {
+      const showDl = post.tag === 'Research' || post.tag === 'Case Study';
+      const imgDlBtn = showDl ? `<div style="margin-bottom:24px;">${dlBtn}</div>` : '';
+      heroHtml = `<img src="${post.heroImg}" alt="${post.title}" style="width:100%;border-radius:var(--radius);margin-bottom:${showDl ? '16' : '32'}px;">${imgDlBtn}`;
+    }
+
+    let bodyHtml = mdToHtml(stripContents(post.body));
+
+    // Inject inline companion images for the Chat Advance case study
+    if (post.title.includes('Chat Advance')) {
+      const overviewImg = `<figure style="margin:32px 0;"><img src="images/blog/chat-advance-overview.png" alt="Chat Advance case study overview — agentic intake flow from application to funder match" style="width:100%;border-radius:var(--radius);border:1px solid var(--pale);"></figure>`;
+      const macyImg = `<figure style="margin:32px 0;"><img src="images/blog/chat-advance-macy.png" alt="Macy, the AI funding assistant, presenting two funder offers to an applicant in real time" style="width:100%;border-radius:var(--radius);border:1px solid var(--pale);"></figure>`;
+
+      // Insert overview after the first paragraph, Macy screenshot after the third
+      const paragraphs = bodyHtml.split('</p>');
+      if (paragraphs.length > 3) {
+        paragraphs.splice(1, 0, overviewImg);
+        paragraphs.splice(4, 0, macyImg);
+        bodyHtml = paragraphs.join('</p>');
+      } else {
+        bodyHtml += overviewImg + macyImg;
+      }
+    }
+
+    document.getElementById('postBody').innerHTML = heroHtml + bodyHtml;
+    navigate('post');
+  }
+
+  function filterBlog(tag) {
+    document.querySelectorAll('.blog-filter').forEach(b => b.classList.toggle('active', b.dataset.filter === tag));
+    document.querySelectorAll('.blog-card').forEach(card => {
+      card.style.display = (tag === 'all' || card.dataset.tag === tag) ? '' : 'none';
+    });
+  }
+
+  function clerkSignIn() {
+    if (confirm('This will use Clerk authentication in production.\n\nSimulate successful sign-in for skeleton preview?')) {
+      document.getElementById('docsGate').style.display = 'none';
+      document.getElementById('docsContent').style.display = 'block';
+    }
+  }
+
+  function closeDropdowns() {
+    document.querySelectorAll('.nav-dropdown-menu').forEach(m => {
+      m.style.display = 'none';
+      setTimeout(() => m.style.display = '', 200);
+    });
+  }
+
+  function toggleMobileNav() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+  function closeMobile() {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+  function closeMobileNav() { closeMobile(); }
+
+  // ---- Case study direct link ----
+  var _caseStudyPost = null;
+  function openCaseStudy() {
+    if (_caseStudyPost) {
+      openPost(_caseStudyPost);
+    } else {
+      _origNavigate('blog');
+    }
+  }
+
+  // ---- Whitepaper modal ----
+  // Dev: /api/whitepaper-lead (local dev server). Prod: Cloudflare Worker URL.
+  const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? '/api/whitepaper-lead'
+    : ''; // TODO: set to Cloudflare Worker URL when deployed
+  var _activeWhitepaper = 'Chat Advance Case Study';
+  function openWhitepaperModal(name) {
+    if (name) _activeWhitepaper = name;
+    document.getElementById('wpOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('wpEmail').focus(), 200);
+  }
+  function closeWhitepaperModal() {
+    document.getElementById('wpOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+    // Reset form state
+    document.getElementById('wpForm').classList.remove('hidden');
+    document.getElementById('wpSuccess').classList.remove('visible');
+    document.getElementById('wpEmail').value = '';
+    document.getElementById('wpEmail').classList.remove('wp-error');
+    document.getElementById('wpError').classList.remove('visible');
+  }
+  function submitWhitepaperEmail() {
+    const input = document.getElementById('wpEmail');
+    const email = input.value.trim();
+    const errorEl = document.getElementById('wpError');
+    // Validate
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      input.classList.add('wp-error');
+      errorEl.classList.add('visible');
+      return;
+    }
+    input.classList.remove('wp-error');
+    errorEl.classList.remove('visible');
+
+    if (WORKER_URL) {
+      // Production: POST to Cloudflare Worker
+      fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, whitepaper: _activeWhitepaper })
+      }).then(r => {
+        if (!r.ok) throw new Error('Submit failed');
+        showWhitepaperSuccess();
+      }).catch(() => {
+        errorEl.textContent = 'Something went wrong. Please try again.';
+        errorEl.classList.add('visible');
+      });
+    } else {
+      // Mock mode: log and show success
+      console.log('[Whitepaper] Email captured:', email, 'for:', _activeWhitepaper);
+      showWhitepaperSuccess();
+    }
+  }
+  function showWhitepaperSuccess() {
+    document.getElementById('wpForm').classList.add('hidden');
+    document.getElementById('wpSuccess').classList.add('visible');
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('wpOverlay').classList.contains('active')) {
+      closeWhitepaperModal();
+    }
+  });
+
+  // ---- Theme toggle ----
+  function toggleTheme() {
+    document.documentElement.classList.toggle('theme-light');
+  }
+
+  // ---- Scroll reveal ----
+  function initReveals() {
+    document.querySelectorAll('.home-section, .stats-bar, .cta-section, .testimonial-section, .case-study, .sol-hero, .sol-body').forEach(el => {
+      el.classList.add('reveal');
+    });
+    document.querySelectorAll('#homeSolutions').forEach(el => {
+      el.classList.add('reveal-stagger');
+    });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => observer.observe(el));
+  }
+
+  // ---- Nav scroll shadow ----
+  window.addEventListener('scroll', () => {
+    document.querySelector('header').classList.toggle('scrolled', window.scrollY > 10);
+  }, { passive: true });
+
+  // ---- Page transitions ----
+  const _origNavigate = navigate;
+  navigate = function(page) {
+    const current = document.querySelector('.page.active');
+    if (current) {
+      current.classList.add('fade-out');
+      setTimeout(() => {
+        current.classList.remove('fade-out');
+        _origNavigate(page);
+        // Re-init reveals for new page content
+        initReveals();
+      }, 150);
+    } else {
+      _origNavigate(page);
+    }
+  };
+
+  // ---- Browser back/forward ----
+  window.addEventListener('popstate', function(e) {
+    var page = (e.state && e.state.page) || 'home';
+    _origNavigate(page);
+    initReveals();
+  });
+
+  // ---- Boot ----
+  var _bootPage = location.pathname.replace(/^\//, '') || 'home';
+  if (!document.getElementById('page-' + _bootPage)) _bootPage = 'home';
+  _origNavigate(_bootPage);
+  history.replaceState({ page: _bootPage }, '', _bootPage === 'home' ? '/' : '/' + _bootPage);
+  loadContent().then(function() {
+    setTimeout(initReveals, 100);
+  });
+</script>
+</body>
+</html>

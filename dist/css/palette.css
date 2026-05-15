@@ -1,0 +1,76 @@
+/* undersight Brand Color Palette */
+/* AI Underwriting for Alternative Finance */
+
+:root {
+  /* Graphite 900 - Primary dark, backgrounds, text */
+  --color-graphite-900: #23262C;
+
+  /* Graphite 700 - Secondary dark, cards, surfaces */
+  --color-graphite-700: #3A3F47;
+
+  /* Cloud Zinc - Light backgrounds, borders, muted text */
+  --color-cloud-zinc: #D1D5DB;
+
+  /* Amber Rust - Primary accent, CTAs, highlights */
+  --color-amber-rust: #C97A54;
+
+  /* Eucalyptus - Success states, positive indicators */
+  --color-eucalyptus: #6B9E8C;
+
+  /* Paper White - Light mode backgrounds, reversed text */
+  --color-paper-white: #FFFFFF;
+
+  /* Semantic aliases */
+  --color-primary: var(--color-graphite-900);
+  --color-secondary: var(--color-graphite-700);
+  --color-background: var(--color-paper-white);
+  --color-surface: var(--color-cloud-zinc);
+  --color-accent: var(--color-amber-rust);
+  --color-success: var(--color-eucalyptus);
+  --color-text: var(--color-graphite-900);
+  --color-text-muted: var(--color-graphite-700);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--color-graphite-900);
+    --color-surface: var(--color-graphite-700);
+    --color-text: var(--color-paper-white);
+    --color-text-muted: var(--color-cloud-zinc);
+  }
+}
+
+/* Utility Classes */
+
+/* Backgrounds */
+.bg-graphite-900 { background-color: var(--color-graphite-900); }
+.bg-graphite-700 { background-color: var(--color-graphite-700); }
+.bg-cloud-zinc { background-color: var(--color-cloud-zinc); }
+.bg-amber-rust { background-color: var(--color-amber-rust); }
+.bg-eucalyptus { background-color: var(--color-eucalyptus); }
+.bg-paper-white { background-color: var(--color-paper-white); }
+
+/* Text colors */
+.text-graphite-900 { color: var(--color-graphite-900); }
+.text-graphite-700 { color: var(--color-graphite-700); }
+.text-cloud-zinc { color: var(--color-cloud-zinc); }
+.text-amber-rust { color: var(--color-amber-rust); }
+.text-eucalyptus { color: var(--color-eucalyptus); }
+.text-paper-white { color: var(--color-paper-white); }
+
+/* Border colors */
+.border-graphite-900 { border-color: var(--color-graphite-900); }
+.border-graphite-700 { border-color: var(--color-graphite-700); }
+.border-cloud-zinc { border-color: var(--color-cloud-zinc); }
+.border-amber-rust { border-color: var(--color-amber-rust); }
+.border-eucalyptus { border-color: var(--color-eucalyptus); }
+
+/* Semantic utilities */
+.bg-primary { background-color: var(--color-primary); }
+.bg-accent { background-color: var(--color-accent); }
+.bg-success { background-color: var(--color-success); }
+.text-primary { color: var(--color-text); }
+.text-muted { color: var(--color-text-muted); }
+.text-accent { color: var(--color-accent); }
+.text-success { color: var(--color-success); }

@@ -1,0 +1,12 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#23262C">
+    <!-- Cap -->
+    <rect x="22" y="8" width="20" height="10" rx="1"/>
+    <!-- Nib body -->
+    <path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/>
+  </g>
+  <!-- Slit -->
+  <rect fill="#FFFFFF" x="31" y="21" width="2" height="35"/>
+  <!-- Insight eye -->
+  <circle fill="#FFFFFF" cx="32" cy="32" r="5"/>
+</svg>

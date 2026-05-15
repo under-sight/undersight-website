@@ -1,0 +1,38 @@
+# undersight
+
+> AI underwriting infrastructure for alternative finance.
+
+undersight builds agentic AI tools that automate intake, enrich data, score risk, and assist underwriters across every stage of small business lending. The platform serves funds, brokers, and marketplaces in MCA, revenue-based financing, and factoring.
+
+## Products
+
+### underscore
+API-first agentic and ML risk scoring for small business portfolios. Send a deal via API, get back enriched analysis and a risk score in seconds. Continuous portfolio monitoring flags pre-default signals automatically.
+
+### Agentic Client RFI
+Conversational AI intake agent (Macy) that collects documents from applicants and brokers, answers questions, resolves gaps, and builds funder-ready submission packages. No manual follow-up required.
+
+### AI Underwriting Copilot
+Single-pane underwriting workspace where underwriters can analyze transactions, score risk, and get AI-powered insights. 30% faster screening, 20-30% more approvals. The underwriter still makes the call.
+
+## Key Metrics
+- 71% reduction in deal time (based on active customer deployments)
+- 22% increase in booked receivables
+- 650 basis point improvement in loss ratios
+- $30K MRR as of December 2025
+
+## Market
+- Alternative finance: MCA, revenue-based financing, factoring
+- $19-22B annual US market, 200-300 originators, 1,000-2,000 brokers
+- Founded October 2025, product launched November 2025
+
+## Contact
+- Website: https://undersight.ai
+- Email: contact@undersight.ai
+- Book a call: https://calendly.com/kyle-undersight/30min
+
+## Links
+- Solutions: https://undersight.ai/#underscore, https://undersight.ai/#rfi, https://undersight.ai/#copilot
+- Blog: https://undersight.ai/#blog
+- API Documentation: https://undersight.ai/#docs
+- Privacy Policy: https://legal.undersight.ai
