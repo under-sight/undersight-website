@@ -8,28 +8,82 @@ in components.
 
 ---
 
+## Development Workflow
+
+**All development happens in the `dev` branch of the `undersight-website` repo.**
+There is no separate local dev directory — this repo IS the working directory.
+
+### Git Workflow
+
+1. **Every session**: start by pulling latest from `dev`
+2. **All edits**: made directly in this repo (not a separate local copy)
+3. **Commit frequently**: push to `dev` at every natural checkpoint
+4. **Merge to main**: when ready for production build/deploy
+5. **No local testing on a separate directory** — test via dev server from this repo
+
+```bash
+# Start of session
+cd "/Users/kyle/My Drive (kyle@undersight.ai)/undersight-website"
+git checkout dev && git pull
+
+# After changes
+git add <files> && git commit -m "description" && git push
+
+# When ready for production
+git checkout main && git merge dev && git push && git checkout dev
+```
+
+### Dev Server
+
+```bash
+python3 undersight-serve.py
+# Serves on http://localhost:8088
+# Content from Fibery API (5s cache)
+# SPA fallback routing for clean paths
+```
+
+### Build & Deploy
+
+```bash
+python3 build.py          # Bakes Fibery content into dist/
+python3 build.py --verify  # Build + security checks
+```
+
+Requires `FIBERY_TOKEN` env var or macOS Keychain entry
+(`mcp-credentials / fibery-undersight`).
+
+---
+
 ## Repo & File Map
 
 | What | Path |
 |------|------|
-| Website repo | `/Users/kyle/Documents/underchat/undersight/` |
-| Landing page | `/Users/kyle/Documents/underchat/undersight/undersight/index.html` |
-| Favicon SVG | `/Users/kyle/Documents/underchat/undersight/undersight/favicon.svg` |
-| Agent workspace | `projects/undersight-website/` (this directory) |
-| Design spec | `projects/undersight-website/DESIGN.md` (create via workflow below) |
-| Token CSS | `projects/undersight-website/tokens/tokens.css` |
-| Token JSON | `projects/undersight-website/tokens/tokens.json` |
-| Preview catalog | `projects/undersight-website/preview.html` |
-| Reference spec | `projects/undersight-website/reference/<source>.DESIGN.md` |
+| GitHub repo | `under-sight/undersight-website` (`dev` branch) |
+| Landing page | `index.html` |
+| Favicon SVG | `favicon.svg` |
+| Design spec | `DESIGN.md` |
+| Token CSS | `tokens/tokens.css` |
+| Token JSON | `tokens/tokens.json` |
+| Preview catalog | `preview.html` |
+| Reference specs | `reference/<source>.DESIGN.md` |
+| Tests | `tests/test-suite.sh` |
+| Docs | `docs/ARCHITECTURE.md`, `docs/MAINTENANCE.md` |
+| Build output | `dist/` (committed, deployed to Cloudflare Pages) |
+| Dev server | `undersight-serve.py` |
+| Build script | `build.py` |
+| Cloudflare Worker | `worker/index.js` + `worker/wrangler.toml` |
+| Whitepapers | `whitepaper/` (PDFs + generation scripts) |
 
 ---
 
 ## Tech Stack
 
-- HTML/CSS (static site, no build step)
+- HTML/CSS (static site, built via `build.py`)
 - Inter font with OpenType features (`cv01`, `ss03`)
-- Dark mode via `prefers-color-scheme`
-- Hosted at undersight.ai
+- Dark mode via `prefers-color-scheme` + manual toggle (`theme-dark`/`theme-light`)
+- SPA routing via `history.pushState` + `popstate` (clean paths: `/blog`, `/copilot`)
+- Content from Fibery CMS (`subscript.fibery.io`)
+- Hosted at undersight.ai (Cloudflare Pages)
 
 ---
 
@@ -187,10 +241,14 @@ transplant as a model for how this pipeline works end-to-end.
 
 | Task | Command |
 |------|---------|
-| Local preview | `open /Users/kyle/Documents/underchat/undersight/undersight/index.html` |
-| Design preview | `open projects/undersight-website/preview.html` |
+| Start dev server | `python3 undersight-serve.py` → `http://localhost:8088` |
+| Build for production | `python3 build.py --verify` |
+| Run tests | `bash tests/test-suite.sh` |
+| Design preview | `open preview.html` |
 | Fetch design ref | `npx getdesign@latest add <site>` |
-| List available sites | `gh api repos/VoltAgent/awesome-design-md/contents/design-md --jq '.[].name'` |
+| Push to dev | `git add . && git commit -m "msg" && git push` |
+| Merge to main | `git checkout main && git merge dev && git push && git checkout dev` |
+| Trigger test lead | `curl -s -X POST http://localhost:8088/api/whitepaper-lead -H "Content-Type: application/json" -d '{"email":"kyle.adriany@gmail.com","whitepaper":"Chat Advance Case Study"}'` |
 
 ---
 
@@ -306,7 +364,10 @@ the correct whitepaper, with `Sent` eventually set to true by the automation.
 ## Known Issues
 
 - WORKER_URL not yet set for production (whitepaper capture works in dev only)
+- Sign In link points to `staging.app.underchat.ai` (intentional until prod auth)
 - Font stack validated (Inter) but display font TBD
+- Test suite has curl flakes on large HTML responses from Python dev server
+  (meta tags, OG tags occasionally fail — not real issues)
 
 ---
 
