@@ -710,6 +710,48 @@ else
   fail "apple-touch-icon link present for iOS Safari"
 fi
 
+# Test: .btn-primary uses background-color not background shorthand (iOS Safari)
+if echo "$MAIN_CSS" | grep -A3 '\.btn-primary {' | grep -q 'background-color:'; then
+  pass ".btn-primary uses background-color (iOS Safari <a> compat)"
+else
+  fail ".btn-primary uses background-color" "background shorthand ignored on <a> tags in iOS Safari"
+fi
+
+# Test: .btn-primary has -webkit-appearance: none (iOS Safari)
+if echo "$MAIN_CSS" | grep -A5 '\.btn-primary {' | grep -q '\-webkit-appearance.*none'; then
+  pass ".btn-primary has -webkit-appearance: none (iOS Safari)"
+else
+  fail ".btn-primary has -webkit-appearance: none" "iOS Safari may override button styling"
+fi
+
+# Test: .btn-primary has hardcoded color fallback before CSS variable (iOS Safari)
+if echo "$MAIN_CSS" | grep -A5 '\.btn-primary {' | grep -q '#C97A54\|#c97a54'; then
+  pass ".btn-primary has hardcoded #C97A54 fallback for CSS variable"
+else
+  fail ".btn-primary has hardcoded color fallback" "CSS variable may not resolve on older iOS Safari"
+fi
+
+# Test: Mobile menu Solutions header not using var(--light) (invisible in light mode)
+if grep -q 'Solutions.*color:var(--light)' "$SRC_HTML"; then
+  fail "Mobile menu Solutions header visible in light mode" "color:var(--light) is near-invisible on white"
+else
+  pass "Mobile menu Solutions header visible in light mode"
+fi
+
+# Test: Mobile .mobile-sub uses var(--dark) not var(--mid) (contrast)
+if echo "$MAIN_CSS" | grep 'mobile-sub' | grep -q 'var(--dark)'; then
+  pass "Mobile solution links use var(--dark) for sufficient contrast"
+else
+  fail "Mobile solution links use var(--dark)" "var(--mid) has insufficient contrast on white"
+fi
+
+# Test: Mobile .sol-row-img uses aspect-ratio not fixed height (prevents cropping)
+if echo "$MAIN_CSS" | grep 'sol-row-img.*aspect-ratio\|sol-row-img.*height: auto' | grep -q 'aspect-ratio'; then
+  pass "Mobile solution images use aspect-ratio (prevents cropping)"
+else
+  fail "Mobile solution images use aspect-ratio" "Fixed height causes image cropping on mobile"
+fi
+
 # Test: prefers-reduced-motion covers .reveal animations
 if echo "$MAIN_CSS" | grep -q 'prefers-reduced-motion.*reduce'; then
   MOTION_BLOCK=$(echo "$MAIN_CSS" | sed -n '/prefers-reduced-motion.*reduce/,/}/p' | head -20)
