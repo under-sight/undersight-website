@@ -45,7 +45,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ---- NAV ---- */
 header {
-  position: sticky; top: 0; z-index: 100;
+  position: -webkit-sticky; position: sticky; top: 0; z-index: 100;
   background: var(--white);
   border-bottom: 1px solid var(--pale);
   transition: box-shadow 0.2s ease;
@@ -203,7 +203,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 }
 
 /* ---- PAGE SECTIONS ---- */
-.page { display: none; min-height: calc(100vh - 64px - 80px); }
+.page { display: none; min-height: calc(100vh - 64px - 80px); min-height: calc(100dvh - 64px - 80px); }
 .page.active { display: block; }
 .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
 
@@ -684,7 +684,7 @@ footer { border-top: 1px solid var(--pale); background: var(--white); }
   display: inline-block; padding: 4px 12px; border-radius: 999px;
   font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
   background: rgba(201, 122, 84, 0.08); color: var(--color-accent); margin-bottom: 16px;
-  width: fit-content;
+  width: -webkit-fit-content; width: fit-content;
 }
 .case-study-text h3 { font-size: 24px; font-weight: 700; margin-bottom: 12px; line-height: 1.25; }
 .case-study-text p { font-size: 15px; color: var(--mid); margin-bottom: 20px; line-height: 1.7; }
@@ -786,10 +786,18 @@ footer { border-top: 1px solid var(--pale); background: var(--white); }
 }
 
 /* ---- FOCUS STATES ---- */
+a:focus, button:focus, .btn:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 a:focus-visible, button:focus-visible, .btn:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
+}
+a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:focus-visible) {
+  outline: none;
 }
 .form-group input:focus, .form-group textarea:focus {
   outline: none;
@@ -799,7 +807,7 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
 
 /* ---- WHITEPAPER MODAL ---- */
 .wp-overlay {
-  position: fixed; inset: 0;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);

@@ -482,7 +482,7 @@
     if (!md) return '';
     function inline(text) {
       text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+      text = text.replace(/([^*]|^)\*([^*]+)\*([^*]|$)/g, '$1<em>$2</em>$3');
       text = text.replace(/\[(.+?)\]\((.+?)\)/g, (_, t, u) => {
         const safe = /^(https?:\/\/|\/|#)/.test(u.trim());
         return safe ? `<a href="${u}">${t}</a>` : t;
@@ -603,8 +603,8 @@
     const heroEl = document.getElementById('heroTitle');
     const heroTitle = hero._title || "Manual underwriting can't scale. Agentic underwriting can.";
     // Render accent color on second sentence if it contains a period
-    const parts = heroTitle.split(/(?<=\.)\s*/);
-    if (parts.length > 1) {
+    const parts = heroTitle.split(/\.\s*/);
+    if (parts.length > 1) { parts[0] = parts[0] + '.';
       heroEl.innerHTML = parts[0] + '<br><span class="accent">' + parts.slice(1).join(' ') + '</span>';
     } else {
       heroEl.textContent = heroTitle;
@@ -877,6 +877,22 @@
   }
   function closeMobileNav() { closeMobile(); }
 
+  // ---- Touch-friendly dropdown toggle ----
+  document.querySelectorAll('.nav-dropdown-trigger').forEach(function(trigger) {
+    trigger.addEventListener('click', function(e) {
+      var menu = this.closest('.nav-dropdown').querySelector('.nav-dropdown-menu');
+      var isOpen = menu.classList.contains('force-open');
+      document.querySelectorAll('.nav-dropdown-menu.force-open').forEach(function(m) { m.classList.remove('force-open'); });
+      if (!isOpen) {
+        menu.classList.add('force-open');
+        e.stopPropagation();
+      }
+    });
+  });
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.nav-dropdown-menu.force-open').forEach(function(m) { m.classList.remove('force-open'); });
+  });
+
   // ---- Case study direct link ----
   var _caseStudyPost = null;
   function openCaseStudy() {
@@ -978,15 +994,19 @@
     document.querySelectorAll('#homeSolutions').forEach(el => {
       el.classList.add('reveal-stagger');
     });
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => observer.observe(el));
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            observer.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => observer.observe(el));
+    } else {
+      document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('visible'));
+    }
   }
 
   // ---- Nav scroll shadow ----

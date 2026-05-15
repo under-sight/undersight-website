@@ -570,6 +570,159 @@ for ROUTE in "/" "/blog" "/copilot" "/docs" "/underscore"; do
 done
 
 # =============================================================================
+section "Cross-Browser Compatibility Tests"
+# =============================================================================
+# Validates patterns required for consistent behavior across:
+# Desktop Safari, Desktop Chrome, Mobile Safari, Mobile Chrome, Desktop Firefox
+
+# Test: backdrop-filter always paired with -webkit- prefix (Safari)
+BDF_TOTAL=$(echo "$MAIN_CSS" | grep -c 'backdrop-filter' || true)
+BDF_PREFIXED=$(echo "$MAIN_CSS" | grep -c '\-webkit-backdrop-filter' || true)
+BDF_UNPREFIXED=$((BDF_TOTAL - BDF_PREFIXED))
+if [ "$BDF_UNPREFIXED" -eq "$BDF_PREFIXED" ]; then
+  pass "backdrop-filter always paired with -webkit- prefix ($BDF_PREFIXED pairs)"
+else
+  fail "backdrop-filter always paired with -webkit- prefix" "$BDF_UNPREFIXED unprefixed vs $BDF_PREFIXED prefixed"
+fi
+
+# Test: backdrop-filter has rgba() fallback background (Firefox)
+BDF_WITH_RGBA=$(echo "$MAIN_CSS" | grep -B5 'backdrop-filter' | grep -c 'rgba(' || true)
+if [ "$BDF_WITH_RGBA" -gt 0 ]; then
+  pass "backdrop-filter has rgba() fallback background"
+else
+  fail "backdrop-filter has rgba() fallback background" "No rgba() background found near backdrop-filter"
+fi
+
+# Test: position: sticky has -webkit-sticky prefix (Safari <13)
+STICKY_COUNT=$(echo "$MAIN_CSS" | grep -c 'position: sticky\|position:sticky' || true)
+WEBKIT_STICKY=$(echo "$MAIN_CSS" | grep -c '\-webkit-sticky' || true)
+if [ "$STICKY_COUNT" -eq 0 ]; then
+  pass "position: sticky not used (no prefix needed)"
+elif [ "$WEBKIT_STICKY" -ge "$STICKY_COUNT" ]; then
+  pass "position: sticky has -webkit-sticky prefix ($WEBKIT_STICKY prefixed)"
+else
+  fail "position: sticky has -webkit-sticky prefix" "$STICKY_COUNT sticky, only $WEBKIT_STICKY prefixed"
+fi
+
+# Test: CSS inset shorthand not used — longhand for Safari <14.1
+INSET_COUNT=$(echo "$MAIN_CSS" | grep -c 'inset:' || true)
+if [ "$INSET_COUNT" -eq 0 ]; then
+  pass "CSS inset shorthand not used (longhand for Safari compat)"
+else
+  fail "CSS inset shorthand not used" "$INSET_COUNT usage(s) of inset: — use top/right/bottom/left"
+fi
+
+# Test: 100vh has 100dvh progressive enhancement (Mobile Safari/Chrome)
+VH_LINES=$(echo "$MAIN_CSS" | grep -c '100vh' || true)
+DVH_LINES=$(echo "$MAIN_CSS" | grep -c '100dvh' || true)
+if [ "$VH_LINES" -eq 0 ]; then
+  pass "No 100vh used (no mobile viewport issue)"
+elif [ "$DVH_LINES" -ge "$VH_LINES" ]; then
+  pass "100vh has 100dvh fallback ($DVH_LINES dvh for $VH_LINES vh)"
+else
+  fail "100vh has 100dvh fallback" "$VH_LINES uses of 100vh but only $DVH_LINES of 100dvh"
+fi
+
+# Test: fit-content has -webkit-fit-content prefix (older Safari)
+FIT_COUNT=$(echo "$MAIN_CSS" | grep -c 'fit-content' || true)
+WEBKIT_FIT=$(echo "$MAIN_CSS" | grep -c '\-webkit-fit-content' || true)
+FIT_UNPREFIXED=$((FIT_COUNT - WEBKIT_FIT))
+if [ "$FIT_COUNT" -eq 0 ]; then
+  pass "fit-content not used (no prefix needed)"
+elif [ "$FIT_UNPREFIXED" -le "$WEBKIT_FIT" ]; then
+  pass "fit-content has -webkit- prefix ($WEBKIT_FIT prefixed)"
+else
+  fail "fit-content has -webkit- prefix" "$FIT_UNPREFIXED without prefix"
+fi
+
+# Test: focus-visible has :focus fallback (Safari <15.4)
+if echo "$MAIN_CSS" | grep -q ':focus-visible'; then
+  if echo "$MAIN_CSS" | grep -q 'a:focus,' || echo "$MAIN_CSS" | grep -q 'button:focus,'; then
+    pass ":focus-visible has :focus fallback for older Safari"
+  else
+    fail ":focus-visible has :focus fallback" "No a:focus/button:focus rule — keyboard nav invisible on Safari <15.4"
+  fi
+else
+  pass ":focus-visible not used (no fallback needed)"
+fi
+
+# Test: No regex lookbehind assertions in JS (Safari <16.4 crashes)
+LOOKBEHIND_NEG=$(grep -c '(?<!' "$SRC_HTML" 2>/dev/null || true)
+LOOKBEHIND_POS=$(grep -c '(?<=' "$SRC_HTML" 2>/dev/null || true)
+TOTAL_LOOKBEHIND=$((LOOKBEHIND_NEG + LOOKBEHIND_POS))
+if [ "$TOTAL_LOOKBEHIND" -eq 0 ]; then
+  pass "No regex lookbehind assertions (Safari <16.4 safe)"
+else
+  fail "No regex lookbehind assertions" "$TOTAL_LOOKBEHIND lookbehind(s) — crashes Safari <16.4"
+fi
+
+# Test: IntersectionObserver has feature detection guard
+if grep -q 'IntersectionObserver' "$SRC_HTML"; then
+  if grep -q "IntersectionObserver.*in.*window\|typeof IntersectionObserver" "$SRC_HTML"; then
+    pass "IntersectionObserver has feature detection guard"
+  else
+    fail "IntersectionObserver has feature detection guard" "Used without checking browser support"
+  fi
+else
+  pass "IntersectionObserver not used (no guard needed)"
+fi
+
+# Test: Dropdown has click/touch handler for mobile (Mobile Safari/Chrome)
+if grep -q 'nav-dropdown-trigger' "$SRC_HTML"; then
+  if grep -q 'force-open' "$SRC_HTML"; then
+    pass "Dropdown has click/touch handler for mobile devices"
+  else
+    fail "Dropdown has click/touch handler" "Dropdown uses :hover only — inaccessible on touch"
+  fi
+else
+  pass "No dropdown trigger (no touch handler needed)"
+fi
+
+# Test: Google Fonts loaded with display=swap (consistent FOUT across browsers)
+if grep -q 'fonts.googleapis.com.*display=swap' "$SRC_HTML"; then
+  pass "Google Fonts loaded with display=swap (prevents FOIT)"
+else
+  fail "Google Fonts loaded with display=swap" "Fonts may block rendering inconsistently"
+fi
+
+# Test: SVG favicon has PNG fallback (older browsers)
+if grep -q 'image/svg+xml' "$SRC_HTML"; then
+  if grep -q 'image/png' "$SRC_HTML"; then
+    pass "SVG favicon has PNG fallback"
+  else
+    fail "SVG favicon has PNG fallback" "SVG favicon only — no icon in older browsers"
+  fi
+else
+  pass "No SVG favicon (PNG only — universally supported)"
+fi
+
+# Test: meta viewport includes width=device-width (all mobile browsers)
+if grep -q 'viewport.*width=device-width' "$SRC_HTML"; then
+  pass "Meta viewport includes width=device-width"
+else
+  fail "Meta viewport includes width=device-width" "Mobile browsers will render at 980px"
+fi
+
+# Test: apple-touch-icon link present (iOS Safari home screen)
+if grep -q 'apple-touch-icon' "$SRC_HTML"; then
+  pass "apple-touch-icon link present for iOS Safari"
+else
+  fail "apple-touch-icon link present for iOS Safari"
+fi
+
+# Test: prefers-reduced-motion covers .reveal animations
+if echo "$MAIN_CSS" | grep -q 'prefers-reduced-motion.*reduce'; then
+  MOTION_BLOCK=$(echo "$MAIN_CSS" | sed -n '/prefers-reduced-motion.*reduce/,/}/p' | head -20)
+  if echo "$MOTION_BLOCK" | grep -q '\.reveal'; then
+    pass "prefers-reduced-motion covers .reveal animations"
+  else
+    fail "prefers-reduced-motion covers .reveal animations" ".reveal not in reduced motion block"
+  fi
+else
+  fail "prefers-reduced-motion present" "No reduced motion media query"
+fi
+
+# =============================================================================
 section "Fibery Content Linkage Tests"
 # =============================================================================
 # Verifies 1:1 mapping between Fibery entities and site consumption.
@@ -1245,10 +1398,50 @@ else
   fail "stripContents() removes table of contents from blog posts"
 fi
 
+# Test: Every downloadable blog post has a matching Whitepapers entity in Fibery
+# Frontend sends post.title as the whitepaper name — Fibery must have a matching entity
+WP_MATCH=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json, subprocess, urllib.request
+data = json.load(sys.stdin)
+token = subprocess.run(['security','find-generic-password','-s','mcp-credentials','-a','fibery-undersight','-w'], capture_output=True, text=True).stdout.strip()
+# Get downloadable posts (Research + Case Study tags)
+downloadable = []
+for name, entity in data.items():
+    if not name.startswith('Blog - '): continue
+    content = entity.get('content', '')
+    if '**Tag:** Research' in content or '**Tag:** Case Study' in content:
+        downloadable.append(name.replace('Blog - ', ''))
+# Get all Whitepapers entity names
+try:
+    req = urllib.request.Request('https://subscript.fibery.io/api/commands',
+        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Whitepapers','q/select':['Website/name'],'q/limit':50}}}]).encode(),
+        headers={'Authorization':'Token '+token,'Content-Type':'application/json'})
+    resp = urllib.request.urlopen(req)
+    wp_data = json.loads(resp.read())
+    wp_names = set(e.get('Website/name','') for e in wp_data[0].get('result',[]))
+except:
+    print('ERROR:could not query Whitepapers database')
+    sys.exit(0)
+missing = [t for t in downloadable if t not in wp_names]
+if missing:
+    print('MISSING:' + ';'.join(missing))
+else:
+    print('ALL_MATCHED:' + str(len(downloadable)))
+" 2>/dev/null)
+if [[ "$WP_MATCH" == ALL_MATCHED* ]]; then
+  COUNT=$(echo "$WP_MATCH" | sed 's/ALL_MATCHED://')
+  pass "All $COUNT downloadable posts have matching Whitepapers entities in Fibery"
+elif [[ "$WP_MATCH" == ERROR* ]]; then
+  skip "Could not query Whitepapers database"
+else
+  MISSING=$(echo "$WP_MATCH" | sed 's/MISSING://')
+  fail "All downloadable posts have matching Whitepapers entities" "Missing: $MISSING"
+fi
+
 # Test: Lead capture endpoint responds (dev server)
 WP_LEAD_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/whitepaper-lead" \
   -H "Content-Type: application/json" \
-  -d '{"email":"kyle.adriany@gmail.com","whitepaper":"Chat Advance Case Study"}' 2>/dev/null)
+  -d '{"email":"kyle.adriany@gmail.com","whitepaper":"How Chat Advance funded a declined deal in 5 minutes"}' 2>/dev/null)
 if [ "$WP_LEAD_RESPONSE" = "200" ]; then
   pass "POST /api/whitepaper-lead returns 200"
 else
