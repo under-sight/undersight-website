@@ -1,87 +1,206 @@
 /**
- * Generate all whitepaper PDFs from markdown content.
- * Uses Playwright to render branded HTML → PDF.
+ * Generate all whitepaper PDFs from Fibery content.
+ * Uses the original branded template with cover page, proper typography, and back page.
  *
- * Usage: node generate-all.js
+ * Usage:
+ *   node generate-all.js          # all papers
+ *   node generate-all.js 4d       # just 4D Financing
  */
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const { execSync } = require('child_process');
 const { chromium } = require('playwright');
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
+const WORKSPACE = 'subscript.fibery.io';
+const DB = 'Website/Database 1';
+const IMG_DIR = '/Users/kyle/Documents/underchat/undersight/undersight/dist/images/blog';
 
 const WHITEPAPERS = [
   {
     slug: 'chat-advance',
-    // Uses the custom HTML template already created
+    fiberyKey: 'Chat Advance',
     html: path.resolve(__dirname, 'chat-advance.html'),
     out: path.resolve(__dirname, 'chat-advance-case-study.pdf'),
-    custom: true,
+    custom: true,  // Uses hand-crafted HTML template
   },
   {
     slug: 'deterministic-scorecards',
-    md: '/tmp/wp-scorecards.md',
+    fiberyKey: 'Deterministic Scorecards',
     out: path.resolve(__dirname, 'deterministic-scorecards.pdf'),
     tag: 'undersight Research',
-    title: 'From Deterministic Scorecards to Agentic Credit Assessments',
-    subtitle: 'A Vision for AI-Native Credit Assessment Architectures',
-    author: 'Sajit Roshan',
-    date: '2026-05-14',
   },
   {
     slug: 'institutional-capital',
-    md: '/tmp/wp-institutional.md',
+    fiberyKey: 'Institutional Capital',
     out: path.resolve(__dirname, 'institutional-capital.pdf'),
     tag: 'undersight Research',
-    title: 'Unlocking Institutional Capital for Mid-Tier MCA Funds',
-    subtitle: 'A Technology-Enabled Transformation Thesis',
-    author: 'Kyle Adriany',
-    date: '2026-05-01',
+    injectImages(bodyHtml) {
+      // Splice in descending order so earlier inserts don't shift later indices
+      // P[23]: "undersight addresses four of five..." → end of Mapping to Matthews Dimensions
+      bodyHtml = spliceAfterP(bodyHtml, 23,
+        imgTag('institutional-capital-dimensions.png',
+          'undersight directly addresses four of the five Matthews dimensions for institutional readiness. Data Integrity, Servicing Continuity, and Buyback Discipline are fully covered. Payment Stability and Stacking Controls receive substantial support.',
+          '65%'));
+      // P[22]: "The progression is deliberate..." → end of Three-Layer Value Stack
+      bodyHtml = spliceAfterP(bodyHtml, 22,
+        imgTag('institutional-capital-layers.png',
+          'The three layers build on each other deliberately. Funds adopt Layer 1 for underwriting efficiency and cost reduction. Layer 2 compounds value through continuous monitoring and early warning. Layer 3 delivers the transformation payoff: institutional capital access at materially better terms.',
+          '65%'));
+      // P[6]: "The question is not whether..." → end of Transformation Opportunity
+      bodyHtml = spliceAfterP(bodyHtml, 6,
+        imgTag('institutional-capital-market.png',
+          'The US MCA market originates $19-22B annually across roughly 200-300 funders. Despite strong asset performance, only ~8 platforms have achieved institutional capital access. The mid-market tier — 30-50 funds originating $3-6B — represents the largest transformation opportunity.',
+          '65%'));
+      return bodyHtml;
+    },
   },
   {
     slug: '4d-financing',
-    md: '/tmp/wp-4d-financing.md',
+    fiberyKey: '4D Financing',
     out: path.resolve(__dirname, '4d-financing-case-study.pdf'),
     tag: 'undersight Case Study',
-    title: 'How 4D Financing gets institutional-grade underwriting with a 2-person team',
-    subtitle: 'Evidence-backed underwriting on every deal, with full audit trails',
-    author: 'Kyle Adriany',
-    date: '2026-05-12',
+    injectImages(bodyHtml) {
+      bodyHtml = spliceAfterP(bodyHtml, 5,
+        imgTag('4d-financing.png',
+          'The undersight agentic underwriting workflow — from client intake and document parsing through scoring and decisioning.',
+          '70%'));
+      return bodyHtml;
+    },
   },
 ];
 
+// ---------------------------------------------------------------------------
+// Fibery API
+// ---------------------------------------------------------------------------
+
+function getToken() {
+  if (process.env.FIBERY_TOKEN) return process.env.FIBERY_TOKEN;
+  return execSync(
+    'security find-generic-password -s mcp-credentials -a fibery-undersight -w',
+    { encoding: 'utf8' }
+  ).trim();
+}
+
+function fiberyPost(apiPath, body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const req = https.request({
+      hostname: WORKSPACE, path: apiPath, method: 'POST',
+      headers: {
+        Authorization: `Token ${getToken()}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+      },
+    }, (res) => {
+      let buf = '';
+      res.on('data', d => buf += d);
+      res.on('end', () => {
+        try { resolve(JSON.parse(buf)); }
+        catch { reject(new Error('JSON parse failed: ' + buf.substring(0, 200))); }
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
+async function fetchBlogPosts() {
+  const entities = (await fiberyPost('/api/commands', [{
+    command: 'fibery.entity/query',
+    args: {
+      query: {
+        'q/from': DB,
+        'q/select': {
+          Name: 'Website/Name',
+          DocSecret: ['Website/Description', 'Collaboration~Documents/secret'],
+        },
+        'q/limit': 100,
+      },
+    },
+  }]))[0].result;
+
+  const secrets = entities.filter(e => e.DocSecret).map(e => e.DocSecret);
+  const docResults = await fiberyPost(
+    '/api/documents/commands?format=md',
+    { command: 'get-documents', args: secrets.map(s => ({ secret: s })) }
+  );
+  const docs = {};
+  for (const d of docResults) docs[d.secret] = d.content || '';
+
+  return entities
+    .filter(e => e.Name && e.Name.startsWith('Blog - '))
+    .map(e => ({
+      name: e.Name,
+      title: e.Name.replace('Blog - ', ''),
+      content: docs[e.DocSecret] || '',
+    }));
+}
+
+// ---------------------------------------------------------------------------
+// Front matter parsing
+// ---------------------------------------------------------------------------
+
+function parseFrontMatter(content) {
+  const lines = content.split('\n');
+  const meta = { date: '', author: '', subtitle: '', tag: '', excerpt: '' };
+  const bodyLines = [];
+  let inFront = true;
+
+  for (const line of lines) {
+    if (inFront && line.trim() === '---') { inFront = false; continue; }
+    if (inFront) {
+      const strip = (key) => line.replace(new RegExp(`^\\*\\*${key}:\\*\\*\\s*`), '').replace(/\\+$/, '').trim();
+      if (line.startsWith('**Date:**'))     meta.date = strip('Date');
+      else if (line.startsWith('**Author:**'))   meta.author = strip('Author');
+      else if (line.startsWith('**Subtitle:**')) meta.subtitle = strip('Subtitle');
+      else if (line.startsWith('**Tag:**'))      meta.tag = strip('Tag');
+      else if (line.startsWith('**Excerpt:**'))  meta.excerpt = strip('Excerpt');
+      continue;
+    }
+    bodyLines.push(line);
+  }
+  meta.body = bodyLines.join('\n');
+  return meta;
+}
+
+// ---------------------------------------------------------------------------
+// Markdown → HTML (from original, with escape handling)
+// ---------------------------------------------------------------------------
+
 function mdToHtml(md) {
   if (!md) return '';
-  const body = md.trim();
-  const lines = body.split('\n');
-  let html = '';
-  let inList = false;
-  let inTable = false;
-  let tableHeader = false;
+  const lines = md.trim().split('\n');
+  let html = '', inList = false, inTable = false;
+
+  const fmt = (t) => t
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
 
   for (let i = 0; i < lines.length; i++) {
+    // Strip trailing backslash continuations AND unescape markdown chars
     let line = lines[i].replace(/\\$/, '').replace(/\\([~`*_{}[\]()#+\-.!])/g, '$1');
     const trimmed = line.trim();
+
     if (!trimmed) {
       if (inList) { html += '</ul>\n'; inList = false; }
       if (inTable) { html += '</tbody></table>\n'; inTable = false; }
       continue;
     }
-
-    // Horizontal rules
     if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
       if (inList) { html += '</ul>\n'; inList = false; }
       if (inTable) { html += '</tbody></table>\n'; inTable = false; }
       html += '<hr>\n';
       continue;
     }
-
-    // Inline formatting
-    const fmt = (t) => t
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
-      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
-
-    // Skip duplicate titles (already in cover)
+    // Skip duplicate H1 title (already on cover)
     if (trimmed.startsWith('# ') && i < 5) continue;
 
     if (trimmed.startsWith('### ')) {
@@ -90,17 +209,16 @@ function mdToHtml(md) {
     } else if (trimmed.startsWith('## ')) {
       if (inList) { html += '</ul>\n'; inList = false; }
       html += `<h2>${fmt(trimmed.slice(3))}</h2>\n`;
-    } else if (trimmed.startsWith('| ') && trimmed.endsWith('|')) {
-      if (/^\|[\s\-:|]+\|$/.test(trimmed)) continue; // separator
+    } else if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      if (/^\|[\s\-:|]+\|$/.test(trimmed)) continue;
       const cells = trimmed.split('|').slice(1, -1).map(c => c.trim());
       if (!inTable) {
         inTable = true;
-        tableHeader = true;
         html += '<table><thead><tr>' + cells.map(c => `<th>${fmt(c)}</th>`).join('') + '</tr></thead><tbody>\n';
       } else {
         html += '<tr>' + cells.map(c => `<td>${fmt(c)}</td>`).join('') + '</tr>\n';
       }
-    } else if (/^\*\s/.test(trimmed)) {
+    } else if (/^\*\s/.test(trimmed) || /^-\s/.test(trimmed)) {
       if (!inList) { html += '<ul>\n'; inList = true; }
       html += `<li>${fmt(trimmed.slice(2))}</li>\n`;
     } else if (/^\d+\.\s/.test(trimmed)) {
@@ -118,17 +236,45 @@ function mdToHtml(md) {
   return html;
 }
 
-function buildResearchHtml(wp) {
-  const md = fs.readFileSync(wp.md, 'utf-8');
-  // Strip frontmatter metadata lines
-  const bodyMd = md.split('\n').filter(l => !l.match(/^\*\*(Date|Excerpt|Tag|Author|Subtitle):\*\*/)).join('\n');
-  const bodyHtml = mdToHtml(bodyMd);
+// ---------------------------------------------------------------------------
+// Image helpers
+// ---------------------------------------------------------------------------
 
+function imgTag(filename, caption, width = '100%') {
+  const absPath = path.join(IMG_DIR, filename);
+  if (!fs.existsSync(absPath)) {
+    console.warn(`  ⚠ Missing image: ${filename}`);
+    return '';
+  }
+  const b64 = fs.readFileSync(absPath).toString('base64');
+  const mime = filename.endsWith('.webp') ? 'image/webp' : 'image/png';
+  let html = `<div style="margin:28px 0;page-break-inside:avoid;text-align:center;"><img src="data:${mime};base64,${b64}" style="width:${width};border-radius:6px;">`;
+  if (caption) html += `<p style="font-size:9pt;color:#6B7280;line-height:1.5;margin-top:8px;">${caption}</p>`;
+  html += '</div>\n';
+  return html;
+}
+
+function spliceAfterP(bodyHtml, pIndex, insertHtml) {
+  if (!insertHtml) return bodyHtml;
+  const parts = bodyHtml.split('</p>');
+  if (pIndex < parts.length) {
+    parts.splice(pIndex, 0, insertHtml);
+  } else {
+    parts.push(insertHtml);
+  }
+  return parts.join('</p>');
+}
+
+// ---------------------------------------------------------------------------
+// Branded HTML template (matches original quality)
+// ---------------------------------------------------------------------------
+
+function buildResearchHtml(wp, meta, bodyHtml) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>${wp.title} — undersight</title>
+<title>${meta.title || wp.title} — undersight</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   @page { size: A4; margin: 40px 0; }
@@ -177,7 +323,6 @@ function buildResearchHtml(wp) {
     font-size: 11px; color: rgba(255,255,255,0.4);
     font-family: 'Inter', sans-serif; font-feature-settings: 'cv01','ss03';
   }
-  /* Geometric bg */
   .cover-visual {
     position: absolute; right: 40px; top: 50%; transform: translateY(-50%); opacity: 0.05;
   }
@@ -216,10 +361,8 @@ function buildResearchHtml(wp) {
 
   strong { font-weight: 600; color: var(--g900); }
   em { font-style: italic; }
-
   hr { border: none; border-top: 1px solid var(--g100); margin: 28px 0; break-inside: avoid; break-after: avoid; page-break-after: avoid; }
 
-  /* Page break control */
   h2, h3 { break-after: avoid; page-break-after: avoid; }
   blockquote, table, ul, ol { break-inside: avoid; page-break-inside: avoid; }
   p { orphans: 3; widows: 3; }
@@ -277,13 +420,13 @@ function buildResearchHtml(wp) {
     </div>
   </div>
   <div class="cover-body">
-    <div class="cover-tag">${wp.tag}</div>
+    <div class="cover-tag">${wp.tag || meta.tag || 'undersight'}</div>
     <div class="cover-bar"></div>
-    <h1>${wp.title}</h1>
-    <div class="subtitle">${wp.subtitle}</div>
-    <div class="meta">By ${wp.author} &middot; ${wp.date}</div>
+    <h1>${meta.title || wp.title}</h1>
+    <div class="subtitle">${meta.subtitle || ''}</div>
+    <div class="meta">By ${meta.author || 'undersight'} &middot; ${meta.date || ''}</div>
   </div>
-  <div class="cover-bottom"><span>undersight.ai</span><span>2025</span></div>
+  <div class="cover-bottom"><span>undersight.ai</span><span>2026</span></div>
 </div>
 
 <!-- CONTENT -->
@@ -309,39 +452,87 @@ ${bodyHtml}
 </body></html>`;
 }
 
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
 (async () => {
+  const target = process.argv[2] || 'all';
+
+  console.log('Fetching content from Fibery...');
+  const posts = await fetchBlogPosts();
+  console.log(`  Found ${posts.length} blog posts`);
+
   const browser = await chromium.launch();
 
   for (const wp of WHITEPAPERS) {
-    let filePath;
+    if (target !== 'all' && !wp.slug.toLowerCase().includes(target.toLowerCase())) continue;
 
+    // Custom HTML templates (Chat Advance) don't need Fibery content
     if (wp.custom) {
-      filePath = wp.html;
-    } else {
-      // Generate HTML from markdown
-      const html = buildResearchHtml(wp);
-      const tmpPath = `/tmp/wp-${wp.slug}.html`;
-      fs.writeFileSync(tmpPath, html);
-      filePath = tmpPath;
+      const page = await browser.newPage();
+      await page.goto('file://' + wp.html, { waitUntil: 'networkidle' });
+      await page.pdf({
+        path: wp.out, format: 'A4', printBackground: true,
+        margin: { top: 0, bottom: 0, left: 0, right: 0 },
+      });
+      await page.close();
+      const size = Math.round(fs.statSync(wp.out).size / 1024);
+      console.log(`  ✓ ${path.basename(wp.out)} (${size}KB) [custom template]`);
+      continue;
     }
+
+    // Find the matching blog post in Fibery
+    const post = posts.find(p => p.title.includes(wp.fiberyKey));
+    if (!post) {
+      console.log(`  ⚠ Skipping ${wp.slug} — "${wp.fiberyKey}" not found in Fibery`);
+      continue;
+    }
+
+    const meta = parseFrontMatter(post.content);
+
+    // Strip frontmatter metadata lines from body markdown
+    let bodyMd = meta.body.split('\n')
+      .filter(l => !l.match(/^\*\*(Date|Excerpt|Tag|Author|Subtitle):\*\*/))
+      .join('\n');
+
+    // Strip preamble (subtitle/attribution lines before first ## or ---)
+    // These duplicate what's on the cover page
+    bodyMd = bodyMd.replace(/^[\s\S]*?(?=\n---|\n## )/, '');
+
+    // Strip "Market Size" appendix for Institutional Capital (replaced by chart)
+    if (wp.fiberyKey === 'Institutional Capital') {
+      bodyMd = bodyMd.replace(/\n## Market Size[\s\S]*$/, '');
+    }
+
+    let bodyHtml = mdToHtml(bodyMd);
+
+    // Inject companion images if defined
+    if (wp.injectImages) {
+      bodyHtml = wp.injectImages(bodyHtml);
+    }
+
+    // Build branded HTML and render to PDF
+    const html = buildResearchHtml(wp, {
+      title: post.title,
+      subtitle: meta.subtitle,
+      author: meta.author,
+      date: meta.date,
+      tag: meta.tag,
+    }, bodyHtml);
+
+    const tmpPath = `/tmp/wp-${wp.slug}.html`;
+    fs.writeFileSync(tmpPath, html);
 
     const page = await browser.newPage();
-    await page.goto('file://' + filePath, { waitUntil: 'networkidle' });
-    const pdfOpts = {
-      path: wp.out,
-      format: 'A4',
-      printBackground: true,
-    };
-    // Custom templates handle their own margins; research papers use CSS @page margins
-    if (wp.custom) {
-      pdfOpts.margin = { top: 0, bottom: 0, left: 0, right: 0 };
-    }
-    await page.pdf(pdfOpts);
+    await page.goto('file://' + tmpPath, { waitUntil: 'networkidle' });
+    await page.pdf({ path: wp.out, format: 'A4', printBackground: true });
     await page.close();
 
     const size = Math.round(fs.statSync(wp.out).size / 1024);
-    console.log(`Generated: ${path.basename(wp.out)} (${size}KB)`);
+    console.log(`  ✓ ${path.basename(wp.out)} (${size}KB)`);
   }
 
   await browser.close();
+  console.log('Done.');
 })();
