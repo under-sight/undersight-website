@@ -209,10 +209,105 @@ transplant as a model for how this pipeline works end-to-end.
 
 ---
 
+## Whitepaper Lead Capture & PDF Delivery
+
+### Overview
+
+Research articles and case studies are gated behind an email capture modal.
+When a visitor submits their email, a lead entity is created in Fibery and linked
+to the corresponding whitepaper. A Fibery automation ("undersight research dispatch")
+sends the PDF to the visitor's email automatically.
+
+### Data Flow
+
+```
+Website modal → submitWhitepaperEmail()
+  → POST /api/whitepaper-lead { email, whitepaper }
+  → Dev: undersight-serve.py _capture_lead()
+  → Prod: Cloudflare Worker (WORKER_URL — TODO: deploy)
+  → Fibery API:
+      1. Query Website/Whitepapers by name → get fibery/id
+      2. Create Website/Whitepaper Leads entity
+         - Website/Email: submitted email
+         - Website/Source: "website-modal"
+         - Website/Whitepaper: linked to whitepaper entity
+  → Fibery Automation triggers on new lead
+  → Sends email with PDF attachment from whitepaper entity
+  → Sets Website/Sent = true on the lead
+```
+
+### Fibery Schema
+
+**Website/Whitepapers** (catalog of downloadable PDFs):
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `Website/name` | text | Entity name — must match the `whitepaper` param from the modal |
+| `Website/Slug` | text | URL-safe identifier |
+| `Website/Type` | text | "Case Study" or "Research" |
+| `Website/PDF` | file | The PDF attachment sent to leads |
+| `Website/Leads` | relation (1:M) | Back-reference to all leads for this whitepaper |
+
+**Website/Whitepaper Leads** (captured submissions):
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `Website/Email` | text | Visitor's email |
+| `Website/Source` | text | Always "website-modal" |
+| `Website/Whitepaper` | relation (M:1) | Link to the whitepaper entity |
+| `Website/Sent` | bool | Set true by Fibery automation after email sent |
+| `Website/Requested At` | date | When the request was made |
+
+### Current Whitepapers (must exist in Fibery with PDF attached)
+
+| Name (exact match required) | Type | Slug |
+|----|------|------|
+| `Chat Advance Case Study` | Case Study | `chat-advance` |
+| `From Deterministic Scorecards to Agentic Credit Assessments` | Research | `deterministic-scorecards` |
+| `Unlocking Institutional Capital for Mid-Tier MCA Funds` | Research | `institutional-capital` |
+
+### Whitepaper Name Mapping (JS → Fibery)
+
+The modal receives a whitepaper name via `openWhitepaperModal(name)`. This name
+**must exactly match** the `Website/name` field in the Fibery Whitepapers database.
+
+- Homepage case study CTA → hardcoded `'Chat Advance Case Study'`
+- Blog posts with tag `Research` or `Case Study` → uses `post.title` directly,
+  except posts containing "Chat Advance" which map to `'Chat Advance Case Study'`
+
+### Adding a New Whitepaper
+
+1. Create a `Website/Whitepapers` entity in Fibery with the exact name
+2. Attach the PDF file to the `Website/PDF` field
+3. Set `Website/Type` and `Website/Slug`
+4. In `index.html`, add a download button that calls
+   `openWhitepaperModal('Exact Whitepaper Name')` — OR ensure the blog post
+   title matches the whitepaper name and has tag `Research` or `Case Study`
+5. The Fibery automation will handle delivery — no code changes needed
+
+### Testing Lead Capture
+
+```bash
+# Trigger a test lead (dev server must be running on :8088)
+curl -s -X POST http://localhost:8088/api/whitepaper-lead \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","whitepaper":"Chat Advance Case Study"}'
+```
+
+Verify in Fibery: Website/Whitepaper Leads should show the new entity linked to
+the correct whitepaper, with `Sent` eventually set to true by the automation.
+
+### Production Status
+
+- **Dev server**: Working — POST `/api/whitepaper-lead` handled by `undersight-serve.py`
+- **Prod (WORKER_URL)**: TODO — needs Cloudflare Worker deployment with same logic
+- **Fibery automation**: Active — "undersight research dispatch" triggers on new leads
+
+---
+
 ## Known Issues
 
-- Design system not yet created (DESIGN.md, tokens/, preview.html pending)
-- Site is a placeholder landing page only
+- WORKER_URL not yet set for production (whitepaper capture works in dev only)
 - Font stack validated (Inter) but display font TBD
 
 ---

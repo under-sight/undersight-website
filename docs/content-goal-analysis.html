@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Goal Analysis — undersight vs. Reference Sites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --graphite-900: #23262C;
+    --graphite-800: #2E3138;
+    --graphite-700: #3A3F47;
+    --graphite-500: #6B7280;
+    --graphite-300: #9CA3AF;
+    --graphite-100: #F0F1F2;
+    --graphite-50: #F7F8F8;
+    --cloud-zinc: #D1D5DB;
+    --cloud-zinc-light: #E8EAED;
+    --amber-rust: #C97A54;
+    --amber-rust-hover: #B56A45;
+    --amber-rust-10: rgba(201, 122, 84, 0.1);
+    --amber-rust-05: rgba(201, 122, 84, 0.05);
+    --eucalyptus: #6B9E8C;
+    --eucalyptus-10: rgba(107, 158, 140, 0.1);
+    --paper-white: #FFFFFF;
+    --bg-surface: #FAFAFA;
+    --error: #D05454;
+    --error-10: rgba(208, 84, 84, 0.1);
+    --info: #5B8DEF;
+    --info-10: rgba(91, 141, 239, 0.1);
+    --warning: #E5A94E;
+    --warning-10: rgba(229, 169, 78, 0.1);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+    --max-width: 1120px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1A1D21; --bg-alt: #23262C; --bg-subtle: #23262C; --bg-muted: #3A3F47;
+      --text: #FFFFFF; --text-secondary: #D1D5DB; --text-muted: #9CA3AF;
+      --border: rgba(255,255,255,0.1); --border-light: rgba(255,255,255,0.06);
+      --surface: #23262C; --surface-elevated: #3A3F47;
+    }
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #FFFFFF; --bg-alt: #FAFAFA; --bg-subtle: #F7F8F8; --bg-muted: #F0F1F2;
+      --text: #23262C; --text-secondary: #3A3F47; --text-muted: #6B7280;
+      --border: #D1D5DB; --border-light: #E8EAED;
+      --surface: #FFFFFF; --surface-elevated: #FFFFFF;
+    }
+  }
+
+  html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.75; }
+  .container { max-width: var(--max-width); margin: 0 auto; padding: 0 32px; }
+
+  /* HEADER */
+  .doc-header { border-bottom: 1px solid var(--border); padding: 48px 0 40px; margin-bottom: 48px; }
+  .eyebrow {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-size: 11px; font-weight: 510; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--amber-rust); margin-bottom: 16px; display: block;
+  }
+  h1 {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-size: 36px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--text); margin-bottom: 12px;
+  }
+  .subtitle { font-size: 18px; color: var(--text-secondary); line-height: 1.6; max-width: 680px; }
+  .meta { margin-top: 24px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .meta-item { font-family: var(--font-sans); font-feature-settings: 'cv01','ss03'; font-size: 13px; color: var(--text-muted); }
+  .meta-item strong { color: var(--text-secondary); font-weight: 510; }
+
+  /* SECTIONS */
+  section { margin-bottom: 64px; }
+  h2 {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-size: 24px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25;
+    color: var(--text); margin-bottom: 8px;
+  }
+  h3 {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; margin-top: 32px;
+  }
+  .section-lead { font-size: 16px; color: var(--text-secondary); margin-bottom: 32px; max-width: 680px; line-height: 1.75; }
+
+  /* TAXONOMY TABLE */
+  .taxonomy-table { width: 100%; border-collapse: collapse; margin: 24px 0 32px; font-size: 14px; }
+  .taxonomy-table th {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-weight: 510; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--border); color: var(--text-muted); white-space: nowrap;
+  }
+  .taxonomy-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .taxonomy-table tr:last-child td { border-bottom: none; }
+  .goal-num { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); width: 32px; }
+  .goal-name { font-family: var(--font-sans); font-feature-settings: 'cv01','ss03'; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .goal-def { color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+  .goal-q { font-style: italic; color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+
+  /* BAR CHARTS */
+  .chart-section { margin: 32px 0; }
+  .chart-site-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+  .chart-site-name { font-family: var(--font-sans); font-feature-settings: 'cv01','ss03'; font-weight: 600; font-size: 18px; color: var(--text); }
+  .chart-site-tag { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 4px; background: var(--bg-muted); color: var(--text-muted); }
+  .chart-site-tag.tag-early { background: var(--amber-rust-10); color: var(--amber-rust); }
+  .chart-site-tag.tag-mature { background: var(--eucalyptus-10); color: var(--eucalyptus); }
+
+  .bar-row { display: grid; grid-template-columns: 160px 1fr 48px; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .bar-label { font-family: var(--font-sans); font-feature-settings: 'cv01','ss03'; font-size: 13px; font-weight: 510; color: var(--text-secondary); text-align: right; white-space: nowrap; }
+  .bar-track { height: 28px; background: var(--bg-muted); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-value { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--text-muted); text-align: right; }
+
+  .bar-fill[data-g="vp"]   { background: var(--graphite-700); }
+  .bar-fill[data-g="pu"]   { background: var(--info); }
+  .bar-fill[data-g="sp"]   { background: var(--eucalyptus); }
+  .bar-fill[data-g="dx"]   { background: #8B5CF6; }
+  .bar-fill[data-g="ucf"]  { background: var(--warning); }
+  .bar-fill[data-g="conv"] { background: var(--amber-rust); }
+  .bar-fill[data-g="pe"]   { background: #EC4899; }
+  .bar-fill[data-g="tc"]   { background: var(--error); }
+
+  .evidence-list { margin: 12px 0 0; padding: 0; list-style: none; }
+  .evidence-list li { font-size: 13px; color: var(--text-muted); padding: 4px 0 4px 16px; position: relative; line-height: 1.5; }
+  .evidence-list li::before { content: ''; position: absolute; left: 0; top: 11px; width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; margin: 16px 0 24px; padding: 16px; background: var(--bg-alt); border-radius: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); font-family: var(--font-sans); font-feature-settings: 'cv01','ss03'; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+  /* TIER LABEL */
+  .tier-banner {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 20px; border-radius: 8px; margin: 40px 0 16px;
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-size: 14px; font-weight: 600;
+  }
+  .tier-mature { background: var(--eucalyptus-10); color: var(--eucalyptus); }
+  .tier-early { background: var(--amber-rust-10); color: var(--amber-rust); }
+  .tier-subject { background: var(--info-10); color: var(--info); }
+  .tier-sub { font-weight: 400; font-size: 13px; opacity: 0.8; margin-left: 4px; }
+
+  /* COMPARISON MATRIX */
+  .matrix-wrapper { overflow-x: auto; margin: 24px 0; border: 1px solid var(--border); border-radius: 12px; }
+  .matrix { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 780px; }
+  .matrix thead th {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-weight: 510; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 16px 12px; text-align: center; background: var(--bg-alt); color: var(--text-muted);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0;
+  }
+  .matrix thead th:first-child { text-align: left; border-top-left-radius: 12px; }
+  .matrix thead th:last-child { border-top-right-radius: 12px; }
+  .matrix tbody td {
+    padding: 14px 12px; text-align: center; border-bottom: 1px solid var(--border-light);
+    font-family: var(--font-mono); font-size: 14px; color: var(--text);
+  }
+  .matrix tbody td:first-child {
+    text-align: left; font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-weight: 510; color: var(--text); white-space: nowrap;
+  }
+  .matrix tbody tr:last-child td { border-bottom: none; }
+  .col-us { background: var(--amber-rust-05); font-weight: 500; }
+  .col-gap { font-weight: 500; }
+  .gap-pos { color: var(--eucalyptus); }
+  .gap-neg { color: var(--error); }
+  .gap-n { color: var(--text-muted); }
+  .gap-warn { color: var(--warning); }
+  .row-crit td { background: var(--error-10); }
+  .row-crit td.col-us { background: rgba(208,84,84,0.15); }
+  .col-mature { background: var(--eucalyptus-10); }
+  .col-early { background: var(--amber-rust-05); }
+
+  /* FINDINGS */
+  .findings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 32px 0; }
+  @media (max-width: 768px) { .findings-grid { grid-template-columns: 1fr; } }
+  .finding-card { border: 1px solid var(--border); border-radius: 12px; padding: 24px; background: var(--surface); }
+  .finding-card.c-crit { border-color: var(--error); }
+  .finding-card.c-str { border-color: var(--eucalyptus); }
+  .finding-card.c-warn { border-color: var(--warning); }
+  .finding-card.c-info { border-color: var(--info); }
+  .finding-tag {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-size: 11px; font-weight: 510; letter-spacing: 0.08em; text-transform: uppercase;
+    display: inline-block; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px;
+  }
+  .t-crit { background: var(--error-10); color: var(--error); }
+  .t-str { background: var(--eucalyptus-10); color: var(--eucalyptus); }
+  .t-warn { background: var(--warning-10); color: var(--warning); }
+  .t-info { background: var(--info-10); color: var(--info); }
+  .finding-title {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-weight: 600; font-size: 16px; color: var(--text); margin-bottom: 8px; line-height: 1.3;
+  }
+  .finding-body { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+  .fs { font-family: var(--font-mono); font-weight: 500; color: var(--text); }
+
+  /* CALLOUT */
+  .callout { padding: 20px 24px; border-radius: 8px; border-left: 3px solid; margin: 24px 0; font-size: 14px; line-height: 1.65; }
+  .callout-info { background: var(--info-10); border-color: var(--info); color: var(--text-secondary); }
+  .callout-warn { background: var(--warning-10); border-color: var(--warning); color: var(--text-secondary); }
+  .callout-err { background: var(--error-10); border-color: var(--error); color: var(--text-secondary); }
+  .callout strong { color: var(--text); font-weight: 600; }
+
+  /* RECOMMENDATIONS */
+  .rec-item {
+    display: grid; grid-template-columns: 48px 1fr; gap: 16px; margin-bottom: 24px;
+    padding: 24px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+  }
+  .rec-num {
+    font-family: var(--font-mono); font-size: 20px; font-weight: 500; color: var(--amber-rust);
+    display: flex; align-items: flex-start; justify-content: center; padding-top: 2px;
+  }
+  .rec-content h4 {
+    font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+    font-weight: 600; font-size: 16px; color: var(--text); margin-bottom: 6px; line-height: 1.3;
+  }
+  .rec-content p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+  .rec-impact {
+    display: inline-block; margin-top: 8px; font-family: var(--font-mono);
+    font-size: 12px; padding: 2px 8px; border-radius: 4px;
+  }
+  .imp-h { background: var(--error-10); color: var(--error); }
+  .imp-m { background: var(--warning-10); color: var(--warning); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  .doc-footer {
+    border-top: 1px solid var(--border); padding: 24px 0 48px; margin-top: 64px;
+    font-size: 13px; color: var(--text-muted); font-family: var(--font-sans); font-feature-settings: 'cv01','ss03';
+  }
+
+  @media print {
+    body { background: white; color: #23262C; }
+    .bar-track, .bar-fill { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="doc-header">
+  <span class="eyebrow">Content Strategy Analysis</span>
+  <h1>Content Goal Audit: undersight vs. Reference Sites</h1>
+  <p class="subtitle">
+    All website content categorized by core user goal, weighted by content real estate,
+    and benchmarked against both mature infrastructure companies and stage-appropriate early-stage fintech peers.
+  </p>
+  <div class="meta">
+    <span class="meta-item"><strong>Date:</strong> 14 May 2026</span>
+    <span class="meta-item"><strong>Sites analyzed:</strong> 8</span>
+    <span class="meta-item"><strong>Tiers:</strong> Mature (2) + Early-stage (4) + Subject (1)</span>
+    <span class="meta-item"><strong>Fibery:</strong> #953</span>
+  </div>
+</header>
+
+<!-- TAXONOMY -->
+<section>
+  <h2>Goal Taxonomy</h2>
+  <p class="section-lead">
+    Eight universal categories that B2B fintech website content serves.
+    Every piece of content maps to one of these visitor objectives.
+  </p>
+  <table class="taxonomy-table">
+    <thead>
+      <tr><th>#</th><th>Goal</th><th>What It Covers</th><th>Visitor Question</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="goal-num">1</td><td class="goal-name">Value Proposition</td><td class="goal-def">Hero messaging, positioning, taglines, first-impression clarity</td><td class="goal-q">"What is this?"</td></tr>
+      <tr><td class="goal-num">2</td><td class="goal-name">Product Understanding</td><td class="goal-def">Feature pages, capabilities, how-it-works, product cards, narratives</td><td class="goal-q">"What can it do?"</td></tr>
+      <tr><td class="goal-num">3</td><td class="goal-name">Social Proof</td><td class="goal-def">Customer logos, testimonials, case studies, named references, outcome metrics</td><td class="goal-q">"Who else uses this?"</td></tr>
+      <tr><td class="goal-num">4</td><td class="goal-name">Developer Experience</td><td class="goal-def">Docs, API references, SDKs, quickstarts, code samples, GitHub</td><td class="goal-q">"How do I integrate?"</td></tr>
+      <tr><td class="goal-num">5</td><td class="goal-name">Use Case Fit</td><td class="goal-def">Audience segmentation, industry verticals, persona routing</td><td class="goal-q">"Is this for me?"</td></tr>
+      <tr><td class="goal-num">6</td><td class="goal-name">Conversion</td><td class="goal-def">CTAs, pricing, demo booking, free tiers, contact forms</td><td class="goal-q">"How do I start?"</td></tr>
+      <tr><td class="goal-num">7</td><td class="goal-name">Problem Education</td><td class="goal-def">Pain point articulation, market context, thought leadership, "why now"</td><td class="goal-q">"Why do I need this?"</td></tr>
+      <tr><td class="goal-num">8</td><td class="goal-name">Trust & Credibility</td><td class="goal-def">Security badges, compliance, team bios, uptime, brand authority</td><td class="goal-q">"Can I trust this?"</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<hr class="divider">
+
+<!-- PER-SITE BREAKDOWNS -->
+<section>
+  <h2>Content Distribution by Site</h2>
+  <p class="section-lead">
+    Sites grouped into three tiers: mature infrastructure companies (category-defining),
+    early-stage fintech peers (stage-appropriate comparables), and undersight (subject).
+  </p>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch" style="background:#3A3F47"></span> Value Prop</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#5B8DEF"></span> Product</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#6B9E8C"></span> Social Proof</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#8B5CF6"></span> Dev Experience</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#E5A94E"></span> Use Case Fit</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#C97A54"></span> Conversion</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#EC4899"></span> Problem Ed.</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#D05454"></span> Trust</span>
+  </div>
+
+  <!-- ==================== MATURE TIER ==================== -->
+  <div class="tier-banner tier-mature">Mature Infrastructure<span class="tier-sub">category-defining, $1B+ revenue</span></div>
+
+  <!-- STRIPE -->
+  <div class="chart-section">
+    <div class="chart-site-header">
+      <span class="chart-site-name">Stripe</span>
+      <span class="chart-site-tag tag-mature">mature</span>
+    </div>
+    <div class="bar-row"><span class="bar-label">Value Prop</span><div class="bar-track"><div class="bar-fill" data-g="vp" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Product</span><div class="bar-track"><div class="bar-fill" data-g="pu" style="width:85.7%"></div></div><span class="bar-value">30%</span></div>
+    <div class="bar-row"><span class="bar-label">Social Proof</span><div class="bar-track"><div class="bar-fill" data-g="sp" style="width:57.1%"></div></div><span class="bar-value">20%</span></div>
+    <div class="bar-row"><span class="bar-label">Dev Experience</span><div class="bar-track"><div class="bar-fill" data-g="dx" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Use Case Fit</span><div class="bar-track"><div class="bar-fill" data-g="ucf" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" data-g="conv" style="width:22.8%"></div></div><span class="bar-value">8%</span></div>
+    <div class="bar-row"><span class="bar-label">Problem Ed.</span><div class="bar-track"><div class="bar-fill" data-g="pe" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Trust</span><div class="bar-track"><div class="bar-fill" data-g="tc" style="width:20%"></div></div><span class="bar-value">7%</span></div>
+    <ul class="evidence-list">
+      <li>$1.9T volume, 99.999% uptime, 50% of Fortune 100, 78% of Forbes AI 50</li>
+      <li>Named customer stories: Hertz, URBN, Instacart, Le Monde</li>
+      <li>6 product categories; minimal problem education &mdash; category is assumed</li>
+    </ul>
+  </div>
+
+  <!-- PLAID -->
+  <div class="chart-section">
+    <div class="chart-site-header">
+      <span class="chart-site-name">Plaid</span>
+      <span class="chart-site-tag tag-mature">mature</span>
+    </div>
+    <div class="bar-row"><span class="bar-label">Value Prop</span><div class="bar-track"><div class="bar-fill" data-g="vp" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Product</span><div class="bar-track"><div class="bar-fill" data-g="pu" style="width:100%"></div></div><span class="bar-value">35%</span></div>
+    <div class="bar-row"><span class="bar-label">Social Proof</span><div class="bar-track"><div class="bar-fill" data-g="sp" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Dev Experience</span><div class="bar-track"><div class="bar-fill" data-g="dx" style="width:42.8%"></div></div><span class="bar-value">15%</span></div>
+    <div class="bar-row"><span class="bar-label">Use Case Fit</span><div class="bar-track"><div class="bar-fill" data-g="ucf" style="width:42.8%"></div></div><span class="bar-value">15%</span></div>
+    <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" data-g="conv" style="width:22.8%"></div></div><span class="bar-value">8%</span></div>
+    <div class="bar-row"><span class="bar-label">Problem Ed.</span><div class="bar-track"><div class="bar-fill" data-g="pe" style="width:8.6%"></div></div><span class="bar-value">3%</span></div>
+    <div class="bar-row"><span class="bar-label">Trust</span><div class="bar-track"><div class="bar-fill" data-g="tc" style="width:11.4%"></div></div><span class="bar-value">4%</span></div>
+    <ul class="evidence-list">
+      <li>20+ named products across 6 categories on /products page</li>
+      <li>Dual taxonomy: by use case AND by industry vertical</li>
+      <li>Developer-heavy: Quickstart, API docs, Libraries, GitHub, Link demo</li>
+    </ul>
+  </div>
+
+  <!-- ==================== EARLY-STAGE TIER ==================== -->
+  <div class="tier-banner tier-early">Early-Stage Fintech Peers<span class="tier-sub">stage-appropriate comparables, Series A&ndash;C</span></div>
+
+  <!-- HERON DATA -->
+  <div class="chart-section">
+    <div class="chart-site-header">
+      <span class="chart-site-name">Heron Data</span>
+      <span class="chart-site-tag tag-early">early-stage</span>
+      <span class="chart-site-tag">closest comp</span>
+    </div>
+    <div class="bar-row"><span class="bar-label">Value Prop</span><div class="bar-track"><div class="bar-fill" data-g="vp" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Product</span><div class="bar-track"><div class="bar-fill" data-g="pu" style="width:71.4%"></div></div><span class="bar-value">25%</span></div>
+    <div class="bar-row"><span class="bar-label">Social Proof</span><div class="bar-track"><div class="bar-fill" data-g="sp" style="width:85.7%"></div></div><span class="bar-value">30%</span></div>
+    <div class="bar-row"><span class="bar-label">Dev Experience</span><div class="bar-track"><div class="bar-fill" data-g="dx" style="width:8.6%"></div></div><span class="bar-value">3%</span></div>
+    <div class="bar-row"><span class="bar-label">Use Case Fit</span><div class="bar-track"><div class="bar-fill" data-g="ucf" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" data-g="conv" style="width:20%"></div></div><span class="bar-value">7%</span></div>
+    <div class="bar-row"><span class="bar-label">Problem Ed.</span><div class="bar-track"><div class="bar-fill" data-g="pe" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Trust</span><div class="bar-track"><div class="bar-fill" data-g="tc" style="width:42.8%"></div></div><span class="bar-value">15%</span></div>
+    <ul class="evidence-list">
+      <li>Social proof dominates: 6+ named testimonials with titles, 3 full case studies with outcome metrics</li>
+      <li>Trust: SOC 2 badge in hero, 130+ firms, security section, physical address</li>
+      <li>Closest undersight competitor &mdash; same vertical (document processing for MCA/lending)</li>
+      <li>Minimal dev experience &mdash; "No engineers needed" positioning</li>
+    </ul>
+  </div>
+
+  <!-- ALLOY -->
+  <div class="chart-section">
+    <div class="chart-site-header">
+      <span class="chart-site-name">Alloy</span>
+      <span class="chart-site-tag tag-early">early-stage</span>
+    </div>
+    <div class="bar-row"><span class="bar-label">Value Prop</span><div class="bar-track"><div class="bar-fill" data-g="vp" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Product</span><div class="bar-track"><div class="bar-fill" data-g="pu" style="width:85.7%"></div></div><span class="bar-value">30%</span></div>
+    <div class="bar-row"><span class="bar-label">Social Proof</span><div class="bar-track"><div class="bar-fill" data-g="sp" style="width:71.4%"></div></div><span class="bar-value">25%</span></div>
+    <div class="bar-row"><span class="bar-label">Dev Experience</span><div class="bar-track"><div class="bar-fill" data-g="dx" style="width:5.7%"></div></div><span class="bar-value">2%</span></div>
+    <div class="bar-row"><span class="bar-label">Use Case Fit</span><div class="bar-track"><div class="bar-fill" data-g="ucf" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" data-g="conv" style="width:22.8%"></div></div><span class="bar-value">8%</span></div>
+    <div class="bar-row"><span class="bar-label">Problem Ed.</span><div class="bar-track"><div class="bar-fill" data-g="pe" style="width:22.8%"></div></div><span class="bar-value">8%</span></div>
+    <div class="bar-row"><span class="bar-label">Trust</span><div class="bar-track"><div class="bar-fill" data-g="tc" style="width:34.3%"></div></div><span class="bar-value">12%</span></div>
+    <ul class="evidence-list">
+      <li>800+ customers, named logos (Ally Bank, Navy Federal, Ramp, Shopify, LendingClub)</li>
+      <li>3 case studies with specific metrics (27% fraud reduction, 58% fewer manual reviews)</li>
+      <li>270+ data partners, "10+ years of industry trust"</li>
+    </ul>
+  </div>
+
+  <!-- SARDINE -->
+  <div class="chart-section">
+    <div class="chart-site-header">
+      <span class="chart-site-name">Sardine</span>
+      <span class="chart-site-tag tag-early">early-stage</span>
+    </div>
+    <div class="bar-row"><span class="bar-label">Value Prop</span><div class="bar-track"><div class="bar-fill" data-g="vp" style="width:22.8%"></div></div><span class="bar-value">8%</span></div>
+    <div class="bar-row"><span class="bar-label">Product</span><div class="bar-track"><div class="bar-fill" data-g="pu" style="width:100%"></div></div><span class="bar-value">35%</span></div>
+    <div class="bar-row"><span class="bar-label">Social Proof</span><div class="bar-track"><div class="bar-fill" data-g="sp" style="width:42.8%"></div></div><span class="bar-value">15%</span></div>
+    <div class="bar-row"><span class="bar-label">Dev Experience</span><div class="bar-track"><div class="bar-fill" data-g="dx" style="width:5.7%"></div></div><span class="bar-value">2%</span></div>
+    <div class="bar-row"><span class="bar-label">Use Case Fit</span><div class="bar-track"><div class="bar-fill" data-g="ucf" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" data-g="conv" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Problem Ed.</span><div class="bar-track"><div class="bar-fill" data-g="pe" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Trust</span><div class="bar-track"><div class="bar-fill" data-g="tc" style="width:57.1%"></div></div><span class="bar-value">20%</span></div>
+    <ul class="evidence-list">
+      <li>Heaviest trust investment of peers: G2 4.9/5, 400+ enterprise customers, $1.3T screened, 5.4B devices</li>
+      <li>Named enterprise logos: FIS, GoDaddy, Experian, Intuit, Nubank, Gusto, Deel</li>
+      <li>Own conference (SardineCon), podcast, thought leadership content</li>
+      <li>Most granular product depth: 5 categories, 25+ named sub-features, 9 named AI agents</li>
+    </ul>
+  </div>
+
+  <!-- UNIT -->
+  <div class="chart-section">
+    <div class="chart-site-header">
+      <span class="chart-site-name">Unit</span>
+      <span class="chart-site-tag tag-early">early-stage</span>
+    </div>
+    <div class="bar-row"><span class="bar-label">Value Prop</span><div class="bar-track"><div class="bar-fill" data-g="vp" style="width:34.3%"></div></div><span class="bar-value">12%</span></div>
+    <div class="bar-row"><span class="bar-label">Product</span><div class="bar-track"><div class="bar-fill" data-g="pu" style="width:71.4%"></div></div><span class="bar-value">25%</span></div>
+    <div class="bar-row"><span class="bar-label">Social Proof</span><div class="bar-track"><div class="bar-fill" data-g="sp" style="width:57.1%"></div></div><span class="bar-value">20%</span></div>
+    <div class="bar-row"><span class="bar-label">Dev Experience</span><div class="bar-track"><div class="bar-fill" data-g="dx" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Use Case Fit</span><div class="bar-track"><div class="bar-fill" data-g="ucf" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" data-g="conv" style="width:22.8%"></div></div><span class="bar-value">8%</span></div>
+    <div class="bar-row"><span class="bar-label">Problem Ed.</span><div class="bar-track"><div class="bar-fill" data-g="pe" style="width:14.3%"></div></div><span class="bar-value">5%</span></div>
+    <div class="bar-row"><span class="bar-label">Trust</span><div class="bar-track"><div class="bar-fill" data-g="tc" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <ul class="evidence-list">
+      <li>Best developer experience of peers: Sandbox, API docs, changelog, white-label components</li>
+      <li>Interactive demo with email capture (unique among all sites analyzed)</li>
+      <li>3 case studies with named metrics: 4x LTV, 2.5x engagement, 50% lower CAC</li>
+      <li>PCI DSS, SOC certifications, FDIC disclaimers</li>
+    </ul>
+  </div>
+
+  <!-- ==================== SUBJECT ==================== -->
+  <div class="tier-banner tier-subject">Subject: undersight<span class="tier-sub">current draft site</span></div>
+
+  <div class="chart-section">
+    <div class="chart-site-header">
+      <span class="chart-site-name">undersight</span>
+      <span class="chart-site-tag">undersight.ai</span>
+    </div>
+    <div class="bar-row"><span class="bar-label">Value Prop</span><div class="bar-track"><div class="bar-fill" data-g="vp" style="width:28.5%"></div></div><span class="bar-value">10%</span></div>
+    <div class="bar-row"><span class="bar-label">Product</span><div class="bar-track"><div class="bar-fill" data-g="pu" style="width:85.7%"></div></div><span class="bar-value">30%</span></div>
+    <div class="bar-row"><span class="bar-label">Social Proof</span><div class="bar-track"><div class="bar-fill" data-g="sp" style="width:34.3%"></div></div><span class="bar-value">12%</span></div>
+    <div class="bar-row"><span class="bar-label">Dev Experience</span><div class="bar-track"><div class="bar-fill" data-g="dx" style="width:8.6%"></div></div><span class="bar-value">3%</span></div>
+    <div class="bar-row"><span class="bar-label">Use Case Fit</span><div class="bar-track"><div class="bar-fill" data-g="ucf" style="width:34.3%"></div></div><span class="bar-value">12%</span></div>
+    <div class="bar-row"><span class="bar-label">Conversion</span><div class="bar-track"><div class="bar-fill" data-g="conv" style="width:34.3%"></div></div><span class="bar-value">12%</span></div>
+    <div class="bar-row"><span class="bar-label">Problem Ed.</span><div class="bar-track"><div class="bar-fill" data-g="pe" style="width:51.4%"></div></div><span class="bar-value">18%</span></div>
+    <div class="bar-row"><span class="bar-label">Trust</span><div class="bar-track"><div class="bar-fill" data-g="tc" style="width:8.6%"></div></div><span class="bar-value">3%</span></div>
+    <ul class="evidence-list">
+      <li>Hero: "Manual underwriting can't scale. Agentic underwriting can."</li>
+      <li>Heaviest problem education of all 8 sites: "Why Underwriting Breaks Down" + market context</li>
+      <li>Case study + stats (71%, 22%, 650bps) &mdash; stats unattributed, case study unnamed</li>
+      <li>Docs page is empty auth gate; no actual API documentation</li>
+      <li>No customer logos, no team page, no compliance badges, staging URL leak</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- COMPARISON MATRICES -->
+<section>
+  <h2>Side-by-Side Comparison</h2>
+  <p class="section-lead">
+    undersight benchmarked against both tiers. The critical insight: the gap column now compares
+    against early-stage peers (Heron, Alloy, Sardine, Unit) rather than mature companies.
+    This is the stage-appropriate benchmark.
+  </p>
+
+  <h3>Full Matrix</h3>
+  <div class="matrix-wrapper">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Goal</th>
+          <th class="col-mature">Stripe</th>
+          <th class="col-mature">Plaid</th>
+          <th class="col-early">Heron</th>
+          <th class="col-early">Alloy</th>
+          <th class="col-early">Sardine</th>
+          <th class="col-early">Unit</th>
+          <th>Early Avg</th>
+          <th>undersight</th>
+          <th>Gap vs Peers</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Value Prop</td>
+          <td class="col-mature">10%</td><td class="col-mature">10%</td>
+          <td class="col-early">10%</td><td class="col-early">10%</td><td class="col-early">8%</td><td class="col-early">12%</td>
+          <td>10%</td>
+          <td class="col-us">10%</td>
+          <td class="col-gap gap-n">&mdash;</td>
+        </tr>
+        <tr>
+          <td>Product</td>
+          <td class="col-mature">30%</td><td class="col-mature">35%</td>
+          <td class="col-early">25%</td><td class="col-early">30%</td><td class="col-early">35%</td><td class="col-early">25%</td>
+          <td>29%</td>
+          <td class="col-us">30%</td>
+          <td class="col-gap gap-n">+1</td>
+        </tr>
+        <tr class="row-crit">
+          <td>Social Proof</td>
+          <td class="col-mature">20%</td><td class="col-mature">5%</td>
+          <td class="col-early">30%</td><td class="col-early">25%</td><td class="col-early">15%</td><td class="col-early">20%</td>
+          <td>23%</td>
+          <td class="col-us">12%*</td>
+          <td class="col-gap gap-neg">-11</td>
+        </tr>
+        <tr>
+          <td>Dev Experience</td>
+          <td class="col-mature">10%</td><td class="col-mature">15%</td>
+          <td class="col-early">3%</td><td class="col-early">2%</td><td class="col-early">2%</td><td class="col-early">10%</td>
+          <td>4%</td>
+          <td class="col-us">3%</td>
+          <td class="col-gap gap-n">-1</td>
+        </tr>
+        <tr>
+          <td>Use Case Fit</td>
+          <td class="col-mature">10%</td><td class="col-mature">15%</td>
+          <td class="col-early">5%</td><td class="col-early">5%</td><td class="col-early">5%</td><td class="col-early">10%</td>
+          <td>6%</td>
+          <td class="col-us">12%</td>
+          <td class="col-gap gap-pos">+6</td>
+        </tr>
+        <tr>
+          <td>Conversion</td>
+          <td class="col-mature">8%</td><td class="col-mature">8%</td>
+          <td class="col-early">7%</td><td class="col-early">8%</td><td class="col-early">5%</td><td class="col-early">8%</td>
+          <td>7%</td>
+          <td class="col-us">12%</td>
+          <td class="col-gap gap-warn">+5</td>
+        </tr>
+        <tr class="row-crit">
+          <td>Problem Ed.</td>
+          <td class="col-mature">5%</td><td class="col-mature">3%</td>
+          <td class="col-early">5%</td><td class="col-early">8%</td><td class="col-early">10%</td><td class="col-early">5%</td>
+          <td>7%</td>
+          <td class="col-us">18%</td>
+          <td class="col-gap gap-warn">+11</td>
+        </tr>
+        <tr class="row-crit">
+          <td>Trust</td>
+          <td class="col-mature">7%</td><td class="col-mature">4%</td>
+          <td class="col-early">15%</td><td class="col-early">12%</td><td class="col-early">20%</td><td class="col-early">10%</td>
+          <td>14%</td>
+          <td class="col-us">3%</td>
+          <td class="col-gap gap-neg">-11</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-err">
+    <strong>The early-stage calibration makes the gaps worse, not better.</strong>
+    When compared to mature companies, undersight's Trust gap was -3. Against early-stage peers
+    who compensate for brand obscurity with heavy trust investment, the gap is <strong>-11</strong>.
+    Heron, Alloy, Sardine, and Unit all invest 10&ndash;20% in trust signals. undersight invests 3%.
+  </div>
+
+  <div class="callout callout-info">
+    <strong>Developer Experience normalizes.</strong> Against mature companies (Stripe 10%, Plaid 15%),
+    undersight's 3% looked like a critical gap. Against early-stage peers (average 4%), it's
+    in line &mdash; most early-stage fintech companies under-invest in docs. The exception is Unit (10%),
+    whose developer-first positioning is a deliberate differentiator, not the norm.
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>* Social Proof at 12% is hollow.</strong> The case study lacks customer attribution,
+    the three headline metrics have no methodology footnote. Peer average is 23% with
+    substantive proof: named quotes, titled individuals, specific outcome metrics.
+    Heron alone has 6+ named testimonials. Effective undersight proof weight is closer to 5%.
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- KEY FINDINGS -->
+<section>
+  <h2>Key Findings (Stage-Calibrated)</h2>
+  <p class="section-lead">
+    Recalibrated against early-stage fintech peers. The findings change materially
+    when the benchmark shifts from Stripe/Plaid to Heron/Alloy/Sardine/Unit.
+  </p>
+
+  <div class="findings-grid">
+
+    <div class="finding-card c-crit">
+      <span class="finding-tag t-crit">Critical Gap</span>
+      <h3 class="finding-title">Trust & Credibility: 3% vs 14% peer average</h3>
+      <p class="finding-body">
+        This is the single largest gap in the analysis. Early-stage fintech companies invest
+        <span class="fs">3.5&ndash;5x</span> more in trust signals than undersight. They do this
+        precisely because they lack brand recognition &mdash; SOC 2 badges, named customer counts,
+        compliance statements, and security sections compensate for obscurity.
+      </p>
+      <ul class="evidence-list">
+        <li>Heron: SOC 2 badge in hero, "130+ firms", physical address, security section</li>
+        <li>Sardine: G2 4.9/5, $1.3T screened, named enterprise logos (FIS, Intuit, Nubank)</li>
+        <li>Alloy: "800+ financial institutions", 270+ data partners, "10+ years"</li>
+        <li>Unit: PCI DSS, SOC certifications, FDIC disclaimers, banking partner transparency</li>
+        <li>undersight: none of the above</li>
+      </ul>
+    </div>
+
+    <div class="finding-card c-crit">
+      <span class="finding-tag t-crit">Critical Gap</span>
+      <h3 class="finding-title">Social Proof: 12% (hollow) vs 23% peer average</h3>
+      <p class="finding-body">
+        The most surprising finding. Early-stage companies invest <span class="fs">more</span> in social proof
+        than mature ones (23% vs 13%). Without brand ubiquity, they lean hard on named customers,
+        specific outcome metrics, and testimonial quotes with real names and titles.
+      </p>
+      <p class="finding-body" style="margin-top:8px">
+        Heron Data &mdash; undersight's closest competitor &mdash; dedicates <span class="fs">30%</span>
+        of its homepage to social proof with 6+ named testimonials and 3 full case studies.
+        undersight has one anonymous case study and three unattributed stats.
+      </p>
+    </div>
+
+    <div class="finding-card c-warn">
+      <span class="finding-tag t-warn">Over-indexed</span>
+      <h3 class="finding-title">Problem Education: 18% vs 7% peer average</h3>
+      <p class="finding-body">
+        Still over-indexed even against early-stage peers. Sardine &mdash; the peer with the highest
+        problem education at <span class="fs">10%</span> &mdash; frames problems through resource teasers
+        and blog content rather than dedicated homepage sections. undersight's "Why Current Underwriting
+        Breaks Down" section is a full 3-card grid that no peer replicates.
+      </p>
+      <p class="finding-body" style="margin-top:8px">
+        Reducing from 18% to 10% is still justified, but the reallocation should flow to
+        social proof and trust rather than developer experience.
+      </p>
+    </div>
+
+    <div class="finding-card c-warn">
+      <span class="finding-tag t-warn">Over-indexed</span>
+      <h3 class="finding-title">Conversion: 12% vs 7% peer average</h3>
+      <p class="finding-body">
+        7+ CTAs for "Book a Discovery Call" when the peer average is <span class="fs">7%</span>.
+        The ratio of conversion-to-trust is <span class="fs">4:1</span> on undersight vs <span class="fs">0.5:1</span>
+        across peers. undersight asks for action 4x more than it invests in earning the right to ask.
+      </p>
+    </div>
+
+    <div class="finding-card c-info">
+      <span class="finding-tag t-info">Recalibrated</span>
+      <h3 class="finding-title">Developer Experience: 3% is peer-normal</h3>
+      <p class="finding-body">
+        Against mature companies, this looked like a -10 gap. Against peers, it's <span class="fs">-1</span>.
+        Most early-stage fintech companies (Heron 3%, Alloy 2%, Sardine 2%) under-invest here.
+        Unit (10%) is the outlier with deliberate developer-first positioning. Unless undersight
+        is pursuing a developer-led growth motion, this is not the priority gap.
+      </p>
+    </div>
+
+    <div class="finding-card c-str">
+      <span class="finding-tag t-str">Strength</span>
+      <h3 class="finding-title">Use Case Fit: 12% vs 6% peer average</h3>
+      <p class="finding-body">
+        undersight's Funds/Brokers/Marketplaces segmentation is <span class="fs">2x</span> the peer average.
+        This is a genuine strength &mdash; clear audience routing helps visitors self-qualify.
+        Most peers rely on generic "Banks / Fintechs" segmentation. undersight's specificity
+        (revenue-based financing, MCA, factoring) is an advantage.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- THE EARLY-STAGE PATTERN -->
+<section>
+  <h2>The Early-Stage Trust Paradox</h2>
+  <p class="section-lead">
+    The data reveals a counter-intuitive pattern: early-stage companies invest MORE in trust
+    and social proof than mature companies, not less.
+  </p>
+
+  <div class="matrix-wrapper">
+    <table class="matrix" style="min-width:500px">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th class="col-mature">Mature Avg</th>
+          <th class="col-early">Early Avg</th>
+          <th>undersight</th>
+          <th>Insight</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Social Proof</td>
+          <td class="col-mature">13%</td>
+          <td class="col-early">23%</td>
+          <td class="col-us">12%</td>
+          <td style="font-size:13px;text-align:left;font-family:var(--font-body)">Early-stage over-invests to compensate for no brand</td>
+        </tr>
+        <tr>
+          <td>Trust</td>
+          <td class="col-mature">6%</td>
+          <td class="col-early">14%</td>
+          <td class="col-us">3%</td>
+          <td style="font-size:13px;text-align:left;font-family:var(--font-body)">SOC 2, logos, G2 ratings fill the brand-recognition gap</td>
+        </tr>
+        <tr>
+          <td>Problem Ed.</td>
+          <td class="col-mature">4%</td>
+          <td class="col-early">7%</td>
+          <td class="col-us">18%</td>
+          <td style="font-size:13px;text-align:left;font-family:var(--font-body)">Even early-stage peers don't over-explain the problem</td>
+        </tr>
+        <tr>
+          <td>Dev Experience</td>
+          <td class="col-mature">13%</td>
+          <td class="col-early">4%</td>
+          <td class="col-us">3%</td>
+          <td style="font-size:13px;text-align:left;font-family:var(--font-body)">Early-stage deprioritizes docs; mature companies invest</td>
+        </tr>
+        <tr>
+          <td>Conversion</td>
+          <td class="col-mature">8%</td>
+          <td class="col-early">7%</td>
+          <td class="col-us">12%</td>
+          <td style="font-size:13px;text-align:left;font-family:var(--font-body)">Peers restrain CTAs; let proof generate the pull</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-info">
+    <strong>The logic:</strong> Stripe can afford 5% problem education and 7% trust because everyone
+    already knows what Stripe is and why they need it. Heron Data invests 15% in trust and 30% in social proof
+    because nobody wakes up knowing they need Heron. undersight is in Heron's position but spending
+    like it has Stripe's brand awareness &mdash; heavy on education, light on proof.
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- RECOMMENDATIONS (RECALIBRATED) -->
+<section>
+  <h2>Recommendations (Stage-Calibrated)</h2>
+  <p class="section-lead">
+    Priority order changes significantly with the early-stage benchmark.
+    Trust and social proof are now the top two priorities, ahead of developer experience.
+  </p>
+
+  <div class="rec-item">
+    <div class="rec-num">01</div>
+    <div class="rec-content">
+      <h4>Close the trust gap: 3% &rarr; 12&ndash;15%</h4>
+      <p>
+        Every peer invests 10&ndash;20% in trust signals. Add: SOC 2 badge or security statement,
+        customer count ("N active deployments"), team/founder section with photos,
+        attribution on headline stats ("Based on N months across X customers"),
+        and remove the staging URL leak. These are table stakes in fintech &mdash; Heron puts SOC 2
+        directly in the hero.
+      </p>
+      <span class="rec-impact imp-h">P0 &mdash; Largest gap</span>
+    </div>
+  </div>
+
+  <div class="rec-item">
+    <div class="rec-num">02</div>
+    <div class="rec-content">
+      <h4>Build substantive social proof: 12% (hollow) &rarr; 20%+ (real)</h4>
+      <p>
+        Heron's playbook: named quotes with titles and companies, specific outcome metrics per customer,
+        multiple case studies across verticals. Even 2&ndash;3 real testimonials with names would
+        transform credibility. Replace anonymous stats with attributed ones. Add customer logos even
+        if it's just 3&ndash;4.
+      </p>
+      <span class="rec-impact imp-h">P0 &mdash; Peer-expected</span>
+    </div>
+  </div>
+
+  <div class="rec-item">
+    <div class="rec-num">03</div>
+    <div class="rec-content">
+      <h4>Compress problem education: 18% &rarr; 10%</h4>
+      <p>
+        Even Sardine, with the highest problem education of any peer at 10%, weaves it into blog teasers
+        and resource sections rather than a dedicated homepage grid. Fold "Why Underwriting Breaks Down"
+        into the hero narrative or solution descriptions. Let the problem context support the solution
+        rather than standing alone.
+      </p>
+      <span class="rec-impact imp-m">P1 &mdash; Content rebalance</span>
+    </div>
+  </div>
+
+  <div class="rec-item">
+    <div class="rec-num">04</div>
+    <div class="rec-content">
+      <h4>Reduce CTA density: 12% &rarr; 7&ndash;8%</h4>
+      <p>
+        Cut "Book a Discovery Call" from 7+ to 3&ndash;4 placements: hero, post-case-study, footer.
+        The conversion-to-trust ratio should be roughly 1:2 (peers average 0.5:1), not 4:1.
+        Each CTA should follow a trust-building section that earns the ask.
+      </p>
+      <span class="rec-impact imp-m">P1 &mdash; Ratio fix</span>
+    </div>
+  </div>
+
+  <div class="rec-item">
+    <div class="rec-num">05</div>
+    <div class="rec-content">
+      <h4>Developer experience: defer unless pursuing dev-led growth</h4>
+      <p>
+        At 3%, undersight is in line with peers (avg 4%). Only invest here if the go-to-market
+        motion is developer-led (like Unit at 10%). For a sales-led motion targeting fund managers
+        and ops leaders, the current level is adequate. If you do invest, a static API overview
+        with one code sample is sufficient &mdash; no need for full docs at this stage.
+      </p>
+      <span class="rec-impact imp-m">P2 &mdash; Conditional</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- TARGET PROFILE -->
+<section>
+  <h2>Target Content Profile</h2>
+  <p class="section-lead">
+    Recommended allocation based on early-stage peer benchmarks and undersight's
+    sales-led go-to-market motion.
+  </p>
+
+  <div class="matrix-wrapper">
+    <table class="matrix" style="min-width:600px">
+      <thead>
+        <tr>
+          <th>Goal</th>
+          <th>Current</th>
+          <th>Early Avg</th>
+          <th>Target</th>
+          <th>Shift</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Value Proposition</td><td>10%</td><td>10%</td><td class="col-us">10%</td><td class="col-gap gap-n">&mdash;</td>
+        </tr>
+        <tr>
+          <td>Product Understanding</td><td>30%</td><td>29%</td><td class="col-us">25%</td><td class="col-gap gap-n">-5</td>
+        </tr>
+        <tr>
+          <td>Social Proof</td><td>12%</td><td>23%</td><td class="col-us">20%</td><td class="col-gap gap-pos">+8</td>
+        </tr>
+        <tr>
+          <td>Developer Experience</td><td>3%</td><td>4%</td><td class="col-us">3%</td><td class="col-gap gap-n">&mdash;</td>
+        </tr>
+        <tr>
+          <td>Use Case Fit</td><td>12%</td><td>6%</td><td class="col-us">10%</td><td class="col-gap gap-n">-2</td>
+        </tr>
+        <tr>
+          <td>Conversion</td><td>12%</td><td>7%</td><td class="col-us">7%</td><td class="col-gap gap-pos">-5</td>
+        </tr>
+        <tr>
+          <td>Problem Education</td><td>18%</td><td>7%</td><td class="col-us">10%</td><td class="col-gap gap-pos">-8</td>
+        </tr>
+        <tr>
+          <td>Trust & Credibility</td><td>3%</td><td>14%</td><td class="col-us">15%</td><td class="col-gap gap-pos">+12</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-info">
+    <strong>Where the content comes from:</strong> Problem education (-8), conversion (-5), and product (-5)
+    compress to feed social proof (+8) and trust (+12). The site's narrative arc shifts from
+    "here's why underwriting is broken &rarr; book a call" to "here's what we do &rarr; here's who trusts us
+    &rarr; here's the proof &rarr; ready?"
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <p>
+    undersight content goal analysis &mdash; generated 14 May 2026<br>
+    Mature tier: stripe.com, plaid.com &nbsp;&middot;&nbsp;
+    Early-stage tier: herondata.io, alloy.com, sardine.ai, unit.co &nbsp;&middot;&nbsp;
+    Subject: undersight.ai draft &nbsp;&middot;&nbsp;
+    Fibery #953
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 700px;
+    background: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .chat-frame {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #F0F1F2;
+  }
+
+  .agent-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .agent-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E8D5C8, #D4B59E);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .agent-avatar svg { width: 22px; height: 22px; }
+
+  .agent-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #23262C;
+  }
+
+  .agent-status-label {
+    font-size: 12px;
+    color: #6B9E8C;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .agent-status-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6B9E8C;
+  }
+
+  .brand {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #23262C;
+  }
+
+  .brand svg { flex-shrink: 0; }
+
+  .online-badge {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6B9E8C;
+    font-weight: 500;
+  }
+
+  .online-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6B9E8C;
+  }
+
+  /* Messages */
+  .messages {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .msg-row {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .msg-row.user {
+    align-items: flex-end;
+  }
+
+  .msg-meta {
+    font-size: 11px;
+    color: #9CA3AF;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .msg-row.user .msg-meta {
+    flex-direction: row-reverse;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #C97A54;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* User message bubble */
+  .bubble-user {
+    background: #F7F8F8;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px 12px 2px 12px;
+    padding: 14px 18px;
+    max-width: 380px;
+  }
+
+  .bubble-user .text {
+    font-size: 14px;
+    color: #23262C;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #23262C;
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .file-icon {
+    width: 24px;
+    height: 24px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .file-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+  }
+
+  .file-size {
+    font-size: 11px;
+    color: #9CA3AF;
+  }
+
+  /* Agent message */
+  .bubble-agent {
+    max-width: 440px;
+  }
+
+  .agent-msg-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .agent-msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E8D5C8, #D4B59E);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .agent-msg-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #23262C;
+  }
+
+  .agent-msg-time {
+    font-size: 11px;
+    color: #9CA3AF;
+  }
+
+  .congrats {
+    font-size: 15px;
+    font-weight: 600;
+    color: #C97A54;
+    margin: 10px 0 14px;
+  }
+
+  /* Offers table */
+  .offers {
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .offer-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 1fr;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #F0F1F2;
+  }
+
+  .offer-row:last-child {
+    border-bottom: none;
+  }
+
+  .offer-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6B9E8C;
+  }
+
+  .offer-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #23262C;
+  }
+
+  .offer-unit {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9CA3AF;
+    margin-top: 1px;
+  }
+
+  .offer-cell {
+    text-align: center;
+  }
+
+  /* Input bar */
+  .input-bar {
+    margin: 24px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    background: #F7F8F8;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+
+  .input-bar .placeholder {
+    font-size: 14px;
+    color: #9CA3AF;
+    flex: 1;
+  }
+
+  .send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #C97A54;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="chat-frame">
+    <!-- Header -->
+    <div class="header">
+      <div class="agent-info">
+        <div class="agent-avatar">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#8B6F5C" stroke-width="1.5"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="#8B6F5C" stroke-width="1.5"/></svg>
+        </div>
+        <div>
+          <div class="agent-name">Macy</div>
+          <div class="agent-status-label">Your funding assistant</div>
+        </div>
+      </div>
+      <div class="brand">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4" y="1" width="8" height="4" rx="0.5" fill="#23262C"/><path d="M3 6h10l-5 9-5-9z" fill="#23262C"/></svg>
+        ChatAdvance
+      </div>
+      <div class="online-badge">Online</div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages">
+      <!-- User message -->
+      <div class="msg-row user">
+        <div class="msg-meta">
+          <span>User</span>
+          <span>10:42 AM</span>
+          <div class="user-avatar">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="#FFF" stroke-width="1"/><path d="M2.5 12c0-2 2-3.5 4.5-3.5s4.5 1.5 4.5 3.5" stroke="#FFF" stroke-width="1"/></svg>
+          </div>
+        </div>
+        <div class="bubble-user">
+          <div class="text">Here are my bank statements</div>
+          <div class="file-list">
+            <div class="file-item">
+              <div class="file-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1h4l3 3v7H3V1z" stroke="#FFF" stroke-width="1"/></svg></div>
+              <div><div class="file-name">bank_statement_oct.pdf</div><div class="file-size">245 KB</div></div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1h4l3 3v7H3V1z" stroke="#FFF" stroke-width="1"/></svg></div>
+              <div><div class="file-name">bank_statement_nov.pdf</div><div class="file-size">238 KB</div></div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1h4l3 3v7H3V1z" stroke="#FFF" stroke-width="1"/></svg></div>
+              <div><div class="file-name">bank_statement_dec.pdf</div><div class="file-size">251 KB</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent response -->
+      <div class="msg-row">
+        <div class="bubble-agent">
+          <div class="agent-msg-header">
+            <div class="agent-msg-avatar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#8B6F5C" stroke-width="1.5"/><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="#8B6F5C" stroke-width="1.5"/></svg>
+            </div>
+            <span class="agent-msg-name">Macy</span>
+            <span class="agent-msg-time">10:43 AM</span>
+          </div>
+          <div class="congrats">Congratulations! You have 2 offers from funders</div>
+          <div class="offers">
+            <div class="offer-row">
+              <div class="offer-label">Offer 1</div>
+              <div class="offer-cell"><div class="offer-value">$100K</div><div class="offer-unit">Funding</div></div>
+              <div class="offer-cell"><div class="offer-value">26 wks</div><div class="offer-unit">Term</div></div>
+              <div class="offer-cell"><div class="offer-value">1.25x</div><div class="offer-unit">Factor</div></div>
+            </div>
+            <div class="offer-row">
+              <div class="offer-label">Offer 2</div>
+              <div class="offer-cell"><div class="offer-value">$80K</div><div class="offer-unit">Funding</div></div>
+              <div class="offer-cell"><div class="offer-value">34 wks</div><div class="offer-unit">Term</div></div>
+              <div class="offer-cell"><div class="offer-value">1.34x</div><div class="offer-unit">Factor</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <span class="placeholder">Ask about these offers...</span>
+      <div class="send-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-5-5 12-2-5-5-2z" fill="#FFF"/></svg>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
