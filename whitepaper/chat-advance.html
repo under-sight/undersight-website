@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Study: Chat Advance — undersight</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --graphite-900: #23262C;
+    --graphite-800: #2E3138;
+    --graphite-700: #3A3F47;
+    --graphite-100: #F0F1F2;
+    --graphite-50: #F7F8F8;
+    --amber-rust: #C97A54;
+    --amber-rust-hover: #B56A45;
+    --eucalyptus: #6B9E8C;
+    --white: #FFFFFF;
+    --cloud-zinc: #D1D5DB;
+  }
+
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--graphite-900);
+    font-size: 11pt;
+    line-height: 1.7;
+    background: var(--white);
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    line-height: 1.25;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 0;
+    page-break-after: always;
+    position: relative;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+
+  /* ===== COVER PAGE ===== */
+  .cover {
+    background: var(--graphite-900);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .cover-top {
+    padding: 48px 56px 0;
+  }
+
+  .cover-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    font-feature-settings: 'cv01', 'ss03';
+    letter-spacing: -0.02em;
+    color: var(--white);
+  }
+
+  .cover-logo svg { flex-shrink: 0; }
+
+  .cover-body {
+    padding: 0 56px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .cover-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber-rust);
+    margin-bottom: 16px;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  .cover-title {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    max-width: 480px;
+  }
+
+  .cover-subtitle {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--cloud-zinc);
+    max-width: 440px;
+  }
+
+  .cover-accent-bar {
+    width: 48px;
+    height: 4px;
+    background: var(--amber-rust);
+    margin-bottom: 24px;
+    border-radius: 2px;
+  }
+
+  .cover-bottom {
+    padding: 32px 56px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  /* Cover visual */
+  .cover-visual {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.06;
+  }
+
+  /* ===== CONTENT PAGES ===== */
+  .content {
+    padding: 56px;
+  }
+
+  .content h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    color: var(--graphite-900);
+  }
+
+  .content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    color: var(--graphite-800);
+  }
+
+  .content p {
+    margin-bottom: 14px;
+    color: var(--graphite-700);
+    font-size: 11pt;
+    line-height: 1.7;
+  }
+
+  .section-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber-rust);
+    margin-bottom: 12px;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--graphite-100);
+    margin: 28px 0;
+  }
+
+  /* ===== HIGHLIGHT BOX (QUOTE) ===== */
+  .highlight-box {
+    background: var(--graphite-50);
+    border-left: 3px solid var(--amber-rust);
+    padding: 20px 24px;
+    border-radius: 0 8px 8px 0;
+    margin: 24px 0;
+  }
+
+  .highlight-box p {
+    font-style: italic;
+    margin-bottom: 0;
+    color: var(--graphite-800);
+  }
+
+  .highlight-box .attribution {
+    font-style: normal;
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    font-size: 12px;
+    font-weight: 510;
+    color: var(--graphite-700);
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .highlight-box .attribution::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 1px;
+    background: var(--amber-rust);
+  }
+
+  /* ===== COMPARISON DIAGRAM ===== */
+  .comparison {
+    display: flex;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .comparison-col {
+    flex: 1;
+    border: 1px solid var(--graphite-100);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+  }
+
+  .comparison-col.negative {
+    background: var(--graphite-50);
+  }
+
+  .comparison-col.positive {
+    background: var(--white);
+    border-color: var(--amber-rust);
+  }
+
+  .comparison-col .comp-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .comparison-col.negative .comp-icon {
+    background: var(--graphite-100);
+  }
+
+  .comparison-col.positive .comp-icon {
+    background: rgba(201, 122, 84, 0.1);
+  }
+
+  .comparison-col h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--graphite-900);
+  }
+
+  .comparison-col ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .comparison-col li {
+    font-size: 10.5pt;
+    color: var(--graphite-700);
+    padding: 3px 0;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .comparison-col.negative li::before {
+    content: '×';
+    position: absolute;
+    left: 0;
+    color: var(--graphite-700);
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .comparison-col.positive li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--amber-rust);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .comp-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  .comp-vs span {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--cloud-zinc);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== STATS GRID ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .stat-card {
+    background: var(--graphite-50);
+    border: 1px solid var(--graphite-100);
+    border-radius: 8px;
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .stat-icon {
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--amber-rust);
+    letter-spacing: -0.02em;
+    font-feature-settings: 'cv01', 'ss03';
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 510;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--graphite-700);
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  /* ===== STEPS ===== */
+  .steps {
+    margin: 24px 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--graphite-900);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  .step-content h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--graphite-900);
+  }
+
+  .step-content p {
+    font-size: 10.5pt;
+    margin-bottom: 0;
+    color: var(--graphite-700);
+  }
+
+  /* ===== FLOW DIAGRAM ===== */
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 28px 0 8px;
+    padding: 20px 0;
+  }
+
+  .flow-node {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+
+  .flow-node-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--graphite-900);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .flow-node-label {
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    font-size: 10px;
+    font-weight: 510;
+    color: var(--graphite-700);
+    letter-spacing: 0.02em;
+  }
+
+  .flow-arrow {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+
+  /* ===== TIMELINE VISUAL ===== */
+  .timeline-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    background: var(--graphite-50);
+    border-radius: 8px;
+    border: 1px solid var(--graphite-100);
+    overflow: hidden;
+    height: 56px;
+  }
+
+  .timeline-segment {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    position: relative;
+    height: 100%;
+  }
+
+  .timeline-segment:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 1px;
+    background: var(--graphite-100);
+  }
+
+  .timeline-segment .tl-time {
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--amber-rust);
+    letter-spacing: -0.01em;
+  }
+
+  .timeline-segment .tl-label {
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+    font-size: 9px;
+    font-weight: 510;
+    color: var(--graphite-700);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+
+  /* ===== BACK PAGE (CTA) ===== */
+  .back-page {
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .back-page-inner {
+    max-width: 400px;
+  }
+
+  .back-page h2 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    color: var(--graphite-900);
+  }
+
+  .back-page p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--graphite-700);
+    margin-bottom: 32px;
+  }
+
+  .back-page-cta {
+    display: inline-block;
+    background: var(--amber-rust);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 510;
+    padding: 12px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  .back-page-contact {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--graphite-700);
+  }
+
+  .back-page-contact a {
+    color: var(--amber-rust);
+    text-decoration: none;
+  }
+
+  .back-page-footer {
+    position: absolute;
+    bottom: 32px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--cloud-zinc);
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  /* ===== PAGE BREAK CONTROL ===== */
+  .content h2, .content h3 { break-after: avoid; page-break-after: avoid; }
+  .highlight-box, .comparison, .stats-grid, .step, .flow-diagram, .timeline-bar {
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .content p { orphans: 3; widows: 3; }
+
+  /* ===== PAGE NUMBER ===== */
+  .page-footer {
+    position: absolute;
+    bottom: 24px;
+    left: 56px;
+    right: 56px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: var(--cloud-zinc);
+    font-feature-settings: 'cv01', 'ss03';
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE 1: COVER ===== -->
+<div class="page cover">
+  <!-- Subtle geometric background -->
+  <svg class="cover-visual" width="360" height="360" viewBox="0 0 360 360" fill="none">
+    <!-- Network nodes -->
+    <circle cx="180" cy="180" r="120" stroke="rgba(255,255,255,1)" stroke-width="0.5" fill="none"/>
+    <circle cx="180" cy="180" r="80" stroke="rgba(255,255,255,1)" stroke-width="0.5" fill="none"/>
+    <circle cx="180" cy="180" r="160" stroke="rgba(255,255,255,1)" stroke-width="0.5" fill="none"/>
+    <!-- Radial lines -->
+    <line x1="180" y1="20" x2="180" y2="340" stroke="rgba(255,255,255,1)" stroke-width="0.3"/>
+    <line x1="20" y1="180" x2="340" y2="180" stroke="rgba(255,255,255,1)" stroke-width="0.3"/>
+    <line x1="67" y1="67" x2="293" y2="293" stroke="rgba(255,255,255,1)" stroke-width="0.3"/>
+    <line x1="293" y1="67" x2="67" y2="293" stroke="rgba(255,255,255,1)" stroke-width="0.3"/>
+    <!-- Accent dots at intersections -->
+    <circle cx="180" cy="60" r="4" fill="#C97A54"/>
+    <circle cx="300" cy="180" r="4" fill="#C97A54"/>
+    <circle cx="180" cy="300" r="4" fill="#C97A54"/>
+    <circle cx="60" cy="180" r="4" fill="#C97A54"/>
+    <circle cx="293" cy="67" r="3" fill="#C97A54" opacity="0.6"/>
+    <circle cx="67" cy="293" r="3" fill="#C97A54" opacity="0.6"/>
+    <circle cx="180" cy="100" r="3" fill="#C97A54" opacity="0.4"/>
+    <circle cx="260" cy="180" r="3" fill="#C97A54" opacity="0.4"/>
+    <!-- Center eye motif -->
+    <circle cx="180" cy="180" r="20" stroke="#C97A54" stroke-width="1.5" fill="none"/>
+    <circle cx="180" cy="180" r="6" fill="#C97A54"/>
+  </svg>
+
+  <div class="cover-top">
+    <div class="cover-logo">
+      <svg viewBox="0 0 64 64" width="28" height="28">
+        <g fill="#FFFFFF"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g>
+        <rect x="31" y="21" width="2" height="35" fill="#23262C"/>
+        <circle cx="32" cy="32" r="5" fill="#23262C"/>
+      </svg>
+      undersight
+    </div>
+  </div>
+
+  <div class="cover-body">
+    <div class="cover-tag">Case Study</div>
+    <div class="cover-accent-bar"></div>
+    <h1 class="cover-title">How Chat Advance Funded a Declined Deal in 5 Minutes</h1>
+    <p class="cover-subtitle">A small business owner was auto-declined by a rules-based underwriter. The undersight platform saw what the rules engine couldn't.</p>
+  </div>
+
+  <div class="cover-bottom">
+    <span>undersight.ai</span>
+    <span>2025</span>
+  </div>
+</div>
+
+<!-- ===== PAGE 2: THE PROBLEM ===== -->
+<div class="page content">
+  <div class="section-label">The Problem</div>
+  <h2>Good deals are getting killed by rigid rules</h2>
+
+  <p>In alternative finance, speed and accuracy determine who wins. Yet most underwriting still relies on deterministic rule sets and manual review processes that were designed for a different era.</p>
+
+  <p>When a small business owner applied for funding through Chat Advance's marketplace, the application was auto-declined within seconds. A rules-based underwriting engine evaluated the deal against a fixed set of criteria and determined it didn't qualify.</p>
+
+  <p>But the numbers told a different story. Revenue was consistent. Bank data showed healthy cash flow patterns. The business had been operating for years. The decline wasn't a reflection of actual risk &mdash; it was a reflection of the limitations of a system that can only say yes or no, with no room for nuance.</p>
+
+  <div class="highlight-box">
+    <p>"The rules engine couldn't see what was actually there. It checked boxes, not patterns. When the deal didn't fit the template, it was rejected automatically &mdash; regardless of the underlying fundamentals."</p>
+    <div class="attribution">Sajit Roshan, from <em>Deterministic Scorecards to Agentic Credit Assessments</em></div>
+  </div>
+
+  <!-- Comparison diagram: Deterministic vs Agentic -->
+  <div class="comparison">
+    <div class="comparison-col negative">
+      <div class="comp-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="2" width="16" height="16" rx="2" stroke="#3A3F47" stroke-width="1.5"/>
+          <line x1="6" y1="7" x2="14" y2="7" stroke="#3A3F47" stroke-width="1.5"/>
+          <line x1="6" y1="10" x2="14" y2="10" stroke="#3A3F47" stroke-width="1.5"/>
+          <line x1="6" y1="13" x2="10" y2="13" stroke="#3A3F47" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <h4>Deterministic Scorecard</h4>
+      <ul>
+        <li>Fixed threshold rules</li>
+        <li>Binary pass/fail output</li>
+        <li>No contextual analysis</li>
+        <li>Misses edge cases</li>
+        <li>Manual review backlog</li>
+      </ul>
+    </div>
+    <div class="comp-vs"><span>vs</span></div>
+    <div class="comparison-col positive">
+      <div class="comp-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="#C97A54" stroke-width="1.5"/>
+          <circle cx="10" cy="10" r="3" fill="#C97A54"/>
+          <line x1="10" y1="2" x2="10" y2="5" stroke="#C97A54" stroke-width="1"/>
+          <line x1="10" y1="15" x2="10" y2="18" stroke="#C97A54" stroke-width="1"/>
+          <line x1="2" y1="10" x2="5" y2="10" stroke="#C97A54" stroke-width="1"/>
+          <line x1="15" y1="10" x2="18" y2="10" stroke="#C97A54" stroke-width="1"/>
+        </svg>
+      </div>
+      <h4>Agentic Underwriting</h4>
+      <ul>
+        <li>Pattern-based risk assessment</li>
+        <li>Nuanced scoring with signals</li>
+        <li>Document intelligence</li>
+        <li>Real-time data enrichment</li>
+        <li>Zero manual intervention</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>undersight.ai</span>
+    <span>2</span>
+  </div>
+</div>
+
+<!-- ===== PAGE 3: THE SOLUTION + PROCESS ===== -->
+<div class="page content">
+  <div class="section-label">The Solution</div>
+  <h2>Agentic underwriting with undersight</h2>
+
+  <p>Chat Advance integrated the undersight platform into their intake workflow. Instead of relying solely on rules-based filters, every application now passes through an AI-powered pipeline that combines document intelligence, enrichment, and risk assessment. Here's what happened when the previously declined applicant re-engaged.</p>
+
+  <div class="divider"></div>
+
+  <div class="section-label">The Process</div>
+  <h2>From application to funded deal in 4 steps</h2>
+
+  <!-- Flow diagram -->
+  <div class="flow-diagram">
+    <div class="flow-node">
+      <div class="flow-node-icon">
+        <!-- Chat bubble -->
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 4h14a1 1 0 011 1v9a1 1 0 01-1 1H8l-4 3v-3a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="#FFFFFF" stroke-width="1.5" fill="none"/>
+          <circle cx="8" cy="10" r="1" fill="#C97A54"/>
+          <circle cx="11" cy="10" r="1" fill="#C97A54"/>
+          <circle cx="14" cy="10" r="1" fill="#C97A54"/>
+        </svg>
+      </div>
+      <div class="flow-node-label">Intake</div>
+    </div>
+    <div class="flow-arrow">
+      <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+        <line x1="0" y1="6" x2="18" y2="6" stroke="#D1D5DB" stroke-width="1.5"/>
+        <polyline points="16,2 20,6 16,10" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="flow-node">
+      <div class="flow-node-icon">
+        <!-- Data/bank icon -->
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="4" y="4" width="14" height="14" rx="2" stroke="#FFFFFF" stroke-width="1.5"/>
+          <line x1="4" y1="9" x2="18" y2="9" stroke="#FFFFFF" stroke-width="1"/>
+          <line x1="11" y1="9" x2="11" y2="18" stroke="#FFFFFF" stroke-width="1"/>
+          <circle cx="7.5" cy="13.5" r="1.5" fill="#C97A54"/>
+          <rect x="13" y="12" width="3" height="4" rx="0.5" fill="#C97A54"/>
+        </svg>
+      </div>
+      <div class="flow-node-label">Enrich</div>
+    </div>
+    <div class="flow-arrow">
+      <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+        <line x1="0" y1="6" x2="18" y2="6" stroke="#D1D5DB" stroke-width="1.5"/>
+        <polyline points="16,2 20,6 16,10" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="flow-node">
+      <div class="flow-node-icon">
+        <!-- Document/RFI icon -->
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M6 4h7l4 4v10a1 1 0 01-1 1H6a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="#FFFFFF" stroke-width="1.5"/>
+          <polyline points="13,4 13,8 17,8" stroke="#FFFFFF" stroke-width="1"/>
+          <line x1="8" y1="12" x2="14" y2="12" stroke="#C97A54" stroke-width="1.5"/>
+          <line x1="8" y1="15" x2="12" y2="15" stroke="#C97A54" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="flow-node-label">Resolve</div>
+    </div>
+    <div class="flow-arrow">
+      <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+        <line x1="0" y1="6" x2="18" y2="6" stroke="#D1D5DB" stroke-width="1.5"/>
+        <polyline points="16,2 20,6 16,10" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="flow-node">
+      <div class="flow-node-icon" style="background:var(--amber-rust);">
+        <!-- Package/send icon -->
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="4" y="6" width="14" height="12" rx="1" stroke="#FFFFFF" stroke-width="1.5"/>
+          <polyline points="4,6 11,13 18,6" stroke="#FFFFFF" stroke-width="1.5" fill="none"/>
+        </svg>
+      </div>
+      <div class="flow-node-label">Submit</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Applicant engages via chat with Macy, the AI intake agent</h4>
+        <p>The applicant started a conversation through Chat Advance's web channel. Macy, the AI intake agent, guided the conversation naturally &mdash; collecting application details, requesting bank statements, and clarifying information gaps in real time. No forms, no uploads, no waiting.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Bank data ingested via Plaid and enriched automatically</h4>
+        <p>Bank statements were connected via Plaid and processed instantly. The undersight platform parsed transaction-level data into structured intelligence: revenue patterns, existing debt positions, seasonal trends, and anomaly signals. What would take an analyst 20+ minutes was completed in seconds.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>RFIs addressed directly with the applicant by the agent</h4>
+        <p>When additional information was needed, Macy asked the applicant directly. Missing data points, clarifications on specific transactions, and supplementary documentation were all resolved within the same conversation &mdash; no email chains, no delays.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Matching funders receive a rich submission package</h4>
+        <p>The completed application was assembled into a comprehensive submission package: structured financial data, enriched risk signals, and supporting documentation. The package was matched to two funders whose criteria aligned with the deal profile. Both received the submission simultaneously.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>undersight.ai</span>
+    <span>3</span>
+  </div>
+</div>
+
+<!-- ===== PAGE 4: RESULTS ===== -->
+<div class="page content">
+  <div class="section-label">The Results</div>
+  <h2>A deal that was dead became funded</h2>
+
+  <p>Within five minutes of the applicant re-engaging, two funders had received full submission packages and extended offers. A deal that had been automatically rejected by a rules-based system was funded &mdash; with better data, faster processing, and zero manual underwriting effort.</p>
+
+  <!-- Timeline bar -->
+  <div class="timeline-bar">
+    <div class="timeline-segment">
+      <div class="tl-time">0:00</div>
+      <div class="tl-label">Chat starts</div>
+    </div>
+    <div class="timeline-segment">
+      <div class="tl-time">0:45</div>
+      <div class="tl-label">Data ingested</div>
+    </div>
+    <div class="timeline-segment">
+      <div class="tl-time">2:30</div>
+      <div class="tl-label">RFIs resolved</div>
+    </div>
+    <div class="timeline-segment">
+      <div class="tl-time">3:15</div>
+      <div class="tl-label">Package sent</div>
+    </div>
+    <div class="timeline-segment">
+      <div class="tl-time">5:00</div>
+      <div class="tl-label">2 offers</div>
+    </div>
+  </div>
+
+  <div class="stats-grid" style="margin-top:32px;">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="10" stroke="#C97A54" stroke-width="1.5"/>
+          <polyline points="14,8 14,14 18,14" stroke="#C97A54" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stat-value">24/7</div>
+      <div class="stat-label">Availability</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M7 20L12 10L16 15L21 7" stroke="#C97A54" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="2" fill="#C97A54" opacity="0.3"/>
+          <circle cx="21" cy="7" r="2" fill="#C97A54" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="stat-value">60s</div>
+      <div class="stat-label">Screening</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="8" stroke="#C97A54" stroke-width="1.5"/>
+          <text x="14" y="17" font-family="Inter" font-size="9" font-weight="700" fill="#C97A54" text-anchor="middle">$</text>
+        </svg>
+      </div>
+      <div class="stat-value">$0</div>
+      <div class="stat-label">Acquisition Cost</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="6" y="8" width="16" height="12" rx="1.5" stroke="#C97A54" stroke-width="1.5"/>
+          <polyline points="6,8 14,15 22,8" stroke="#C97A54" stroke-width="1.5" fill="none"/>
+        </svg>
+      </div>
+      <div class="stat-value">2</div>
+      <div class="stat-label">Offers in 5 min</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>The cost of false negatives</h3>
+
+  <p>Every auto-declined deal that should have been funded represents lost revenue for the marketplace, a missed opportunity for the funder, and a frustrated business owner who needed capital. In a competitive market, these false negatives compound quickly.</p>
+
+  <p>Chat Advance's integration with undersight didn't just recover one deal. It established a permanent layer of intelligence that catches what deterministic systems miss &mdash; converting false negatives into funded deals, automatically, around the clock.</p>
+
+  <div class="page-footer">
+    <span>undersight.ai</span>
+    <span>4</span>
+  </div>
+</div>
+
+<!-- ===== PAGE 5: BACK PAGE / CTA ===== -->
+<div class="page back-page">
+  <div class="back-page-inner">
+    <div class="cover-logo" style="justify-content:center;margin-bottom:48px;color:var(--graphite-900);">
+      <svg viewBox="0 0 64 64" width="32" height="32">
+        <g fill="#23262C"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g>
+        <rect x="31" y="21" width="2" height="35" fill="#FFFFFF"/>
+        <circle cx="32" cy="32" r="5" fill="#FFFFFF"/>
+      </svg>
+      undersight
+    </div>
+
+    <h2>Ready to see undersight in action?</h2>
+    <p>Schedule a 30-minute discovery call. We'll walk through your workflow and show you what's possible with agentic underwriting.</p>
+    <a href="https://calendly.com/kyle-undersight/30min" class="back-page-cta">Book a Discovery Call</a>
+    <div class="back-page-contact">
+      Or email us at <a href="mailto:contact@undersight.ai">contact@undersight.ai</a>
+    </div>
+  </div>
+  <div class="back-page-footer">undersight.ai &middot; AI underwriting infrastructure for alternative finance</div>
+</div>
+
+</body>
+</html>
