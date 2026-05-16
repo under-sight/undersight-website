@@ -64,8 +64,10 @@
     animation: fadeIn 0.8s ease-out 0.2s forwards;
   }
   .logo img { height: 56px; width: auto; }
+  .logo .logo-dark { display: none; }
   @media (prefers-color-scheme: dark) {
-    .logo img { filter: invert(1); }
+    .logo .logo-light { display: none; }
+    .logo .logo-dark { display: inline; }
   }
 
   /* --- Writing animation --- */
@@ -157,7 +159,8 @@
   <div class="container">
 
     <div class="logo">
-      <img src="images/brand/logo-horizontal-line-primary.svg" alt="undersight" width="160" height="28">
+      <img class="logo-light" src="images/brand/logo-horizontal-line-primary.svg" alt="undersight" width="160" height="28">
+      <img class="logo-dark" src="images/brand/logo-horizontal-line-reversed.svg" alt="undersight" width="160" height="28">
     </div>
 
     <div class="writing-stage">
