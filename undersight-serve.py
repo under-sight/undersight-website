@@ -12,6 +12,7 @@ Usage:
 import http.server
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -21,6 +22,48 @@ PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
 WORKSPACE = "subscript.fibery.io"
 DB = "Website/Pages"
 CACHE_TTL = 5  # seconds - short for dev, increase for prod
+
+# Input validation constants (mirror production handlers)
+MAX_BODY_BYTES = 4096
+EMAIL_MIN = 5
+EMAIL_MAX = 254
+WHITEPAPER_MIN = 1
+WHITEPAPER_MAX = 200
+EMAIL_REGEX = re.compile(r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$')
+
+
+def _is_valid_email(email):
+    if not isinstance(email, str):
+        return False
+    email = email.strip()
+    if len(email) < EMAIL_MIN or len(email) > EMAIL_MAX:
+        return False
+    if re.search(r'[<>"\']', email):
+        return False
+    if '..' in email:
+        return False
+    return bool(EMAIL_REGEX.match(email))
+
+
+def _is_valid_whitepaper(name):
+    if not isinstance(name, str):
+        return False
+    name = name.strip()
+    if len(name) < WHITEPAPER_MIN or len(name) > WHITEPAPER_MAX:
+        return False
+    if re.search(r'[<>]', name):
+        return False
+    return True
+
+
+def _mask_email(email):
+    """Mask an email for logging: kyle@example.com -> k***@example.com"""
+    if not isinstance(email, str) or '@' not in email:
+        return '***'
+    local, _, domain = email.partition('@')
+    if not local:
+        return '***@' + domain
+    return local[0] + '***@' + domain
 
 _cache = {"data": None, "ts": 0}
 
@@ -147,14 +190,43 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_error(404)
 
     def _capture_lead(self):
-        import re
+        # Body size cap — check Content-Length header first
         length = int(self.headers.get("Content-Length", 0))
-        body = json.loads(self.rfile.read(length)) if length else {}
-        email = (body.get("email") or "").strip()
-        if not email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-            self._send_json({"error": "Invalid email"})
+        if length > MAX_BODY_BYTES:
+            self._send_json({"error": "Payload too large"}, status=413)
             return
-        whitepaper_name = body.get("whitepaper", "Chat Advance Case Study")
+
+        # Defence-in-depth: read at most MAX_BODY_BYTES + 1; reject if more present
+        try:
+            raw = self.rfile.read(min(length, MAX_BODY_BYTES + 1)) if length else b""
+        except Exception:
+            self._send_json({"error": "Invalid request"}, status=400)
+            return
+        if len(raw) > MAX_BODY_BYTES:
+            self._send_json({"error": "Payload too large"}, status=413)
+            return
+
+        try:
+            body = json.loads(raw) if raw else {}
+        except Exception:
+            self._send_json({"error": "Invalid request"}, status=400)
+            return
+
+        if not isinstance(body, dict):
+            self._send_json({"error": "Invalid request"}, status=422)
+            return
+
+        email = (body.get("email") or "").strip()
+        if not _is_valid_email(email):
+            self._send_json({"error": "Invalid request"}, status=422)
+            return
+
+        whitepaper_name = (body.get("whitepaper") or "Chat Advance Case Study").strip()
+        if not _is_valid_whitepaper(whitepaper_name):
+            self._send_json({"error": "Invalid request"}, status=422)
+            return
+
+        masked = _mask_email(email)
         try:
             # 1. Look up the Blog entity by name
             wp_results = api_post("/api/commands", [{
@@ -189,11 +261,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     "entity": lead_entity,
                 },
             }])
-            print(f"  [LEAD] {email} -> {whitepaper_name}" + (" (linked)" if wp_id else " (no match)"))
+            print(f"  [LEAD] {masked} -> {whitepaper_name}" + (" (linked)" if wp_id else " (no match)"))
             self._send_json({"ok": True})
         except Exception as e:
-            print(f"  [LEAD] {email} -> ERROR: {e}")
-            self._send_json({"error": str(e)})
+            # Detail to stderr only; generic message to client
+            print(f"  [LEAD] {masked} -> ERROR: {e}", file=sys.stderr)
+            self._send_json({"error": "Internal error"}, status=500)
 
     def do_GET(self):
         if self.path == "/api/content":
@@ -245,12 +318,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def _send_json(self, data):
+    def _send_json(self, data, status=200, extra_headers=None):
         payload = json.dumps(data).encode()
-        self.send_response(200)
+        self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(payload)))
         self.send_header("Cache-Control", "private, no-store")
+        if extra_headers:
+            for k, v in extra_headers.items():
+                self.send_header(k, v)
         self.end_headers()
         self.wfile.write(payload)
 

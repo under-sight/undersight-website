@@ -1,6 +1,11 @@
 /**
  * Cloudflare Worker — Whitepaper lead capture relay
  *
+ * SAFETY-NET DUPLICATE: production traffic flows through
+ * functions/api/whitepaper-lead.js (Cloudflare Pages Function).
+ * This worker is preserved as a fallback / standalone deployment option.
+ * Keep the two implementations in sync until this is formally retired.
+ *
  * Accepts POST { email, whitepaper } from undersight.ai,
  * creates a "Blog Leads" entity in Fibery, and returns JSON.
  *
@@ -10,6 +15,32 @@
  * Environment variables (set in wrangler.toml):
  *   ALLOWED_ORIGIN — e.g. https://undersight.ai
  */
+
+// Input validation constants
+const MAX_BODY_BYTES = 4096;
+const EMAIL_MIN = 5;
+const EMAIL_MAX = 254;
+const WHITEPAPER_MIN = 1;
+const WHITEPAPER_MAX = 200;
+// Strict email regex: 2+ char TLD, allowed local characters only
+const EMAIL_REGEX = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/;
+
+function isValidEmail(email) {
+  if (typeof email !== 'string') return false;
+  const trimmed = email.trim();
+  if (trimmed.length < EMAIL_MIN || trimmed.length > EMAIL_MAX) return false;
+  if (/[<>"']/.test(trimmed)) return false;
+  if (trimmed.includes('..')) return false;
+  return EMAIL_REGEX.test(trimmed);
+}
+
+function isValidWhitepaper(name) {
+  if (typeof name !== 'string') return false;
+  const trimmed = name.trim();
+  if (trimmed.length < WHITEPAPER_MIN || trimmed.length > WHITEPAPER_MAX) return false;
+  if (/[<>]/.test(trimmed)) return false;
+  return true;
+}
 
 export default {
   async fetch(request, env) {
@@ -22,19 +53,43 @@ export default {
       return json({ error: 'Method not allowed' }, 405, env);
     }
 
+    // Body size cap — check Content-Length header first
+    const contentLength = parseInt(request.headers.get('Content-Length') || '0', 10);
+    if (contentLength > MAX_BODY_BYTES) {
+      return json({ error: 'Payload too large' }, 413, env);
+    }
+
+    let rawText;
+    try {
+      rawText = await request.text();
+    } catch {
+      return json({ error: 'Invalid request' }, 400, env);
+    }
+    if (rawText.length > MAX_BODY_BYTES) {
+      return json({ error: 'Payload too large' }, 413, env);
+    }
+
     let body;
     try {
-      body = await request.json();
+      body = JSON.parse(rawText);
     } catch {
-      return json({ error: 'Invalid JSON' }, 400, env);
+      return json({ error: 'Invalid request' }, 400, env);
+    }
+
+    if (!body || typeof body !== 'object') {
+      return json({ error: 'Invalid request' }, 422, env);
     }
 
     const email = (body.email || '').trim();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return json({ error: 'Invalid email' }, 422, env);
+    if (!isValidEmail(email)) {
+      return json({ error: 'Invalid request' }, 422, env);
     }
 
-    const whitepaperName = body.whitepaper || 'Chat Advance Case Study';
+    const whitepaperName = (body.whitepaper || 'Chat Advance Case Study').trim();
+    if (!isValidWhitepaper(whitepaperName)) {
+      return json({ error: 'Invalid request' }, 422, env);
+    }
+
     const fiberyHeaders = {
       'Content-Type': 'application/json',
       'Authorization': `Token ${env.FIBERY_TOKEN}`,
