@@ -36,3 +36,6 @@ build/
 out/
 .next/
 .nuxt/
+
+# Local Fibery file download cache (speeds up incremental builds)
+.fibery-file-cache/
