@@ -26,8 +26,10 @@ for entity in "Home - Hero" "Site Config" "Solutions - underscore" "Solutions - 
   grep -q "$entity" "$DIST/index.html" && pass "Baked entity: $entity" || fail "Baked entity: $entity" "Missing from dist"
 done
 
-# At least one Blog entity baked
-grep -q "Blog - " "$DIST/index.html" && pass "Blog content baked" || fail "Blog content baked"
+# At least one Blog entity baked (look for the _blogs structured data with a slug).
+# Blog content moved from Website/Pages 'Blog -*' entries to the dedicated
+# Website/Blog database in May 2026, so legacy "Blog - " prefix is gone.
+grep -q '"_blogs"' "$DIST/index.html" && grep -q '"slug":' "$DIST/index.html" && pass "Blog content baked" || fail "Blog content baked"
 
 # No Fibery secrets/UUIDs leaked
 ! grep -qE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' "$DIST/index.html" && pass "No Fibery UUIDs in dist" || fail "No Fibery UUIDs in dist"

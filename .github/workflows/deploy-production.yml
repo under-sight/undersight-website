@@ -29,6 +29,45 @@ jobs:
           fi
           echo "Schema check passed."
 
+      - name: Schema guard (block 'Blog -*' regressions in Website/Pages)
+        env:
+          FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
+        run: |
+          echo "Querying Website/Pages for stale 'Blog -*' entities..."
+          python3 - <<'PY'
+          import json, os, sys, urllib.request
+          token = os.environ.get("FIBERY_TOKEN", "")
+          if not token:
+              print("::warning::FIBERY_TOKEN not set, skipping Pages 'Blog -*' guard")
+              sys.exit(0)
+          req = urllib.request.Request(
+              "https://subscript.fibery.io/api/commands",
+              data=json.dumps([{
+                  "command": "fibery.entity/query",
+                  "args": {"query": {
+                      "q/from": "Website/Pages",
+                      "q/select": {"name": "Website/Name"},
+                      "q/where": ["q/contains", ["Website/Name"], "$prefix"],
+                      "q/limit": 50,
+                  }, "params": {"$prefix": "Blog -"}},
+              }]).encode(),
+              headers={"Authorization": f"Token {token}",
+                       "Content-Type": "application/json"},
+          )
+          with urllib.request.urlopen(req, timeout=30) as resp:
+              data = json.loads(resp.read())
+          result = data[0].get("result", []) if data else []
+          stale = [r["name"] for r in result
+                   if isinstance(r, dict) and isinstance(r.get("name"), str)
+                   and r["name"].startswith("Blog -")]
+          if stale:
+              print("::error::Stale 'Blog -*' entities detected in Website/Pages — blog content must live in Website/Blog:")
+              for n in stale:
+                  print(f"  - {n}")
+              sys.exit(1)
+          print("Pages 'Blog -*' guard passed (no regressions).")
+          PY
+
       - name: Build site from Fibery (respects Site Mode)
         id: build
         env:

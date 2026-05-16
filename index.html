@@ -1457,22 +1457,54 @@
     }
 
     // ---- Blog ----
+    // Read structured blog list from Website/Blog DB (cutover from
+    // legacy 'Blog -*' Website/Pages entries in May 2026). Each entry
+    // already has Slug, Tag, Subtitle, Author, Post Date, and Excerpt
+    // as first-class fields — no front-matter parsing needed.
     const blogGrid = document.getElementById('blogGrid');
     blogGrid.innerHTML = '';
-    const blogEntries = Object.keys(data)
-      .filter(k => k.startsWith('Blog - '))
-      .map(name => {
-        const md = getContent(data, name);
-        const files = getFiles(data, name);
-        const meta = parseMeta(md);
-        const heroFile = selectHero(files);
-        const heroImg = heroFile ? heroFile.url : '';
-        const companionImgs = imageFiles(files).filter(f => f !== heroFile).map(f => f.url);
-        return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, companionImgs, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '', pdf: meta.PDF || '' };
-      })
-      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const blogList = (data._blogs && data._blogs._data) || [];
+    const blogEntries = blogList.map(blog => {
+      const files = blog.files || [];
+      const heroFile = selectHero(files);
+      const heroImg = heroFile ? heroFile.url : '';
+      const companionImgs = imageFiles(files).filter(f => f !== heroFile).map(f => f.url);
+      // Body may still contain front-matter from legacy migration; strip it
+      // out so the post page doesn't render the **Date:** / **Excerpt:** lines.
+      const meta = parseMeta(blog.body || '');
+      const body = meta._body || blog.body || '';
+      const excerpt = blog.excerpt || meta.Excerpt || '';
+      return {
+        name: blog.name,
+        title: blog.name,
+        slug: blog.slug,
+        date: blog.post_date || '',
+        creation_date: blog.creation_date || '',
+        excerpt: excerpt,
+        body: body,
+        heroImg,
+        companionImgs,
+        tag: blog.type || meta.Tag || '',
+        subtitle: blog.subtitle || meta.Subtitle || '',
+        author: blog.author || meta.Author || '',
+        // PDF asset name matches the Blog entity name (whitepaper modal
+        // queries Website/Blog by name in the lead capture handler).
+        pdf: blog.name,
+      };
+    });
+    // Sort: Post Date desc, tie-break by creation date desc (matches build.py).
+    blogEntries.sort((a, b) => {
+      const dateDelta = (b.date || '').localeCompare(a.date || '');
+      if (dateDelta !== 0) return dateDelta;
+      return (b.creation_date || '').localeCompare(a.creation_date || '');
+    });
 
+    // Build slug lookup so /blog/<slug> can resolve directly to a post,
+    // and expose the list for deep-link boot routing below.
+    _blogPostsBySlug = {};
+    _allBlogPosts = blogEntries;
     blogEntries.forEach(post => {
+      if (post.slug) _blogPostsBySlug[post.slug] = post;
       if (post.title.includes('Chat Advance')) _caseStudyPost = post;
       if (post.title.includes('4D Financing')) _4dCaseStudyPost = post;
       const card = document.createElement('div');
@@ -1601,6 +1633,15 @@
 
     document.getElementById('postBody').innerHTML = heroHtml + bodyHtml;
     navigate('post');
+    // After navigate() has pushed /post, replace with /blog/<slug> for
+    // shareable deep links. navigate() handles page transitions; the URL
+    // rewrite is a cosmetic follow-up.
+    if (post.slug) {
+      var slugPath = '/blog/' + post.slug;
+      if (location.pathname !== slugPath) {
+        history.replaceState({ page: 'post', slug: post.slug }, '', slugPath);
+      }
+    }
   }
 
   function filterBlog(tag) {
@@ -1651,6 +1692,19 @@
   // ---- Case study direct link ----
   var _caseStudyPost = null;
   var _4dCaseStudyPost = null;
+  // Slug-based post lookup for /blog/<slug> deep links. Populated by
+  // renderContent() once the Blog list has loaded.
+  var _blogPostsBySlug = {};
+  var _allBlogPosts = [];
+  var _pendingBlogSlug = null;  // set by boot if URL was /blog/<slug>
+  function openPostBySlug(slug) {
+    var post = _blogPostsBySlug && _blogPostsBySlug[slug];
+    if (post) {
+      openPost(post);
+      return true;
+    }
+    return false;
+  }
   function openCaseStudy() {
     if (_caseStudyPost) {
       openPost(_caseStudyPost);
@@ -1901,17 +1955,48 @@
 
   // ---- Browser back/forward ----
   window.addEventListener('popstate', function(e) {
+    var slug = e.state && e.state.slug;
+    if (slug && openPostBySlug(slug)) {
+      initReveals();
+      return;
+    }
+    // /blog/<slug> path without state (e.g., user typed it) — try slug lookup
+    var slugMatch = location.pathname.match(/^\/blog\/([a-z0-9-]+)\/?$/i);
+    if (slugMatch && openPostBySlug(slugMatch[1])) {
+      initReveals();
+      return;
+    }
     var page = (e.state && e.state.page) || 'home';
     _origNavigate(page);
     initReveals();
   });
 
   // ---- Boot ----
-  var _bootPage = location.pathname.replace(/^\//, '') || 'home';
-  if (!document.getElementById('page-' + _bootPage)) _bootPage = 'home';
+  // Detect /blog/<slug> deep links. The post can't be rendered until
+  // the content data arrives, so we stash the slug and resolve it after
+  // renderContent() populates _blogPostsBySlug.
+  var _bootPath = location.pathname;
+  var _bootSlugMatch = _bootPath.match(/^\/blog\/([a-z0-9-]+)\/?$/i);
+  var _bootPage;
+  if (_bootSlugMatch) {
+    _pendingBlogSlug = _bootSlugMatch[1];
+    _bootPage = 'blog';  // show blog index until the post resolves
+  } else {
+    _bootPage = _bootPath.replace(/^\//, '') || 'home';
+    if (!document.getElementById('page-' + _bootPage)) _bootPage = 'home';
+  }
   _origNavigate(_bootPage);
-  history.replaceState({ page: _bootPage }, '', _bootPage === 'home' ? '/' : '/' + _bootPage);
+  // Don't overwrite a /blog/<slug> path with /blog during boot; leave the URL
+  // intact so openPost's history.replaceState can restore proper state once
+  // the post resolves.
+  if (!_bootSlugMatch) {
+    history.replaceState({ page: _bootPage }, '', _bootPage === 'home' ? '/' : '/' + _bootPage);
+  }
   loadContent().then(function() {
+    if (_pendingBlogSlug) {
+      openPostBySlug(_pendingBlogSlug);
+      _pendingBlogSlug = null;
+    }
     setTimeout(initReveals, 100);
   });
 </script>
