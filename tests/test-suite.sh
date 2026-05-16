@@ -1638,6 +1638,258 @@ else
 fi
 
 # =============================================================================
+section "CMS Content Safety Tests"
+# =============================================================================
+# Validates that content changes in Fibery don't break the site.
+# These tests catch common CMS authoring mistakes before they hit production.
+
+# Test 1: No empty blog bodies — every Blog entity must have content after ---
+EMPTY_BODIES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+empty = []
+for name, entity in data.items():
+    if not name.startswith('Blog - '): continue
+    content = entity.get('content', '')
+    if '---' in content:
+        body = content.split('---', 1)[1].strip()
+        if not body:
+            empty.append(name)
+    else:
+        # No separator means no metadata block — entire content is body
+        if not content.strip():
+            empty.append(name)
+if empty:
+    print(';'.join(empty))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$EMPTY_BODIES" = "ok" ]; then
+  pass "No empty blog bodies (all posts have content after --- separator)"
+else
+  fail "No empty blog bodies" "Empty body in: $EMPTY_BODIES"
+fi
+
+# Test 2: Blog hero images resolve — every Blog entity has at least one image file
+BLOGS_WITHOUT_IMAGES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+missing = []
+for name, entity in data.items():
+    if not name.startswith('Blog - '): continue
+    files = entity.get('files', [])
+    has_image = any(f.get('type', '').startswith('image/') for f in files)
+    if not has_image:
+        missing.append(name)
+if missing:
+    print(';'.join(missing))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$BLOGS_WITHOUT_IMAGES" = "ok" ]; then
+  pass "All blog entities have at least one image file attachment"
+else
+  fail "All blog entities have at least one image file attachment" "Missing images: $BLOGS_WITHOUT_IMAGES"
+fi
+
+# Test 3: Required blog metadata complete — Date, Excerpt, Tag, Author
+BLOG_META_MISSING=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+issues = []
+for name, entity in sorted(data.items()):
+    if not name.startswith('Blog - '): continue
+    content = entity.get('content', '')
+    missing_fields = []
+    if '**Date:**' not in content and '**Date:' not in content:
+        missing_fields.append('Date')
+    if '**Excerpt:**' not in content and '**Excerpt:' not in content:
+        missing_fields.append('Excerpt')
+    if '**Tag:**' not in content and '**Tag:' not in content:
+        missing_fields.append('Tag')
+    if '**Author:**' not in content and '**Author:' not in content:
+        missing_fields.append('Author')
+    if missing_fields:
+        issues.append(f'{name} (missing: {\", \".join(missing_fields)})')
+if issues:
+    print(';'.join(issues))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$BLOG_META_MISSING" = "ok" ]; then
+  pass "All blog entities have required metadata (Date, Excerpt, Tag, Author)"
+else
+  fail "All blog entities have required metadata" "$BLOG_META_MISSING"
+fi
+
+# Test 4: No broken internal references — SOLUTION_MAP names exist in content API
+# (This extends the existing SOLUTION_MAP audit with a content-safety framing)
+SOL_REF_MISSING=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+expected = ['Solutions - underscore', 'Solutions - Agentic Client RFI', 'Solutions - AI Underwriting Copilot']
+missing = [s for s in expected if s not in data]
+if missing:
+    print(';'.join(missing))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$SOL_REF_MISSING" = "ok" ]; then
+  pass "All SOLUTION_MAP references resolve to existing content entities"
+else
+  fail "All SOLUTION_MAP references resolve to existing content entities" "Missing: $SOL_REF_MISSING"
+fi
+
+# Test 5: Minimum content length per entity type
+# Blog posts: body (after ---) must be > 100 chars
+SHORT_BLOGS=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+short = []
+for name, entity in data.items():
+    if not name.startswith('Blog - '): continue
+    content = entity.get('content', '')
+    if '---' in content:
+        body = content.split('---', 1)[1].strip()
+    else:
+        body = content.strip()
+    if len(body) <= 100:
+        short.append(f'{name} ({len(body)} chars)')
+if short:
+    print(';'.join(short))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$SHORT_BLOGS" = "ok" ]; then
+  pass "All blog posts have body content > 100 chars"
+else
+  fail "All blog posts have body content > 100 chars" "Too short: $SHORT_BLOGS"
+fi
+
+# Solution pages: content must be > 50 chars
+SHORT_SOLUTIONS=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+short = []
+for name, entity in data.items():
+    if not name.startswith('Solutions - '): continue
+    content = entity.get('content', '').strip()
+    if len(content) <= 50:
+        short.append(f'{name} ({len(content)} chars)')
+if short:
+    print(';'.join(short))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$SHORT_SOLUTIONS" = "ok" ]; then
+  pass "All solution pages have content > 50 chars"
+else
+  fail "All solution pages have content > 50 chars" "Too short: $SHORT_SOLUTIONS"
+fi
+
+# Home sections: content must be > 10 chars
+SHORT_HOME=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+short = []
+for name, entity in data.items():
+    if not name.startswith('Home - '): continue
+    content = entity.get('content', '').strip()
+    if len(content) <= 10:
+        short.append(f'{name} ({len(content)} chars)')
+if short:
+    print(';'.join(short))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$SHORT_HOME" = "ok" ]; then
+  pass "All home sections have content > 10 chars"
+else
+  fail "All home sections have content > 10 chars" "Too short: $SHORT_HOME"
+fi
+
+# Test 6: Image file URLs in content are valid
+# Markdown image syntax ![alt](url) must use /api/file/ (dev) or images/ (prod/local)
+INVALID_IMG_URLS=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json, re
+data = json.load(sys.stdin)
+invalid = []
+img_pattern = re.compile(r'!\[[^\]]*\]\(([^)]+)\)')
+for name, entity in data.items():
+    if not name.startswith('Blog - '): continue
+    content = entity.get('content', '')
+    for match in img_pattern.finditer(content):
+        url = match.group(1)
+        if url.startswith('/api/file/') or url.startswith('images/') or url.startswith('./images/'):
+            continue
+        # Also allow absolute https URLs (external images are acceptable)
+        if url.startswith('https://') or url.startswith('http://'):
+            continue
+        invalid.append(f'{name}: {url}')
+if invalid:
+    print(';'.join(invalid[:5]))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$INVALID_IMG_URLS" = "ok" ]; then
+  pass "All markdown image URLs in blog content use valid paths"
+else
+  fail "All markdown image URLs in blog content use valid paths" "Invalid: $INVALID_IMG_URLS"
+fi
+
+# Test 7: No duplicate blog titles
+DUPLICATE_TITLES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+titles = []
+for name in data:
+    if name.startswith('Blog - '):
+        title = name.replace('Blog - ', '')
+        titles.append(title)
+seen = set()
+duplicates = set()
+for t in titles:
+    if t in seen:
+        duplicates.add(t)
+    seen.add(t)
+if duplicates:
+    print(';'.join(sorted(duplicates)))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$DUPLICATE_TITLES" = "ok" ]; then
+  pass "No duplicate blog titles"
+else
+  fail "No duplicate blog titles" "Duplicates: $DUPLICATE_TITLES"
+fi
+
+# Test 8: Tag values are from allowed set
+INVALID_TAGS=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+allowed_tags = {'Research', 'Case Study', 'Insight'}
+invalid = []
+for name, entity in sorted(data.items()):
+    if not name.startswith('Blog - '): continue
+    content = entity.get('content', '')
+    for line in content.split('\n'):
+        if '**Tag:**' in line:
+            tag = line.split('**Tag:**')[1].strip().rstrip('\\\\')
+            if tag and tag not in allowed_tags:
+                invalid.append(f'{name} (tag: \"{tag}\")')
+            break
+if invalid:
+    print(';'.join(invalid))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$INVALID_TAGS" = "ok" ]; then
+  pass "All blog tags are from allowed set (Research, Case Study, Insight)"
+else
+  fail "All blog tags are from allowed set" "Unexpected tags: $INVALID_TAGS"
+fi
+
+# =============================================================================
 section "Summary"
 # =============================================================================
 
