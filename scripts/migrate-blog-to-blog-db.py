@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any
 
 FIBERY = "/Users/kyle/bin/fibery"
-WORKSPACE = "undersight"
+WORKSPACE = "subscript"
 
 # These six fields must exist on Website/Blog before we can migrate.
 REQUIRED_FIELDS = [
@@ -247,13 +247,13 @@ def fetch_pages_entity(entity_id: str) -> dict[str, Any]:
         "q/where": ["=", ["fibery/id"], "$id"],
         "q/select": {
             "id":   ["fibery/id"],
-            "name": ["Website/name"],
+            "name": ["Website/Name"],
             "doc":  ["Website/Description", "Collaboration~Documents/secret"],
         },
         "q/limit": 1,
-        "q/params": {"$id": entity_id},
     }
-    res = run_fibery("query", "--query-json", json.dumps(q))
+    params = {"$id": entity_id}
+    res = run_fibery("query", "Website/Pages", "--json-query", json.dumps(q), "--params", json.dumps(params))
     if not res:
         raise RuntimeError(f"Pages entity not found: {entity_id}")
     return res[0]
@@ -274,9 +274,9 @@ def fetch_blog_entity(entity_id: str) -> dict[str, Any]:
             "excerpt":   ["Website/Excerpt"],
         },
         "q/limit": 1,
-        "q/params": {"$id": entity_id},
     }
-    res = run_fibery("query", "--query-json", json.dumps(q))
+    params = {"$id": entity_id}
+    res = run_fibery("query", "Website/Blog", "--json-query", json.dumps(q), "--params", json.dumps(params))
     if not res:
         raise RuntimeError(f"Blog entity not found: {entity_id}")
     return res[0]
