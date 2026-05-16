@@ -1707,7 +1707,9 @@ for name, entity in sorted(data.items()):
         missing_fields.append('Excerpt')
     if '**Tag:**' not in content and '**Tag:' not in content:
         missing_fields.append('Tag')
-    if '**Author:**' not in content and '**Author:' not in content:
+    # Author required only for Insight + Research (Case Studies don't need author attribution)
+    is_case_study = '**Tag:** Case Study' in content or '**Tag: Case Study' in content
+    if not is_case_study and '**Author:**' not in content and '**Author:' not in content:
         missing_fields.append('Author')
     if missing_fields:
         issues.append(f'{name} (missing: {\", \".join(missing_fields)})')
