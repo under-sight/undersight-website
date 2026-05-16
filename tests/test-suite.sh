@@ -1890,6 +1890,199 @@ else
 fi
 
 # =============================================================================
+section "Image Integrity Tests"
+# =============================================================================
+# Flags inadvertent image swaps and regenerations. Images should not change
+# without explicit permission. Checks filenames, sizes, counts, and duplicates.
+
+# Test 1: Blog hero image filenames match expected patterns (no monochrome/generated names)
+HERO_NAME_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+bad_patterns = ['minimal-monochrome', 'monochrome', 'editorial-illustration']
+issues = []
+for name, entity in sorted(data.items()):
+    if not name.startswith('Blog - '): continue
+    files = entity.get('files', [])
+    images = [f for f in files if f.get('type', '').startswith('image/')]
+    if not images:
+        continue
+    hero = images[0]
+    hero_name = hero.get('name', '')
+    for pattern in bad_patterns:
+        if pattern in hero_name.lower():
+            issues.append(f'{name}: {hero_name}')
+            break
+if issues:
+    print(';'.join(issues))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$HERO_NAME_ISSUES" = "ok" ]; then
+  pass "Blog hero image filenames are valid (no placeholder patterns)"
+else
+  fail "Blog hero image filenames are valid" "Placeholder images found: $HERO_NAME_ISSUES"
+fi
+
+# Test 2: Blog hero image file sizes are stable (within 50% of expected baseline)
+HERO_SIZE_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+# Expected baselines (filename substring -> expected size in bytes)
+baselines = {
+    'chat-advance-hero': 44000,
+    'copilot-building': 45000,
+    '4d-financing': 51000,
+    'agentic-credit': 25000,
+    'institutional-capital': 27000,
+    'rfi-bottleneck': 500000,
+    'ai-underwriting': 485000,
+}
+issues = []
+for name, entity in sorted(data.items()):
+    if not name.startswith('Blog - '): continue
+    files = entity.get('files', [])
+    images = [f for f in files if f.get('type', '').startswith('image/')]
+    if not images:
+        continue
+    hero = images[0]
+    hero_name = hero.get('name', '').lower()
+    hero_size = hero.get('size', 0)
+    if not hero_size:
+        continue
+    for pattern, expected in baselines.items():
+        if pattern in hero_name:
+            ratio = hero_size / expected if expected else 0
+            if ratio < 0.5 or ratio > 1.5:
+                issues.append(f'{name}: {hero.get(\"name\",\"\")} is {hero_size}B (expected ~{expected}B, ratio {ratio:.2f})')
+            break
+if issues:
+    print(';'.join(issues))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$HERO_SIZE_ISSUES" = "ok" ]; then
+  pass "Blog hero image file sizes are stable (within 50% of baseline)"
+else
+  fail "Blog hero image file sizes are stable" "Size drift detected: $HERO_SIZE_ISSUES"
+fi
+
+# Test 3: No monochrome placeholder images in blog hero slots
+MONOCHROME_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+issues = []
+for name, entity in sorted(data.items()):
+    if not name.startswith('Blog - '): continue
+    files = entity.get('files', [])
+    images = [f for f in files if f.get('type', '').startswith('image/')]
+    if not images:
+        continue
+    hero = images[0]
+    hero_name = hero.get('name', '').lower()
+    if 'monochrome' in hero_name or 'editorial-illustration' in hero_name:
+        issues.append(f'{name}: {hero.get(\"name\", \"\")}')
+if issues:
+    print(';'.join(issues))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$MONOCHROME_ISSUES" = "ok" ]; then
+  pass "No monochrome placeholder images in blog hero slots"
+else
+  fail "No monochrome placeholder images in blog hero slots" "Found: $MONOCHROME_ISSUES"
+fi
+
+# Test 4: Blog entity image count is expected
+# Chat Advance = 3 images, others = 1-2. Flag 0 images or >5 (duplicates).
+IMAGE_COUNT_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+issues = []
+for name, entity in sorted(data.items()):
+    if not name.startswith('Blog - '): continue
+    files = entity.get('files', [])
+    images = [f for f in files if f.get('type', '').startswith('image/')]
+    count = len(images)
+    short_name = name.replace('Blog - ', '')
+    if 'Chat Advance' in short_name:
+        if count != 3:
+            issues.append(f'{name}: expected 3 images, got {count}')
+    else:
+        if count == 0:
+            issues.append(f'{name}: has 0 images')
+        elif count > 5:
+            issues.append(f'{name}: has {count} images (likely duplicates)')
+if issues:
+    print(';'.join(issues))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$IMAGE_COUNT_ISSUES" = "ok" ]; then
+  pass "Blog entity image counts are expected (Chat Advance=3, others=1-2)"
+else
+  fail "Blog entity image counts are expected" "Unexpected counts: $IMAGE_COUNT_ISSUES"
+fi
+
+# Test 5: No duplicate filenames in entity attachments
+DUPLICATE_FILE_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+issues = []
+for name, entity in sorted(data.items()):
+    if not name.startswith('Blog - ') and not name.startswith('Solutions - '):
+        continue
+    files = entity.get('files', [])
+    names_seen = {}
+    for f in files:
+        fname = f.get('name', '')
+        if not fname:
+            continue
+        if fname in names_seen:
+            issues.append(f'{name}: duplicate \"{fname}\"')
+        else:
+            names_seen[fname] = True
+if issues:
+    print(';'.join(issues))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$DUPLICATE_FILE_ISSUES" = "ok" ]; then
+  pass "No duplicate filenames in entity attachments"
+else
+  fail "No duplicate filenames in entity attachments" "Duplicates found: $DUPLICATE_FILE_ISSUES"
+fi
+
+# Test 6: Solution entities have expected image counts
+# underscore=1, RFI=3, Copilot=3
+SOL_IMAGE_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+expected = {
+    'Solutions - underscore': 1,
+    'Solutions - Agentic Client RFI': 3,
+    'Solutions - AI Underwriting Copilot': 3,
+}
+issues = []
+for name, exp_count in expected.items():
+    entity = data.get(name, {})
+    files = entity.get('files', [])
+    images = [f for f in files if f.get('type', '').startswith('image/')]
+    actual = len(images)
+    if actual != exp_count:
+        issues.append(f'{name}: expected {exp_count} images, got {actual}')
+if issues:
+    print(';'.join(issues))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$SOL_IMAGE_ISSUES" = "ok" ]; then
+  pass "Solution entities have expected image counts (underscore=1, RFI=3, Copilot=3)"
+else
+  fail "Solution entities have expected image counts" "Deviations: $SOL_IMAGE_ISSUES"
+fi
+
+# =============================================================================
 section "Summary"
 # =============================================================================
 
