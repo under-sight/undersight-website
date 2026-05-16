@@ -82,7 +82,7 @@ Requires `FIBERY_TOKEN` env var or macOS Keychain entry
 - Inter font with OpenType features (`cv01`, `ss03`)
 - Dark mode via `prefers-color-scheme` + manual toggle (`theme-dark`/`theme-light`)
 - SPA routing via `history.pushState` + `popstate` (clean paths: `/blog`, `/copilot`)
-- Content from Fibery CMS (`subscript.fibery.io`)
+- **CMS: Fibery (`subscript.fibery.io`) — single source of truth for all editable content.** Site baked at build (`build.py`) and deployed static. Dev refresh cadence: local server caches 5s; Cloudflare dev rebuilds via cron (~5-15 min) and on every push to `dev`.
 - Hosted at undersight.ai (Cloudflare Pages)
 
 ---
@@ -99,6 +99,77 @@ Requires `FIBERY_TOKEN` env var or macOS Keychain entry
 | Font (sans) | Inter, -apple-system, system-ui |
 | Font (display) | TBD (consider Space Grotesk or keep Inter) |
 | Font (mono) | JetBrains Mono |
+
+---
+
+## Content Source of Truth: Fibery CMS
+
+**Principle.** Marketing-grade content (copy, headlines, metrics, testimonials,
+case studies, blog posts, whitepapers) lives in Fibery. HTML is a *rendering
+layer*, not a content store. The default answer to "where do I change this
+text?" is always: **edit the Fibery entity**.
+
+**Editorial workflow.** Edit the Fibery entity → wait for cache refresh
+(5s on local dev; next push or cron rebuild on Cloudflare dev/prod). Never
+edit content directly in `index.html`.
+
+**Engineering workflow.** To add a new content surface: create the Fibery
+entity *first*, then wire the renderer in HTML via `data-content-entity` and
+`getContent()`. Do not ship hardcoded copy with a TODO to "move to Fibery
+later" — the contract is content-first.
+
+### Currently Fibery-driven
+
+- Hero (`Home - Hero`)
+- Solutions dropdown + cards + detail pages
+- Blog grid, post bodies, post images
+- Contact page (`Contact Page`)
+- Site Config (contact email, Calendly, copyright, sign-in URL)
+- Whitepapers + lead capture (`Website/Blog` + `Website/Blog Leads`)
+- Deployment tracking (`Website/Deployments`)
+
+### Migration backlog (currently hardcoded — should move to Fibery)
+
+- "Who We Serve" cards — `index.html:157-175`
+- Metrics bar with 71% / 22% / 650bps claims — `index.html:182-184`
+- "How It Works" timeline — `index.html:190-208`
+- Testimonial quote — `index.html:264-270`
+- CTA copy — `index.html:312-315`
+- Footer tagline — `index.html:392`
+
+### Hybrid drift risk
+
+Two case study sections carry `data-content-entity` attributes
+(`index.html:226` — Chat Advance; `index.html:275` — 4D Financing) but their
+copy is still hardcoded inline. The attribute is a **contract** — those
+sections must be fully wired so the Fibery entity is the live source. Any
+hardcoded fallback masks a missing render and lets content drift go
+undetected.
+
+### Legitimately hardcoded (exceptions)
+
+- JSON-LD structured data (crawler preference for inline literals)
+- Design tokens (`tokens/tokens.css`, `tokens/tokens.json`)
+- Layout scaffolding (grid wrappers, section containers, semantic structure)
+- Brand identity strings ("undersight")
+- Calendly / auth URLs — but these *do* live in the `Site Config` entity and
+  should be read from there, not duplicated in markup
+
+---
+
+## Fibery Schema Reference
+
+| Type | Key Fields | Used By |
+|------|------------|---------|
+| `Website/Pages` | `Website/Name`, `Website/Description` (markdown doc), `Website/Assets` (files) | `build.py:97-200`, `undersight-serve.py:53-123` |
+| `Website/Blog` | `Website/name`, `Website/Slug`, `Website/PDF`, `Website/Assets`, `Website/Post Date`, `Website/Tag`, `Website/Subtitle`, `Website/Author`, `Website/Excerpt` | `build.py:183-194`, `functions/api/whitepaper-lead.js:79`, `undersight-serve.py:164-166` |
+| `Website/Blog Leads` | `Website/Email`, `Website/Blog Post`, `Website/Sent At` | `functions/api/whitepaper-lead.js:97-105` |
+| `Website/Deployments` | `Website/Commit`, `Website/Site Mode`, `Website/Content Hash`, `Website/Build Status`, `Website/URL`, `Website/Deployed At` | `deploy-report.py:56-102` |
+| `Site Config` (entity in `Website/Pages`) | contact email, Calendly URL, copyright, sign-in URL (markdown body keys) | `index.html:784-794` |
+
+**Markdown front-matter convention** used inside `Website/Description` documents:
+`_title`, `_body` for primary copy; `Date`, `Excerpt`, `Tag`, `Subtitle`,
+`Author` for Blog metadata.
 
 ---
 
@@ -217,16 +288,21 @@ These are available as slash commands in any Claude Code session:
 
 ## Working Rules
 
-1. **Never hardcode colors.** Import `tokens/tokens.css` and use CSS variables.
-2. **Inter text must have OpenType features.** Always apply
+1. **Fibery is the CMS source of truth.** All editable content lives in
+   Fibery, not HTML. To add or change content, edit the Fibery entity first.
+2. **Never hardcode colors.** Import `tokens/tokens.css` and use CSS variables.
+3. **Inter text must have OpenType features.** Always apply
    `font-feature-settings: 'cv01', 'ss03'` via `tokens.css` or explicitly.
-3. **UI weight is `510`**, not 500. Buttons, nav, labels, form fields.
-4. **Amber Rust is reserved** for CTAs, active states, and interactive elements.
+4. **UI weight is `510`**, not 500. Buttons, nav, labels, form fields.
+5. **Amber Rust is reserved** for CTAs, active states, and interactive elements.
    Never decorative.
-5. **Token synchrony.** `DESIGN.md`, `tokens/tokens.css`, and `tokens/tokens.json`
+6. **Token synchrony.** `DESIGN.md`, `tokens/tokens.css`, and `tokens/tokens.json`
    must stay in sync. If you add a value to one, add it to all three.
-6. **Preview before shipping.** New component patterns go to `preview.html` first.
-7. **"undersight" is always lowercase.** Never "Undersight" or "UNDERSIGHT".
+7. **`data-content-entity` is a contract.** If the attribute is set, the
+   rendered copy MUST come from Fibery. Never leave hardcoded fallback copy
+   that masks a missing Fibery render.
+8. **Preview before shipping.** New component patterns go to `preview.html` first.
+9. **"undersight" is always lowercase.** Never "Undersight" or "UNDERSIGHT".
 
 ---
 
@@ -359,6 +435,46 @@ the correct blog/case-study asset, with `Sent` eventually set to true by the aut
 - **Fibery automation**: Active — "undersight research dispatch" triggers on new leads
 - **Setup required**: Set `FIBERY_TOKEN` in Cloudflare Pages dashboard →
   Settings → Environment variables (Production + Preview)
+
+---
+
+## Launch Readiness Checklist
+
+### CMS robustness
+
+- [ ] Hardcoded marketing copy migrated to Fibery (per migration backlog above)
+- [ ] Hybrid case study sections fully wired (no hardcoded fallback)
+- [ ] Blog consolidation complete (all posts in `Website/Blog`, not `Website/Pages`)
+- [ ] `/blog` sorted by post date desc
+
+### Safeguards
+
+- [ ] `build.py --verify` passes
+- [ ] Schema guard active in CI (`.github/workflows/deploy-production.yml`)
+- [ ] Under-construction fallback verified (auto-deploys if build fails)
+
+### Security
+
+- [ ] `FIBERY_TOKEN` set in Cloudflare Pages env (Production + Preview)
+- [ ] No secrets in committed `dist/` (Fibery URLs, UUIDs, file endpoints)
+- [ ] Rate-limit / abuse protection on `/api/whitepaper-lead`
+
+### Tests
+
+- [ ] `tests/test-suite.sh` passing
+- [ ] `tests/build-validation.sh` (13 checks) passing
+- [ ] Lead capture E2E test (submit → entity created → automation email sent)
+- [ ] Visual regression on dev before main merge
+
+### Content
+
+- [ ] Metrics bar (71% / 22% / 650bps) attributed with source
+- [ ] All whitepaper entities exist in Fibery with PDFs attached
+
+### Performance
+
+- [ ] Dev rebuild reliable at sub-5-min cadence
+- [ ] Fibery webhook for push-based freshness
 
 ---
 
