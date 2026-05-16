@@ -488,6 +488,8 @@
     function inline(text) {
       text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/([^*]|^)\*([^*]+)\*([^*]|$)/g, '$1<em>$2</em>$3');
+      text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+        '<figure style="margin:32px 0;"><img src="$2" alt="$1" style="width:100%;border-radius:var(--rounded-md);border:1px solid var(--pale);" loading="lazy"></figure>');
       text = text.replace(/\[(.+?)\]\((.+?)\)/g, (_, t, u) => {
         const safe = /^(https?:\/\/|\/|#)/.test(u.trim());
         return safe ? `<a href="${u}">${t}</a>` : t;
