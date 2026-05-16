@@ -23,7 +23,6 @@ There is no separate local dev directory — this repo IS the working directory.
 
 ```bash
 # Start of session
-cd "/Users/kyle/My Drive (kyle@undersight.ai)/undersight-website"
 git checkout dev && git pull
 
 # After changes
@@ -32,6 +31,57 @@ git add <files> && git commit -m "description" && git push
 # When ready for production
 git checkout main && git merge dev && git push && git checkout dev
 ```
+
+### Git Rules for Agents (Multi-Agent Safety)
+
+These rules are mandatory for all Claude agents working in this repo.
+
+**Branch before you build.** Never commit directly to `dev` when doing
+multi-step work. Create a feature branch from `dev`, do your work there,
+then merge back:
+
+```bash
+git checkout dev && git pull
+git checkout -b <short-descriptive-name>
+# ... work and commit ...
+git checkout dev && git pull && git merge <branch> && git push
+```
+
+**One agent, one branch.** If you are in a worktree or were spawned as a
+sub-agent, always create your own branch. Never push to `dev` or `main`
+from a worktree — merge via the primary working directory.
+
+**Never revert without reading the commit.** Before running `git revert`,
+read the full diff of the target commit (`git show <hash>`) and verify
+the changes are actually wrong. Reverting correct work is worse than
+leaving a bug — it creates silent regressions across multiple files.
+
+**Never force-push.** No `--force`, no `--force-with-lease`, no
+`git push -f`. If the remote has diverged, pull and merge.
+
+**Check for uncommitted work before switching branches.** Run `git status`
+before any `git checkout` or `git switch`. Stash or commit first.
+
+**Merge conflicts require human review.** If `git merge` produces
+conflicts, stop and ask the user to resolve. Do not silently pick one
+side or auto-resolve with `--theirs`/`--ours`.
+
+**Worktree hygiene.** After finishing work in a worktree:
+1. Merge your branch back to `dev` from the primary directory
+2. Remove the worktree: `git worktree remove <path>`
+3. Delete the branch: `git branch -d <name>`
+
+**Before editing a file, check git log for recent changes:**
+
+```bash
+git log --oneline -5 -- <file>
+```
+
+If another agent touched it in the last few commits, read those commits
+before making changes to avoid undoing recent work.
+
+**Commit messages must name the key files changed.** Include file names
+in the commit body so the circuit breaker can detect oscillation patterns.
 
 ### Dev Server
 
@@ -248,7 +298,7 @@ transplant as a model for how this pipeline works end-to-end.
 | Fetch design ref | `npx getdesign@latest add <site>` |
 | Push to dev | `git add . && git commit -m "msg" && git push` |
 | Merge to main | `git checkout main && git merge dev && git push && git checkout dev` |
-| Trigger test lead | `curl -s -X POST http://localhost:8088/api/whitepaper-lead -H "Content-Type: application/json" -d '{"email":"kyle.adriany@gmail.com","whitepaper":"Chat Advance Case Study"}'` |
+| Trigger test lead | `curl -s -X POST https://dev.undersight-website.pages.dev/api/whitepaper-lead -H "Content-Type: application/json" -d '{"email":"test@example.com","whitepaper":"Chat Advance Case Study"}'` |
 
 ---
 
@@ -267,106 +317,111 @@ transplant as a model for how this pipeline works end-to-end.
 
 ---
 
-## Whitepaper Lead Capture & PDF Delivery
+## Blog Lead Capture & PDF Delivery
 
 ### Overview
 
-Research articles and case studies are gated behind an email capture modal.
-When a visitor submits their email, a lead entity is created in Fibery and linked
-to the corresponding whitepaper. A Fibery automation ("undersight research dispatch")
-sends the PDF to the visitor's email automatically.
+Research articles and case studies (not Insight posts) are gated behind an email
+capture modal. When a visitor submits their email, a lead is created in Fibery
+and linked to the blog post. A Fibery automation sends the PDF automatically.
 
 ### Data Flow
 
 ```
 Website modal → submitWhitepaperEmail()
-  → POST /api/whitepaper-lead { email, whitepaper }
+  → POST /api/whitepaper-lead { email, whitepaper: "Post Name" }
   → Dev: undersight-serve.py _capture_lead()
-  → Prod: Cloudflare Worker (WORKER_URL — TODO: deploy)
+  → Prod: Cloudflare Pages Function (functions/api/whitepaper-lead.js)
   → Fibery API:
-      1. Query Website/Whitepapers by name → get fibery/id
-      2. Create Website/Whitepaper Leads entity
+      1. Query Website/Blog by name → get fibery/id
+      2. Create Website/Blog Leads entity
          - Website/Email: submitted email
-         - Website/Whitepaper: linked to whitepaper entity
+         - Website/Blog Post: linked to blog entity
   → Fibery Automation triggers on new lead
-  → Sends email with PDF attachment from whitepaper entity
-  → Sets Website/Sent At = current timestamp on the lead
+  → Sends email with PDF attachment from blog entity
 ```
 
-### Fibery Schema
+### Fibery Schema (subscript.fibery.io)
 
-**Website/Whitepapers** (catalog of downloadable PDFs):
+**Website/Blog** (all blog posts; only Case Study and Research have PDFs):
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `Website/name` | text | Entity name — must match the `whitepaper` param from the modal |
+| `Website/name` | text | Entity name — must match the name param from the modal |
 | `Website/Slug` | text | URL-safe identifier |
-| `Website/Type` | text | "Case Study" or "Research" |
-| `Website/PDF` | file | The PDF attachment sent to leads |
-| `Website/Leads` | relation (1:M) | Back-reference to all leads for this whitepaper |
+| `Website/Type` | multi-select | "Case Study", "Research", or "Insight" |
+| `Website/Version` | number | Version control for content updates |
+| `Website/PDF` | file | PDF attachment sent to leads (Case Study + Research only) |
+| `Website/Leads` | relation (1:M) | Back-reference to all leads for this post |
 
-**Website/Whitepaper Leads** (captured submissions):
+**Website/Blog Leads** (captured submissions):
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | `Website/Email` | text | Visitor's email |
-| `Website/Whitepaper` | relation (M:1) | Link to the whitepaper entity |
+| `Website/Blog Post` | relation (M:1) | Link to the blog entity |
 | `Website/Sent At` | date-time | Set by Fibery automation when email is sent |
-| `fibery/creation-date` | date-time | (system) When the lead was captured |
 
-### Current Whitepapers (must exist in Fibery with PDF attached)
+### Current Blog Posts (in Fibery)
 
-| Name (exact match required) | Type | Slug |
+| Name (exact match required) | Type | PDF |
 |----|------|------|
-| `Chat Advance Case Study` | Case Study | `chat-advance` |
-| `From Deterministic Scorecards to Agentic Credit Assessments` | Research | `deterministic-scorecards` |
-| `Unlocking Institutional Capital for Mid-Tier MCA Funds` | Research | `institutional-capital` |
+| `Chat Advance Case Study` | Case Study | Yes |
+| `4D Financing Case Study` | Case Study | Yes |
+| `From Deterministic Scorecards to Agentic Credit Assessments` | Research | Yes |
+| `Unlocking Institutional Capital for Mid-Tier MCA Funds` | Research | Yes |
+| `Why AI underwriting is not about replacing underwriters` | Insight | No |
+| `The RFI bottleneck` | Insight | No |
+| `Building an underwriting copilot` | Insight | No |
 
-### Whitepaper Name Mapping (JS → Fibery)
+### Name Mapping (JS → Fibery)
 
-The modal receives a whitepaper name via `openWhitepaperModal(name)`. This name
-**must exactly match** the `Website/name` field in the Fibery Whitepapers database.
+The modal receives a name via `openWhitepaperModal(name)`. This name
+**must exactly match** the `Website/name` field in the Fibery Blog database.
 
-- Homepage case study CTA → hardcoded `'Chat Advance Case Study'`
-- Blog posts with tag `Research` or `Case Study` → uses `post.title` directly,
-  except posts containing "Chat Advance" which map to `'Chat Advance Case Study'`
+- Posts containing "Chat Advance" → mapped to `'Chat Advance Case Study'`
+- Posts containing "4D Financing" → mapped to `'4D Financing Case Study'`
+- All other Research/Case Study posts → `post.title` sent directly
 
-### Adding a New Whitepaper
+### Adding a New Downloadable Post
 
-1. Create a `Website/Whitepapers` entity in Fibery with the exact name
-2. Attach the PDF file to the `Website/PDF` field
-3. Set `Website/Type` and `Website/Slug`
-4. In `index.html`, add a download button that calls
-   `openWhitepaperModal('Exact Whitepaper Name')` — OR ensure the blog post
-   title matches the whitepaper name and has tag `Research` or `Case Study`
-5. The Fibery automation will handle delivery — no code changes needed
+1. Create a `Website/Blog` entity in Fibery with the exact name
+2. Set `Website/Type` to "Case Study" or "Research"
+3. Attach the PDF to `Website/PDF`
+4. Ensure the blog post title matches the entity name, or add a mapping
+   in the `wpName` logic in `index.html`
+5. The Fibery automation handles email delivery — no code changes needed
+
+### Generating PDFs
+
+```bash
+cd whitepaper && node generate-all.js        # all papers
+cd whitepaper && node generate-all.js 4d     # just 4D
+```
+
+The generator fetches content from Fibery, renders branded HTML with cover page,
+and exports A4 PDFs via Playwright.
 
 ### Testing Lead Capture
 
 ```bash
-# Trigger a test lead (dev server must be running on :8088)
-curl -s -X POST http://localhost:8088/api/whitepaper-lead \
+curl -s -X POST https://dev.undersight-website.pages.dev/api/whitepaper-lead \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","whitepaper":"Chat Advance Case Study"}'
 ```
-
-Verify in Fibery: Website/Whitepaper Leads should show the new entity linked to
-the correct whitepaper, with `Sent` eventually set to true by the automation.
 
 ### Production Status
 
 - **Dev server**: POST `/api/whitepaper-lead` handled by `undersight-serve.py`
 - **Production**: POST `/api/whitepaper-lead` handled by Cloudflare Pages Function
-  (`functions/api/whitepaper-lead.js` — deploys automatically with the site)
-- **Fibery automation**: Active — "undersight research dispatch" triggers on new leads
-- **Setup required**: Set `FIBERY_TOKEN` in Cloudflare Pages dashboard →
-  Settings → Environment variables (Production + Preview)
+- **Fibery automation**: Active — triggers on new Blog Leads
+- **Required env**: `FIBERY_TOKEN` set in Cloudflare Pages (Production + Preview)
 
 ---
 
 ## Known Issues
 
-- Cloudflare Pages needs `FIBERY_TOKEN` env var set in dashboard for whitepaper leads
+- Cloudflare Pages needs `FIBERY_TOKEN` env var set in dashboard for blog lead capture
 - Sign In link points to `staging.app.underchat.ai` (intentional until prod auth)
 - Font stack validated (Inter) but display font TBD
 - Test suite has curl flakes on large HTML responses from Python dev server

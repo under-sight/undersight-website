@@ -45,18 +45,18 @@ const WHITEPAPERS = [
       // P[23]: "undersight addresses four of five..." → end of Mapping to Matthews Dimensions
       bodyHtml = spliceAfterP(bodyHtml, 23,
         imgTag('institutional-capital-dimensions.png',
-          'undersight directly addresses four of the five Matthews dimensions for institutional readiness. Data Integrity, Servicing Continuity, and Buyback Discipline are fully covered. Payment Stability and Stacking Controls receive substantial support.',
-          '65%'));
+          'Fig. 3 — undersight coverage across the Matthews institutional readiness framework.',
+          '75%'));
       // P[22]: "The progression is deliberate..." → end of Three-Layer Value Stack
       bodyHtml = spliceAfterP(bodyHtml, 22,
         imgTag('institutional-capital-layers.png',
-          'The three layers build on each other deliberately. Funds adopt Layer 1 for underwriting efficiency and cost reduction. Layer 2 compounds value through continuous monitoring and early warning. Layer 3 delivers the transformation payoff: institutional capital access at materially better terms.',
-          '65%'));
+          'Fig. 2 — The undersight value stack: from operational efficiency to institutional capital access.',
+          '75%'));
       // P[6]: "The question is not whether..." → end of Transformation Opportunity
       bodyHtml = spliceAfterP(bodyHtml, 6,
         imgTag('institutional-capital-market.png',
-          'The US MCA market originates $19-22B annually across roughly 200-300 funders. Despite strong asset performance, only ~8 platforms have achieved institutional capital access. The mid-market tier — 30-50 funds originating $3-6B — represents the largest transformation opportunity.',
-          '65%'));
+          'Fig. 1 — US MCA market by origination tier. Mid-market funds represent the primary transformation opportunity.',
+          '75%'));
       return bodyHtml;
     },
   },
