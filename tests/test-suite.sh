@@ -775,7 +775,7 @@ section "Fibery Content Linkage Tests"
 #   "Site Config"                         → signInLink, footerPrivacy, contactEmail, footerCopy
 #   "Contact Page"                        → contactTitle, contactSubtitle
 #   "Solutions - underscore"              → page-underscore, nav dropdown, home solutions
-#   "Solutions - Agentic Client RFI"      → page-rfi, nav dropdown, home solutions
+#   "Solutions - underchat agent"         → page-underchat, nav dropdown, home solutions
 #   "Solutions - AI Underwriting Copilot" → page-copilot, nav dropdown, home solutions
 #   "Blog - *"                            → blogGrid cards, page-post on click
 #
@@ -797,7 +797,7 @@ REQUIRED_ENTITIES=(
   "Site Config"
   "Contact Page"
   "Solutions - underscore"
-  "Solutions - Agentic Client RFI"
+  "Solutions - underchat agent"
   "Solutions - AI Underwriting Copilot"
 )
 
@@ -873,7 +873,7 @@ consumed_exact = {'Home - Hero', 'Home - Who We Serve', 'Home - Metrics',
                   'Home - Testimonial', 'Home - Case Study: 4D Financing',
                   'Home - CTA', 'Site Config', 'Contact Page', 'Docs Page',
                   'Footer', 'SEO', 'Solutions - underscore',
-                  'Solutions - Agentic Client RFI',
+                  'Solutions - underchat agent',
                   'Solutions - AI Underwriting Copilot'}
 consumed_prefixes = ['Blog - ']
 orphans = []
@@ -957,7 +957,7 @@ fi
 
 # -- Solution entities have non-empty body content --
 
-for SOL_NAME in "Solutions - underscore" "Solutions - Agentic Client RFI" "Solutions - AI Underwriting Copilot"; do
+for SOL_NAME in "Solutions - underscore" "Solutions - underchat agent" "Solutions - AI Underwriting Copilot"; do
   SOL_LEN=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
@@ -1722,7 +1722,7 @@ fi
 SOL_REF_MISSING=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-expected = ['Solutions - underscore', 'Solutions - Agentic Client RFI', 'Solutions - AI Underwriting Copilot']
+expected = ['Solutions - underscore', 'Solutions - underchat agent', 'Solutions - AI Underwriting Copilot']
 missing = [s for s in expected if s not in data]
 if missing:
     print(';'.join(missing))
@@ -2055,7 +2055,7 @@ import sys, json
 data = json.load(sys.stdin)
 expected = {
     'Solutions - underscore': 1,
-    'Solutions - Agentic Client RFI': 3,
+    'Solutions - underchat agent': 3,
     'Solutions - AI Underwriting Copilot': 3,
 }
 issues = []

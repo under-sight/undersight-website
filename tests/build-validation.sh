@@ -22,7 +22,7 @@ echo ""
 ! grep -q "fetch('/api/content')" "$DIST/index.html" && pass "No runtime API calls in dist" || fail "No runtime API calls in dist"
 
 # Baked content contains required entities
-for entity in "Home - Hero" "Site Config" "Solutions - underscore" "Solutions - Agentic Client RFI" "Solutions - AI Underwriting Copilot"; do
+for entity in "Home - Hero" "Site Config" "Solutions - underscore" "Solutions - underchat agent" "Solutions - AI Underwriting Copilot"; do
   grep -q "$entity" "$DIST/index.html" && pass "Baked entity: $entity" || fail "Baked entity: $entity" "Missing from dist"
 done
 
