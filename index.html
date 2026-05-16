@@ -898,7 +898,7 @@
         const files = getFiles(data, name);
         const meta = parseMeta(md);
         const heroImg = firstImage(files) || '';
-        const companionImgs = (files || []).filter(f => (f.type || '').startsWith('image/')).slice(1).map(f => f.url);
+        const companionImgs = (files || []).filter(f => (f.type || '').startsWith('image/') && !(f.name || '').includes('logo')).slice(1).map(f => f.url);
         return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, companionImgs, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '', pdf: meta.PDF || '' };
       })
       .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
