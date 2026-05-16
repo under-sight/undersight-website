@@ -133,6 +133,8 @@ def fetch_all(token):
         ],
         token,
     )[0]["result"]
+    # Filter out non-dict entries (Fibery API sometimes returns metadata strings)
+    entities = [e for e in entities if isinstance(e, dict)]
     print(f"  Found {len(entities)} entities")
 
     # Batch doc fetch
