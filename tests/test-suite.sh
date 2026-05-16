@@ -1498,18 +1498,11 @@ else
 fi
 
 # Test: Lead capture endpoint responds (dev server)
-if [ "${RUN_FIBERY_WRITE_TESTS:-0}" = "1" ]; then
-  WP_LEAD_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/whitepaper-lead" \
-    -H "Content-Type: application/json" \
-    -d '{"email":"test-suite@example.com","whitepaper":"Chat Advance Case Study"}' 2>/dev/null)
-  if [ "$WP_LEAD_RESPONSE" = "200" ]; then
-    pass "POST /api/whitepaper-lead returns 200"
-  else
-    skip "POST /api/whitepaper-lead returns 200 (dev server may not be running)"
-  fi
-else
-  skip "POST /api/whitepaper-lead write test (set RUN_FIBERY_WRITE_TESTS=1 to enable)"
-fi
+# NOTE: The opt-in deliverable send tests have moved to the
+# "Deliverable Lead Capture Tests (opt-in)" section near the end of this suite.
+# That section fires exactly ONE POST per known whitepaper asset using
+# agent@undersight.ai as the recipient, gated by RUN_DELIVERABLE_SEND_TESTS=1.
+skip "POST /api/whitepaper-lead write test (see Deliverable Lead Capture section; set RUN_DELIVERABLE_SEND_TESTS=1)"
 
 # Test: Lead capture validates email
 WP_INVALID_RESPONSE=$(curl -s -X POST "$BASE/api/whitepaper-lead" \
@@ -2151,6 +2144,118 @@ if grep -q "CF_TURNSTILE_SECRET_KEY" "$SITE_ROOT/functions/api/whitepaper-lead.j
   pass "Turnstile verification wired in Pages Function"
 else
   fail "Turnstile verification wired in Pages Function"
+fi
+
+# =============================================================================
+section "Deliverable Lead Capture Tests (opt-in)"
+# =============================================================================
+# Fires exactly ONE POST per known whitepaper asset against the dev server
+# and verifies that exactly ONE matching lead lands in Fibery for each.
+#
+# This is the only place in the suite that triggers real Fibery writes and
+# real outbound email (via the "undersight research dispatch" automation),
+# so it is gated behind RUN_DELIVERABLE_SEND_TESTS=1 and OFF by default.
+#
+#   Enable:   RUN_DELIVERABLE_SEND_TESTS=1 bash tests/test-suite.sh
+#   Endpoint: $LEAD_ENDPOINT (defaults to $BASE/api/whitepaper-lead)
+#   Recipient: agent@undersight.ai (owned by the user; delivery is confirmed)
+#
+# Between POSTs we sleep 13s to stay safely under the dev server's 5/min
+# per-IP rate limit, even when run back-to-back with the Lead Capture
+# Security Tests section above.
+
+LEAD_ENDPOINT="${LEAD_ENDPOINT:-$BASE/api/whitepaper-lead}"
+LEAD_RECIPIENT="${LEAD_RECIPIENT:-agent@undersight.ai}"
+
+KNOWN_WHITEPAPERS=(
+  "Chat Advance Case Study"
+  "From Deterministic Scorecards to Agentic Credit Assessments"
+  "Unlocking Institutional Capital for Mid-Tier MCA Funds"
+)
+
+if [ "${RUN_DELIVERABLE_SEND_TESTS:-0}" != "1" ]; then
+  for WP in "${KNOWN_WHITEPAPERS[@]}"; do
+    skip "Deliverable POST for: $WP (set RUN_DELIVERABLE_SEND_TESTS=1 to enable)"
+    skip "Fibery lead created exactly once for: $WP (set RUN_DELIVERABLE_SEND_TESTS=1 to enable)"
+  done
+else
+  # Capture a window start timestamp so the Fibery lookup only sees leads
+  # created by THIS test pass. Fibery stores creation-date as an ISO 8601
+  # UTC string; we use a UTC timestamp from a few seconds before the first
+  # POST to absorb any clock skew between the test runner and Fibery.
+  TEST_WINDOW_START="$(python3 -c 'import datetime; print((datetime.datetime.utcnow() - datetime.timedelta(seconds=10)).strftime("%Y-%m-%dT%H:%M:%S.000Z"))')"
+  echo "  (test window start: $TEST_WINDOW_START — leads created before this are ignored)"
+
+  # Resolve FIBERY_TOKEN for the verification step. We accept either an
+  # env var or the macOS Keychain entry described in CLAUDE.md.
+  if [ -z "${FIBERY_TOKEN:-}" ]; then
+    FIBERY_TOKEN="$(security find-generic-password -s 'mcp-credentials' -a 'fibery-undersight' -w 2>/dev/null || echo '')"
+  fi
+  export FIBERY_TOKEN
+
+  FIRST=1
+  for WP in "${KNOWN_WHITEPAPERS[@]}"; do
+    if [ "$FIRST" = "1" ]; then
+      FIRST=0
+    else
+      echo "  (sleeping 13s to respect dev server 5/min rate limit…)"
+      sleep 13
+    fi
+
+    # Build the JSON body with python3 to safely encode the whitepaper name.
+    BODY=$(python3 -c "import json,sys; print(json.dumps({'email': sys.argv[1], 'whitepaper': sys.argv[2]}))" "$LEAD_RECIPIENT" "$WP")
+
+    STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 -X POST \
+      -H 'Content-Type: application/json' \
+      --data "$BODY" \
+      "$LEAD_ENDPOINT" 2>/dev/null || echo "000")
+
+    if [ "$STATUS" = "200" ]; then
+      pass "POST /api/whitepaper-lead 200 for: $WP"
+    else
+      fail "POST /api/whitepaper-lead 200 for: $WP" "Got HTTP $STATUS"
+      continue
+    fi
+
+    # Verify Fibery received exactly ONE new lead for this asset in our window.
+    # Uses the fibery CLI (subscript workspace). Filters on the linked Blog
+    # entity name plus the recipient email plus creation date >= start.
+    if [ -z "${FIBERY_TOKEN:-}" ]; then
+      skip "Fibery lead created exactly once for: $WP (FIBERY_TOKEN not available)"
+      continue
+    fi
+
+    LEAD_COUNT=$(/Users/kyle/bin/fibery -o json subscript query 'Website/Blog Leads' \
+      --where "Website/Email=$LEAD_RECIPIENT" \
+      --where "Website/Blog Post.Website/name=$WP" \
+      --where "fibery/creation-date>=$TEST_WINDOW_START" \
+      --select 'fibery/id,Website/Email,fibery/creation-date' \
+      --limit 10 2>/dev/null | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    # CLI returns a list of entities (or {'result': [...]})
+    if isinstance(data, dict) and 'result' in data:
+        rows = data['result']
+    elif isinstance(data, list):
+        rows = data
+    else:
+        rows = []
+    print(len(rows))
+except Exception as e:
+    print('ERR:' + str(e))
+" 2>/dev/null || echo "ERR:query-failed")
+
+    if [ "$LEAD_COUNT" = "1" ]; then
+      pass "Fibery lead created exactly once for: $WP"
+    elif [ "$LEAD_COUNT" = "0" ]; then
+      fail "Fibery lead created exactly once for: $WP" "No lead found — automation may not have fired or query window too tight"
+    elif [[ "$LEAD_COUNT" == ERR* ]]; then
+      skip "Fibery lead created exactly once for: $WP (query failed: $LEAD_COUNT)"
+    else
+      fail "Fibery lead created exactly once for: $WP" "Duplicate lead created — got $LEAD_COUNT rows (expected 1)"
+    fi
+  done
 fi
 
 # =============================================================================
