@@ -554,7 +554,7 @@ a.back:hover { color: var(--color-accent); }
 
 /* ---- CONTACT ---- */
 .contact-wrap { max-width: 560px; margin: 0 auto; padding: 80px 24px; text-align: center; }
-.contact-wrap h2 { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 12px; }
+.contact-wrap h2 { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 12px; color: var(--color-text); }
 .contact-wrap > p { font-size: 16px; color: var(--mid); margin-bottom: 40px; line-height: 1.6; }
 .contact-email { margin-top: 24px; font-size: 13px; color: var(--mid); }
 .contact-email a { text-decoration: underline; }
@@ -987,7 +987,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   font-feature-settings: 'cv01', 'ss03';
   font-size: 20px; font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--black);
+  color: var(--color-text);
   margin-bottom: 8px;
 }
 .wp-modal .wp-desc {
@@ -1038,7 +1038,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   font-family: 'Inter', sans-serif;
   font-feature-settings: 'cv01', 'ss03';
   font-size: 18px; font-weight: 600;
-  color: var(--black); margin-bottom: 8px;
+  color: var(--color-text); margin-bottom: 8px;
 }
 .wp-success p {
   font-size: 14px; color: var(--mid); line-height: 1.5;
