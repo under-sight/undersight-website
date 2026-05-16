@@ -27,7 +27,7 @@ import urllib.request
 # ---------------------------------------------------------------------------
 
 WORKSPACE = "subscript.fibery.io"
-DB = "Website/Database 1"
+DB = "Website/Pages"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")
 
