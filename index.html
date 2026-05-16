@@ -229,27 +229,9 @@
       <div class="container">
         <div class="home-section-label">Case study</div>
         <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">See it in action</h2>
-        <div class="case-study-inner">
-          <div class="case-study-graphic">
-            <div class="cs-label">Case Study: Chat Advance</div>
-            <h3>An auto-declined deal gets funded in under 5 minutes</h3>
-            <div class="cs-steps">
-              <div class="cs-step"><div class="cs-num">1</div><p>Applicant engages via chat with Macy, the AI intake agent</p></div>
-              <div class="cs-step"><div class="cs-num">2</div><p>Bank data ingested via Plaid and enriched automatically</p></div>
-              <div class="cs-step"><div class="cs-num">3</div><p>RFIs addressed directly with the applicant by the agent</p></div>
-              <div class="cs-step"><div class="cs-num">4</div><p>Matching funders receive a rich submission package</p></div>
-            </div>
-            <div class="cs-stats">
-              <div class="cs-stat"><div class="num">24/7</div><div class="label">Availability</div></div>
-              <div class="cs-stat"><div class="num">60s</div><div class="label">Screening</div></div>
-              <div class="cs-stat"><div class="num">$0</div><div class="label">Acquisition Cost</div></div>
-              <div class="cs-stat"><div class="num">2</div><div class="label">Offers in 5 min</div></div>
-            </div>
-          </div>
+        <div class="case-study-inner" id="caseStudyChatAdvanceInner">
+          <div class="case-study-graphic"></div>
           <div class="case-study-text">
-            <div class="cs-tag">Funding Marketplace</div>
-            <h3>How Chat Advance turned a decline into a funded deal</h3>
-            <p>A small business owner was auto-declined by a rules-based underwriter. The undersight platform saw what the rules engine couldn't. Through agentic intake, enrichment, and pre-underwriting, two funders matched and extended offers in under five minutes.</p>
             <a class="cs-link" href="javascript:void(0)" onclick="openCaseStudy()">Read the full case study &rarr;</a>
             <button class="btn btn-ghost" onclick="openWhitepaperModal('Chat Advance Case Study')" style="margin-top:12px;">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
@@ -278,27 +260,9 @@
       <div class="container">
         <div class="home-section-label">Case study</div>
         <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">Institutional-grade underwriting, lean team</h2>
-        <div class="case-study-inner">
-          <div class="case-study-graphic">
-            <div class="cs-label">Case Study: 4D Financing</div>
-            <h3>Evidence-based underwriting for every deal, every time</h3>
-            <div class="cs-steps">
-              <div class="cs-step"><div class="cs-num">1</div><p>Bank statements and financials are uploaded to undersight</p></div>
-              <div class="cs-step"><div class="cs-num">2</div><p>AI cross-references deposits vs. revenue vs. tax returns, flags anomalies</p></div>
-              <div class="cs-step"><div class="cs-num">3</div><p>Risk profile built with fraud detection, volatility analysis, and stress testing</p></div>
-              <div class="cs-step"><div class="cs-num">4</div><p>Terms proposed or decline issued — with full reasoning and document citations</p></div>
-            </div>
-            <div class="cs-stats">
-              <div class="cs-stat"><div class="num placeholder">Minutes</div><div class="label">Time to underwrite</div></div>
-              <div class="cs-stat"><div class="num">100%</div><div class="label">Audit trail</div></div>
-              <div class="cs-stat"><div class="num">3-way</div><div class="label">Doc cross-check</div></div>
-              <div class="cs-stat"><div class="num">24hr</div><div class="label">Funding after approval</div></div>
-            </div>
-          </div>
+        <div class="case-study-inner" id="caseStudy4DFinancingInner">
+          <div class="case-study-graphic"></div>
           <div class="case-study-text">
-            <div class="cs-tag">Direct Funder</div>
-            <h3>How a 2-person fund gets institutional-grade underwriting</h3>
-            <p>4D Financing is a direct MCA lender built on a simple conviction: business owners deserve transparency. With a lean team and undersight's AI underwriting agent, 4DF analyzes bank statements, cross-references financial documents, flags inconsistencies, and proposes terms — all with full audit trails. Every approval and every decline comes with evidence-backed reasoning, not gut feel.</p>
             <a class="cs-link" href="javascript:void(0)" onclick="open4DCaseStudy()">Read the full case study &rarr;</a>
             <button class="btn btn-ghost" onclick="openWhitepaperModal('4D Financing Case Study')" style="margin-top:12px;">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
@@ -767,6 +731,142 @@
   }
 
 
+  // Parse a homepage case-study markdown body into structured sections.
+  // Expected format:
+  //   **Label:** ...
+  //   **Heading:** ...
+  //   ## Steps
+  //   ### Step 1 \n <para>
+  //   ### Step 2 \n <para>
+  //   ...
+  //   ## Stats
+  //   **key:** value
+  //   ...
+  //   ## Description
+  //   **Tag:** ...
+  //   **Title:** ...
+  //   <body paragraph>
+  function parseHomeCaseStudy(md) {
+    if (!md) return null;
+    const out = { label: '', heading: '', steps: [], stats: [], tag: '', title: '', body: '' };
+    const lines = md.replace(/\\$/gm, '').split('\n');
+    let section = null;
+    let stepBuf = null;
+    let descBuf = [];
+    function flushStep() {
+      if (stepBuf) { out.steps.push(stepBuf); stepBuf = null; }
+    }
+    for (let raw of lines) {
+      const line = raw.replace(/\\$/, '');
+      const trimmed = line.trim();
+      // Section headers
+      if (/^##\s+/.test(trimmed)) {
+        flushStep();
+        const name = trimmed.replace(/^##\s+/, '').toLowerCase();
+        if (name.startsWith('step')) section = 'steps';
+        else if (name.startsWith('stat')) section = 'stats';
+        else if (name.startsWith('desc')) section = 'description';
+        else section = null;
+        continue;
+      }
+      if (/^###\s+/.test(trimmed) && section === 'steps') {
+        flushStep();
+        stepBuf = { label: trimmed.replace(/^###\s+/, ''), text: '' };
+        continue;
+      }
+      // Top-level meta (before any ## section)
+      if (section === null) {
+        const m = trimmed.match(/^\*\*(.+?):\*\*\s*(.*)$/);
+        if (m) {
+          const k = m[1].trim().toLowerCase();
+          if (k === 'label') out.label = m[2].trim();
+          else if (k === 'heading') out.heading = m[2].trim();
+        }
+        continue;
+      }
+      if (section === 'stats') {
+        const m = trimmed.match(/^\*\*(.+?):\*\*\s*(.*)$/);
+        if (m) out.stats.push({ num: m[1].trim(), label: m[2].trim() });
+        continue;
+      }
+      if (section === 'steps' && stepBuf) {
+        if (!trimmed) continue;
+        stepBuf.text = (stepBuf.text ? stepBuf.text + ' ' : '') + trimmed;
+        continue;
+      }
+      if (section === 'description') {
+        const m = trimmed.match(/^\*\*(.+?):\*\*\s*(.*)$/);
+        if (m) {
+          const k = m[1].trim().toLowerCase();
+          if (k === 'tag') out.tag = m[2].trim();
+          else if (k === 'title') out.title = m[2].trim();
+          else descBuf.push(trimmed);
+        } else if (trimmed) {
+          descBuf.push(trimmed);
+        } else if (descBuf.length) {
+          descBuf.push('');
+        }
+        continue;
+      }
+    }
+    flushStep();
+    out.body = descBuf.join('\n').trim();
+    return out;
+  }
+
+  function escapeHtml(s) {
+    return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function renderHomeCaseStudy(data, entityName, innerId) {
+    const inner = document.getElementById(innerId);
+    if (!inner) return;
+    const md = getContent(data, entityName);
+    const cs = parseHomeCaseStudy(md);
+    const graphic = inner.querySelector('.case-study-graphic');
+    const text = inner.querySelector('.case-study-text');
+    if (!cs || (!cs.steps.length && !cs.stats.length && !cs.body)) {
+      // No Fibery content — hide the section rather than show empty scaffolding
+      const section = inner.closest('.case-study');
+      if (section) section.style.display = 'none';
+      return;
+    }
+    if (graphic) {
+      const stepsHtml = cs.steps.map((s, i) =>
+        `<div class="cs-step"><div class="cs-num">${i + 1}</div><p>${escapeHtml(s.text)}</p></div>`
+      ).join('');
+      const statsHtml = cs.stats.map(s =>
+        `<div class="cs-stat"><div class="num">${escapeHtml(s.num)}</div><div class="label">${escapeHtml(s.label)}</div></div>`
+      ).join('');
+      graphic.innerHTML =
+        (cs.label ? `<div class="cs-label">${escapeHtml(cs.label)}</div>` : '') +
+        (cs.heading ? `<h3>${escapeHtml(cs.heading)}</h3>` : '') +
+        (stepsHtml ? `<div class="cs-steps">${stepsHtml}</div>` : '') +
+        (statsHtml ? `<div class="cs-stats">${statsHtml}</div>` : '');
+    }
+    if (text) {
+      const bodyHtml = cs.body
+        ? cs.body.split(/\n{2,}/).map(p => `<p>${escapeHtml(p).replace(/\n/g, ' ')}</p>`).join('')
+        : '';
+      const prefix =
+        (cs.tag ? `<div class="cs-tag">${escapeHtml(cs.tag)}</div>` : '') +
+        (cs.title ? `<h3>${escapeHtml(cs.title)}</h3>` : '') +
+        bodyHtml;
+      // Prepend Fibery-rendered content before the scaffolding CTAs (cs-link + button)
+      // by inserting before the first child.
+      // First remove any previously injected nodes (re-render safe).
+      Array.from(text.querySelectorAll('[data-cs-injected]')).forEach(n => n.remove());
+      const wrap = document.createElement('div');
+      wrap.setAttribute('data-cs-injected', '');
+      wrap.innerHTML = prefix;
+      // Insert each child before the first scaffolding element
+      const firstChild = text.firstChild;
+      while (wrap.firstChild) {
+        text.insertBefore(wrap.firstChild, firstChild);
+      }
+    }
+  }
+
   function renderContent(data) {
     // ---- Hero ----
     const hero = parseMeta(getContent(data, 'Home - Hero'));
@@ -800,6 +900,10 @@
     const contact = parseMeta(getContent(data, 'Contact Page'));
     if (contact._title) document.getElementById('contactTitle').textContent = contact._title;
     if (contact._body) document.getElementById('contactSubtitle').textContent = contact._body.split('\n')[0];
+
+    // ---- Homepage Case Studies (structured Fibery body) ----
+    renderHomeCaseStudy(data, 'Home - Case Study: Chat Advance', 'caseStudyChatAdvanceInner');
+    renderHomeCaseStudy(data, 'Home - Case Study: 4D Financing', 'caseStudy4DFinancingInner');
 
     // ---- Solutions ----
     const dropdown = document.getElementById('solutionsDropdown');
