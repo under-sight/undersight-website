@@ -19,7 +19,7 @@ import urllib.request
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
 WORKSPACE = "subscript.fibery.io"
-DB = "Website/Database 1"
+DB = "Website/Pages"
 CACHE_TTL = 5  # seconds - short for dev, increase for prod
 
 _cache = {"data": None, "ts": 0}
@@ -78,6 +78,9 @@ def fetch_all():
             }
         },
     }])[0]["result"]
+
+    # Filter out non-dict entries (Fibery API sometimes returns metadata strings)
+    entities = [e for e in entities if isinstance(e, dict)]
 
     # 2. Batch doc fetch: all document contents in one API call
     secrets = [e["DocSecret"] for e in entities if e.get("DocSecret")]
@@ -153,12 +156,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         whitepaper_name = body.get("whitepaper", "Chat Advance Case Study")
         try:
-            # 1. Look up the Whitepaper entity by name
+            # 1. Look up the Blog entity by name
             wp_results = api_post("/api/commands", [{
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "Website/Whitepapers",
+                        "q/from": "Website/Blog",
                         "q/select": ["fibery/id"],
                         "q/where": ["=", ["Website/name"], "$name"],
                         "q/limit": 1,
@@ -177,12 +180,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             }
             # 3. Link to whitepaper if found
             if wp_id:
-                lead_entity["Website/Whitepaper"] = {"fibery/id": wp_id}
+                lead_entity["Website/Blog Post"] = {"fibery/id": wp_id}
 
             api_post("/api/commands", [{
                 "command": "fibery.entity/create",
                 "args": {
-                    "type": "Website/Whitepaper Leads",
+                    "type": "Website/Blog Leads",
                     "entity": lead_entity,
                 },
             }])

@@ -112,7 +112,7 @@ def read_build_meta():
 
 def get_site_mode_from_fibery(token):
     """Read current Site Mode from Site Config entity (same query pattern as build.py)."""
-    CMS_DB = "Website/Database 1"
+    CMS_DB = "Website/Pages"
     entities = api_post("/api/commands", [{
         "command": "fibery.entity/query",
         "args": {

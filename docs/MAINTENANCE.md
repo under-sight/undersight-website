@@ -7,7 +7,7 @@ All website text content is managed in Fibery CMS. No code changes are needed fo
 ### Fibery Workspace
 
 - **Workspace**: `subscript.fibery.io`
-- **Database**: `Website / Database 1`
+- **Database**: `Website / Pages`
 - **Access**: Requires a Fibery account with access to the workspace
 
 ### Entity Naming Conventions
@@ -16,7 +16,14 @@ Entity names determine how content is routed and rendered. Follow these naming p
 
 | Entity Name | Renders As |
 |-------------|-----------|
-| `Homepage - Hero` | Hero headline (line after `#`) and subtitle (body text) |
+| `Home - Hero` | Hero headline (line after `#`) and subtitle (body text) |
+| `Home - Who We Serve` | Homepage audience cards |
+| `Home - Metrics` | Homepage stats bar between Who We Serve and How It Works |
+| `Home - How It Works` | Homepage process section |
+| `Home - Case Study: Chat Advance` | First homepage case study |
+| `Home - Testimonial` | Homepage testimonial |
+| `Home - Case Study: 4D Financing` | Second homepage case study |
+| `Home - CTA` | Homepage final CTA |
 | `Site Config` | Global settings: Sign In URL, Privacy Policy URL, Contact Email, Copyright |
 | `Contact Page` | Contact section headline and description |
 | `Solutions - underscore` | underscore solution page |
@@ -49,7 +56,7 @@ Supports **bold**, [links](https://example.com), and paragraph breaks.
 ### Workflow: Edit Existing Content
 
 1. Log in to [Fibery](https://subscript.fibery.io)
-2. Navigate to Website > Database 1
+2. Navigate to Website > Pages
 3. Find the entity by name
 4. Edit the Description field
 5. For dev preview: refresh `localhost:8088` (content refreshes every 5 seconds)
@@ -403,7 +410,7 @@ Before publishing any content update, verify:
 - [ ] Inter font has OpenType features `cv01`, `ss03` applied
 - [ ] UI weight is `510` (not 500) for buttons, nav, labels, form fields
 - [ ] No hardcoded hex values in CSS (all through token variables)
-- [ ] Content does not reference "specialty insurance" or insurance-specific terms (the product is for alternative finance)
+- [ ] Content does not reference "specialty insurance" or insurance-specific terms (the product is for private credit)
 - [ ] No "underchat" branding in customer-facing content (use "undersight")
 - [ ] Stats have disclaimers or qualifiers ("Based on measured outcomes across active customer deployments")
 - [ ] Sign-in URL points to production (not staging)

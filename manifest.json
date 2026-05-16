@@ -1,7 +1,7 @@
 {
   "name": "undersight",
   "short_name": "undersight",
-  "description": "AI Underwriting for Alternative Finance",
+  "description": "AI Underwriting for Private Credit",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#23262C",

@@ -187,7 +187,7 @@ Historical record of the undersight.ai website build, from planning through prod
 | P0-1 | Missing `--color-text-muted` token caused hierarchy collapse | Added to `tokens.css` semantic aliases, mapped to `--color-cloud-zinc` (light) and `rgba(255,255,255,0.45)` (dark) |
 | P0-2 | Sign-in links pointed to `staging.app.underchat.ai` | Known issue; production app URL to be configured when app is deployed |
 | P0-3 | Hardcoded `#ddd`, `#fff`, undefined `--pw`/`--cz` vars | Replaced with token variable references during CSS extraction (Task #28) |
-| P0-4 | Blog content referenced "specialty insurance" instead of alternative finance | Content issue in Fibery; flagged for content team to fix |
+| P0-4 | Blog content referenced "specialty insurance" instead of private credit | Content issue in Fibery; flagged for content team to fix |
 | P0-5 | "underchat" brand name in customer-facing blog content | Content issue in Fibery; flagged for content team to fix |
 
 ### UX Issues Found in Critique/Audit
