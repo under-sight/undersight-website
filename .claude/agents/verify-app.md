@@ -47,6 +47,12 @@ Design system lives at the agent workspace: `projects/undersight-website/`.
 8. **Smoke test:**
    - Open `index.html` in browser and verify it renders (manual step)
 
+9. **Git safety (schema consistency):**
+   - No `Website/Whitepapers` references in `functions/`, `undersight-serve.py`, `worker/`
+     (correct schema is `Website/Blog`)
+   - No `Website/Whitepaper Leads` references (correct is `Website/Blog Leads`)
+   - Run `git worktree list` — only the primary working directory should exist
+
 ## Known Issues
 
 None currently documented.

@@ -1453,16 +1453,16 @@ for name, entity in data.items():
     content = entity.get('content', '')
     if '**Tag:** Research' in content or '**Tag:** Case Study' in content:
         downloadable.append(name.replace('Blog - ', ''))
-# Get all Whitepapers entity names
+# Get all Blog entity names
 try:
     req = urllib.request.Request('https://subscript.fibery.io/api/commands',
-        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Whitepapers','q/select':['Website/name'],'q/limit':50}}}]).encode(),
+        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Blog','q/select':['Website/name'],'q/limit':50}}}]).encode(),
         headers={'Authorization':'Token '+token,'Content-Type':'application/json'})
     resp = urllib.request.urlopen(req)
     wp_data = json.loads(resp.read())
     wp_names = set(e.get('Website/name','') for e in wp_data[0].get('result',[]))
 except:
-    print('ERROR:could not query Whitepapers database')
+    print('ERROR:could not query Blog database')
     sys.exit(0)
 missing = [t for t in downloadable if t not in wp_names]
 if missing:

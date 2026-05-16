@@ -23,7 +23,6 @@ There is no separate local dev directory — this repo IS the working directory.
 
 ```bash
 # Start of session
-cd "/Users/kyle/My Drive (kyle@undersight.ai)/undersight-website"
 git checkout dev && git pull
 
 # After changes
@@ -32,6 +31,57 @@ git add <files> && git commit -m "description" && git push
 # When ready for production
 git checkout main && git merge dev && git push && git checkout dev
 ```
+
+### Git Rules for Agents (Multi-Agent Safety)
+
+These rules are mandatory for all Claude agents working in this repo.
+
+**Branch before you build.** Never commit directly to `dev` when doing
+multi-step work. Create a feature branch from `dev`, do your work there,
+then merge back:
+
+```bash
+git checkout dev && git pull
+git checkout -b <short-descriptive-name>
+# ... work and commit ...
+git checkout dev && git pull && git merge <branch> && git push
+```
+
+**One agent, one branch.** If you are in a worktree or were spawned as a
+sub-agent, always create your own branch. Never push to `dev` or `main`
+from a worktree — merge via the primary working directory.
+
+**Never revert without reading the commit.** Before running `git revert`,
+read the full diff of the target commit (`git show <hash>`) and verify
+the changes are actually wrong. Reverting correct work is worse than
+leaving a bug — it creates silent regressions across multiple files.
+
+**Never force-push.** No `--force`, no `--force-with-lease`, no
+`git push -f`. If the remote has diverged, pull and merge.
+
+**Check for uncommitted work before switching branches.** Run `git status`
+before any `git checkout` or `git switch`. Stash or commit first.
+
+**Merge conflicts require human review.** If `git merge` produces
+conflicts, stop and ask the user to resolve. Do not silently pick one
+side or auto-resolve with `--theirs`/`--ours`.
+
+**Worktree hygiene.** After finishing work in a worktree:
+1. Merge your branch back to `dev` from the primary directory
+2. Remove the worktree: `git worktree remove <path>`
+3. Delete the branch: `git branch -d <name>`
+
+**Before editing a file, check git log for recent changes:**
+
+```bash
+git log --oneline -5 -- <file>
+```
+
+If another agent touched it in the last few commits, read those commits
+before making changes to avoid undoing recent work.
+
+**Commit messages must name the key files changed.** Include file names
+in the commit body so the circuit breaker can detect oscillation patterns.
 
 ### Dev Server
 
