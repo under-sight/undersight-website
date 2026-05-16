@@ -418,9 +418,22 @@
   // ---- Helpers ----
   function getContent(data, key) { return (data[key] || {}).content || ''; }
   function getFiles(data, key) { return (data[key] || {}).files || []; }
+  // Filter to image files only, excluding logos (consistent with companion logic).
+  function imageFiles(files) {
+    return (files || []).filter(f =>
+      (f.type || '').startsWith('image/') &&
+      !(f.name || '').toLowerCase().includes('logo'));
+  }
+  // Pick the hero file: prefer files with hero/primary/cover in the name,
+  // otherwise fall back to the first image. Defensive against Fibery returning
+  // old attachments first when both old and new images are attached.
+  function selectHero(files) {
+    const imgs = imageFiles(files);
+    return imgs.find(f => /hero|primary|cover/i.test(f.name || '')) || imgs[0] || null;
+  }
   function firstImage(files) {
-    const img = files.find(f => (f.type || '').startsWith('image/'));
-    return img ? img.url : '';
+    const hero = selectHero(files);
+    return hero ? hero.url : '';
   }
 
   function parseMeta(md) {
@@ -1001,8 +1014,9 @@
         const md = getContent(data, name);
         const files = getFiles(data, name);
         const meta = parseMeta(md);
-        const heroImg = firstImage(files) || '';
-        const companionImgs = (files || []).filter(f => (f.type || '').startsWith('image/') && !(f.name || '').includes('logo')).slice(1).map(f => f.url);
+        const heroFile = selectHero(files);
+        const heroImg = heroFile ? heroFile.url : '';
+        const companionImgs = imageFiles(files).filter(f => f !== heroFile).map(f => f.url);
         return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, companionImgs, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '', pdf: meta.PDF || '' };
       })
       .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
