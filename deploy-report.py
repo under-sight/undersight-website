@@ -79,22 +79,24 @@ def find_deployment(token, env_name):
     return None
 
 
-def update_deployment(token, entity_id, commit, site_mode, content_hash, url):
+def update_deployment(token, entity_id, commit, site_mode, content_hash, url, build_status="success"):
     """Update an existing deployment entity."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    entity = {
+        "fibery/id": entity_id,
+        "Website/Commit": commit,
+        "Website/Deployed At": now,
+        "Website/Status": site_mode,
+        "Website/Site Mode": site_mode,
+        "Website/Content Hash": content_hash,
+        "Website/URL": url,
+        "Website/Build Status": build_status,
+    }
     api_post("/api/commands", [{
         "command": "fibery.entity/update",
         "args": {
             "type": DB,
-            "entity": {
-                "fibery/id": entity_id,
-                "Website/Commit": commit,
-                "Website/Deployed At": now,
-                "Website/Status": site_mode,
-                "Website/Site Mode": site_mode,
-                "Website/Content Hash": content_hash,
-                "Website/URL": url,
-            },
+            "entity": entity,
         },
     }], token)
     return now
@@ -151,6 +153,7 @@ def main():
     args = sys.argv[1:]
     env_name = "dev"
     url = ""
+    build_status = os.environ.get("BUILD_STATUS", "success")
     verify_only = "--verify" in args
     check_only = "--check" in args
 
@@ -163,6 +166,10 @@ def main():
             url = arg.split("=", 1)[1]
         elif arg == "--url" and i + 1 < len(args):
             url = args[i + 1]
+        elif arg.startswith("--status="):
+            build_status = arg.split("=", 1)[1]
+        elif arg == "--status" and i + 1 < len(args):
+            build_status = args[i + 1]
 
     token = get_token()
     meta = read_build_meta()
@@ -204,13 +211,13 @@ def main():
     site_mode = meta.get("site_mode", "unknown")
     content_hash = meta.get("content_hash", "none")
 
-    print(f"Reporting deployment: env={env_name} mode={site_mode} commit={commit}")
+    print(f"Reporting deployment: env={env_name} mode={site_mode} commit={commit} status={build_status}")
 
     existing = find_deployment(token, env_name)
     if existing:
         entity_id = existing["fibery/id"]
-        ts = update_deployment(token, entity_id, commit, site_mode, content_hash, url)
-        print(f"Updated Fibery Deployment: {existing.get('Website/name')} at {ts}")
+        ts = update_deployment(token, entity_id, commit, site_mode, content_hash, url, build_status)
+        print(f"Updated Fibery Deployment: {existing.get('Website/name')} at {ts} (build_status={build_status})")
     else:
         print(f"WARNING: No deployment entity found for env={env_name} — skipping Fibery update")
 

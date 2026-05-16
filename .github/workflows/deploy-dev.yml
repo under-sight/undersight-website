@@ -30,9 +30,29 @@ jobs:
           echo "Schema check passed."
 
       - name: Build site from Fibery
+        id: build
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
         run: python3 build.py --verify --env dev
+        continue-on-error: true
+
+      - name: Validate build output
+        id: validate
+        if: steps.build.outcome == 'success'
+        run: bash tests/build-validation.sh
+        continue-on-error: true
+
+      - name: Fallback to under-construction on build failure
+        if: steps.build.outcome == 'failure' || steps.validate.outcome == 'failure'
+        run: |
+          echo "::warning::Build or validation failed — deploying under-construction page"
+          mkdir -p dist/css dist/images/brand
+          cp under-construction.html dist/index.html
+          cp favicon.svg dist/ 2>/dev/null || true
+          cp favicon-32.png dist/ 2>/dev/null || true
+          cp favicon-16.png dist/ 2>/dev/null || true
+          cp -r images/brand/ dist/images/brand/ 2>/dev/null || true
+          cp css/tokens.css dist/css/ 2>/dev/null || true
 
       - name: Deploy to Cloudflare Pages (dev)
         uses: cloudflare/wrangler-action@v3
@@ -44,4 +64,5 @@ jobs:
       - name: Report deployment to Fibery
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
-        run: python3 deploy-report.py --env dev --url "https://dev.undersight-website.pages.dev"
+          BUILD_STATUS: ${{ (steps.build.outcome == 'success' && steps.validate.outcome == 'success') && 'success' || (steps.build.outcome == 'failure' && 'failed' || 'degraded') }}
+        run: python3 deploy-report.py --env dev --url "https://dev.undersight-website.pages.dev" --status "$BUILD_STATUS"
