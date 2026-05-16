@@ -203,7 +203,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   .sol-hero p { font-size: 15px; }
   .sol-body { padding: 32px 16px 48px; }
   .blog-card-body { padding: 16px; }
-  .blog-thumb { height: 180px; }
+  .blog-thumb { aspect-ratio: 3 / 2; }
   .post-content { padding: 32px 16px 48px; }
   .post-content h1 { font-size: 26px; }
   .contact-wrap { padding: 48px 16px; }
@@ -488,7 +488,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 .blog-thumb {
-  width: 100%; height: 240px; background: var(--bg);
+  width: 100%; aspect-ratio: 3 / 2; background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; color: var(--light);
 }
