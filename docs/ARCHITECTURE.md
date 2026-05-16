@@ -445,7 +445,6 @@ A structured plain-text file designed for LLM consumption. Contains:
 - Company description and positioning
 - Product descriptions (underscore, Agentic Client RFI, AI Underwriting Copilot)
 - Key metrics (71% deal time reduction, 22% more receivables, 650bps loss ratio)
-- Market context ($19-22B annual US market)
 - Contact information and all site links
 
 ### `robots.txt`

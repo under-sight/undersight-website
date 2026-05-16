@@ -500,10 +500,6 @@ ${bodyHtml}
     // These duplicate what's on the cover page
     bodyMd = bodyMd.replace(/^[\s\S]*?(?=\n---|\n## )/, '');
 
-    // Strip "Market Size" appendix for Institutional Capital (replaced by chart)
-    if (wp.fiberyKey === 'Institutional Capital') {
-      bodyMd = bodyMd.replace(/\n## Market Size[\s\S]*$/, '');
-    }
 
     let bodyHtml = mdToHtml(bodyMd);
 

@@ -23,7 +23,6 @@ Single-pane underwriting workspace where underwriters can analyze transactions, 
 
 ## Market
 - Private credit: MCA, revenue-based financing, factoring
-- $19-22B annual US market, 200-300 originators, 1,000-2,000 brokers
 - Founded October 2025, product launched November 2025
 
 ## Contact
