@@ -297,7 +297,7 @@
             <div class="cs-tag">Direct Funder</div>
             <h3>How a 2-person fund gets institutional-grade underwriting</h3>
             <p>4D Financing is a direct MCA lender built on a simple conviction: business owners deserve transparency. With a lean team and undersight's AI underwriting agent, 4DF analyzes bank statements, cross-references financial documents, flags inconsistencies, and proposes terms — all with full audit trails. Every approval and every decline comes with evidence-backed reasoning, not gut feel.</p>
-            <a class="cs-link placeholder" href="javascript:void(0)">Read the full case study &rarr;</a>
+            <a class="cs-link" href="javascript:void(0)" onclick="open4DCaseStudy()">Read the full case study &rarr;</a>
             <button class="btn btn-ghost" onclick="openWhitepaperModal('4D Financing Case Study')" style="margin-top:12px;">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
               Download as PDF
@@ -902,6 +902,7 @@
 
     blogEntries.forEach(post => {
       if (post.title.includes('Chat Advance')) _caseStudyPost = post;
+      if (post.title.includes('4D Financing')) _4dCaseStudyPost = post;
       const card = document.createElement('div');
       card.className = 'blog-card';
       card.dataset.tag = post.tag;
@@ -1071,9 +1072,17 @@
 
   // ---- Case study direct link ----
   var _caseStudyPost = null;
+  var _4dCaseStudyPost = null;
   function openCaseStudy() {
     if (_caseStudyPost) {
       openPost(_caseStudyPost);
+    } else {
+      _origNavigate('blog');
+    }
+  }
+  function open4DCaseStudy() {
+    if (_4dCaseStudyPost) {
+      openPost(_4dCaseStudyPost);
     } else {
       _origNavigate('blog');
     }
