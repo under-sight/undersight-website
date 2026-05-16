@@ -20,7 +20,9 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -30,6 +32,7 @@ WORKSPACE = "subscript.fibery.io"
 DB = "Website/Pages"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")
+CACHE_DIR = os.path.join(SRC_DIR, ".fibery-file-cache")
 
 # Static files and directories to copy into dist/
 STATIC_DIRS = ["css", "images"]
@@ -200,19 +203,135 @@ def fetch_all(token):
     return result, file_map
 
 
-def download_file(secret, token):
-    """Download a file from Fibery by its secret. Returns bytes or None."""
+def download_file(secret, token, return_headers=False, max_retries=4):
+    """
+    Download a file from Fibery by its secret. Retries on 429 / transient errors
+    with exponential backoff.
+
+    Returns bytes (default) or (bytes, headers_dict) if return_headers=True.
+    Returns None / (None, {}) on failure.
+    """
     headers = {"Authorization": f"Token {token}"}
-    req = urllib.request.Request(
-        f"https://{WORKSPACE}/api/files/{secret}",
-        headers=headers,
+    url = f"https://{WORKSPACE}/api/files/{secret}"
+    last_err = None
+    for attempt in range(max_retries):
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = resp.read()
+                if return_headers:
+                    h = resp.headers
+                    size = h.get("Content-Length")
+                    hdrs = {
+                        "size": int(size) if size and size.isdigit() else len(data),
+                        "etag": h.get("ETag"),
+                        "last_modified": h.get("Last-Modified"),
+                    }
+                    return data, hdrs
+                return data
+        except urllib.error.HTTPError as e:
+            last_err = e
+            # Back off on 429 / 5xx and retry; fail fast on 4xx other than 429
+            if e.code == 429 or 500 <= e.code < 600:
+                time.sleep(0.5 * (2 ** attempt))
+                continue
+            break
+        except Exception as e:
+            last_err = e
+            time.sleep(0.5 * (2 ** attempt))
+            continue
+    print(f"    WARNING: Failed to download file {secret[:8]}...: {last_err}")
+    return (None, {}) if return_headers else None
+
+
+# ---------------------------------------------------------------------------
+# Local file cache (speeds up repeat builds by skipping unchanged downloads)
+# ---------------------------------------------------------------------------
+
+
+def _cache_key(secret):
+    """Hash a Fibery file secret to an opaque cache key."""
+    return hashlib.sha256(secret.encode()).hexdigest()[:16]
+
+
+def _cache_paths(secret):
+    """Return (bytes_path, metadata_path) for a given Fibery secret."""
+    key = _cache_key(secret)
+    return (
+        os.path.join(CACHE_DIR, f"{key}.bin"),
+        os.path.join(CACHE_DIR, f"{key}.json"),
     )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return resp.read()
-    except Exception as e:
-        print(f"    WARNING: Failed to download file {secret[:8]}...: {e}")
+
+
+def _cache_read_meta(secret):
+    """Return cached metadata dict for a secret, or None if no cache."""
+    _, meta_path = _cache_paths(secret)
+    if not os.path.isfile(meta_path):
         return None
+    try:
+        with open(meta_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _cache_read_bytes(secret):
+    """Return cached file bytes for a secret, or None if no cache."""
+    bytes_path, _ = _cache_paths(secret)
+    if not os.path.isfile(bytes_path):
+        return None
+    try:
+        with open(bytes_path, "rb") as f:
+            return f.read()
+    except Exception:
+        return None
+
+
+def _cache_write(secret, data, meta):
+    """Persist file bytes + metadata for a secret."""
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    bytes_path, meta_path = _cache_paths(secret)
+    tmp_bytes = bytes_path + ".tmp"
+    tmp_meta = meta_path + ".tmp"
+    with open(tmp_bytes, "wb") as f:
+        f.write(data)
+    with open(tmp_meta, "w", encoding="utf-8") as f:
+        json.dump(meta, f)
+    os.replace(tmp_bytes, bytes_path)
+    os.replace(tmp_meta, meta_path)
+
+
+def download_file_cached(secret, token, use_cache=True):
+    """
+    Download a Fibery file, transparently using the local cache when possible.
+
+    Returns (bytes, was_cached) where was_cached is True if served from cache.
+
+    Fibery `fibery/secret` is immutable: replacing a file in the source entity
+    yields a new secret, which surfaces as a new opaque_id in the file_map.
+    So a cache hit on secret is always content-correct — no HEAD probe needed.
+    """
+    if not use_cache:
+        data, hdrs = download_file(secret, token, return_headers=True)
+        return data, False
+
+    cached_bytes = _cache_read_bytes(secret)
+    if cached_bytes is not None:
+        return cached_bytes, True
+
+    # Miss — download and populate the cache
+    data, hdrs = download_file(secret, token, return_headers=True)
+    if data is not None:
+        meta = {
+            "size": len(data),
+            "etag": hdrs.get("etag"),
+            "last_modified": hdrs.get("last_modified"),
+        }
+        try:
+            _cache_write(secret, data, meta)
+        except Exception as e:
+            print(f"    WARNING: Could not write cache for {secret[:8]}...: {e}")
+    return data, False
 
 
 # ---------------------------------------------------------------------------
@@ -248,33 +367,55 @@ def determine_local_path(opaque_id, files_info):
     return f"images/files/{opaque_id}"
 
 
-def download_fibery_files(content_map, file_map, token):
+def download_fibery_files(content_map, file_map, token, use_cache=True):
     """
     Download all Fibery file attachments to dist/images/files/.
-    Returns a mapping of opaque_id -> local_relative_path.
+    Returns (local_paths, stats) where:
+      - local_paths: mapping of opaque_id -> local_relative_path
+      - stats: {"total", "cached", "downloaded", "skipped"}
     """
+    stats = {"total": 0, "cached": 0, "downloaded": 0, "skipped": 0}
     if not file_map:
-        return {}
+        return {}, stats
 
     files_dir = os.path.join(DIST_DIR, "images", "files")
     os.makedirs(files_dir, exist_ok=True)
 
     local_paths = {}
-    for opaque_id, secret in file_map.items():
+
+    def _fetch_one(item):
+        opaque_id, secret = item
         local_rel = determine_local_path(opaque_id, content_map)
         local_abs = os.path.join(DIST_DIR, local_rel)
         os.makedirs(os.path.dirname(local_abs), exist_ok=True)
-
-        print(f"    Downloading {opaque_id} -> {local_rel}")
-        data = download_file(secret, token)
+        data, was_cached = download_file_cached(
+            secret, token, use_cache=use_cache
+        )
         if data:
             with open(local_abs, "wb") as f:
                 f.write(data)
+        return opaque_id, local_rel, data, was_cached
+
+    # Parallelize the network I/O. Keep worker count modest to avoid Fibery 429s;
+    # download_file() has its own retry-with-backoff for transient rate limits.
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(_fetch_one, file_map.items()))
+
+    for opaque_id, local_rel, data, was_cached in results:
+        stats["total"] += 1
+        tag = "cached" if was_cached else "downloaded"
+        print(f"    {tag:>10}: {opaque_id} -> {local_rel}")
+        if data:
             local_paths[opaque_id] = local_rel
+            if was_cached:
+                stats["cached"] += 1
+            else:
+                stats["downloaded"] += 1
         else:
+            stats["skipped"] += 1
             print(f"    SKIPPED: {opaque_id}")
 
-    return local_paths
+    return local_paths, stats
 
 
 def rewrite_file_urls(content_map, local_paths):
@@ -567,6 +708,7 @@ def format_size(nbytes):
 
 def main():
     do_verify = "--verify" in sys.argv
+    use_cache = "--no-cache" not in sys.argv
 
     # Parse --env flag (production or dev)
     env_name = "dev"
@@ -678,7 +820,11 @@ def main():
     # 5. Download Fibery file attachments and rewrite URLs
     print("\n[5/6] Downloading file attachments...")
     if file_map:
-        local_paths = download_fibery_files(content_map, file_map, token)
+        if not use_cache:
+            print("  (cache disabled via --no-cache)")
+        local_paths, file_stats = download_fibery_files(
+            content_map, file_map, token, use_cache=use_cache
+        )
         rewrite_file_urls(content_map, local_paths)
         dl_count = len(local_paths)
         # Add downloaded files to totals
@@ -687,7 +833,16 @@ def main():
             if os.path.isfile(abs_path):
                 static_bytes += os.path.getsize(abs_path)
                 file_count += 1
-        print(f"  Downloaded {dl_count} files")
+        total = file_stats["total"] or 1
+        hit_rate = 100.0 * file_stats["cached"] / total
+        print(
+            f"  Files: {file_stats['total']} total, "
+            f"{file_stats['cached']} cached, "
+            f"{file_stats['downloaded']} downloaded "
+            f"(cache hit rate {hit_rate:.0f}%)"
+        )
+        if file_stats["skipped"]:
+            print(f"  SKIPPED: {file_stats['skipped']}")
     else:
         print("  No file attachments to download")
 
