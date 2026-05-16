@@ -478,6 +478,13 @@
     return meta;
   }
 
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + (dateStr.length === 10 ? 'T00:00:00' : ''));
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
   function mdToHtml(md) {
     if (!md) return '';
     function inline(text) {
@@ -580,11 +587,7 @@
   };
 
   const SOLUTION_NARRATIVES = {
-    'underscore': [
-      { img: 'images/solutions/us1.webp', title: 'Submit a deal via API', desc: 'Send application data, bank statements, and existing positions. underscore ingests and parses everything automatically.' },
-      { img: 'images/solutions/us2.webp', title: 'Get a risk score in seconds', desc: 'ML models trained on deal outcomes score the applicant across revenue patterns, existing positions, and anomaly signals.' },
-      { img: 'images/solutions/us3.webp', title: 'Monitor your portfolio continuously', desc: 'Every active deal is re-underwritten automatically. Pre-default signals are flagged before collections, not after.' },
-    ],
+    'underscore': [],
     'rfi': [
       { img: 'images/solutions/rfi1.webp', title: 'AI agent collects documents', desc: 'Macy conducts an intelligent conversation with the applicant or broker, collecting bank statements and resolving gaps automatically.' },
       { img: 'images/solutions/rfi2.webp', title: 'Data is enriched and verified', desc: 'Raw documents are parsed into structured transaction intelligence. Revenue patterns, existing positions, and anomalies identified.' },
@@ -603,31 +606,12 @@
     const logoCards = Object.entries(UNDERSCORE_LOGOS).map(([name, src]) =>
       `<div class="integration-logo-card"><img src="${src}" alt="${name}" loading="lazy"><div class="int-name">${name}</div></div>`
     ).join('');
-    const workflowHtml = (SOLUTION_NARRATIVES.underscore || []).map((step) => `
-          <div class="sol-row">
-            <div class="sol-row-img"><img src="${step.img}" alt="${step.title}" loading="lazy"></div>
-            <div class="sol-row-text">
-              <h3>${step.title}</h3>
-              <p>${step.desc}</p>
-            </div>
-          </div>`).join('');
-
     pageEl.innerHTML = `
       <div class="sol-hero">
         <span class="tag">${tag}</span>
         <h1>150+ SMB-specific metrics from a single API call</h1>
         <p>ML and agentic scoring models built for private credit. Send bank statements, QuickBooks exports, or Plaid connections &mdash; get back institutional-grade risk intelligence in seconds.</p>
         <div class="hero-code-tease">POST /v1/score &mdash; bank statements, CSVs, QuickBooks, Plaid, Yodlee, or raw PDFs</div>
-      </div>
-
-      <div class="home-section">
-        <div class="container">
-          <div class="home-section-head">
-            <div class="home-section-label">Workflow</div>
-            <h2>From raw documents to live portfolio intelligence</h2>
-          </div>
-          ${workflowHtml}
-        </div>
       </div>
 
       <div class="api-preview">
@@ -936,7 +920,7 @@
       card.innerHTML = `
         ${thumbHtml}
         <div class="blog-card-body">
-          ${tagHtml}<div class="date">${post.date}</div>
+          ${tagHtml}<div class="date">${formatDate(post.date)}</div>
           <h3>${post.title}</h3>
           <p>${post.excerpt}</p>
         </div>`;
@@ -995,7 +979,7 @@
     const wordCount = (post.body || '').split(/\s+/).length;
     const readingTime = Math.max(1, Math.ceil(wordCount / 200));
     let metaParts = [];
-    if (post.date) metaParts.push(post.date);
+    if (post.date) metaParts.push(formatDate(post.date));
     if (post.author) metaParts.push(post.author);
     metaParts.push(`${readingTime} min read`);
 
