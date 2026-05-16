@@ -436,6 +436,69 @@ the correct blog/case-study asset, with `Sent` eventually set to true by the aut
 - **Setup required**: Set `FIBERY_TOKEN` in Cloudflare Pages dashboard →
   Settings → Environment variables (Production + Preview)
 
+### Lead Capture Security
+
+The lead capture endpoint is hardened against spam and abuse via four layers:
+input validation, Cloudflare Turnstile, per-IP rate limiting, and a strict
+whitepaper allowlist. All four are wired up; the Turnstile and rate-limit
+layers no-op gracefully (with a logged warning) until the user provisions the
+required Cloudflare resources, so the site stays functional in the meantime.
+
+**Required environment variables / bindings (Cloudflare Pages → Settings):**
+
+| Setting | Type | Purpose |
+|---|---|---|
+| `FIBERY_TOKEN` | Secret env var | Fibery API auth (existing) |
+| `CF_TURNSTILE_SECRET_KEY` | Secret env var | Server-side Turnstile verification |
+| `RATE_LIMIT_KV` | KV namespace binding | Per-IP counters for rate limit |
+
+**Client-side (`index.html`):** replace the `TURNSTILE_SITE_KEY_PLACEHOLDER`
+constant with the public site key from the Cloudflare Turnstile dashboard.
+
+**Provision Turnstile keys:**
+
+1. Cloudflare dashboard → Turnstile → Add site
+2. Mode: **Invisible** (least friction, matches the modal UX)
+3. Hostnames: `undersight.ai`, `dev.undersight-website.pages.dev`, `localhost`
+4. Copy the **Site Key** into `index.html` (the `TURNSTILE_SITE_KEY` constant)
+5. Copy the **Secret Key** into Cloudflare Pages → Settings → Environment
+   variables → `CF_TURNSTILE_SECRET_KEY` (Production + Preview)
+
+**Provision KV namespace for rate limiting:**
+
+```bash
+wrangler kv:namespace create RATE_LIMIT_KV
+# Then in Cloudflare Pages dashboard:
+#   Settings → Functions → KV namespace bindings
+#   Variable name: RATE_LIMIT_KV
+#   KV namespace:  (select the one just created)
+```
+
+**Rate limit budgets:**
+
+| Environment | Per-minute | Per-day | Key |
+|---|---|---|---|
+| Production (Pages Function + Worker) | 3 | 20 | `CF-Connecting-IP` |
+| Dev server | 5 | — | peer socket IP |
+
+**Validation rules (all environments):**
+
+- Request body capped at 4096 bytes → `413` if exceeded
+- Email: 5-254 chars, strict regex (2+ char TLD), no `<>"'`, no `..` → `422`
+- Whitepaper name: 1-200 chars, no `<>`, must match `KNOWN_WHITEPAPERS`
+  allowlist → `422`
+- Turnstile token required when `CF_TURNSTILE_SECRET_KEY` is set → `403`
+- Per-IP rate limit exceeded → `429` with `Retry-After` header
+
+**CORS allowlist:** `https://undersight.ai`, `https://www.undersight.ai`,
+`https://undersight-website.pages.dev`, `https://dev.undersight-website.pages.dev`,
+`http://localhost:8088`. Unknown origins receive **no**
+`Access-Control-Allow-Origin` header (the browser rejects the response).
+
+**Adding a new PDF asset (post-launch):** update the `KNOWN_WHITEPAPERS`
+constant in all three handlers (`functions/api/whitepaper-lead.js`,
+`worker/index.js`, `undersight-serve.py`) when adding a new entity in Fibery.
+
 ---
 
 ## Launch Readiness Checklist

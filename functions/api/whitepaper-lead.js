@@ -16,7 +16,18 @@ const ALLOWED_ORIGINS = [
   'https://undersight.ai',
   'https://www.undersight.ai',
   'https://undersight-website.pages.dev',
+  'https://dev.undersight-website.pages.dev',
   'http://localhost:8088',
+];
+
+// Hardcoded whitelist of asset names that may be requested. Mirrors the
+// `Website/Blog` entities in Fibery that have a PDF attached and a working
+// "undersight research dispatch" automation. Unknown names are rejected
+// before doing any Fibery work — protects against probing/enumeration.
+const KNOWN_WHITEPAPERS = [
+  'Chat Advance Case Study',
+  'From Deterministic Scorecards to Agentic Credit Assessments',
+  'Unlocking Institutional Capital for Mid-Tier MCA Funds',
 ];
 
 // Input validation constants
@@ -30,13 +41,19 @@ const EMAIL_REGEX = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/;
 
 function corsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    'Access-Control-Allow-Origin': allowed,
+  const headers = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
   };
+  // Only echo the origin when it's in the allowlist. Browsers reject CORS
+  // responses without the header, which is exactly what we want for unknown
+  // origins — never fall back to a default that grants them access.
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+  return headers;
 }
 
 function json(data, status, request) {
@@ -215,6 +232,9 @@ export async function onRequestPost(context) {
   const whitepaperName = (body.whitepaper || 'Chat Advance Case Study').trim();
   if (!isValidWhitepaper(whitepaperName)) {
     return json({ error: 'Invalid request' }, 422, request);
+  }
+  if (!KNOWN_WHITEPAPERS.includes(whitepaperName)) {
+    return json({ error: 'Unknown content' }, 422, request);
   }
 
   // Verify Turnstile (skipped automatically when secret is unset — deploy-safe)

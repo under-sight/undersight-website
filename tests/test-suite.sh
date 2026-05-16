@@ -2085,6 +2085,75 @@ else
 fi
 
 # =============================================================================
+section "Lead Capture Security Tests"
+# =============================================================================
+# Exercises /api/whitepaper-lead against the dev server. Dev server skips
+# Turnstile by design, so we verify production wire-up via source grep.
+#
+# Earlier sections also hit /api/whitepaper-lead a few times, so without a
+# pause we'd run into the dev server's 5/min rate limit mid-section. Sleep
+# 65s here to let the window roll off; this section only runs once.
+echo "  (waiting 65s to clear dev server rate-limit window…)"
+sleep 65
+
+# Oversized payload → 413
+BIG=$(python3 -c "print('a'*5000)")
+STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
+  -H 'Content-Type: application/json' \
+  --data "{\"email\":\"$BIG@x.com\",\"whitepaper\":\"x\"}" \
+  "$BASE/api/whitepaper-lead" 2>/dev/null || echo "000")
+if [ "$STATUS" = "413" ]; then
+  pass "Oversized payload rejected (413)"
+else
+  fail "Oversized payload rejected" "Got $STATUS"
+fi
+
+# Invalid email forms → 422 (test each individually for clearer failure output)
+for BAD in '"not-an-email"' '"<script>@x.com"' '"a..b@x.com"'; do
+  STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
+    -H 'Content-Type: application/json' \
+    --data "{\"email\":$BAD,\"whitepaper\":\"Chat Advance Case Study\"}" \
+    "$BASE/api/whitepaper-lead" 2>/dev/null || echo "000")
+  if [ "$STATUS" = "422" ]; then
+    pass "Invalid email rejected: $BAD"
+  else
+    fail "Invalid email rejected: $BAD" "Got $STATUS"
+  fi
+done
+
+# Unknown whitepaper → 422
+STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
+  -H 'Content-Type: application/json' \
+  --data '{"email":"test@example.com","whitepaper":"Bogus Asset"}' \
+  "$BASE/api/whitepaper-lead" 2>/dev/null || echo "000")
+if [ "$STATUS" = "422" ]; then
+  pass "Unknown whitepaper rejected (422)"
+else
+  fail "Unknown whitepaper rejected" "Got $STATUS"
+fi
+
+# Body size cap present in production handler source
+if grep -q "MAX_BODY_BYTES" "$SITE_ROOT/functions/api/whitepaper-lead.js"; then
+  pass "Body size cap configured in Pages Function"
+else
+  fail "Body size cap configured in Pages Function"
+fi
+
+# Turnstile widget referenced in client
+if grep -q "turnstile" "$SITE_ROOT/index.html"; then
+  pass "Turnstile widget referenced in index.html"
+else
+  fail "Turnstile widget referenced in index.html"
+fi
+
+# Turnstile verification wired in production handler
+if grep -q "CF_TURNSTILE_SECRET_KEY" "$SITE_ROOT/functions/api/whitepaper-lead.js"; then
+  pass "Turnstile verification wired in Pages Function"
+else
+  fail "Turnstile verification wired in Pages Function"
+fi
+
+# =============================================================================
 section "Summary"
 # =============================================================================
 

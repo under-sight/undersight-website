@@ -31,6 +31,14 @@ WHITEPAPER_MIN = 1
 WHITEPAPER_MAX = 200
 EMAIL_REGEX = re.compile(r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$')
 
+# Hardcoded whitelist of asset names. Mirrors functions/api/whitepaper-lead.js
+# and worker/index.js. Update all three together when adding a new PDF asset.
+KNOWN_WHITEPAPERS = {
+    "Chat Advance Case Study",
+    "From Deterministic Scorecards to Agentic Credit Assessments",
+    "Unlocking Institutional Capital for Mid-Tier MCA Funds",
+}
+
 
 def _is_valid_email(email):
     if not isinstance(email, str):
@@ -66,7 +74,9 @@ def _mask_email(email):
     return local[0] + '***@' + domain
 
 
-# In-process rate limiter: dev only. 5 req/60s per peer IP.
+# In-process rate limiter: dev only. 5 req/60s per peer IP — kept low so the
+# limit fires under manual smoke testing. Production runs tighter limits
+# (3/60s) via Workers KV.
 _RATE_LIMIT_WINDOW = 60      # seconds
 _RATE_LIMIT_MAX = 5
 _rate_limit_log = {}         # ip -> [timestamps]
@@ -256,6 +266,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
         whitepaper_name = (body.get("whitepaper") or "Chat Advance Case Study").strip()
         if not _is_valid_whitepaper(whitepaper_name):
             self._send_json({"error": "Invalid request"}, status=422)
+            return
+        if whitepaper_name not in KNOWN_WHITEPAPERS:
+            self._send_json({"error": "Unknown content"}, status=422)
             return
 
         masked = _mask_email(email)

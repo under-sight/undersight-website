@@ -16,6 +16,22 @@
  *   ALLOWED_ORIGIN — e.g. https://undersight.ai
  */
 
+// Allowed CORS origins. Matches functions/api/whitepaper-lead.js.
+const ALLOWED_ORIGINS = [
+  'https://undersight.ai',
+  'https://www.undersight.ai',
+  'https://undersight-website.pages.dev',
+  'https://dev.undersight-website.pages.dev',
+  'http://localhost:8088',
+];
+
+// Hardcoded whitelist of asset names. Mirrors functions/api/whitepaper-lead.js.
+const KNOWN_WHITEPAPERS = [
+  'Chat Advance Case Study',
+  'From Deterministic Scorecards to Agentic Credit Assessments',
+  'Unlocking Institutional Capital for Mid-Tier MCA Funds',
+];
+
 // Input validation constants
 const MAX_BODY_BYTES = 4096;
 const EMAIL_MIN = 5;
@@ -122,11 +138,11 @@ export default {
   async fetch(request, env) {
     // CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders(env) });
+      return new Response(null, { status: 204, headers: corsHeaders(request) });
     }
 
     if (request.method !== 'POST') {
-      return json({ error: 'Method not allowed' }, 405, env);
+      return json({ error: 'Method not allowed' }, 405, request);
     }
 
     // Per-IP rate limit (no-op when RATE_LIMIT_KV binding is absent)
@@ -137,7 +153,7 @@ export default {
         headers: {
           'Content-Type': 'application/json',
           'Retry-After': String(rl.retryAfter || 60),
-          ...corsHeaders(env),
+          ...corsHeaders(request),
         },
       });
     }
@@ -145,44 +161,47 @@ export default {
     // Body size cap — check Content-Length header first
     const contentLength = parseInt(request.headers.get('Content-Length') || '0', 10);
     if (contentLength > MAX_BODY_BYTES) {
-      return json({ error: 'Payload too large' }, 413, env);
+      return json({ error: 'Payload too large' }, 413, request);
     }
 
     let rawText;
     try {
       rawText = await request.text();
     } catch {
-      return json({ error: 'Invalid request' }, 400, env);
+      return json({ error: 'Invalid request' }, 400, request);
     }
     if (rawText.length > MAX_BODY_BYTES) {
-      return json({ error: 'Payload too large' }, 413, env);
+      return json({ error: 'Payload too large' }, 413, request);
     }
 
     let body;
     try {
       body = JSON.parse(rawText);
     } catch {
-      return json({ error: 'Invalid request' }, 400, env);
+      return json({ error: 'Invalid request' }, 400, request);
     }
 
     if (!body || typeof body !== 'object') {
-      return json({ error: 'Invalid request' }, 422, env);
+      return json({ error: 'Invalid request' }, 422, request);
     }
 
     const email = (body.email || '').trim();
     if (!isValidEmail(email)) {
-      return json({ error: 'Invalid request' }, 422, env);
+      return json({ error: 'Invalid request' }, 422, request);
     }
 
     const whitepaperName = (body.whitepaper || 'Chat Advance Case Study').trim();
     if (!isValidWhitepaper(whitepaperName)) {
-      return json({ error: 'Invalid request' }, 422, env);
+      return json({ error: 'Invalid request' }, 422, request);
+    }
+    if (!KNOWN_WHITEPAPERS.includes(whitepaperName)) {
+      return json({ error: 'Unknown content' }, 422, request);
     }
 
     // Verify Turnstile (skipped automatically when secret is unset — deploy-safe)
     const turnstileResult = await verifyTurnstile(env, request, body.turnstile_token);
     if (!turnstileResult.ok) {
-      return json({ error: 'Verification failed' }, 403, env);
+      return json({ error: 'Verification failed' }, 403, request);
     }
 
     const fiberyHeaders = {
@@ -233,32 +252,39 @@ export default {
 
       if (!fiberyResp.ok) {
         console.error('Fibery API error:', fiberyResp.status, await fiberyResp.text());
-        return json({ error: 'Failed to save' }, 502, env);
+        return json({ error: 'Failed to save' }, 502, request);
       }
 
-      return json({ ok: true }, 200, env);
+      return json({ ok: true }, 200, request);
     } catch (err) {
       console.error('Fibery request failed:', err);
-      return json({ error: 'Internal error' }, 500, env);
+      return json({ error: 'Internal error' }, 500, request);
     }
   },
 };
 
-function corsHeaders(env) {
-  return {
-    'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || 'https://undersight.ai',
+function corsHeaders(request) {
+  const origin = request.headers.get('Origin') || '';
+  const headers = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
   };
+  // Only echo allowlisted origins. Unknown origins get no CORS header at all
+  // (browsers reject the response — exactly what we want).
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+  return headers;
 }
 
-function json(data, status, env) {
+function json(data, status, request) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
-      ...corsHeaders(env),
+      ...corsHeaders(request),
     },
   });
 }
