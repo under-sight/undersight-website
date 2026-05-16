@@ -46,7 +46,7 @@ undersight/
       us1.png, us1.webp       underscore solution images (3 pairs, PNG + WebP)
       us2.png, us2.webp
       us3.png, us3.webp
-      rfi1.png, rfi1.webp     Agentic Client RFI solution images (3 pairs)
+      rfi1.png, rfi1.webp     underchat agent solution images (legacy; formerly Agentic Client RFI)
       rfi2.png, rfi2.webp
       rfi3.png, rfi3.webp
       cop1.png, cop1.webp     AI Underwriting Copilot solution images (3 pairs)
@@ -254,7 +254,7 @@ Content lives in a Fibery workspace at `subscript.fibery.io` in the database `We
 | `Home - CTA` | Homepage final CTA | Heading, subtitle, button |
 | `Site Config` | Global site settings | Sign-in URL, privacy URL, email, copyright |
 | `Contact Page` | Contact/CTA content | Title + body text |
-| `Solutions - *` | Solution pages | `Solutions - underscore`, `Solutions - Agentic Client RFI`, `Solutions - AI Underwriting Copilot` |
+| `Solutions - *` | Solution pages | `Solutions - underscore`, `Solutions - underchat agent`, `Solutions - AI Underwriting Copilot` |
 | `Blog - *` | Blog posts | `Blog - Why AI underwriting is not about replacing underwriters` |
 
 ### Content Flow (Development)
@@ -443,7 +443,7 @@ The site includes several files specifically for AI agent and search engine disc
 
 A structured plain-text file designed for LLM consumption. Contains:
 - Company description and positioning
-- Product descriptions (underscore, Agentic Client RFI, AI Underwriting Copilot)
+- Product descriptions (underscore, underchat agent, AI Underwriting Copilot)
 - Key metrics (71% deal time reduction, 22% more receivables, 650bps loss ratio)
 - Contact information and all site links
 
