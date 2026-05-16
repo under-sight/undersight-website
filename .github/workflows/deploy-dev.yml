@@ -19,6 +19,16 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Schema guard (block stale Fibery refs)
+        run: |
+          echo "Checking for old schema references..."
+          if grep -rn 'Website/Whitepapers\|Website/Whitepaper Leads\|Website/Whitepaper[^s]' \
+            functions/ undersight-serve.py worker/index.js index.html; then
+            echo "::error::Old Fibery schema names detected. Correct schema is Website/Blog, Website/Blog Leads, Website/Blog Post."
+            exit 1
+          fi
+          echo "Schema check passed."
+
       - name: Build site from Fibery
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
