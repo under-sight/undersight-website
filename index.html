@@ -1005,6 +1005,12 @@
 
     let bodyHtml = mdToHtml(stripContents(post.body));
 
+    // Inject 4D Financing logo at the top of the case study
+    if (post.title.includes('4D Financing')) {
+      const logo4d = `<figure style="margin:0 0 32px;"><img src="images/blog/4d-financing-logo.webp" alt="4D Financing" style="height:48px;width:auto;"></figure>`;
+      bodyHtml = logo4d + bodyHtml;
+    }
+
     // Inject inline companion images for the Chat Advance case study
     if (post.title.includes('Chat Advance')) {
       const overviewImg = `<figure style="margin:32px 0;"><img src="images/blog/chat-advance-overview.webp" alt="Chat Advance case study overview — agentic intake flow from application to funder match" style="width:100%;border-radius:var(--radius);border:1px solid var(--pale);"></figure>`;
