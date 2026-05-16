@@ -499,6 +499,14 @@ wrangler kv:namespace create RATE_LIMIT_KV
 constant in all three handlers (`functions/api/whitepaper-lead.js`,
 `worker/index.js`, `undersight-serve.py`) when adding a new entity in Fibery.
 
+**P1 hardening in place** (alongside the four layers above): responses use
+generic error messages with details to stderr only; dev logs mask emails
+(`agent@undersight.ai` → `a***t@undersight.ai`); Fibery error bodies are
+redacted to `status + body_len` in Cloudflare logs; the email regex enforces
+local-part 1-64 chars with no leading/trailing dot; all handlers reject
+non-`application/json` Content-Type with `415`; and `worker/index.js` carries
+a `DEPRECATED` header — production traffic flows through the Pages Function.
+
 ---
 
 ## Launch Readiness Checklist

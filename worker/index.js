@@ -1,3 +1,11 @@
+// DEPRECATED — see functions/api/whitepaper-lead.js for canonical implementation.
+// Production `/api/whitepaper-lead` traffic is handled by the Cloudflare Pages
+// Function. This standalone Worker is kept in the tree as a safety-net /
+// alternative deployment target only; it is NOT deployed by default. If you
+// ever revive it (`wrangler deploy` from worker/), keep it in sync with the
+// Pages Function — security, validation, rate limit, and Turnstile logic
+// must match. Do not delete without explicit user permission.
+
 /**
  * Cloudflare Worker — Whitepaper lead capture relay
  *
@@ -38,8 +46,10 @@ const EMAIL_MIN = 5;
 const EMAIL_MAX = 254;
 const WHITEPAPER_MIN = 1;
 const WHITEPAPER_MAX = 200;
-// Strict email regex: 2+ char TLD, allowed local characters only
-const EMAIL_REGEX = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/;
+// Strict email regex: local part 1-64 chars (alphanumerics + ._%+-), no leading
+// or trailing dot in the local part; domain has at least one label + a 2+ char
+// alpha TLD. Consecutive-dot rejection is enforced separately in isValidEmail.
+const EMAIL_REGEX = /^(?![.])[A-Za-z0-9._%+\-]{1,64}(?<![.])@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
 
 function isValidEmail(email) {
   if (typeof email !== 'string') return false;
@@ -158,6 +168,14 @@ export default {
       });
     }
 
+    // Content-Type guard — only accept JSON. Tolerate parameters like
+    // `; charset=utf-8`. Reject early to avoid parsing form-encoded or
+    // multipart bodies as JSON (defence vs. content-type confusion).
+    const rawContentType = (request.headers.get('Content-Type') || '').split(';')[0].trim().toLowerCase();
+    if (rawContentType !== 'application/json') {
+      return json({ error: 'Unsupported Media Type' }, 415, request);
+    }
+
     // Body size cap — check Content-Length header first
     const contentLength = parseInt(request.headers.get('Content-Length') || '0', 10);
     if (contentLength > MAX_BODY_BYTES) {
@@ -260,13 +278,20 @@ export default {
       });
 
       if (!fiberyResp.ok) {
-        console.error('Fibery API error:', fiberyResp.status, await fiberyResp.text());
+        // Log status + body length only. Fibery error bodies may contain field
+        // names, internal IDs, or token-prefix hints — do not write them to
+        // the Cloudflare log stream.
+        let bodyLen = 0;
+        try { bodyLen = (await fiberyResp.text()).length; } catch { /* ignore */ }
+        console.error('Fibery API error: status=' + fiberyResp.status + ' body_len=' + bodyLen);
         return json({ error: 'Failed to save' }, 502, request);
       }
 
       return json({ ok: true }, 200, request);
     } catch (err) {
-      console.error('Fibery request failed:', err);
+      // Log only the error name/type, never the message or stack — Fibery
+      // client errors can embed URLs and field names.
+      console.error('Fibery request failed:', err && err.name ? err.name : 'Error');
       return json({ error: 'Internal error' }, 500, request);
     }
   },

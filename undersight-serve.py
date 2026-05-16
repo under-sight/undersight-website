@@ -16,6 +16,7 @@ import re
 import subprocess
 import sys
 import time
+import traceback
 import urllib.request
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
@@ -29,7 +30,12 @@ EMAIL_MIN = 5
 EMAIL_MAX = 254
 WHITEPAPER_MIN = 1
 WHITEPAPER_MAX = 200
-EMAIL_REGEX = re.compile(r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$')
+# Strict email regex: local part 1-64 chars (alphanumerics + ._%+-), no leading
+# or trailing dot in the local part; domain has at least one label + a 2+ char
+# alpha TLD. Consecutive-dot rejection is enforced separately in _is_valid_email.
+EMAIL_REGEX = re.compile(
+    r'^(?![.])[A-Za-z0-9._%+\-]{1,64}(?<![.])@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$'
+)
 
 # Hardcoded whitelist of asset names. Mirrors functions/api/whitepaper-lead.js
 # and worker/index.js. Update all three together when adding a new PDF asset.
@@ -65,13 +71,19 @@ def _is_valid_whitepaper(name):
 
 
 def _mask_email(email):
-    """Mask an email for logging: kyle@example.com -> k***@example.com"""
+    """Mask an email for logging: agent@undersight.ai -> a***t@undersight.ai
+
+    Reveals first + last char of the local part plus the full domain; enough
+    context to disambiguate during debugging without leaking the address.
+    """
     if not isinstance(email, str) or '@' not in email:
         return '***'
     local, _, domain = email.partition('@')
     if not local:
         return '***@' + domain
-    return local[0] + '***@' + domain
+    if len(local) == 1:
+        return local + '***@' + domain
+    return local[0] + '***' + local[-1] + '@' + domain
 
 
 # In-process rate limiter: dev only. 5 req/60s per peer IP — kept low so the
@@ -232,6 +244,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             )
             return
 
+        # Content-Type guard — only accept JSON. Tolerate parameters like
+        # `; charset=utf-8`. Reject early so we never parse form-encoded or
+        # multipart bodies as JSON (defence vs. content-type confusion).
+        content_type = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        if content_type != "application/json":
+            self._send_json({"error": "Unsupported Media Type"}, status=415)
+            return
+
         # Body size cap — check Content-Length header first
         length = int(self.headers.get("Content-Length", 0))
         if length > MAX_BODY_BYTES:
@@ -316,9 +336,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             }])
             print(f"  [LEAD] {masked} -> {whitepaper_name} (linked)")
             self._send_json({"ok": True})
-        except Exception as e:
-            # Detail to stderr only; generic message to client
-            print(f"  [LEAD] {masked} -> ERROR: {e}", file=sys.stderr)
+        except Exception:
+            # Generic message to client; full traceback only to server stderr.
+            # Never include exception details, Fibery URLs, tokens, or schema
+            # names in the response body.
+            print(f"  [LEAD] {masked} -> ERROR (see traceback)", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
             self._send_json({"error": "Internal error"}, status=500)
 
     def do_GET(self):
