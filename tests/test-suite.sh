@@ -2083,11 +2083,24 @@ section "Lead Capture Security Tests"
 # Exercises /api/whitepaper-lead against the dev server. Dev server skips
 # Turnstile by design, so we verify production wire-up via source grep.
 #
-# Earlier sections also hit /api/whitepaper-lead a few times, so without a
-# pause we'd run into the dev server's 5/min rate limit mid-section. Sleep
-# 65s here to let the window roll off; this section only runs once.
+# Dev server enforces a 5-POST-per-60s per-IP rate limit (see
+# undersight-serve.py: _check_rate_limit). Earlier sections fire ~2 POSTs to
+# /api/whitepaper-lead, and this section fires 5 more (1 oversized + 3
+# invalid emails + 1 unknown whitepaper). Without spacing them out, the
+# later POSTs come back as 429 instead of the expected 4xx validation
+# status, which previously caused 2 spurious failures here.
+#
+# Strategy: wait 65s up-front to clear any prior accumulation in the
+# limiter's window, then sleep 13s (60s / 5 = 12s, +1s buffer) between
+# each negative-path POST so each request sits in its own window slice.
 echo "  (waiting 65s to clear dev server rate-limit window…)"
 sleep 65
+
+# Helper: pause long enough that the next POST doesn't share a rate-limit
+# window with prior POSTs in this section. 13s = (60s / 5) + 1s buffer.
+wait_for_rate_limit_window() {
+  sleep 13
+}
 
 # Oversized payload → 413
 BIG=$(python3 -c "print('a'*5000)")
@@ -2103,6 +2116,7 @@ fi
 
 # Invalid email forms → 422 (test each individually for clearer failure output)
 for BAD in '"not-an-email"' '"<script>@x.com"' '"a..b@x.com"'; do
+  wait_for_rate_limit_window
   STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
     -H 'Content-Type: application/json' \
     --data "{\"email\":$BAD,\"whitepaper\":\"Chat Advance Case Study\"}" \
@@ -2115,6 +2129,7 @@ for BAD in '"not-an-email"' '"<script>@x.com"' '"a..b@x.com"'; do
 done
 
 # Unknown whitepaper → 422
+wait_for_rate_limit_window
 STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
   -H 'Content-Type: application/json' \
   --data '{"email":"test@example.com","whitepaper":"Bogus Asset"}' \
