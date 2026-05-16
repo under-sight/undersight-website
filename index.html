@@ -1109,11 +1109,37 @@
   const TURNSTILE_SITE_KEY = 'TURNSTILE_SITE_KEY_PLACEHOLDER';
   var _activeWhitepaper = '';
   var _wpTurnstileWidgetId = null;
+  var _wpInFlight = false;
+  var _wpOriginalBtnText = '';
   function _turnstileEnabled() {
     return TURNSTILE_SITE_KEY && TURNSTILE_SITE_KEY !== 'TURNSTILE_SITE_KEY_PLACEHOLDER';
   }
+  function _wpSubmitBtn() {
+    return document.querySelector('.wp-submit');
+  }
+  function _lockWpSubmit() {
+    _wpInFlight = true;
+    var btn = _wpSubmitBtn();
+    if (btn) {
+      if (!_wpOriginalBtnText) _wpOriginalBtnText = btn.textContent;
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+      btn.textContent = 'Sending…';
+    }
+  }
+  function _resetWpSubmit() {
+    _wpInFlight = false;
+    var btn = _wpSubmitBtn();
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('is-loading');
+      if (_wpOriginalBtnText) btn.textContent = _wpOriginalBtnText;
+    }
+  }
   function openWhitepaperModal(name) {
     if (name) _activeWhitepaper = name;
+    // Always start with a clean submit state, even if a previous close didn't fire.
+    _resetWpSubmit();
     // Update modal text based on the content type
     document.getElementById('wpTitle').textContent = 'Get the PDF';
     document.getElementById('wpDesc').textContent = name
@@ -1147,6 +1173,8 @@
     document.getElementById('wpEmail').classList.remove('wp-error');
     document.getElementById('wpError').classList.remove('visible');
     document.getElementById('wpError').textContent = 'Please enter a valid email address.';
+    // Re-enable submit so the next open starts clean.
+    _resetWpSubmit();
     // Reset Turnstile so each submission gets a fresh token
     if (_wpTurnstileWidgetId !== null && window.turnstile) {
       try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
@@ -1158,6 +1186,8 @@
     _postWhitepaperLead(token);
   }
   function submitWhitepaperEmail() {
+    // In-flight guard: ignore rapid re-clicks while a request is pending.
+    if (_wpInFlight) return;
     const input = document.getElementById('wpEmail');
     const email = input.value.trim();
     const errorEl = document.getElementById('wpError');
@@ -1170,6 +1200,9 @@
     }
     input.classList.remove('wp-error');
     errorEl.classList.remove('visible');
+
+    // Lock the submit button before any async work kicks off.
+    _lockWpSubmit();
 
     if (_turnstileEnabled() && _wpTurnstileWidgetId !== null && window.turnstile) {
       // Kick off the invisible challenge; result arrives in onWpTurnstileToken.
@@ -1190,6 +1223,7 @@
     if (!WORKER_URL) {
       console.log('[Whitepaper] Email captured:', email, 'for:', _activeWhitepaper);
       showWhitepaperSuccess();
+      _resetWpSubmit();
       return;
     }
     const payload = { email: email, whitepaper: _activeWhitepaper };
@@ -1199,7 +1233,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }).then(function (r) {
-      if (r.ok) { showWhitepaperSuccess(); return; }
+      if (r.ok) { showWhitepaperSuccess(); _resetWpSubmit(); return; }
       if (r.status === 403) {
         errorEl.textContent = 'Verification failed. Please try again.';
       } else if (r.status === 429) {
@@ -1214,12 +1248,14 @@
       if (_wpTurnstileWidgetId !== null && window.turnstile) {
         try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
       }
+      _resetWpSubmit();
     }).catch(function () {
       errorEl.textContent = 'Something went wrong. Please try again.';
       errorEl.classList.add('visible');
       if (_wpTurnstileWidgetId !== null && window.turnstile) {
         try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
       }
+      _resetWpSubmit();
     });
   }
   function showWhitepaperSuccess() {
