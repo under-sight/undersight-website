@@ -571,14 +571,7 @@
     'Solutions - AI Underwriting Copilot': { page: 'copilot', icon: 'C', tag: 'Copilot' },
   };
 
-  const BLOG_IMAGES = {
-    'Building an underwriting copilot': 'images/blog/copilot-building.webp',
-    'The RFI bottleneck': 'images/blog/rfi-bottleneck.webp',
-    'Why AI underwriting is not about replacing underwriters': 'images/blog/ai-underwriting.webp',
-    'How Chat Advance funded a declined deal in 5 minutes': 'images/blog/chat-advance-hero.webp',
-    'Unlocking Institutional Capital for Mid-Tier MCA Funds': 'images/blog/institutional-capital.webp',
-    'From Deterministic Scorecards to Agentic Credit Assessments': 'images/blog/agentic-credit.webp',
-  };
+  // Blog hero images come from Fibery file attachments via firstImage(files)
 
   const SOLUTION_IMAGES = {
     'underscore': 'images/solutions/underscore-card.webp',
@@ -897,8 +890,9 @@
         const md = getContent(data, name);
         const files = getFiles(data, name);
         const meta = parseMeta(md);
-        const heroImg = firstImage(files) || BLOG_IMAGES[name.replace('Blog - ', '')] || '';
-        return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '' };
+        const heroImg = firstImage(files) || '';
+        const companionImgs = (files || []).filter(f => (f.type || '').startsWith('image/')).slice(1).map(f => f.url);
+        return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, companionImgs, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '' };
       })
       .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
@@ -1007,25 +1001,22 @@
 
     let bodyHtml = mdToHtml(stripContents(post.body));
 
-    // Inject 4D Financing logo at the top of the case study
-    if (post.title.includes('4D Financing')) {
-      const logo4d = `<figure style="margin:0 0 32px;"><img src="images/blog/4d-financing-logo.webp" alt="4D Financing" style="height:48px;width:auto;"></figure>`;
-      bodyHtml = logo4d + bodyHtml;
-    }
-
-    // Inject inline companion images for the Chat Advance case study
-    if (post.title.includes('Chat Advance')) {
-      const overviewImg = `<figure style="margin:32px 0;"><img src="images/blog/chat-advance-overview.webp" alt="Chat Advance case study overview — agentic intake flow from application to funder match" style="width:100%;border-radius:var(--radius);border:1px solid var(--pale);"></figure>`;
-      const macyImg = `<figure style="margin:32px 0;"><img src="images/blog/chat-advance-macy.webp" alt="Macy, the AI funding assistant, presenting two funder offers to an applicant in real time" style="width:100%;border-radius:var(--radius);border:1px solid var(--pale);"></figure>`;
-
-      // Insert overview after the first paragraph, Macy screenshot after the third
+    // Auto-inject companion images from Fibery file attachments
+    // Hero = first image (shown above), remaining images distributed through body
+    if (post.companionImgs && post.companionImgs.length > 0) {
       const paragraphs = bodyHtml.split('</p>');
-      if (paragraphs.length > 3) {
-        paragraphs.splice(1, 0, overviewImg);
-        paragraphs.splice(4, 0, macyImg);
+      if (paragraphs.length > 2) {
+        const interval = Math.max(2, Math.floor(paragraphs.length / (post.companionImgs.length + 1)));
+        post.companionImgs.forEach((url, i) => {
+          const insertAt = Math.min((i + 1) * interval, paragraphs.length - 1);
+          const imgHtml = `<figure style="margin:32px 0;"><img src="${url}" alt="" style="width:100%;border-radius:var(--rounded-md);border:1px solid var(--pale);" loading="lazy"></figure>`;
+          paragraphs.splice(insertAt + i, 0, imgHtml);
+        });
         bodyHtml = paragraphs.join('</p>');
       } else {
-        bodyHtml += overviewImg + macyImg;
+        post.companionImgs.forEach(url => {
+          bodyHtml += `<figure style="margin:32px 0;"><img src="${url}" alt="" style="width:100%;border-radius:var(--rounded-md);border:1px solid var(--pale);" loading="lazy"></figure>`;
+        });
       }
     }
 
