@@ -27,7 +27,7 @@ Entity names determine how content is routed and rendered. Follow these naming p
 | `Site Config` | Global settings: Sign In URL, Privacy Policy URL, Contact Email, Copyright |
 | `Contact Page` | Contact section headline and description |
 | `Solutions - underscore` | underscore solution page |
-| `Solutions - Agentic Client RFI` | RFI solution page |
+| `Solutions - underchat agent` | underchat agent solution page (formerly `Solutions - Agentic Client RFI`) |
 | `Solutions - AI Underwriting Copilot` | Copilot solution page |
 | `Blog - [Title]` | Blog post (the part after `Blog - ` becomes the display title) |
 

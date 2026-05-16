@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>underchat agent Solution Page — Review Draft v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;510;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   DESIGN TOKENS
+   ================================================================ */
+:root {
+  --color-graphite-900: #23262C;
+  --color-graphite-800: #2E3138;
+  --color-graphite-700: #3A3F47;
+  --color-graphite-100: #F0F1F2;
+  --color-graphite-50: #F7F8F8;
+  --color-graphite-500: #6B7280;
+  --color-cloud-zinc: #D1D5DB;
+  --color-cloud-zinc-light: #E8EAED;
+  --color-amber-rust: #C97A54;
+  --color-amber-rust-hover: #B56A45;
+  --color-amber-rust-light: rgba(201, 122, 84, 0.08);
+  --color-amber-rust-focus: rgba(201, 122, 84, 0.2);
+  --color-eucalyptus: #6B9E8C;
+  --color-eucalyptus-light: rgba(107, 158, 140, 0.1);
+  --color-paper-white: #FFFFFF;
+  --color-bg-surface: #FAFAFA;
+  --color-on-accent: #FFFFFF;
+  --color-dark-bg: #1A1D21;
+  --color-dark-surface: #23262C;
+  --color-dark-elevated: #3A3F47;
+  --color-dark-text: #FFFFFF;
+  --color-dark-text-muted: #D1D5DB;
+  --color-dark-border: rgba(255, 255, 255, 0.1);
+
+  --color-bg: var(--color-paper-white);
+  --color-bg-alt: var(--color-bg-surface);
+  --color-bg-subtle: var(--color-graphite-50);
+  --color-bg-muted: var(--color-graphite-100);
+  --color-text: var(--color-graphite-900);
+  --color-text-secondary: var(--color-graphite-700);
+  --color-text-muted: var(--color-graphite-500);
+  --color-text-hover: var(--color-graphite-800);
+  --color-accent: var(--color-amber-rust);
+  --color-accent-hover: var(--color-amber-rust-hover);
+  --color-accent-light: var(--color-amber-rust-light);
+  --color-accent-text: var(--color-on-accent);
+  --color-border: var(--color-cloud-zinc);
+  --color-border-light: var(--color-cloud-zinc-light);
+  --color-success: var(--color-eucalyptus);
+  --color-success-light: var(--color-eucalyptus-light);
+  --color-surface: var(--color-paper-white);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+
+  --rounded-xs: 4px; --rounded-sm: 6px; --rounded-md: 8px;
+  --rounded-lg: 12px; --rounded-pill: 9999px;
+
+  --shadow-subtle: 0 1px 3px rgba(35, 38, 44, 0.06);
+  --shadow-medium: 0 4px 16px rgba(35, 38, 44, 0.08);
+  --shadow-large: 0 8px 32px rgba(35, 38, 44, 0.12);
+
+  --max-width: 1120px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: var(--color-dark-bg); --color-bg-alt: var(--color-dark-surface);
+    --color-bg-subtle: var(--color-dark-surface); --color-bg-muted: var(--color-dark-elevated);
+    --color-text: var(--color-dark-text); --color-text-secondary: var(--color-dark-text-muted);
+    --color-text-muted: rgba(255, 255, 255, 0.45); --color-text-hover: var(--color-dark-text);
+    --color-border: var(--color-dark-border); --color-border-light: var(--color-dark-border);
+    --color-surface: var(--color-dark-surface);
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+html.theme-dark {
+  --color-bg: var(--color-dark-bg); --color-bg-alt: var(--color-dark-surface);
+  --color-bg-subtle: var(--color-dark-surface); --color-bg-muted: var(--color-dark-elevated);
+  --color-text: var(--color-dark-text); --color-text-secondary: var(--color-dark-text-muted);
+  --color-text-muted: rgba(255, 255, 255, 0.45); --color-text-hover: var(--color-dark-text);
+  --color-border: var(--color-dark-border); --color-border-light: var(--color-dark-border);
+  --color-surface: var(--color-dark-surface);
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+html.theme-light {
+  --color-bg: var(--color-paper-white); --color-bg-alt: var(--color-bg-surface);
+  --color-bg-subtle: var(--color-graphite-50); --color-bg-muted: var(--color-graphite-100);
+  --color-text: var(--color-graphite-900); --color-text-secondary: var(--color-graphite-700);
+  --color-text-muted: var(--color-graphite-500); --color-text-hover: var(--color-graphite-800);
+  --color-border: var(--color-cloud-zinc); --color-border-light: var(--color-cloud-zinc-light);
+  --color-surface: var(--color-paper-white);
+  --shadow-subtle: 0 1px 3px rgba(35, 38, 44, 0.06);
+  --shadow-medium: 0 4px 16px rgba(35, 38, 44, 0.08);
+}
+
+/* ================================================================
+   BASE
+   ================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --black: var(--color-text); --dark: var(--color-text-secondary);
+  --mid: var(--color-text-muted); --pale: var(--color-border);
+  --bg: var(--color-bg-alt); --white: var(--color-bg); --max-w: var(--max-width);
+}
+html { overflow-x: hidden; }
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--dark); background: var(--bg); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03'; color: var(--black);
+}
+a { color: inherit; text-decoration: none; }
+::selection { background: rgba(201, 122, 84, 0.15); color: var(--black); }
+
+/* ================================================================
+   COMPONENTS
+   ================================================================ */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 24px; border-radius: var(--rounded-md);
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 14px; font-weight: 510; cursor: pointer;
+  transition: all 0.15s ease; border: none; line-height: 1;
+}
+.btn-primary {
+  background: var(--color-accent); color: var(--color-on-accent);
+  box-shadow: 0 1px 2px rgba(201, 122, 84, 0.15);
+}
+.btn-primary:hover {
+  background: var(--color-accent-hover); transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(201, 122, 84, 0.25);
+}
+
+/* Sol Hero — split layout: text left, live chat tile right */
+.sol-hero {
+  padding: 80px 24px 64px; max-width: var(--max-w); margin: 0 auto;
+  display: grid; grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px; align-items: center;
+}
+.sol-hero-text { text-align: left; }
+.sol-hero .tag {
+  display: inline-block; margin-bottom: 16px; padding: 4px 12px;
+  border-radius: var(--rounded-sm); background: rgba(201, 122, 84, 0.08);
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 12px; font-weight: 600; color: var(--color-accent);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.sol-hero h1 {
+  font-size: 44px; font-weight: 700; letter-spacing: -0.03em;
+  margin: 0 0 18px; line-height: 1.08;
+}
+.sol-hero p {
+  font-size: 17px; color: var(--mid); max-width: 540px;
+  margin: 0 0 28px; line-height: 1.6;
+}
+.sol-hero .hero-cta-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.sol-hero .hero-cta-row .btn { padding: 12px 26px; font-size: 14.5px; }
+.sol-hero .hero-cta-row .hero-cta-alt {
+  font-size: 13px; color: var(--mid);
+}
+.sol-hero .hero-cta-row .hero-cta-alt a { color: var(--color-accent); text-decoration: none; font-weight: 510; }
+.sol-hero .hero-cta-row .hero-cta-alt a:hover { text-decoration: underline; }
+
+/* Hero live-chat tile */
+.hero-tile {
+  background: var(--white); border: 1px solid var(--pale);
+  border-radius: var(--rounded-lg); padding: 0;
+  box-shadow: var(--shadow-medium);
+  position: relative; overflow: hidden;
+  max-width: 440px; margin-left: auto;
+}
+.hero-tile::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-eucalyptus));
+}
+.hero-tile-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg-subtle);
+}
+.hero-tile-head .who {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+}
+.hero-tile-head .avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--color-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.hero-tile-head .name {
+  font-size: 13.5px; font-weight: 600; color: var(--black); line-height: 1.2;
+}
+.hero-tile-head .role {
+  font-size: 11.5px; color: var(--mid); line-height: 1.2;
+}
+.hero-tile-head .live-dot {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--color-eucalyptus);
+  display: flex; align-items: center; gap: 5px;
+}
+.hero-tile-head .live-dot::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-eucalyptus); box-shadow: 0 0 6px var(--color-eucalyptus);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+.hero-tile-body {
+  padding: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--white);
+}
+.hero-bubble {
+  max-width: 88%; padding: 9px 13px; border-radius: 13px;
+  font-family: var(--font-body); font-size: 13.5px; line-height: 1.5;
+}
+.hero-bubble.client {
+  align-self: flex-end; background: var(--color-bg-muted);
+  color: var(--color-text); border-bottom-right-radius: 4px;
+}
+.hero-bubble.agent {
+  align-self: flex-start; background: var(--color-accent-light);
+  color: var(--color-text); border-bottom-left-radius: 4px;
+  border: 1px solid rgba(201, 122, 84, 0.18);
+}
+.hero-bubble .who-tag {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 3px;
+}
+.hero-bubble.agent .who-tag { color: var(--color-accent); }
+.hero-bubble.client .who-tag { color: var(--color-text-muted); }
+.hero-tile-footer {
+  padding: 10px 18px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  border-top: 1px solid var(--color-border-light);
+}
+.hero-tile-footer .typing {
+  font-size: 11.5px; color: var(--mid);
+  display: flex; align-items: center; gap: 6px;
+}
+.hero-tile-footer .typing::before {
+  content: '\2022 \2022 \2022'; font-size: 14px; letter-spacing: 1px;
+  color: var(--color-accent); animation: typing 1.4s ease-in-out infinite;
+}
+@keyframes typing {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+.hero-tile-footer .check-tag {
+  font-size: 11px; color: var(--color-eucalyptus);
+  display: flex; align-items: center; gap: 5px;
+}
+.hero-tile-footer .check-tag::before {
+  content: '\2713'; font-weight: 700;
+}
+
+/* Section pattern */
+.home-section { padding: 80px 24px; border-top: 1px solid var(--pale); }
+.home-section .container { max-width: var(--max-w); margin: 0 auto; }
+.home-section-head { margin-bottom: 40px; }
+.home-section-label {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--color-accent); margin-bottom: 8px;
+}
+.home-section-head h2 {
+  font-size: 28px; font-weight: 700; color: var(--black); letter-spacing: -0.02em;
+}
+.home-section-head p {
+  font-size: 16px; color: var(--mid); margin-top: 8px; line-height: 1.6; max-width: 620px;
+}
+
+/* Cards */
+.card-grid { display: grid; gap: 24px; }
+.card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.card {
+  background: var(--white); border: 1px solid var(--pale);
+  border-radius: var(--rounded-md); padding: 28px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.card:hover { border-color: var(--color-accent); transform: translateY(-2px); }
+.card h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.card p { font-size: 14px; color: var(--mid); line-height: 1.6; }
+.card .metric-highlight {
+  font-family: var(--font-mono); font-size: 28px; font-weight: 700;
+  color: var(--color-accent); margin-bottom: 12px; line-height: 1;
+}
+
+/* Serve grid */
+.serve-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.serve-card {
+  padding: 24px; border: 1px solid var(--pale);
+  border-radius: var(--rounded-md); background: var(--white);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.serve-card:hover { border-color: var(--color-accent); transform: translateY(-1px); }
+.serve-card .cat {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--color-accent); margin-bottom: 8px;
+}
+.serve-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.serve-card p { font-size: 14px; color: var(--mid); line-height: 1.5; }
+
+/* CTA */
+.cta-section { text-align: center; padding: 80px 24px; }
+.cta-section h2 {
+  font-size: 28px; font-weight: 700; color: var(--black);
+  letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.cta-section > p {
+  font-size: 16px; color: var(--mid); margin-bottom: 32px;
+  max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6;
+}
+.cta-section .btn { padding: 14px 32px; font-size: 16px; }
+.cta-alt { font-size: 13px; color: var(--mid); margin-top: 16px; }
+.cta-alt a { text-decoration: underline; color: var(--mid); }
+.cta-alt a:hover { color: var(--color-accent); }
+
+/* ================================================================
+   CONVERSATION PREVIEW (dark, analog to api-preview)
+   ================================================================ */
+.convo-preview {
+  background: var(--color-graphite-900); padding: 64px 24px;
+}
+.convo-preview .home-section-label { color: var(--color-accent); }
+.convo-preview .section-title {
+  font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.convo-preview .section-subtitle {
+  font-size: 15px; color: rgba(255, 255, 255, 0.5); line-height: 1.6; max-width: 620px;
+}
+.convo-preview-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  margin-top: 32px; max-width: var(--max-width);
+  margin-left: auto; margin-right: auto;
+}
+.convo-col { min-width: 0; }
+.convo-col-label {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.5); margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.convo-col-label .col-meta {
+  font-family: var(--font-mono); font-weight: 500; letter-spacing: 0;
+  text-transform: none; color: rgba(255, 255, 255, 0.35);
+}
+
+/* Chat surface */
+.chat-surface {
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--rounded-md); padding: 20px; min-height: 460px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 4px;
+}
+.chat-header .who {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.85);
+}
+.chat-header .avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--color-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.chat-header .avatar.client { background: var(--color-eucalyptus); }
+.chat-header .live {
+  font-family: var(--font-mono); font-size: 11px; color: var(--color-eucalyptus);
+  display: flex; align-items: center; gap: 6px;
+}
+.chat-header .live::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-eucalyptus); box-shadow: 0 0 8px var(--color-eucalyptus);
+}
+
+.bubble {
+  max-width: 92%; padding: 10px 14px; border-radius: 14px;
+  font-family: var(--font-body); font-size: 13.5px; line-height: 1.55;
+  position: relative;
+}
+.bubble.agent {
+  align-self: flex-start; background: rgba(201, 122, 84, 0.16);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(201, 122, 84, 0.28);
+  border-bottom-left-radius: 4px;
+}
+.bubble.client {
+  align-self: flex-end; background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-right-radius: 4px;
+}
+.bubble .who-label {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 4px; opacity: 0.7;
+}
+.bubble.agent .who-label { color: var(--color-accent); }
+.bubble.client .who-label { color: var(--color-eucalyptus); }
+.bubble .ts {
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.35); margin-top: 4px;
+}
+.bubble .cite {
+  display: inline-block; margin-top: 6px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  padding: 2px 7px; border-radius: var(--rounded-xs);
+  background: rgba(107, 158, 140, 0.14); color: var(--color-eucalyptus);
+  border: 1px solid rgba(107, 158, 140, 0.25);
+}
+
+/* ================================================================
+   WORKFLOW TIMELINE (vertical lifecycle — condensed)
+   ================================================================ */
+.workflow-timeline {
+  position: relative;
+  display: flex; flex-direction: column;
+  gap: 22px;
+  max-width: 800px; margin: 0 auto;
+}
+.timeline-spine {
+  position: absolute;
+  left: 21px; top: 24px; bottom: 24px;
+  width: 2px;
+  background: linear-gradient(to bottom,
+    var(--color-accent) 0%,
+    var(--color-accent) 70%,
+    rgba(201, 122, 84, 0.18) 100%);
+  z-index: 0;
+  border-radius: 1px;
+}
+.workflow-step {
+  display: grid; grid-template-columns: 44px 1fr;
+  gap: 22px; align-items: start;
+  position: relative; z-index: 1;
+}
+.ws-marker {
+  width: 44px;
+  display: flex; align-items: flex-start; justify-content: center;
+}
+.ws-num {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  box-shadow: 0 0 0 4px var(--bg);
+}
+.ws-content { padding-top: 8px; }
+.ws-content h3 {
+  font-size: 17px; font-weight: 600;
+  letter-spacing: -0.005em; margin-bottom: 4px;
+}
+.ws-content p {
+  font-size: 14.5px; color: var(--mid); line-height: 1.55;
+  max-width: 640px;
+}
+
+/* Behind-the-scenes summary (plain-English, replaces op-trace) */
+.op-summary { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+.op-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 4px 0;
+}
+.op-check {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(107, 158, 140, 0.18);
+  color: var(--color-eucalyptus);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; line-height: 1;
+  border: 1px solid rgba(107, 158, 140, 0.3);
+}
+.op-item .op-title {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 3px; line-height: 1.4;
+}
+.op-item .op-desc {
+  font-size: 13px; color: rgba(255, 255, 255, 0.6);
+  line-height: 1.55;
+}
+
+/* ================================================================
+   CAPACITY CALLOUT (dark 2-col, analog to mca-callout)
+   ================================================================ */
+.capacity-callout {
+  background: var(--color-graphite-900); padding: 64px 24px; color: #fff;
+}
+.capacity-callout .container { max-width: var(--max-w); margin: 0 auto; }
+.capacity-callout-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+.capacity-text .home-section-label { color: var(--color-accent); }
+.capacity-text h2 {
+  font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.02em; margin-bottom: 12px;
+}
+.capacity-text p {
+  font-size: 15px; color: rgba(255, 255, 255, 0.65); line-height: 1.7; margin-bottom: 16px;
+}
+.capacity-text ul { list-style: none; padding: 0; }
+.capacity-text li {
+  font-size: 14px; color: rgba(255, 255, 255, 0.75); line-height: 1.6;
+  padding: 6px 0; padding-left: 20px; position: relative;
+}
+.capacity-text li::before {
+  content: ''; position: absolute; left: 0; top: 14px;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent);
+}
+.capacity-metrics-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.capacity-metric {
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--rounded-md); padding: 16px;
+}
+.capacity-metric .label {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.4); margin-bottom: 6px;
+}
+.capacity-metric .value {
+  font-family: var(--font-mono); font-size: 22px; font-weight: 700;
+  color: var(--color-accent); line-height: 1; margin-bottom: 4px;
+}
+.capacity-metric .desc {
+  font-size: 12px; color: rgba(255, 255, 255, 0.5); line-height: 1.4;
+}
+
+/* ================================================================
+   CHANNEL STRIP (horizontal omnichannel storyline)
+   ================================================================ */
+.channel-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-top: 32px; position: relative;
+}
+.channel-card {
+  background: var(--white); border: 1px solid var(--pale);
+  border-radius: var(--rounded-md); padding: 18px;
+  position: relative; min-height: 220px;
+  display: flex; flex-direction: column;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.channel-card:hover { border-color: var(--color-accent); transform: translateY(-2px); }
+.channel-card .ch-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+.channel-card .ch-name {
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 13px; font-weight: 600; color: var(--black);
+  display: flex; align-items: center; gap: 8px;
+}
+.channel-card .ch-icon {
+  width: 22px; height: 22px; border-radius: var(--rounded-xs);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 12px; font-weight: 700;
+}
+.ch-icon.web { background: var(--color-accent); }
+.ch-icon.email { background: #5B8DEF; }
+.ch-icon.sms { background: var(--color-eucalyptus); }
+.ch-icon.slack { background: #4A154B; }
+.channel-card .ch-stage {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em;
+}
+.channel-card .ch-body { flex: 1; font-size: 12px; color: var(--dark); line-height: 1.5; }
+
+/* Mini chat samples */
+.mini-chat { display: flex; flex-direction: column; gap: 6px; }
+.mini-bubble {
+  padding: 6px 9px; border-radius: 8px;
+  font-size: 11.5px; line-height: 1.4; max-width: 90%;
+}
+.mini-bubble.agent {
+  align-self: flex-start; background: var(--color-accent-light);
+  color: var(--color-text); border-bottom-left-radius: 2px;
+}
+.mini-bubble.client {
+  align-self: flex-end; background: var(--color-bg-muted);
+  color: var(--color-text); border-bottom-right-radius: 2px;
+}
+.mini-meta {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--mid); padding: 4px 0;
+}
+.mini-email {
+  background: var(--color-bg-subtle); border-radius: var(--rounded-xs);
+  padding: 8px; font-size: 11.5px; color: var(--dark); line-height: 1.45;
+}
+.mini-email .ml-sub { font-weight: 600; color: var(--black); margin-bottom: 3px; }
+.mini-email .ml-from {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--mid); margin-bottom: 6px;
+}
+.mini-sms { display: flex; flex-direction: column; gap: 5px; }
+.mini-sms .sms-bubble {
+  padding: 5px 9px; border-radius: 12px; font-size: 11.5px;
+  max-width: 88%; line-height: 1.4;
+}
+.mini-sms .sms-bubble.in {
+  align-self: flex-start; background: var(--color-bg-muted);
+  border-bottom-left-radius: 3px;
+}
+.mini-sms .sms-bubble.out {
+  align-self: flex-end; background: var(--color-eucalyptus);
+  color: #fff; border-bottom-right-radius: 3px;
+}
+.mini-slack {
+  background: var(--color-bg-subtle); border-radius: var(--rounded-xs);
+  padding: 8px; font-size: 11.5px; line-height: 1.5;
+}
+.mini-slack .sl-name {
+  font-weight: 600; color: var(--black); margin-right: 5px;
+}
+.mini-slack .sl-ts {
+  font-family: var(--font-mono); font-size: 9.5px;
+  color: var(--mid);
+}
+.mini-slack .sl-msg { color: var(--dark); margin-top: 2px; }
+
+/* Channel strip arrow connectors (between cards) */
+.channel-strip::before {
+  content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px;
+  background: repeating-linear-gradient(
+    to right, var(--color-accent), var(--color-accent) 4px,
+    transparent 4px, transparent 8px
+  );
+  opacity: 0.25; z-index: -1;
+}
+
+.channel-caption {
+  text-align: center; margin-top: 28px;
+  font-size: 14px; color: var(--mid); line-height: 1.6;
+  max-width: 580px; margin-left: auto; margin-right: auto;
+}
+.channel-caption strong { color: var(--black); font-weight: 600; }
+
+/* Capability pills below channel strip */
+.capability-pills {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px;
+  justify-content: center;
+}
+.cap-pill {
+  padding: 8px 18px; background: var(--white); border: 1px solid var(--pale);
+  border-radius: var(--rounded-pill); font-family: var(--font-sans);
+  font-feature-settings: 'cv01', 'ss03'; font-size: 13px; font-weight: 510;
+  color: var(--dark);
+}
+
+/* ================================================================
+   Review banner
+   ================================================================ */
+.review-banner {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--color-graphite-900); color: #fff;
+  padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+  font-size: 13px; font-weight: 510;
+  border-bottom: 2px solid var(--color-accent);
+}
+.review-banner .rtag {
+  padding: 3px 10px; border-radius: var(--rounded-pill);
+  background: var(--color-accent); color: #fff;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; margin-right: 8px;
+}
+
+/* Dark mode toggle */
+.theme-toggle {
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--white); border: 1px solid var(--pale);
+  box-shadow: var(--shadow-medium); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease; font-size: 18px;
+}
+.theme-toggle:hover { transform: translateY(-2px); box-shadow: var(--shadow-large); }
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 960px) {
+  .sol-hero { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px 48px; text-align: left; }
+  .sol-hero-text { max-width: 620px; }
+  .hero-tile { margin-left: 0; max-width: 460px; }
+}
+@media (max-width: 900px) {
+  .channel-strip { grid-template-columns: repeat(2, 1fr); }
+  .channel-strip::before { display: none; }
+  .card-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .sol-hero { padding: 40px 16px 32px; gap: 28px; }
+  .sol-hero h1 { font-size: 30px; }
+  .sol-hero p { font-size: 15px; margin-bottom: 22px; }
+  .hero-tile { max-width: 100%; }
+  .hero-tile-body { padding: 14px; }
+  .hero-bubble { font-size: 13px; }
+  .workflow-timeline { gap: 28px; }
+  .workflow-step { grid-template-columns: 44px 1fr; gap: 18px; }
+  .ws-num { width: 44px; height: 44px; font-size: 13px; }
+  .ws-content h3 { font-size: 19px; }
+  .ws-content p { font-size: 14px; }
+  .timeline-spine { left: 21px; }
+  .convo-preview { padding: 48px 16px; }
+  .convo-preview-grid { grid-template-columns: 1fr; }
+  .convo-preview .section-title { font-size: 22px; }
+  .chat-surface { min-height: 0; padding: 16px; }
+  .home-section { padding: 48px 16px; }
+  .home-section-head { margin-bottom: 24px; }
+  .home-section-head h2 { font-size: 22px; }
+  .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+  .card { padding: 20px; }
+  .serve-grid { grid-template-columns: 1fr; }
+  .capacity-callout { padding: 48px 16px; }
+  .capacity-callout-grid { grid-template-columns: 1fr; gap: 32px; }
+  .capacity-metrics-grid { grid-template-columns: 1fr 1fr; }
+  .channel-strip { grid-template-columns: 1fr; }
+  .container { padding: 0 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .btn-primary, .serve-card, .channel-card, .theme-toggle {
+    transition: none !important; transform: none !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- REVIEW BANNER -->
+<div class="review-banner">
+  <div><span class="rtag">Review v1</span> underchat agent Solution Page</div>
+  <div style="font-size: 12px; color: rgba(255,255,255,0.5);">May 2026</div>
+</div>
+
+<!-- ============================================================
+     1. HERO — split: text left, live chat tile right
+     ============================================================ -->
+<div class="sol-hero">
+  <div class="sol-hero-text">
+    <span class="tag">Client Engagement</span>
+    <h1>Brand-matched AI agents that engage your clients 24/7</h1>
+    <p>Guardrailed, observable agent personas that handle intake, RFIs, document collection, recovery, and renewals — across web chat, email, SMS, and Slack. Resolves 80% of cases autonomously and routes the rest to humans with full context.</p>
+    <div class="hero-cta-row">
+      <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+      <span class="hero-cta-alt">or <a href="#workflows">see how it works</a></span>
+    </div>
+  </div>
+
+  <div class="hero-tile" aria-hidden="true">
+    <div class="hero-tile-head">
+      <div class="who">
+        <div class="avatar">H</div>
+        <div>
+          <div class="name">Harper</div>
+          <div class="role">FundFirst Capital · Assistant</div>
+        </div>
+      </div>
+      <div class="live-dot">live</div>
+    </div>
+    <div class="hero-tile-body">
+      <div class="hero-bubble client">
+        <div class="who-tag">Maria</div>
+        stuck on the revenue field — does our tax refund count?
+      </div>
+      <div class="hero-bubble agent">
+        <div class="who-tag">Harper</div>
+        Tax refunds don't count toward average monthly revenue — leave those out. We want a steady-state picture of recurring income.
+      </div>
+      <div class="hero-bubble client">
+        <div class="who-tag">Maria</div>
+        got it, thanks!
+      </div>
+    </div>
+    <div class="hero-tile-footer">
+      <div class="typing">Harper is typing</div>
+      <div class="check-tag">on-brand · cited</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     2. CONVERSATION PREVIEW — dark, dual-view (client + behind-the-scenes)
+     ============================================================ -->
+<div class="convo-preview">
+  <div class="container">
+    <div class="home-section-label">Live Conversation</div>
+    <div class="section-title">On-brand for your client. Observable for your team.</div>
+    <div class="section-subtitle">Clients get a friendly, branded assistant. Your team gets a clear, plain-English view of what the agent did, what it cited, and whether a human needs to step in.</div>
+
+    <div class="convo-preview-grid">
+      <!-- LEFT: CLIENT SURFACE -->
+      <div class="convo-col">
+        <div class="convo-col-label">
+          <span>What the client sees</span>
+        </div>
+        <div class="chat-surface">
+          <div class="chat-header">
+            <div class="who">
+              <div class="avatar">H</div>
+              <div>
+                <div>Harper · FundFirst Capital</div>
+                <div style="font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.45);">Application Assistant</div>
+              </div>
+            </div>
+            <div class="live">live</div>
+          </div>
+
+          <div class="bubble client">
+            <div class="who-label">Maria · Client</div>
+            I'm stuck on "average monthly revenue" — does that include the tax refund we got in March?
+            <div class="ts">2:15 PM</div>
+          </div>
+
+          <div class="bubble agent">
+            <div class="who-label">Harper · Agent</div>
+            Good question. Average monthly revenue means recurring operating income only — so you'd leave out one-time items like tax refunds. We want a steady-state picture of the business.
+            <div class="ts">2:15 PM</div>
+          </div>
+
+          <div class="bubble client">
+            <div class="who-label">Maria · Client</div>
+            got it. can I upload bank statements as PDFs, or do I have to connect Plaid?
+            <div class="ts">2:16 PM</div>
+          </div>
+
+          <div class="bubble agent">
+            <div class="who-label">Harper · Agent</div>
+            Either works. Plaid is quicker, but PDFs are fine — last 6 months, please.
+            <div class="ts">2:16 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: BEHIND-THE-SCENES — plain English -->
+      <div class="convo-col">
+        <div class="convo-col-label">
+          <span>What your team sees</span>
+        </div>
+        <div class="chat-surface">
+          <div class="chat-header">
+            <div class="who">
+              <div class="avatar client">✓</div>
+              <div>
+                <div>Behind the scenes</div>
+                <div style="font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.45);">Plain-English summary</div>
+              </div>
+            </div>
+            <div class="live">auto-resolved</div>
+          </div>
+
+          <div class="op-summary">
+            <div class="op-item">
+              <div class="op-check">✓</div>
+              <div>
+                <div class="op-title">Answered from your intake guide</div>
+                <div class="op-desc">Pulled the revenue definition from FundFirst's intake guide — no guessing.</div>
+              </div>
+            </div>
+
+            <div class="op-item">
+              <div class="op-check">✓</div>
+              <div>
+                <div class="op-title">Stayed on-brand, stayed in scope</div>
+                <div class="op-desc">Voice matched FundFirst's tone. No financial advice, no off-policy claims.</div>
+              </div>
+            </div>
+
+            <div class="op-item">
+              <div class="op-check">✓</div>
+              <div>
+                <div class="op-title">No human needed</div>
+                <div class="op-desc">Routine clarifications. If she'd asked something risky or out of scope, this would have been flagged for a human.</div>
+              </div>
+            </div>
+
+            <div class="op-item">
+              <div class="op-check">✓</div>
+              <div>
+                <div class="op-title">Application moved forward</div>
+                <div class="op-desc">Revenue field filled. Plaid invite queued. Conversation closed cleanly — fully auditable.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     3. CAPABILITIES — 4 cards
+     ============================================================ -->
+<div class="home-section">
+  <div class="container">
+    <div class="home-section-head">
+      <div class="home-section-label">Capabilities</div>
+      <h2>Built to extend your frontline team, not replace it</h2>
+    </div>
+
+    <div class="card-grid cols-4">
+      <div class="card">
+        <div class="metric-highlight">24/7</div>
+        <h3>Always-on coverage</h3>
+        <p>Agents work nights, weekends, and across time zones — meeting clients the moment they're ready, not the next business day.</p>
+      </div>
+      <div class="card">
+        <div class="metric-highlight">80%</div>
+        <h3>Autonomous resolution</h3>
+        <p>Up to 80% of typical cases — intake questions, document chases, RFI clarifications — handled without human involvement, with intelligent escalation for the rest.</p>
+      </div>
+      <div class="card">
+        <div class="metric-highlight">5x</div>
+        <h3>Frontline throughput</h3>
+        <p>Minimum 5x capacity with the same team. Humans get the 20% that matter, with the agent's full transcript and context already prepared.</p>
+      </div>
+      <div class="card">
+        <div class="metric-highlight">Brand</div>
+        <h3>Persona &amp; guardrails</h3>
+        <p>Tone, voice, and policy boundaries configured to your brand guidelines. Every response is on-brand and on-policy — observable and reviewable.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     4. CAPACITY CALLOUT — dark, 2-col, the throughput story
+     ============================================================ -->
+<div class="capacity-callout">
+  <div class="container">
+    <div class="capacity-callout-grid">
+      <div class="capacity-text">
+        <div class="home-section-label">Capacity Multiplier</div>
+        <h2>Anywhere humans are the bottleneck, add an agent-first line</h2>
+        <p>Most frontline work is repetitive context-gathering and clarification. underchat agents handle that work autonomously and escalate cleanly — with the transcript, classified intent, and unresolved questions packaged for the human who picks it up.</p>
+        <ul>
+          <li>Agent-first triage on every inbound — chat, email, SMS, or Slack</li>
+          <li>Intelligent escalation: only the 20% that truly need a human</li>
+          <li>Full transcript and context handoff — no "what did the last rep say?"</li>
+          <li>Context accumulates across conversations — agents remember</li>
+          <li>Observable, auditable, and reviewable end-to-end</li>
+        </ul>
+      </div>
+      <div class="capacity-metrics-grid">
+        <div class="capacity-metric">
+          <div class="label">Autonomous resolution</div>
+          <div class="value">80%</div>
+          <div class="desc">Of typical intake, RFI, and recovery cases</div>
+        </div>
+        <div class="capacity-metric">
+          <div class="label">Throughput uplift</div>
+          <div class="value">5x</div>
+          <div class="desc">Minimum, same headcount</div>
+        </div>
+        <div class="capacity-metric">
+          <div class="label">First-response time</div>
+          <div class="value">&lt;30s</div>
+          <div class="desc">Median, all channels, 24/7</div>
+        </div>
+        <div class="capacity-metric">
+          <div class="label">Coverage</div>
+          <div class="value">24/7</div>
+          <div class="desc">Nights, weekends, holidays</div>
+        </div>
+        <div class="capacity-metric">
+          <div class="label">Escalation precision</div>
+          <div class="value">96%</div>
+          <div class="desc">Of escalations are genuinely human-needed</div>
+        </div>
+        <div class="capacity-metric">
+          <div class="label">Channels</div>
+          <div class="value">4</div>
+          <div class="desc">Web, email, SMS, Slack — one agent</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     5. WORKFLOWS — vertical lifecycle timeline
+     ============================================================ -->
+<div class="home-section" id="workflows">
+  <div class="container">
+    <div class="home-section-head">
+      <div class="home-section-label">Workflows</div>
+      <h2>One agent layer across the client lifecycle</h2>
+      <p>The same brand-matched agent shows up at intake, during RFI, through recovery, and into renewals — carrying context forward so clients never restart the conversation.</p>
+    </div>
+
+    <div class="workflow-timeline">
+      <div class="timeline-spine" aria-hidden="true"></div>
+
+      <div class="workflow-step">
+        <div class="ws-marker"><div class="ws-num">01</div></div>
+        <div class="ws-content">
+          <h3>Intake</h3>
+          <p>Engaging application fill that lifts conversion and completeness — the agent answers field questions in-flow and solicits Plaid, QBO, statements, and AR aging in the same conversation.</p>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="ws-marker"><div class="ws-num">02</div></div>
+        <div class="ws-content">
+          <h3>RFI</h3>
+          <p>Agents chase RFI responses from clients and answer underwriter questions directly from accumulated context. Round-trips collapse from days to minutes.</p>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="ws-marker"><div class="ws-num">03</div></div>
+        <div class="ws-content">
+          <h3>Renewals</h3>
+          <p>Proactive outreach as renewal windows open, with offers tied to current cashflow. Underwriters review only the cases the agent flags — renewal capture rises without renewal-team headcount.</p>
+        </div>
+      </div>
+
+      <div class="workflow-step">
+        <div class="ws-marker"><div class="ws-num">04</div></div>
+        <div class="ws-content">
+          <h3>Recovery</h3>
+          <p>Brand-consistent outreach when payments slip — reminders, hardship check-ins, restructure offers. Humans handle only the escalated cases, with full context already prepared.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     6. USE CASES — 3 cards
+     ============================================================ -->
+<div class="home-section">
+  <div class="container">
+    <div class="home-section-head">
+      <div class="home-section-label">Use Cases</div>
+      <h2>How teams use underchat agent</h2>
+    </div>
+
+    <div class="serve-grid">
+      <div class="serve-card">
+        <div class="cat">Direct Funders</div>
+        <h3>Engage every applicant, fund more deals</h3>
+        <p>Replace queue-based intake with a brand-matched agent that meets every applicant the moment they land. Higher conversion, cleaner submissions, faster fundings.</p>
+      </div>
+      <div class="serve-card">
+        <div class="cat">ISO / Brokerages</div>
+        <h3>Inquiry to package, no manual hand-holding</h3>
+        <p>Move applicants from initial inquiry to a complete, funder-ready package. The agent does the chasing — your reps focus on placement and relationships.</p>
+      </div>
+      <div class="serve-card">
+        <div class="cat">Servicers &amp; Recovery</div>
+        <h3>Catch at-risk accounts before they default</h3>
+        <p>Brand-consistent outreach for renewals, missed-payment intervention, and structured recovery. Agents do the early outreach; humans handle the hard cases.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     7. CHANNELS — horizontal channel strip
+         Same conversation flowing across Web → Email → SMS → Slack
+     ============================================================ -->
+<div class="home-section">
+  <div class="container">
+    <div class="home-section-head">
+      <div class="home-section-label">Channels</div>
+      <h2>Meet clients where they are — same agent, same context</h2>
+      <p>One persistent agent thread across every channel. The conversation that starts in web chat continues in email, SMS, or Slack without losing context, classification, or guardrails.</p>
+    </div>
+
+    <div class="channel-strip">
+      <!-- WEB CHAT -->
+      <div class="channel-card">
+        <div class="ch-head">
+          <div class="ch-name"><div class="ch-icon web">W</div>Web Chat</div>
+          <div class="ch-stage">Stage 1 · Intake</div>
+        </div>
+        <div class="ch-body">
+          <div class="mini-chat">
+            <div class="mini-bubble agent">Hi Maria — ready to wrap up your application?</div>
+            <div class="mini-bubble client">yeah I'm stuck on revenue</div>
+            <div class="mini-bubble agent">No problem — average monthly is recurring operating income only.</div>
+            <div class="mini-meta">conv_8a72f1 · embed widget</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="channel-card">
+        <div class="ch-head">
+          <div class="ch-name"><div class="ch-icon email">E</div>Email</div>
+          <div class="ch-stage">Stage 2 · RFI</div>
+        </div>
+        <div class="ch-body">
+          <div class="mini-email">
+            <div class="ml-from">Harper @ FundFirst &lt;harper@fundfirst…&gt;</div>
+            <div class="ml-sub">Quick follow-up on your application</div>
+            Hi Maria — underwriting flagged two items: last month's deposit pattern and your AR aging. The agent can pull both if you connect your accounting…
+            <div class="mini-meta" style="padding-top: 4px;">threaded · conv_8a72f1</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SMS -->
+      <div class="channel-card">
+        <div class="ch-head">
+          <div class="ch-name"><div class="ch-icon sms">S</div>SMS</div>
+          <div class="ch-stage">Stage 3 · Document chase</div>
+        </div>
+        <div class="ch-body">
+          <div class="mini-sms">
+            <div class="sms-bubble out">Hi Maria — just need your last 2 bank statements to finalize. Reply with files or "plaid" to connect.</div>
+            <div class="sms-bubble in">plaid</div>
+            <div class="sms-bubble out">Sent — link expires in 24h. fundfirst.co/p/9a2…</div>
+            <div class="mini-meta">+1 (212) 555-…  · conv_8a72f1</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLACK -->
+      <div class="channel-card">
+        <div class="ch-head">
+          <div class="ch-name"><div class="ch-icon slack">#</div>Slack</div>
+          <div class="ch-stage">Stage 4 · Renewal</div>
+        </div>
+        <div class="ch-body">
+          <div class="mini-slack">
+            <div><span class="sl-name">Harper</span><span class="sl-ts">9:02 AM</span></div>
+            <div class="sl-msg">Hey team — Maria's 6-month renewal window opens next week. Her cashflow has held up; I'll send a soft renewal offer and tag Jordan if anything looks off.</div>
+            <div class="mini-meta" style="padding-top: 4px;">#fundfirst-deals · conv_8a72f1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="channel-caption">
+      <strong>Same agent, same context, every channel.</strong> The conversation that started in web chat at intake continues by email through RFI, by SMS for document collection, and lands in Slack for the renewal — without ever losing the thread.
+    </div>
+
+    <div class="capability-pills">
+      <div class="cap-pill">Brand-matched personas</div>
+      <div class="cap-pill">Observable transcripts</div>
+      <div class="cap-pill">Configurable guardrails</div>
+      <div class="cap-pill">Human-in-the-loop escalation</div>
+      <div class="cap-pill">Persistent client context</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     8. CTA
+     ============================================================ -->
+<div class="cta-section">
+  <h2>See underchat agent in action</h2>
+  <p>Schedule a discovery call and we'll walk through a live agent conversation tuned to your brand, your policies, and your workflows.</p>
+  <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+  <div class="cta-alt">Or email us at <a href="mailto:contact@undersight.ai">contact@undersight.ai</a></div>
+</div>
+
+<!-- DARK MODE TOGGLE -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+  <span id="themeIcon">&#x263E;</span>
+</button>
+
+<script>
+  const toggle = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  let mode = 'system';
+  toggle.addEventListener('click', () => {
+    const html = document.documentElement;
+    if (mode === 'system' || mode === 'light') {
+      html.classList.add('theme-dark'); html.classList.remove('theme-light');
+      mode = 'dark'; icon.textContent = '☀';
+    } else {
+      html.classList.add('theme-light'); html.classList.remove('theme-dark');
+      mode = 'light'; icon.textContent = '☾';
+    }
+  });
+</script>
+
+</body>
+</html>
