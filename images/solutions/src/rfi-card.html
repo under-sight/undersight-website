@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 640px; height: 640px; background: transparent; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
+
+    <!-- Background -->
+    <rect width="640" height="640" rx="24" fill="#F7F8F8"/>
+
+    <!-- STEP 1 label -->
+    <text x="48" y="56" font-family="Inter, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.1em">STEP 1</text>
+
+    <!-- Chat window container -->
+    <rect x="40" y="76" width="560" height="520" rx="16" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+
+    <!-- Chat header bar -->
+    <rect x="40" y="76" width="560" height="52" rx="16" fill="#23262C"/>
+    <rect x="40" y="112" width="560" height="16" fill="#23262C"/>
+
+    <!-- Agent avatar -->
+    <circle cx="76" cy="102" r="14" fill="#6B9E8C"/>
+    <text x="76" y="107" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">A</text>
+
+    <!-- Agent name -->
+    <text x="100" y="98" font-family="Inter, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">RFI Agent</text>
+    <text x="100" y="114" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">Automated intake</text>
+
+    <!-- Online indicator -->
+    <circle cx="564" cy="102" r="5" fill="#6B9E8C"/>
+
+    <!-- Agent message 1 -->
+    <g transform="translate(56, 150)">
+      <!-- Avatar small -->
+      <circle cx="12" cy="12" r="12" fill="#6B9E8C" opacity="0.15"/>
+      <circle cx="12" cy="12" r="6" fill="#6B9E8C"/>
+      <!-- Bubble -->
+      <rect x="32" y="0" width="360" height="52" rx="12" fill="#F0F1F2"/>
+      <text x="48" y="20" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#23262C">Hi, I'm reviewing the Acme Logistics deal.</text>
+      <text x="48" y="38" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#23262C">Could you upload the latest bank statements?</text>
+    </g>
+
+    <!-- User message 1 -->
+    <g transform="translate(56, 224)">
+      <!-- Bubble (right aligned) -->
+      <rect x="240" y="0" width="320" height="36" rx="12" fill="#23262C"/>
+      <text x="256" y="23" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#FFFFFF">Sure, uploading 3 months now.</text>
+      <!-- User avatar small -->
+      <circle cx="572" cy="18" r="12" fill="#C97A54" opacity="0.15"/>
+      <circle cx="572" cy="18" r="6" fill="#C97A54"/>
+    </g>
+
+    <!-- File attachment cards -->
+    <g transform="translate(296, 278)">
+      <!-- File 1 -->
+      <rect x="0" y="0" width="152" height="32" rx="8" fill="#F0F1F2" stroke="#D1D5DB" stroke-width="1"/>
+      <!-- File icon -->
+      <rect x="10" y="7" width="12" height="16" rx="2" fill="none" stroke="#6B7280" stroke-width="1.2"/>
+      <line x1="10" y1="7" x2="16" y2="7" stroke="#6B7280" stroke-width="1.2"/>
+      <text x="30" y="20" font-family="SF Mono, JetBrains Mono, monospace" font-size="10" fill="#3A3F47">bank_mar.pdf</text>
+      <!-- Checkmark -->
+      <circle cx="134" cy="16" r="8" fill="#6B9E8C" opacity="0.15"/>
+      <polyline points="129,16 132,19 139,13" fill="none" stroke="#6B9E8C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- File 2 -->
+      <rect x="0" y="40" width="152" height="32" rx="8" fill="#F0F1F2" stroke="#D1D5DB" stroke-width="1"/>
+      <rect x="10" y="47" width="12" height="16" rx="2" fill="none" stroke="#6B7280" stroke-width="1.2"/>
+      <line x1="10" y1="47" x2="16" y2="47" stroke="#6B7280" stroke-width="1.2"/>
+      <text x="30" y="60" font-family="SF Mono, JetBrains Mono, monospace" font-size="10" fill="#3A3F47">bank_apr.pdf</text>
+      <circle cx="134" cy="56" r="8" fill="#6B9E8C" opacity="0.15"/>
+      <polyline points="129,56 132,59 139,53" fill="none" stroke="#6B9E8C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- File 3 -->
+      <rect x="0" y="80" width="152" height="32" rx="8" fill="#F0F1F2" stroke="#D1D5DB" stroke-width="1"/>
+      <rect x="10" y="87" width="12" height="16" rx="2" fill="none" stroke="#6B7280" stroke-width="1.2"/>
+      <line x1="10" y1="87" x2="16" y2="87" stroke="#6B7280" stroke-width="1.2"/>
+      <text x="30" y="100" font-family="SF Mono, JetBrains Mono, monospace" font-size="10" fill="#3A3F47">tax_2025.pdf</text>
+      <circle cx="134" cy="96" r="8" fill="#6B9E8C" opacity="0.15"/>
+      <polyline points="129,96 132,99 139,93" fill="none" stroke="#6B9E8C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Agent message 2 - confirmation -->
+    <g transform="translate(56, 406)">
+      <circle cx="12" cy="12" r="12" fill="#6B9E8C" opacity="0.15"/>
+      <circle cx="12" cy="12" r="6" fill="#6B9E8C"/>
+      <rect x="32" y="0" width="400" height="52" rx="12" fill="#F0F1F2"/>
+      <text x="48" y="20" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#23262C">Received. Cross-referencing bank data with</text>
+      <text x="48" y="38" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#23262C">application details and tax filings...</text>
+    </g>
+
+    <!-- Agent typing indicator -->
+    <g transform="translate(56, 476)">
+      <circle cx="12" cy="12" r="12" fill="#6B9E8C" opacity="0.15"/>
+      <circle cx="12" cy="12" r="6" fill="#6B9E8C"/>
+      <rect x="32" y="2" width="64" height="24" rx="12" fill="#F0F1F2"/>
+      <circle cx="52" cy="14" r="3" fill="#6B7280" opacity="0.4"/>
+      <circle cx="64" cy="14" r="3" fill="#6B7280" opacity="0.6"/>
+      <circle cx="76" cy="14" r="3" fill="#6B7280" opacity="0.8"/>
+    </g>
+
+    <!-- Bottom input bar -->
+    <rect x="56" y="514" width="528" height="40" rx="12" fill="#F0F1F2" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="76" y="539" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#6B7280" opacity="0.5">Type a message...</text>
+    <!-- Send button -->
+    <circle cx="556" cy="534" r="14" fill="#C97A54" opacity="0.2"/>
+    <polygon points="551,534 561,534 556,528" fill="#C97A54" transform="rotate(90, 556, 534)"/>
+
+  </svg>
+</body>
+</html>
