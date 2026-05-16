@@ -1,8 +1,8 @@
 # undersight
 
-> AI underwriting infrastructure for alternative finance.
+> AI underwriting infrastructure for private credit.
 
-undersight builds agentic AI tools that automate intake, enrich data, score risk, and assist underwriters across every stage of small business lending. The platform serves funds, brokers, and marketplaces in MCA, revenue-based financing, and factoring.
+undersight builds agentic AI tools that automate intake, enrich data, score risk, and assist underwriters across every stage of small business lending. The platform serves private credit funds, brokers, and marketplaces in MCA, revenue-based financing, and factoring.
 
 ## Products
 
@@ -22,7 +22,7 @@ Single-pane underwriting workspace where underwriters can analyze transactions, 
 - $30K MRR as of December 2025
 
 ## Market
-- Alternative finance: MCA, revenue-based financing, factoring
+- Private credit: MCA, revenue-based financing, factoring
 - $19-22B annual US market, 200-300 originators, 1,000-2,000 brokers
 - Founded October 2025, product launched November 2025
 

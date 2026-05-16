@@ -32,9 +32,9 @@ Both desktop and mobile "Sign In" buttons hardcode `https://staging.app.undercha
 
 ### 3. Blog content references wrong industry
 
-Two blog posts reference "specialty insurance," "carriers," and "loss runs" -- terminology from a different vertical than the homepage's "alternative finance" positioning. A visitor reading the blog after the homepage will notice this immediately.
+Two blog posts reference "specialty insurance," "carriers," and "loss runs" -- terminology from a different vertical than the homepage's "private credit" positioning. A visitor reading the blog after the homepage will notice this immediately.
 
-- **What to do:** Edit the Fibery blog entities: replace "specialty insurance" with "alternative finance," "carrier" with "funder," "loss runs" with "bank statements" or "position schedules"
+- **What to do:** Edit the Fibery blog entities: replace "specialty insurance" with "private credit," "carrier" with "funder," "loss runs" with "bank statements" or "position schedules"
 - **Effort:** Medium (content editing, not code)
 - **Files:** Fibery CMS entities: `Blog - Why AI underwriting is not about replacing underwriters`, `Blog - The RFI bottleneck`
 - **Dependencies:** None

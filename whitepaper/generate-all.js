@@ -18,8 +18,8 @@ const { chromium } = require('playwright');
 // ---------------------------------------------------------------------------
 
 const WORKSPACE = 'subscript.fibery.io';
-const DB = 'Website/Database 1';
-const IMG_DIR = '/Users/kyle/Documents/underchat/undersight/undersight/dist/images/blog';
+const DB = 'Website/Blog';
+const IMG_DIR = path.resolve(__dirname, '../dist/images/blog');
 
 const WHITEPAPERS = [
   {
@@ -118,7 +118,7 @@ async function fetchBlogPosts() {
       query: {
         'q/from': DB,
         'q/select': {
-          Name: 'Website/Name',
+          Name: 'Website/name',
           DocSecret: ['Website/Description', 'Collaboration~Documents/secret'],
         },
         'q/limit': 100,
@@ -135,10 +135,10 @@ async function fetchBlogPosts() {
   for (const d of docResults) docs[d.secret] = d.content || '';
 
   return entities
-    .filter(e => e.Name && e.Name.startsWith('Blog - '))
+    .filter(e => e.Name)
     .map(e => ({
       name: e.Name,
-      title: e.Name.replace('Blog - ', ''),
+      title: e.Name.replace(/^Blog - /, ''),
       content: docs[e.DocSecret] || '',
     }));
 }
@@ -446,7 +446,7 @@ ${bodyHtml}
     <a href="https://calendly.com/kyle-undersight/30min" class="back-cta">Book a Discovery Call</a>
     <div class="back-contact">Or email us at <a href="mailto:contact@undersight.ai">contact@undersight.ai</a></div>
   </div>
-  <div class="back-footer">undersight.ai &middot; AI underwriting infrastructure for alternative finance</div>
+  <div class="back-footer">undersight.ai &middot; AI underwriting infrastructure for private credit</div>
 </div>
 
 </body></html>`;

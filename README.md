@@ -41,11 +41,13 @@ Upload `dist/` contents to your static host. Options:
 
 ## Updating Content
 
-1. Edit entities in [Fibery](https://subscript.fibery.io) > Website > Database 1
+1. Edit entities in [Fibery](https://subscript.fibery.io) > Website > Pages
 2. Entity naming determines page rendering:
-   - `Homepage - Hero` → Hero headline and subtitle
+   - `Home - Hero` → Hero headline and subtitle
+   - `Home - Who We Serve`, `Home - Metrics`, `Home - How It Works` → top homepage sections
+   - `Home - Case Study: *`, `Home - Testimonial`, `Home - CTA` → lower homepage sections
    - `Solutions - *` → Solution pages (underscore, RFI, Copilot)
-   - `Blog - *` → Blog posts
+   - `Blog - *` → Blog posts rendered on the site
    - `Site Config` → Sign-in URL, privacy URL, email, copyright
    - `Contact Page` → Contact/CTA section text
 3. Run `python3 build.py` to regenerate static files

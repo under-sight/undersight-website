@@ -267,14 +267,15 @@ transplant as a model for how this pipeline works end-to-end.
 
 ---
 
-## Whitepaper Lead Capture & PDF Delivery
+## Blog PDF Lead Capture & Delivery
 
 ### Overview
 
 Research articles and case studies are gated behind an email capture modal.
 When a visitor submits their email, a lead entity is created in Fibery and linked
-to the corresponding whitepaper. A Fibery automation ("undersight research dispatch")
-sends the PDF to the visitor's email automatically.
+to the corresponding blog/case-study asset. A Fibery automation ("undersight research dispatch")
+sends the PDF to the visitor's email automatically. Public route/function names
+still say `whitepaper` for compatibility.
 
 ### Data Flow
 
@@ -284,37 +285,35 @@ Website modal → submitWhitepaperEmail()
   → Dev: undersight-serve.py _capture_lead()
   → Prod: Cloudflare Worker (WORKER_URL — TODO: deploy)
   → Fibery API:
-      1. Query Website/Whitepapers by name → get fibery/id
-      2. Create Website/Whitepaper Leads entity
+      1. Query Website/Blog by name → get fibery/id
+      2. Create Website/Blog Leads entity
          - Website/Email: submitted email
-         - Website/Whitepaper: linked to whitepaper entity
+         - Website/Blog Post: linked to blog/case-study entity
   → Fibery Automation triggers on new lead
-  → Sends email with PDF attachment from whitepaper entity
+  → Sends email with PDF attachment from blog/case-study entity
   → Sets Website/Sent At = current timestamp on the lead
 ```
 
 ### Fibery Schema
 
-**Website/Whitepapers** (catalog of downloadable PDFs):
+**Website/Blog** (catalog of downloadable PDFs):
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | `Website/name` | text | Entity name — must match the `whitepaper` param from the modal |
-| `Website/Slug` | text | URL-safe identifier |
-| `Website/Type` | text | "Case Study" or "Research" |
 | `Website/PDF` | file | The PDF attachment sent to leads |
-| `Website/Leads` | relation (1:M) | Back-reference to all leads for this whitepaper |
+| `Website/Leads` | relation (1:M) | Back-reference to all leads for this asset |
 
-**Website/Whitepaper Leads** (captured submissions):
+**Website/Blog Leads** (captured submissions):
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | `Website/Email` | text | Visitor's email |
-| `Website/Whitepaper` | relation (M:1) | Link to the whitepaper entity |
+| `Website/Blog Post` | relation (M:1) | Link to the blog/case-study entity |
 | `Website/Sent At` | date-time | Set by Fibery automation when email is sent |
 | `fibery/creation-date` | date-time | (system) When the lead was captured |
 
-### Current Whitepapers (must exist in Fibery with PDF attached)
+### Current PDF Assets (must exist in Fibery with PDF attached)
 
 | Name (exact match required) | Type | Slug |
 |----|------|------|
@@ -322,24 +321,23 @@ Website modal → submitWhitepaperEmail()
 | `From Deterministic Scorecards to Agentic Credit Assessments` | Research | `deterministic-scorecards` |
 | `Unlocking Institutional Capital for Mid-Tier MCA Funds` | Research | `institutional-capital` |
 
-### Whitepaper Name Mapping (JS → Fibery)
+### PDF Asset Name Mapping (JS → Fibery)
 
 The modal receives a whitepaper name via `openWhitepaperModal(name)`. This name
-**must exactly match** the `Website/name` field in the Fibery Whitepapers database.
+**must exactly match** the `Website/name` field in the Fibery Blog database.
 
 - Homepage case study CTA → hardcoded `'Chat Advance Case Study'`
 - Blog posts with tag `Research` or `Case Study` → uses `post.title` directly,
   except posts containing "Chat Advance" which map to `'Chat Advance Case Study'`
 
-### Adding a New Whitepaper
+### Adding a New PDF Asset
 
-1. Create a `Website/Whitepapers` entity in Fibery with the exact name
+1. Create a `Website/Blog` entity in Fibery with the exact name
 2. Attach the PDF file to the `Website/PDF` field
-3. Set `Website/Type` and `Website/Slug`
-4. In `index.html`, add a download button that calls
+3. In `index.html`, add a download button that calls
    `openWhitepaperModal('Exact Whitepaper Name')` — OR ensure the blog post
    title matches the whitepaper name and has tag `Research` or `Case Study`
-5. The Fibery automation will handle delivery — no code changes needed
+4. The Fibery automation will handle delivery — no code changes needed
 
 ### Testing Lead Capture
 
@@ -350,8 +348,8 @@ curl -s -X POST http://localhost:8088/api/whitepaper-lead \
   -d '{"email":"test@example.com","whitepaper":"Chat Advance Case Study"}'
 ```
 
-Verify in Fibery: Website/Whitepaper Leads should show the new entity linked to
-the correct whitepaper, with `Sent` eventually set to true by the automation.
+Verify in Fibery: Website/Blog Leads should show the new entity linked to
+the correct blog/case-study asset, with `Sent` eventually set to true by the automation.
 
 ### Production Status
 

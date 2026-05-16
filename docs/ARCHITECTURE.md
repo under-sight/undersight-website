@@ -2,7 +2,7 @@
 
 ## High-Level Overview
 
-The undersight website is a single-page application (SPA) that serves as the marketing and product site for undersight.ai, an AI underwriting platform for alternative finance. The architecture has two modes:
+The undersight website is a single-page application (SPA) that serves as the marketing and product site for undersight.ai, an AI underwriting platform for private credit. The architecture has two modes:
 
 - **Development mode**: A Python dev server (`undersight-serve.py`) proxies the Fibery CMS API and serves static files on `localhost:8088`. Content is fetched at runtime via `/api/content`.
 - **Production mode**: A build script (`build.py`) fetches all Fibery content, downloads file attachments, and bakes everything into a fully static `dist/` directory with zero runtime API calls.
@@ -182,7 +182,7 @@ All JavaScript is inline in `index.html` (no external JS files, no build tools, 
 
 - **`loadContent()`**: Fetches all CMS content from `/api/content` (dev) or uses baked-in JSON (production). Passes the data to `renderContent()`.
 - **`renderContent(data)`**: The core rendering function. Takes a `{entityName: {content, files}}` map and populates the DOM:
-  - Parses hero title/subtitle from `Homepage - Hero`
+  - Parses hero title/subtitle from `Home - Hero`
   - Reads site config (sign-in URL, privacy URL, contact email, copyright)
   - Generates solution dropdown items, home page solution rows, and detail pages
   - Generates blog cards from `Blog - *` entities
@@ -234,9 +234,9 @@ Several objects map Fibery entity names to rendering configuration:
 
 ### Fibery CMS Structure
 
-Content lives in a Fibery workspace at `subscript.fibery.io` in the database `Website/Database 1`. Each entity has:
+Content lives in a Fibery workspace at `subscript.fibery.io` in the database `Website/Pages`. Blog delivery assets live in `Website/Blog`, and lead captures live in `Website/Blog Leads`. Each page entity has:
 
-- **Name**: Entity identifier (e.g., `Homepage - Hero`, `Blog - The RFI bottleneck`)
+- **Name**: Entity identifier (e.g., `Home - Hero`, `Blog - The RFI bottleneck`)
 - **Description**: A rich text document (fetched separately via document secret)
 - **Assets**: File attachments (images)
 
@@ -244,7 +244,14 @@ Content lives in a Fibery workspace at `subscript.fibery.io` in the database `We
 
 | Prefix | Purpose | Example |
 |--------|---------|---------|
-| `Homepage - Hero` | Hero section content | Title + subtitle |
+| `Home - Hero` | Hero section content | Title + subtitle |
+| `Home - Who We Serve` | Homepage audience cards | Title, subtitle, cards |
+| `Home - Metrics` | Homepage stats | Stats bar between Who We Serve and How It Works |
+| `Home - How It Works` | Homepage process section | Step cards |
+| `Home - Case Study: Chat Advance` | Homepage first case study | Stats, steps, CTA |
+| `Home - Testimonial` | Homepage testimonial | Quote and attribution |
+| `Home - Case Study: 4D Financing` | Homepage second case study | Stats, steps, CTA |
+| `Home - CTA` | Homepage final CTA | Heading, subtitle, button |
 | `Site Config` | Global site settings | Sign-in URL, privacy URL, email, copyright |
 | `Contact Page` | Contact/CTA content | Title + body text |
 | `Solutions - *` | Solution pages | `Solutions - underscore`, `Solutions - Agentic Client RFI`, `Solutions - AI Underwriting Copilot` |
@@ -390,7 +397,7 @@ The `--verify` flag confirms this with a full text scan.
 
 ### Known Exposure
 
-- The Fibery workspace domain `subscript.fibery.io` and database name `Website/Database 1` appear in the server source files (`undersight-serve.py`, `build.py`). These are not deployed to production but are in the repository.
+- The Fibery workspace domain `subscript.fibery.io` and database names appear in server/build source files. These are not deployed to production but are in the repository.
 - The staging app URL `https://staging.app.underchat.ai/login` appears in the HTML (known issue flagged in adversarial review).
 
 ---
@@ -481,16 +488,16 @@ PWA manifest with:
 
 ---
 
-## Whitepaper Lead Capture System
+## Blog PDF Lead Capture System
 
 ### Overview
 
-Gated whitepaper downloads capture email leads and deliver PDFs via Fibery automation. The system spans the website frontend, a server-side relay, Fibery CMS databases, and an email automation pipeline.
+Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automation. The system spans the website frontend, a server-side relay, Fibery CMS databases, and an email automation pipeline. The public route and frontend function names still use `whitepaper` for compatibility.
 
 ```
 [Website Modal] → [Dev Server / Cloudflare Worker] → [Fibery API]
                                                           ↓
-                                                  [Whitepaper Leads DB]
+                                                  [Blog Leads DB]
                                                           ↓
                                                   [Fibery Automation]
                                                           ↓
@@ -499,23 +506,21 @@ Gated whitepaper downloads capture email leads and deliver PDFs via Fibery autom
 
 ### Fibery Schema
 
-**`Website/Whitepapers`** — catalog of downloadable assets
+**`Website/Blog`** — catalog of downloadable blog/case-study assets
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | Name | text | Display name (used in email subject + template) |
-| Slug | text | URL-safe identifier |
-| Type | text | "Case Study" or "Research" |
 | PDF | file collection | Attached PDF file(s) |
-| Leads | relation (one-to-many) | Reverse relation to Whitepaper Leads |
+| Leads | relation (one-to-many) | Reverse relation to Blog Leads |
 
-**`Website/Whitepaper Leads`** — captured email entries
+**`Website/Blog Leads`** — captured email entries
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | Email | text (email) | Submitted email address |
 | Source | text | Origin ("website-modal") |
-| Whitepaper | relation (many-to-one) | Linked whitepaper entity |
+| Blog Post | relation (many-to-one) | Linked blog/case-study entity |
 | Sent | boolean | Set to true by automation after email sent |
 
 ### Frontend Components
@@ -537,12 +542,12 @@ Gated whitepaper downloads capture email leads and deliver PDFs via Fibery autom
 
 **Dev server** (`undersight-serve.py`):
 - `POST /api/whitepaper-lead` accepts `{ email, whitepaper }` JSON
-- Looks up whitepaper entity by name via Fibery query (uses `$name` param syntax)
-- Creates `Website/Whitepaper Leads` entity with linked whitepaper relation
-- Logs: `[LEAD] email -> whitepaper_name (linked)` or `(no match)`
+- Looks up blog entity by name via Fibery query (uses `$name` param syntax)
+- Creates `Website/Blog Leads` entity with linked blog relation
+- Logs: `[LEAD] email -> post_name (linked)` or `(no match)`
 
 **Production** (Cloudflare Worker at `worker/index.js`):
-- Same logic: validate email → query whitepaper → create lead with relation
+- Same logic: validate email → query blog post → create lead with relation
 - CORS headers for `undersight.ai` origin
 - Fibery API token stored as Worker secret (`FIBERY_TOKEN`)
 - Deploy: `npx wrangler deploy` + `npx wrangler secret put FIBERY_TOKEN`
@@ -556,17 +561,17 @@ const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '
 
 ### Fibery Email Automation
 
-**Rule:** "undersight research dispatch" — trigger: entity created on Whitepaper Leads
+**Rule:** "undersight research dispatch" — trigger: entity created on Blog Leads
 
 **Email template engine:** Fibery uses an EJS-like templating system for email bodies:
 
 | Syntax | Purpose | Example |
 |--------|---------|---------|
-| `{! Relation:Field1,Field2 !}` | Pre-load relation data before template renders | `{! Whitepaper:Name,PDF !}` |
+| `{! Relation:Field1,Field2 !}` | Pre-load relation data before template renders | `{! Blog Post:Name,PDF !}` |
 | `<%= expression %>` | Output a value into HTML | `<%= wp.Name %>` |
 | `<% code %>` | Logic blocks (if/for/variable assignment) | `<% if (pdfUrl) { %>` |
 | `{{Field}}` | Simple field template (direct fields only) | `{{Email}}` |
-| `Entity.Relation` | Access pre-loaded relation object | `Entity.Whitepaper["Name"]` |
+| `Entity.Relation` | Access pre-loaded relation object | `Entity["Blog Post"]["Name"]` |
 | `context.getService('utils')` | Utility functions | `utils.getFileUrl(secret)` |
 
 **Critical formatting rules for Fibery email HTML:**
@@ -575,11 +580,11 @@ const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '
 3. **EJS markers required for HTML rendering** — plain HTML without `<% %>` markers gets markdown-escaped.
 4. **`markdown: true` is compatible** — the EJS/HTML content passes through the markdown processor untouched as long as there's no indentation.
 5. **File URLs** — use `utils.getFileUrl(file.Secret)` to generate accessible download links.
-6. **Relation data is an object** (many-to-one) — access fields as `Entity.Whitepaper["Name"]`, not as an array.
+6. **Relation data is an object** (many-to-one) — access fields as `Entity["Blog Post"]["Name"]`, not as an array.
 
 **Email template structure:**
 ```
-{! Whitepaper:Name,PDF !}
+{! Blog Post:Name,PDF !}
 <% /* EJS preamble: load data */ %>
 <div style="...">          ← all HTML at column 0
 <%= wp.Name %>              ← dynamic values via EJS
@@ -597,14 +602,14 @@ const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '
 1. Fetch article content from Fibery CMS via dev server (`/api/content`)
 2. Convert markdown → HTML with brand styling (Inter headings, DM Sans body, Amber Rust accents)
 3. Render HTML → PDF via Playwright (`page.pdf({ format: 'A4', printBackground: true })`)
-4. Upload PDF to Fibery whitepaper entity via `fibery undersight file attach`
+4. Upload PDF to Fibery blog entity via `fibery undersight file attach`
 
 **Regenerate all PDFs:**
 ```bash
 cd whitepaper && node generate-all.js
 ```
 
-### Current Whitepapers
+### Current PDF Assets
 
 | Name | Type | Slug | PDF |
 |------|------|------|-----|

@@ -294,7 +294,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 
 /* ---- HORIZONTAL SOLUTION SECTIONS ---- */
 .sol-row {
-  display: flex; gap: 40px; align-items: center;
+  display: flex; gap: 28px; align-items: center;
   padding: 40px 0; border-bottom: 1px solid var(--pale);
   transition: background 0.2s ease;
 }
@@ -303,7 +303,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 .sol-row:hover { background: var(--color-bg-subtle, rgba(0, 0, 0, 0.01)); border-radius: var(--rounded-md); }
 
 .sol-row-img {
-  width: 360px; aspect-ratio: 1; flex-shrink: 0;
+  width: 240px; aspect-ratio: 1; flex-shrink: 0;
   background: var(--bg); border-radius: var(--rounded-md);
   border: 1px solid var(--pale);
   display: flex; align-items: center; justify-content: center;
@@ -311,8 +311,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   overflow: hidden;
 }
 .sol-row-img img {
-  width: 100%; height: 100%; object-fit: contain;
-  padding: 16px;
+  width: 100%; height: 100%; object-fit: cover;
   transition: transform 0.4s ease;
 }
 .sol-row:hover .sol-row-img img { transform: scale(1.03); }
@@ -816,7 +815,7 @@ footer { border-top: 1px solid var(--pale); background: var(--white); }
 }
 .code-block .key { color: var(--color-accent); }
 .code-block .str { color: var(--color-eucalyptus); }
-.code-block .num { color: #5B8DEF; }
+.code-block .num { color: var(--color-info); }
 .code-block .cmt { color: rgba(255,255,255,0.3); }
 .code-block .mth { color: rgba(255,255,255,0.5); }
 
