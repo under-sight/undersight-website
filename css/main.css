@@ -352,25 +352,25 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   color: #fff;
 }
 .stat-item {
-  flex: 1; text-align: center; padding: 30px 24px;
+  flex: 1; text-align: center; padding: 20px 24px;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 .stat-item:last-child { border-right: none; }
 .stat-num {
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
-  font-size: 48px; font-weight: 700; color: var(--color-accent);
+  font-size: 40px; font-weight: 700; color: var(--color-accent);
   letter-spacing: -0.02em; line-height: 1;
 }
-.stat-num span { font-size: 24px; }
+.stat-num span { font-size: 20px; }
 .stat-label {
-  font-size: 14px; color: rgba(255, 255, 255, 0.6); margin-top: 8px;
+  font-size: 14px; color: rgba(255, 255, 255, 0.6); margin-top: 6px;
   font-family: 'Inter', sans-serif; font-weight: 400;
 }
 @media (max-width: 768px) {
   .stats-bar { flex-direction: column; }
-  .stat-item { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 20px 16px; }
+  .stat-item { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 14px 16px; }
   .stat-item:last-child { border-bottom: none; }
-  .stat-num { font-size: 36px; }
+  .stat-num { font-size: 30px; }
 }
 
 /* ---- CTA SECTION ---- */
