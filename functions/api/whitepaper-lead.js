@@ -66,6 +66,42 @@ function isValidWhitepaper(name) {
   return true;
 }
 
+/**
+ * Verify a Cloudflare Turnstile token. Returns { ok, skipped }.
+ * - If CF_TURNSTILE_SECRET_KEY is unset, verification is skipped (deploy-safe)
+ *   so the site keeps working before keys are provisioned.
+ * - If the secret is set, the token must be present and accepted by Cloudflare.
+ */
+async function verifyTurnstile(env, request, token) {
+  const secret = env.CF_TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.warn('CF_TURNSTILE_SECRET_KEY not set; skipping Turnstile verification');
+    return { ok: true, skipped: true };
+  }
+  if (!token || typeof token !== 'string') {
+    return { ok: false, skipped: false };
+  }
+  const params = new URLSearchParams();
+  params.append('secret', secret);
+  params.append('response', token);
+  const ip = request.headers.get('CF-Connecting-IP');
+  if (ip) params.append('remoteip', ip);
+  try {
+    const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+    const data = await resp.json();
+    if (data && data.success === true) return { ok: true, skipped: false };
+    console.warn('Turnstile verification failed:', data && data['error-codes']);
+    return { ok: false, skipped: false };
+  } catch (err) {
+    console.error('Turnstile verify request failed:', err);
+    return { ok: false, skipped: false };
+  }
+}
+
 export async function onRequestOptions(context) {
   return new Response(null, { status: 204, headers: corsHeaders(context.request) });
 }
@@ -114,6 +150,12 @@ export async function onRequestPost(context) {
   const whitepaperName = (body.whitepaper || 'Chat Advance Case Study').trim();
   if (!isValidWhitepaper(whitepaperName)) {
     return json({ error: 'Invalid request' }, 422, request);
+  }
+
+  // Verify Turnstile (skipped automatically when secret is unset — deploy-safe)
+  const turnstileResult = await verifyTurnstile(env, request, body.turnstile_token);
+  if (!turnstileResult.ok) {
+    return json({ error: 'Verification failed' }, 403, request);
   }
 
   const fiberyHeaders = {

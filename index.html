@@ -77,6 +77,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/main.css">
+<!-- Cloudflare Turnstile bot protection (whitepaper lead capture). Loaded async so it doesn't block render. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -434,6 +436,8 @@
       <p class="wp-desc" id="wpDesc">Enter your email and we'll send you the full article as a PDF.</p>
       <input type="email" class="wp-input" id="wpEmail" placeholder="you@company.com" autocomplete="email" required>
       <div class="wp-error-msg" id="wpError">Please enter a valid email address.</div>
+      <!-- Invisible Turnstile widget. data-sitekey is set in JS when the modal opens. -->
+      <div class="cf-turnstile" id="wpTurnstile" data-sitekey="" data-callback="onWpTurnstileToken" data-size="invisible"></div>
       <button class="btn btn-primary wp-submit" onclick="submitWhitepaperEmail()">Send me the PDF</button>
     </div>
     <div class="wp-success" id="wpSuccess">
@@ -1098,7 +1102,16 @@
   // Dev: handled by undersight-serve.py. Prod: Cloudflare Pages Function (functions/api/whitepaper-lead.js).
   // Same path works in both environments — no URL switch needed.
   const WORKER_URL = '/api/whitepaper-lead';
+  // Cloudflare Turnstile site key. Replace 'TURNSTILE_SITE_KEY_PLACEHOLDER' with the
+  // real key from Cloudflare dashboard (Turnstile > Add site > invisible widget).
+  // While the placeholder is in place, the client posts without a token and the
+  // server-side verification is skipped (deploy-safe).
+  const TURNSTILE_SITE_KEY = 'TURNSTILE_SITE_KEY_PLACEHOLDER';
   var _activeWhitepaper = '';
+  var _wpTurnstileWidgetId = null;
+  function _turnstileEnabled() {
+    return TURNSTILE_SITE_KEY && TURNSTILE_SITE_KEY !== 'TURNSTILE_SITE_KEY_PLACEHOLDER';
+  }
   function openWhitepaperModal(name) {
     if (name) _activeWhitepaper = name;
     // Update modal text based on the content type
@@ -1108,6 +1121,20 @@
       : 'Enter your email and we\u2019ll send you the full article as a PDF.';
     document.getElementById('wpOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
+    // Render Turnstile widget on first open (only when a real key is configured)
+    if (_turnstileEnabled() && window.turnstile && _wpTurnstileWidgetId === null) {
+      try {
+        var el = document.getElementById('wpTurnstile');
+        el.setAttribute('data-sitekey', TURNSTILE_SITE_KEY);
+        _wpTurnstileWidgetId = window.turnstile.render('#wpTurnstile', {
+          sitekey: TURNSTILE_SITE_KEY,
+          size: 'invisible',
+          callback: onWpTurnstileToken,
+        });
+      } catch (e) {
+        console.warn('Turnstile render failed:', e);
+      }
+    }
     setTimeout(() => document.getElementById('wpEmail').focus(), 200);
   }
   function closeWhitepaperModal() {
@@ -1119,6 +1146,16 @@
     document.getElementById('wpEmail').value = '';
     document.getElementById('wpEmail').classList.remove('wp-error');
     document.getElementById('wpError').classList.remove('visible');
+    document.getElementById('wpError').textContent = 'Please enter a valid email address.';
+    // Reset Turnstile so each submission gets a fresh token
+    if (_wpTurnstileWidgetId !== null && window.turnstile) {
+      try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
+    }
+  }
+  // Called by Turnstile when an invisible challenge succeeds. We stash the token
+  // and forward to the actual fetch.
+  function onWpTurnstileToken(token) {
+    _postWhitepaperLead(token);
   }
   function submitWhitepaperEmail() {
     const input = document.getElementById('wpEmail');
@@ -1127,30 +1164,63 @@
     // Validate
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       input.classList.add('wp-error');
+      errorEl.textContent = 'Please enter a valid email address.';
       errorEl.classList.add('visible');
       return;
     }
     input.classList.remove('wp-error');
     errorEl.classList.remove('visible');
 
-    if (WORKER_URL) {
-      // Production: POST to Cloudflare Worker
-      fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, whitepaper: _activeWhitepaper })
-      }).then(r => {
-        if (!r.ok) throw new Error('Submit failed');
-        showWhitepaperSuccess();
-      }).catch(() => {
-        errorEl.textContent = 'Something went wrong. Please try again.';
-        errorEl.classList.add('visible');
-      });
-    } else {
-      // Mock mode: log and show success
+    if (_turnstileEnabled() && _wpTurnstileWidgetId !== null && window.turnstile) {
+      // Kick off the invisible challenge; result arrives in onWpTurnstileToken.
+      try {
+        window.turnstile.execute(_wpTurnstileWidgetId);
+        return;
+      } catch (e) {
+        console.warn('Turnstile execute failed, sending without token:', e);
+      }
+    }
+    // No Turnstile (dev / placeholder key / API not loaded) \u2014 post directly.
+    _postWhitepaperLead(null);
+  }
+  function _postWhitepaperLead(turnstileToken) {
+    const input = document.getElementById('wpEmail');
+    const email = input.value.trim();
+    const errorEl = document.getElementById('wpError');
+    if (!WORKER_URL) {
       console.log('[Whitepaper] Email captured:', email, 'for:', _activeWhitepaper);
       showWhitepaperSuccess();
+      return;
     }
+    const payload = { email: email, whitepaper: _activeWhitepaper };
+    if (turnstileToken) payload.turnstile_token = turnstileToken;
+    fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).then(function (r) {
+      if (r.ok) { showWhitepaperSuccess(); return; }
+      if (r.status === 403) {
+        errorEl.textContent = 'Verification failed. Please try again.';
+      } else if (r.status === 429) {
+        errorEl.textContent = 'Too many requests. Please try again in a minute.';
+      } else if (r.status === 413 || r.status === 422) {
+        errorEl.textContent = 'Couldn\u2019t send \u2014 please double-check your email.';
+      } else {
+        errorEl.textContent = 'Something went wrong. Please try again.';
+      }
+      errorEl.classList.add('visible');
+      // Reset Turnstile so the user can retry
+      if (_wpTurnstileWidgetId !== null && window.turnstile) {
+        try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
+      }
+    }).catch(function () {
+      errorEl.textContent = 'Something went wrong. Please try again.';
+      errorEl.classList.add('visible');
+      if (_wpTurnstileWidgetId !== null && window.turnstile) {
+        try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
+      }
+    });
   }
   function showWhitepaperSuccess() {
     document.getElementById('wpForm').classList.add('hidden');
