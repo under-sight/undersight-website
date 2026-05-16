@@ -65,6 +65,27 @@ def _mask_email(email):
         return '***@' + domain
     return local[0] + '***@' + domain
 
+
+# In-process rate limiter: dev only. 5 req/60s per peer IP.
+_RATE_LIMIT_WINDOW = 60      # seconds
+_RATE_LIMIT_MAX = 5
+_rate_limit_log = {}         # ip -> [timestamps]
+
+
+def _check_rate_limit(ip):
+    """Returns True if request is allowed; False (with retry_after) otherwise."""
+    now = time.time()
+    cutoff = now - _RATE_LIMIT_WINDOW
+    timestamps = [t for t in _rate_limit_log.get(ip, []) if t > cutoff]
+    if len(timestamps) >= _RATE_LIMIT_MAX:
+        # Retry-after = seconds until the oldest in-window request rolls off.
+        retry_after = max(1, int(_RATE_LIMIT_WINDOW - (now - timestamps[0])))
+        _rate_limit_log[ip] = timestamps
+        return False, retry_after
+    timestamps.append(now)
+    _rate_limit_log[ip] = timestamps
+    return True, 0
+
 _cache = {"data": None, "ts": 0}
 
 
@@ -190,6 +211,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_error(404)
 
     def _capture_lead(self):
+        # Per-IP rate limit (dev: in-process)
+        client_ip = self.client_address[0] if self.client_address else "unknown"
+        allowed, retry_after = _check_rate_limit(client_ip)
+        if not allowed:
+            self._send_json(
+                {"error": "Too many requests"},
+                status=429,
+                extra_headers={"Retry-After": str(retry_after)},
+            )
+            return
+
         # Body size cap — check Content-Length header first
         length = int(self.headers.get("Content-Length", 0))
         if length > MAX_BODY_BYTES:

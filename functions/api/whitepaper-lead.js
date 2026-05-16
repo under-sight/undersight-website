@@ -67,6 +67,58 @@ function isValidWhitepaper(name) {
 }
 
 /**
+ * Per-IP rate limit using Workers KV. Returns { ok, retryAfter }.
+ * - Requires a KV binding named `RATE_LIMIT_KV` in Cloudflare Pages dashboard.
+ * - If the binding is missing, rate limiting no-ops (logs warning) so the site
+ *   stays functional before the namespace is provisioned.
+ * - Budgets: 3 requests / 60s and 20 requests / 24h per CF-Connecting-IP.
+ *
+ * Note: KV is eventually consistent. This is abuse mitigation, not a hard
+ * counter — burst attackers may slip a few requests through, but sustained
+ * abuse is throttled within seconds.
+ */
+const RATE_LIMIT_MINUTE = 3;
+const RATE_LIMIT_MINUTE_WINDOW = 60; // seconds
+const RATE_LIMIT_DAY = 20;
+const RATE_LIMIT_DAY_WINDOW = 86400; // seconds
+
+async function rateLimit(env, request) {
+  const kv = env.RATE_LIMIT_KV;
+  if (!kv) {
+    console.warn('RATE_LIMIT_KV binding missing; rate limiting disabled');
+    return { ok: true };
+  }
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const minuteKey = `rl:minute:${ip}`;
+  const dayKey = `rl:day:${ip}`;
+  try {
+    const [minuteRaw, dayRaw] = await Promise.all([
+      kv.get(minuteKey),
+      kv.get(dayKey),
+    ]);
+    const minuteCount = parseInt(minuteRaw || '0', 10);
+    const dayCount = parseInt(dayRaw || '0', 10);
+    if (minuteCount >= RATE_LIMIT_MINUTE) {
+      return { ok: false, retryAfter: RATE_LIMIT_MINUTE_WINDOW };
+    }
+    if (dayCount >= RATE_LIMIT_DAY) {
+      return { ok: false, retryAfter: RATE_LIMIT_DAY_WINDOW };
+    }
+    // Increment both counters. expirationTtl preserves a sliding-ish window:
+    // each new write resets the TTL, so a sustained attacker stays blocked.
+    await Promise.all([
+      kv.put(minuteKey, String(minuteCount + 1), { expirationTtl: RATE_LIMIT_MINUTE_WINDOW }),
+      kv.put(dayKey, String(dayCount + 1), { expirationTtl: RATE_LIMIT_DAY_WINDOW }),
+    ]);
+    return { ok: true };
+  } catch (err) {
+    // KV outage shouldn't block legitimate users — log and allow.
+    console.error('Rate limit KV error:', err);
+    return { ok: true };
+  }
+}
+
+/**
  * Verify a Cloudflare Turnstile token. Returns { ok, skipped }.
  * - If CF_TURNSTILE_SECRET_KEY is unset, verification is skipped (deploy-safe)
  *   so the site keeps working before keys are provisioned.
@@ -112,6 +164,19 @@ export async function onRequestPost(context) {
   if (!env.FIBERY_TOKEN) {
     console.error('FIBERY_TOKEN not set');
     return json({ error: 'Server misconfigured' }, 500, request);
+  }
+
+  // Per-IP rate limit (no-op when RATE_LIMIT_KV binding is absent)
+  const rl = await rateLimit(env, request);
+  if (!rl.ok) {
+    return new Response(JSON.stringify({ error: 'Too many requests' }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(rl.retryAfter || 60),
+        ...corsHeaders(request),
+      },
+    });
   }
 
   // Body size cap — check Content-Length header first (cheap reject)

@@ -43,6 +43,48 @@ function isValidWhitepaper(name) {
 }
 
 /**
+ * Per-IP rate limit using Workers KV. Returns { ok, retryAfter }.
+ * Requires KV binding RATE_LIMIT_KV; no-ops with a warning when missing.
+ */
+const RATE_LIMIT_MINUTE = 3;
+const RATE_LIMIT_MINUTE_WINDOW = 60;
+const RATE_LIMIT_DAY = 20;
+const RATE_LIMIT_DAY_WINDOW = 86400;
+
+async function rateLimit(env, request) {
+  const kv = env.RATE_LIMIT_KV;
+  if (!kv) {
+    console.warn('RATE_LIMIT_KV binding missing; rate limiting disabled');
+    return { ok: true };
+  }
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const minuteKey = `rl:minute:${ip}`;
+  const dayKey = `rl:day:${ip}`;
+  try {
+    const [minuteRaw, dayRaw] = await Promise.all([
+      kv.get(minuteKey),
+      kv.get(dayKey),
+    ]);
+    const minuteCount = parseInt(minuteRaw || '0', 10);
+    const dayCount = parseInt(dayRaw || '0', 10);
+    if (minuteCount >= RATE_LIMIT_MINUTE) {
+      return { ok: false, retryAfter: RATE_LIMIT_MINUTE_WINDOW };
+    }
+    if (dayCount >= RATE_LIMIT_DAY) {
+      return { ok: false, retryAfter: RATE_LIMIT_DAY_WINDOW };
+    }
+    await Promise.all([
+      kv.put(minuteKey, String(minuteCount + 1), { expirationTtl: RATE_LIMIT_MINUTE_WINDOW }),
+      kv.put(dayKey, String(dayCount + 1), { expirationTtl: RATE_LIMIT_DAY_WINDOW }),
+    ]);
+    return { ok: true };
+  } catch (err) {
+    console.error('Rate limit KV error:', err);
+    return { ok: true };
+  }
+}
+
+/**
  * Verify a Cloudflare Turnstile token. Returns { ok, skipped }.
  * If CF_TURNSTILE_SECRET_KEY is unset, verification is skipped (deploy-safe).
  */
@@ -85,6 +127,19 @@ export default {
 
     if (request.method !== 'POST') {
       return json({ error: 'Method not allowed' }, 405, env);
+    }
+
+    // Per-IP rate limit (no-op when RATE_LIMIT_KV binding is absent)
+    const rl = await rateLimit(env, request);
+    if (!rl.ok) {
+      return new Response(JSON.stringify({ error: 'Too many requests' }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rl.retryAfter || 60),
+          ...corsHeaders(env),
+        },
+      });
     }
 
     // Body size cap — check Content-Length header first
