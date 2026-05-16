@@ -895,7 +895,7 @@
         const meta = parseMeta(md);
         const heroImg = firstImage(files) || '';
         const companionImgs = (files || []).filter(f => (f.type || '').startsWith('image/')).slice(1).map(f => f.url);
-        return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, companionImgs, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '' };
+        return { name, title: name.replace('Blog - ', ''), date: meta.Date || '', excerpt: meta.Excerpt || '', md, body: meta._body || md, heroImg, companionImgs, tag: meta.Tag || '', subtitle: meta.Subtitle || '', author: meta.Author || '', pdf: meta.PDF || '' };
       })
       .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
@@ -988,8 +988,8 @@
       (post.tag ? `<span class="blog-tag">${post.tag}</span> ` : '') +
       metaParts.join(' &middot; ');
 
-    // Map blog post display titles to Blog delivery entity names in Fibery.
-    const wpName = whitepaperNameForTitle(post.title);
+    // PDF delivery name from **PDF:** metadata in Fibery, falls back to post title
+    const wpName = post.pdf || post.title;
     const dlBtn = `<button class="btn btn-ghost" onclick="openWhitepaperModal('${wpName.replace(/'/g, "\\'")}')" style="margin-top:16px;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
         Download as PDF
@@ -1091,11 +1091,8 @@
     }
   }
 
-  function whitepaperNameForTitle(title) {
-    if (title.includes('Chat Advance')) return 'Chat Advance Case Study';
-    if (title.includes('4D Financing')) return '4D Financing Case Study';
-    return title;
-  }
+  // PDF delivery name comes from **PDF:** metadata field in Fibery markdown.
+  // Falls back to post title if not set.
 
   // ---- Whitepaper modal ----
   // Dev: handled by undersight-serve.py. Prod: Cloudflare Pages Function (functions/api/whitepaper-lead.js).
