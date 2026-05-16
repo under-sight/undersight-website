@@ -66,30 +66,15 @@
       <!-- Title bar -->
       <rect x="0" y="0" width="220" height="36" rx="12" fill="#23262C"/>
       <rect x="0" y="24" width="220" height="12" fill="#23262C"/>
-      <!-- Macy avatar (warm gradient + person silhouette) -->
-      <defs>
-        <linearGradient id="macyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#E8D5C8"/>
-          <stop offset="100%" stop-color="#D4B59E"/>
-        </linearGradient>
-      </defs>
-      <circle cx="24" cy="18" r="10" fill="url(#macyGrad)"/>
-      <circle cx="24" cy="15" r="3.5" fill="none" stroke="#8B6F5C" stroke-width="1.2"/>
-      <path d="M17 25 C17 21, 20 19, 24 19 C28 19, 31 21, 31 25" fill="none" stroke="#8B6F5C" stroke-width="1.2" stroke-linecap="round"/>
+      <!-- Agent avatar circle -->
+      <circle cx="24" cy="18" r="10" fill="#3A3F47"/>
+      <circle cx="24" cy="15" r="4" fill="#6B7280"/>
+      <ellipse cx="24" cy="24" rx="6" ry="4" fill="#6B7280"/>
       <!-- Agent name -->
       <text x="42" y="16" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Macy</text>
       <text x="42" y="28" font-family="Inter, sans-serif" font-size="8" fill="#6B7280">AI Intake Agent</text>
-      <!-- ChatAdvance logo (chat bubble icon + wordmark, right-aligned) -->
-      <g transform="translate(140, 8)">
-        <!-- Chat bubble icon (simplified from ChatAdvance logo) -->
-        <g transform="scale(0.28)" fill="#427CB3">
-          <path d="M55 0.5C58.8 0.5 62.3 1.4 64.8 3.8C67.3 6.2 68.4 9.6 68.5 13.4V40.2C68.5 44.2 67.6 47.7 65 50.3C62.5 52.9 59 53.9 55 53.9H36.5L24.2 69.3C23.4 70.4 21.9 70.8 20.6 70.4C19.3 69.9 18.4 68.7 18.4 67.3V53.9H14C10.1 53.9 6.5 52.9 4 50.3C1.5 47.7 0.5 44.2 0.5 40.2V14.2C0.5 10.2 1.5 6.6 4 4.1C6.5 1.5 10.1 0.5 14 0.5H55ZM14 7C11.1 7 9.5 7.7 8.6 8.6C7.7 9.5 7 11.2 7 14.2V40.2C7 43.2 7.7 44.8 8.6 45.7C9.5 46.6 11.1 47.4 14 47.4H21.7C23.5 47.4 25 48.8 25 50.6V58L32.2 48.9C32.4 48.5 32.8 48.2 33.1 48C33.7 47.6 34.4 47.4 35.1 47.4H55C57.9 47.4 59.5 46.6 60.4 45.7C61.3 44.9 62 43.3 62 40.6V39.1L62 37V26.9L62 17.8V13.6C61.9 10.9 61.2 9.4 60.3 8.5C59.4 7.7 57.9 7 55 7H14Z"/>
-        </g>
-        <!-- "ChatAdvance" text -->
-        <text x="24" y="13" font-family="Inter, sans-serif" font-size="7.5" font-weight="600" letter-spacing="0.01em">
-          <tspan fill="#427CB3">Chat</tspan><tspan fill="#FA6E44">Advance</tspan>
-        </text>
-      </g>
+      <!-- Online dot -->
+      <circle cx="200" cy="18" r="4" fill="#6B9E8C"/>
 
       <!-- Chat messages -->
       <!-- Agent message 1 -->

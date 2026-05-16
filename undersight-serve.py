@@ -153,12 +153,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         whitepaper_name = body.get("whitepaper", "Chat Advance Case Study")
         try:
-            # 1. Look up the Blog entity by name
+            # 1. Look up the Whitepaper entity by name
             wp_results = api_post("/api/commands", [{
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "Website/Blog",
+                        "q/from": "Website/Whitepapers",
                         "q/select": ["fibery/id"],
                         "q/where": ["=", ["Website/name"], "$name"],
                         "q/limit": 1,
@@ -177,12 +177,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             }
             # 3. Link to whitepaper if found
             if wp_id:
-                lead_entity["Website/Blog Post"] = {"fibery/id": wp_id}
+                lead_entity["Website/Whitepaper"] = {"fibery/id": wp_id}
 
             api_post("/api/commands", [{
                 "command": "fibery.entity/create",
                 "args": {
-                    "type": "Website/Blog Leads",
+                    "type": "Website/Whitepaper Leads",
                     "entity": lead_entity,
                 },
             }])

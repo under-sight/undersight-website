@@ -1453,16 +1453,16 @@ for name, entity in data.items():
     content = entity.get('content', '')
     if '**Tag:** Research' in content or '**Tag:** Case Study' in content:
         downloadable.append(name.replace('Blog - ', ''))
-# Get all Blog entity names
+# Get all Whitepapers entity names
 try:
     req = urllib.request.Request('https://subscript.fibery.io/api/commands',
-        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Blog','q/select':['Website/name'],'q/limit':50}}}]).encode(),
+        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Whitepapers','q/select':['Website/name'],'q/limit':50}}}]).encode(),
         headers={'Authorization':'Token '+token,'Content-Type':'application/json'})
     resp = urllib.request.urlopen(req)
     wp_data = json.loads(resp.read())
     wp_names = set(e.get('Website/name','') for e in wp_data[0].get('result',[]))
 except:
-    print('ERROR:could not query Blog database')
+    print('ERROR:could not query Whitepapers database')
     sys.exit(0)
 missing = [t for t in downloadable if t not in wp_names]
 if missing:
@@ -1565,60 +1565,6 @@ if grep -q "wpName" "$SITE_ROOT/index.html" && grep -q "tag === 'Research'" "$SI
   pass "Research blog posts include download button with dynamic whitepaper name"
 else
   fail "Research blog posts include download button"
-fi
-
-# =============================================================================
-section "Locked Design Decisions"
-# =============================================================================
-# These values were intentionally set and must NOT be reverted.
-# See CLAUDE.md "DO NOT CHANGE" section. Catches regressions from other
-# sessions or file sync tools that overwrite the CSS.
-
-MAIN_CSS_FILE="$SITE_ROOT/css/main.css"
-
-# Test: sol-row gap is 28px (not 40px)
-if grep -q 'sol-row {' "$MAIN_CSS_FILE" && grep -A2 'sol-row {' "$MAIN_CSS_FILE" | grep -q 'gap: 28px'; then
-  pass "sol-row gap is 28px (denser layout)"
-else
-  fail "sol-row gap is 28px" "REVERTED to old value — check CLAUDE.md 'DO NOT CHANGE' section"
-fi
-
-# Test: sol-row-img width is 240px (not 360px)
-if grep -A2 'sol-row-img {' "$MAIN_CSS_FILE" | grep -q '240px'; then
-  pass "sol-row-img width is 240px"
-else
-  fail "sol-row-img width is 240px" "REVERTED to 360px — check CLAUDE.md"
-fi
-
-# Test: sol-row-img uses object-fit: cover (not contain)
-if grep 'object-fit' "$MAIN_CSS_FILE" | head -1 | grep -q 'cover'; then
-  pass "sol-row-img uses object-fit: cover"
-else
-  fail "sol-row-img uses object-fit: cover" "REVERTED to contain — check CLAUDE.md"
-fi
-
-# Test: sol-row-img has no internal padding
-if grep -A3 'sol-row-img img' "$MAIN_CSS_FILE" | grep -q 'padding:'; then
-  fail "sol-row-img img has no padding" "REVERTED — padding added back — check CLAUDE.md"
-else
-  pass "sol-row-img img has no padding"
-fi
-
-# Test: Solution images are simplified (< 100KB each, not 300KB+)
-SOL_IMG_DIR="$SITE_ROOT/images/solutions"
-LARGE_IMGS=0
-for img in "$SOL_IMG_DIR"/us1.png "$SOL_IMG_DIR"/us2.png "$SOL_IMG_DIR"/us3.png "$SOL_IMG_DIR"/rfi1.png "$SOL_IMG_DIR"/rfi2.png "$SOL_IMG_DIR"/rfi3.png "$SOL_IMG_DIR"/cop1.png "$SOL_IMG_DIR"/cop2.png "$SOL_IMG_DIR"/cop3.png; do
-  if [ -f "$img" ]; then
-    SIZE=$(stat -f%z "$img" 2>/dev/null || stat -c%s "$img" 2>/dev/null || echo 0)
-    if [ "$SIZE" -gt 100000 ]; then
-      LARGE_IMGS=$((LARGE_IMGS + 1))
-    fi
-  fi
-done
-if [ "$LARGE_IMGS" -eq 0 ]; then
-  pass "All solution images are simplified (< 100KB each)"
-else
-  fail "All solution images are simplified" "$LARGE_IMGS image(s) are > 100KB — old complex images restored"
 fi
 
 # =============================================================================

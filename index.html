@@ -426,13 +426,6 @@
     return md.replace(/^#{1,3}\s+(Contents|Table of Contents)\s*\n([\s\S]*?)(?=\n#{1,3}\s|\n\n\n|$)/gim, '').trim();
   }
 
-  function formatDate(d) {
-    if (!d) return '';
-    const dt = new Date(d + 'T00:00:00');
-    if (isNaN(dt)) return d;
-    return dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
-
   // ---- Rendering ----
   const SOLUTION_MAP = {
     'Solutions - underscore': { page: 'underscore', icon: 'S', tag: 'Risk Scoring' },
@@ -940,7 +933,7 @@
       card.innerHTML = `
         ${thumbHtml}
         <div class="blog-card-body">
-          ${tagHtml}<div class="date">${formatDate(post.date)}</div>
+          ${tagHtml}<div class="date">${post.date}</div>
           <h3>${post.title}</h3>
           <p>${post.excerpt}</p>
         </div>`;
@@ -999,7 +992,7 @@
     const wordCount = (post.body || '').split(/\s+/).length;
     const readingTime = Math.max(1, Math.ceil(wordCount / 200));
     let metaParts = [];
-    if (post.date) metaParts.push(formatDate(post.date));
+    if (post.date) metaParts.push(post.date);
     if (post.author) metaParts.push(post.author);
     metaParts.push(`${readingTime} min read`);
 
@@ -1010,7 +1003,7 @@
       (post.tag ? `<span class="blog-tag">${post.tag}</span> ` : '') +
       metaParts.join(' &middot; ');
 
-    // Map blog post to whitepaper name (must match Website/Blog entity names in Fibery)
+    // Map blog post to whitepaper name (must match Website/Whitepapers entity names in Fibery)
     const wpName = findWhitepaper(post.title);
     const dlBtn = `<button class="btn btn-ghost" onclick="openWhitepaperModal('${wpName.replace(/'/g, "\\'")}')" style="margin-top:16px;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
@@ -1024,12 +1017,7 @@
       heroHtml = `<img src="${post.heroImg}" alt="${post.title}" style="width:100%;border-radius:var(--radius);margin-bottom:${showDl ? '16' : '32'}px;">${imgDlBtn}`;
     }
 
-    let bodyMd = stripContents(post.body);
-    // Strip "Market Size" appendix from Institutional Capital post
-    if (post.title.includes('Institutional Capital')) {
-      bodyMd = bodyMd.replace(/\n## Market Size[\s\S]*$/, '');
-    }
-    let bodyHtml = mdToHtml(bodyMd);
+    let bodyHtml = mdToHtml(stripContents(post.body));
 
     // Inject companion images from Fibery file attachments (skip the hero image)
     const companionImages = (post.files || []).filter(f => (f.type || '').startsWith('image/')).slice(1);
@@ -1141,17 +1129,12 @@
     input.classList.remove('wp-error');
     errorEl.classList.remove('visible');
 
-    // Map display titles to Fibery Blog entity names
-    let wpName = _activeWhitepaper;
-    if (wpName.includes('Chat Advance')) wpName = 'Chat Advance Case Study';
-    else if (wpName.includes('4D Financing')) wpName = '4D Financing Case Study';
-
     if (WORKER_URL) {
       // Production: POST to Cloudflare Worker
       fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, whitepaper: wpName })
+        body: JSON.stringify({ email, whitepaper: _activeWhitepaper })
       }).then(r => {
         if (!r.ok) throw new Error('Submit failed');
         showWhitepaperSuccess();

@@ -499,23 +499,24 @@ Gated whitepaper downloads capture email leads and deliver PDFs via Fibery autom
 
 ### Fibery Schema
 
-**`Website/Blog`** — catalog of blog posts (Case Study and Research types have PDFs)
+**`Website/Whitepapers`** — catalog of downloadable assets
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | Name | text | Display name (used in email subject + template) |
 | Slug | text | URL-safe identifier |
-| Type | multi-select | "Case Study", "Research", or "Insight" |
-| PDF | file | Attached PDF (Case Study + Research only) |
-| Leads | relation (one-to-many) | Reverse relation to Blog Leads |
+| Type | text | "Case Study" or "Research" |
+| PDF | file collection | Attached PDF file(s) |
+| Leads | relation (one-to-many) | Reverse relation to Whitepaper Leads |
 
-**`Website/Blog Leads`** — captured email entries
+**`Website/Whitepaper Leads`** — captured email entries
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | Email | text (email) | Submitted email address |
-| Blog Post | relation (many-to-one) | Linked blog entity |
-| Sent At | date-time | Set by Fibery automation when email sent |
+| Source | text | Origin ("website-modal") |
+| Whitepaper | relation (many-to-one) | Linked whitepaper entity |
+| Sent | boolean | Set to true by automation after email sent |
 
 ### Frontend Components
 
@@ -536,8 +537,8 @@ Gated whitepaper downloads capture email leads and deliver PDFs via Fibery autom
 
 **Dev server** (`undersight-serve.py`):
 - `POST /api/whitepaper-lead` accepts `{ email, whitepaper }` JSON
-- Looks up blog entity by name via Fibery query (uses `$name` param syntax)
-- Creates `Website/Blog Leads` entity with linked blog post relation
+- Looks up whitepaper entity by name via Fibery query (uses `$name` param syntax)
+- Creates `Website/Whitepaper Leads` entity with linked whitepaper relation
 - Logs: `[LEAD] email -> whitepaper_name (linked)` or `(no match)`
 
 **Production** (Cloudflare Worker at `worker/index.js`):

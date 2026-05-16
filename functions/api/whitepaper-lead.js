@@ -1,11 +1,11 @@
 /**
- * Cloudflare Pages Function — Blog lead capture
+ * Cloudflare Pages Function — Whitepaper lead capture
  *
  * Route: POST /api/whitepaper-lead
  * Deployed automatically with Cloudflare Pages (lives in functions/ dir).
  *
- * Accepts { email, whitepaper } and creates a Blog Leads entity in Fibery,
- * linked to the matching Blog entity. The Fibery automation
+ * Accepts { email, whitepaper } and creates a Whitepaper Leads entity in Fibery,
+ * linked to the matching Whitepapers entity. The Fibery automation
  * "undersight research dispatch" then sends the PDF via email.
  *
  * Environment variable (set in Cloudflare Pages dashboard → Settings → Environment variables):
@@ -68,7 +68,7 @@ export async function onRequestPost(context) {
   };
 
   try {
-    // 1. Look up the Blog entity by name
+    // 1. Look up the Whitepaper entity by name
     const wpResp = await fetch('https://subscript.fibery.io/api/commands', {
       method: 'POST',
       headers: fiberyHeaders,
@@ -76,7 +76,7 @@ export async function onRequestPost(context) {
         command: 'fibery.entity/query',
         args: {
           query: {
-            'q/from': 'Website/Blog',
+            'q/from': 'Website/Whitepapers',
             'q/select': ['fibery/id'],
             'q/where': ['=', ['Website/name'], '$name'],
             'q/limit': 1,
@@ -95,14 +95,14 @@ export async function onRequestPost(context) {
 
     // 2. Create the lead, linking to whitepaper if found
     const leadEntity = { 'Website/Email': email };
-    if (wpId) leadEntity['Website/Blog Post'] = { 'fibery/id': wpId };
+    if (wpId) leadEntity['Website/Whitepaper'] = { 'fibery/id': wpId };
 
     const fiberyResp = await fetch('https://subscript.fibery.io/api/commands', {
       method: 'POST',
       headers: fiberyHeaders,
       body: JSON.stringify([{
         command: 'fibery.entity/create',
-        args: { type: 'Website/Blog Leads', entity: leadEntity },
+        args: { type: 'Website/Whitepaper Leads', entity: leadEntity },
       }]),
     });
 
