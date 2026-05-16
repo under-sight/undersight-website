@@ -573,23 +573,22 @@
 
   // Blog hero images come from Fibery file attachments via firstImage(files)
 
-  const SOLUTION_IMAGES = {
-    'underscore': 'images/solutions/underscore-card.webp',
-    'rfi': 'images/solutions/rfi-card.webp',
-    'copilot': 'images/solutions/copilot-card.webp',
+  // Solution images and narratives are driven by Fibery file attachments
+  // First image = hero/card, remaining images = narrative steps
+  const SOLUTION_NARRATIVE_TITLES = {
+    'rfi': ['AI agent collects documents', 'Data is enriched and verified', 'Funder-ready package delivered'],
+    'copilot': ['Screen deals in minutes', 'Analyze transactions with AI', 'Ask questions, get answers'],
   };
-
-  const SOLUTION_NARRATIVES = {
-    'underscore': [],
+  const SOLUTION_NARRATIVE_DESCS = {
     'rfi': [
-      { img: 'images/solutions/rfi-card.webp', title: 'AI agent collects documents', desc: 'Macy conducts an intelligent conversation with the applicant or broker, collecting bank statements and resolving gaps automatically.' },
-      { img: 'images/solutions/rfi-step2.webp', title: 'Data is enriched and verified', desc: 'Raw documents are parsed into structured transaction intelligence. Revenue patterns, existing positions, and anomalies identified.' },
-      { img: 'images/solutions/rfi-step3.webp', title: 'Funder-ready package delivered', desc: 'Complete submission packages are assembled from raw inputs, including RFI responses, enriched data, and preliminary risk signals.' },
+      'Macy conducts an intelligent conversation with the applicant or broker, collecting bank statements and resolving gaps automatically.',
+      'Raw documents are parsed into structured transaction intelligence. Revenue patterns, existing positions, and anomalies identified.',
+      'Complete submission packages are assembled from raw inputs, including RFI responses, enriched data, and preliminary risk signals.',
     ],
     'copilot': [
-      { img: 'images/solutions/copilot-card.webp', title: 'Screen deals in minutes', desc: 'AI identifies clear declines instantly. Deal queues are prioritized by risk signal strength, freeing capacity for complex deals.' },
-      { img: 'images/solutions/copilot-step2.webp', title: 'Analyze transactions with AI', desc: 'Revenue patterns, anomalies, and risk factors surfaced in a unified transaction viewer. Every deal gets institutional-grade analysis.' },
-      { img: 'images/solutions/copilot-step3.webp', title: 'Ask questions, get answers', desc: 'Chat about deals, raise RFIs, and get structured responses with inline data citations. The underwriter makes the call, with better data.' },
+      'AI identifies clear declines instantly. Deal queues are prioritized by risk signal strength, freeing capacity for complex deals.',
+      'Revenue patterns, anomalies, and risk factors surfaced in a unified transaction viewer. Every deal gets institutional-grade analysis.',
+      'Chat about deals, raise RFIs, and get structured responses with inline data citations. The underwriter makes the call, with better data.',
     ],
   };
 
@@ -813,7 +812,9 @@
       const bodyParas = (meta._body || '').split('\n\n').filter(p => p.trim() && !p.startsWith('#'));
       const desc = bodyParas[0] || '';
       const tag = meta.Tag || cfg.tag;
-      const solImg = SOLUTION_IMAGES[cfg.page] || '';
+      const solFiles = getFiles(data, entityName);
+      const solImgs = (solFiles || []).filter(f => (f.type || '').startsWith('image/')).map(f => f.url);
+      const solImg = solImgs[0] || '';
 
       // Dropdown
       const ddItem = document.createElement('a');
@@ -851,10 +852,12 @@
       if (cfg.page === 'underscore') {
         renderUnderscorePage(pageEl, tag, title, desc, config['Contact Email'] || 'contact@undersight.ai');
       } else {
-        const narrative = SOLUTION_NARRATIVES[cfg.page] || [];
+        const narTitles = SOLUTION_NARRATIVE_TITLES[cfg.page] || [];
+        const narDescs = SOLUTION_NARRATIVE_DESCS[cfg.page] || [];
+        const narrative = narTitles.map((t, i) => ({ img: solImgs[i] || '', title: t, desc: narDescs[i] || '' }));
         const narrativeHtml = narrative.map((step, i) => `
           <div class="sol-row${i % 2 === 1 ? '' : ''}">
-            <div class="sol-row-img"><img src="${step.img}" alt="${step.title}" loading="lazy"></div>
+            ${step.img ? `<div class="sol-row-img"><img src="${step.img}" alt="${step.title}" loading="lazy"></div>` : ''}
             <div class="sol-row-text">
               <h3>${step.title}</h3>
               <p>${step.desc}</p>
