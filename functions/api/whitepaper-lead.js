@@ -274,9 +274,20 @@ export async function onRequestPost(context) {
       if (matches.length) wpId = matches[0]['fibery/id'];
     }
 
-    // 2. Create the lead, linking to the blog post if found
-    const leadEntity = { 'Website/Email': email };
-    if (wpId) leadEntity['Website/Blog Post'] = { 'fibery/id': wpId };
+    // Reject if the asset name passed the allowlist but no matching Fibery
+    // entity exists. Creating an unlinked lead causes the dispatch automation
+    // to build a malformed `To` header — fail fast instead of producing an
+    // orphan record that will silently break delivery.
+    if (!wpId) {
+      console.error('Whitepaper not found in Fibery:', whitepaperName);
+      return json({ error: 'Whitepaper not found' }, 422, request);
+    }
+
+    // 2. Create the lead, linking to the blog post
+    const leadEntity = {
+      'Website/Email': email,
+      'Website/Blog Post': { 'fibery/id': wpId },
+    };
 
     const fiberyResp = await fetch('https://subscript.fibery.io/api/commands', {
       method: 'POST',

@@ -291,13 +291,21 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if wp_matches:
                 wp_id = wp_matches[0]["fibery/id"]
 
-            # 2. Create the lead entity
+            # Reject if the asset name passed the allowlist but no matching
+            # Fibery entity exists. Creating an unlinked lead causes the
+            # dispatch automation to build a malformed `To` header — fail
+            # fast instead of producing an orphan record that will silently
+            # break delivery.
+            if not wp_id:
+                print(f"  [LEAD] {masked} -> {whitepaper_name} (not found in Fibery)", file=sys.stderr)
+                self._send_json({"error": "Whitepaper not found"}, status=422)
+                return
+
+            # 2. Create the lead entity, linked to the blog post
             lead_entity = {
                 "Website/Email": email,
+                "Website/Blog Post": {"fibery/id": wp_id},
             }
-            # 3. Link to whitepaper if found
-            if wp_id:
-                lead_entity["Website/Blog Post"] = {"fibery/id": wp_id}
 
             api_post("/api/commands", [{
                 "command": "fibery.entity/create",
@@ -306,7 +314,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     "entity": lead_entity,
                 },
             }])
-            print(f"  [LEAD] {masked} -> {whitepaper_name}" + (" (linked)" if wp_id else " (no match)"))
+            print(f"  [LEAD] {masked} -> {whitepaper_name} (linked)")
             self._send_json({"ok": True})
         except Exception as e:
             # Detail to stderr only; generic message to client

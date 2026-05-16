@@ -163,7 +163,7 @@ undetected.
 |------|------------|---------|
 | `Website/Pages` | `Website/Name`, `Website/Description` (markdown doc), `Website/Assets` (files) | `build.py:97-200`, `undersight-serve.py:53-123` |
 | `Website/Blog` | `Website/name`, `Website/Slug`, `Website/PDF`, `Website/Assets`, `Website/Post Date`, `Website/Tag`, `Website/Subtitle`, `Website/Author`, `Website/Excerpt` | `build.py:183-194`, `functions/api/whitepaper-lead.js:79`, `undersight-serve.py:164-166` |
-| `Website/Blog Leads` | `Website/Email`, `Website/Blog Post`, `Website/Sent At` | `functions/api/whitepaper-lead.js:97-105` |
+| `Website/Blog Leads` | `Website/Email`, `Website/Blog Post`, `Website/Sent` | `functions/api/whitepaper-lead.js:97-105` |
 | `Website/Deployments` | `Website/Commit`, `Website/Site Mode`, `Website/Content Hash`, `Website/Build Status`, `Website/URL`, `Website/Deployed At` | `deploy-report.py:56-102` |
 | `Site Config` (entity in `Website/Pages`) | contact email, Calendly URL, copyright, sign-in URL (markdown body keys) | `index.html:784-794` |
 
@@ -367,7 +367,7 @@ Website modal → submitWhitepaperEmail()
          - Website/Blog Post: linked to blog/case-study entity
   → Fibery Automation triggers on new lead
   → Sends email with PDF attachment from blog/case-study entity
-  → Sets Website/Sent At = current timestamp on the lead
+  → Sets Website/Sent = true on the lead
 ```
 
 ### Fibery Schema
@@ -386,7 +386,7 @@ Website modal → submitWhitepaperEmail()
 |-------|------|---------|
 | `Website/Email` | text | Visitor's email |
 | `Website/Blog Post` | relation (M:1) | Link to the blog/case-study entity |
-| `Website/Sent At` | date-time | Set by Fibery automation when email is sent |
+| `Website/Sent` | bool | Set to true by Fibery automation when email is sent |
 | `fibery/creation-date` | date-time | (system) When the lead was captured |
 
 ### Current PDF Assets (must exist in Fibery with PDF attached)
