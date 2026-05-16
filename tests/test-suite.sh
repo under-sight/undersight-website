@@ -100,7 +100,9 @@ else
 fi
 
 # Test: All entity types present in content API
-for ENTITY_PREFIX in "Home" "Solutions" "Blog" "Site Config" "Contact"; do
+# Blog content moved from Website/Pages 'Blog -*' entries to the dedicated
+# Website/Blog DB in May 2026 — it now arrives under data['_blogs']['_data'].
+for ENTITY_PREFIX in "Home" "Solutions" "Site Config" "Contact"; do
   if echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
@@ -112,6 +114,18 @@ sys.exit(0 if found else 1)
     fail "Entity type '$ENTITY_PREFIX' present in /api/content"
   fi
 done
+
+# Blog list lives under data._blogs._data (post-cutover)
+if echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+blogs = (data.get('_blogs') or {}).get('_data') or []
+sys.exit(0 if blogs else 1)
+" 2>/dev/null; then
+  pass "Blog list present in /api/content (_blogs._data)"
+else
+  fail "Blog list present in /api/content (_blogs._data)"
+fi
 
 # Test: Static files serve correctly
 STATIC_FILES=(
@@ -155,7 +169,9 @@ else
 fi
 
 # Test: No "merchant" or "SMB" in non-blog entity content (copy rules)
-# Blog posts may legitimately reference these terms in context
+# Blog posts may legitimately reference these terms in context. Blogs now
+# live under _blogs._data (post-cutover); skip the synthetic _blogs entry
+# alongside any legacy 'Blog - ' prefix entries still lurking.
 for BANNED_TERM in "merchant" "SMB"; do
   FOUND=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
@@ -163,6 +179,7 @@ data = json.load(sys.stdin)
 violations = []
 for name, entity in data.items():
     if name.startswith('Blog - '): continue
+    if name.startswith('_'): continue
     content = entity.get('content', '')
     if '$BANNED_TERM' in content:
         violations.append(name)
@@ -189,31 +206,32 @@ else
   fail "All 3 solution entities present" "Found $SOLUTION_COUNT"
 fi
 
-# Test: Blog entities have Date and Excerpt metadata
+# Test: Blog entries have post_date and slug (post-cutover structured fields)
+# Note: || true so set -e doesn't bail when the python helper exits non-zero.
 BLOG_META_OK=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-blogs = {k: v for k, v in data.items() if k.startswith('Blog - ')}
+blogs = (data.get('_blogs') or {}).get('_data') or []
 if not blogs:
     print('no blogs')
     sys.exit(1)
 missing = []
-for name, entity in blogs.items():
-    content = entity.get('content', '')
-    has_date = '**Date:**' in content or '**Date:' in content
-    has_excerpt = '**Excerpt:**' in content or '**Excerpt:' in content
-    if not has_date or not has_excerpt:
-        missing.append(name)
+for b in blogs:
+    name = b.get('name', '<unnamed>')
+    if not b.get('post_date'):
+        missing.append(f'{name} (no post_date)')
+    if not b.get('slug'):
+        missing.append(f'{name} (no slug)')
 if missing:
-    print(', '.join(missing))
+    print('; '.join(missing))
     sys.exit(1)
 print('ok')
 sys.exit(0)
-" 2>/dev/null)
+" 2>/dev/null || true)
 if [ "$BLOG_META_OK" = "ok" ]; then
-  pass "Blog entities have Date and Excerpt metadata"
+  pass "Blog entries have post_date and slug metadata"
 else
-  fail "Blog entities have Date and Excerpt metadata" "Missing in: $BLOG_META_OK"
+  fail "Blog entries have post_date and slug metadata" "Missing in: $BLOG_META_OK"
 fi
 
 # Test: Contact entity has Calendly URL
@@ -822,44 +840,42 @@ print('content' if has_content else 'empty' if '$ENTITY' in data else 'missing')
   esac
 done
 
-# -- Blog entities: at least 1 must exist with Date + Excerpt --
+# -- Blog entries (Website/Blog DB): at least 1 must exist with slug + post_date --
 
 BLOG_COUNT=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-blogs = [k for k in data if k.startswith('Blog - ')]
+blogs = (data.get('_blogs') or {}).get('_data') or []
 print(len(blogs))
 " 2>/dev/null)
 if [ "$BLOG_COUNT" -gt 0 ]; then
-  pass "At least 1 blog entity exists ($BLOG_COUNT found)"
+  pass "At least 1 blog entry exists ($BLOG_COUNT found)"
 else
-  fail "At least 1 blog entity exists" "No 'Blog - *' entities in /api/content"
+  fail "At least 1 blog entry exists" "No entries in _blogs._data"
 fi
 
-# -- Every blog entity must have Date and Excerpt metadata --
+# -- Every blog entry must have slug and post_date --
 
 BLOG_MISSING=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
+blogs = (data.get('_blogs') or {}).get('_data') or []
 missing = []
-for name, entity in data.items():
-    if not name.startswith('Blog - '): continue
-    content = entity.get('content', '')
-    has_date = '**Date:**' in content or '**Date:' in content
-    has_excerpt = '**Excerpt:**' in content or '**Excerpt:' in content
-    if not has_date:
-        missing.append(f'{name} (no Date)')
-    if not has_excerpt:
-        missing.append(f'{name} (no Excerpt)')
+for b in blogs:
+    name = b.get('name', '<unnamed>')
+    if not b.get('post_date'):
+        missing.append(f'{name} (no post_date)')
+    if not b.get('slug'):
+        missing.append(f'{name} (no slug)')
 if missing:
     print('; '.join(missing))
 else:
     print('ok')
 " 2>/dev/null)
 if [ "$BLOG_MISSING" = "ok" ]; then
-  pass "All blog entities have Date and Excerpt metadata"
+  pass "All blog entries have post_date and slug"
 else
-  fail "All blog entities have Date and Excerpt metadata" "$BLOG_MISSING"
+  fail "All blog entries have post_date and slug" "$BLOG_MISSING"
 fi
 
 # -- Orphan check: every entity in the API must be consumed by the site --
@@ -874,7 +890,8 @@ consumed_exact = {'Home - Hero', 'Home - Who We Serve', 'Home - Metrics',
                   'Home - CTA', 'Site Config', 'Contact Page', 'Docs Page',
                   'Footer', 'SEO', 'Solutions - underscore',
                   'Solutions - underchat agent',
-                  'Solutions - AI Underwriting Copilot'}
+                  'Solutions - AI Underwriting Copilot',
+                  '_blogs', '_whitepapers'}
 consumed_prefixes = ['Blog - ']
 orphans = []
 for name in data:
@@ -1087,25 +1104,21 @@ section "Blog Tag Tests"
 BLOG_TAG_RESULT=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
+blogs = (data.get('_blogs') or {}).get('_data') or []
 missing = []
 tagged = []
-for name, entity in sorted(data.items()):
-    if not name.startswith('Blog - '): continue
-    content = entity.get('content', '')
-    has_tag = '**Tag:**' in content
-    if has_tag:
-        for line in content.split('\n'):
-            if '**Tag:**' in line:
-                tag = line.split('**Tag:**')[1].strip().rstrip('\\\\')
-                tagged.append(f'{name}={tag}')
-                break
+for b in sorted(blogs, key=lambda x: x.get('name', '')):
+    name = b.get('name', '<unnamed>')
+    tag = b.get('type') or ''
+    if tag:
+        tagged.append(f'{name}={tag}')
     else:
         missing.append(name)
 if missing:
     print('MISSING:' + ';'.join(missing))
 else:
     print('ALL_TAGGED:' + ';'.join(tagged))
-" 2>/dev/null)
+" 2>/dev/null || true)
 
 if [[ "$BLOG_TAG_RESULT" == ALL_TAGGED* ]]; then
   pass "All blog posts have Tag metadata"
@@ -1120,13 +1133,9 @@ for TAG in "Research" "Case Study"; do
   TAG_EXISTS=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-for name, entity in data.items():
-    if not name.startswith('Blog - '): continue
-    if '**Tag:** $TAG' in entity.get('content', ''):
-        print('yes')
-        break
-else:
-    print('no')
+blogs = (data.get('_blogs') or {}).get('_data') or []
+found = any((b.get('type') == '$TAG') for b in blogs)
+print('yes' if found else 'no')
 " 2>/dev/null)
   if [ "$TAG_EXISTS" = "yes" ]; then
     pass "Blog tag '$TAG' exists in at least one post"
@@ -1265,11 +1274,12 @@ else
   fail "Solution pages are CMS-driven via SOLUTION_MAP + getContent(data, entityName)"
 fi
 
-# Test: Blog posts are CMS-driven (dynamic rendering from Blog - * entities)
-if grep -q "k\.startsWith('Blog - ')" "$SRC_HTML" || grep -q "k.startsWith('Blog - ')" "$SRC_HTML"; then
-  pass "Blog grid dynamically renders from 'Blog - *' entities"
+# Test: Blog posts are CMS-driven (dynamic rendering from Website/Blog DB)
+# Post-cutover: blogs arrive as data._blogs._data, no longer via 'Blog - ' prefix.
+if grep -q "data\._blogs" "$SRC_HTML"; then
+  pass "Blog grid dynamically renders from Website/Blog DB (data._blogs)"
 else
-  fail "Blog grid dynamically renders from 'Blog - *' entities"
+  fail "Blog grid dynamically renders from Website/Blog DB" "Expected 'data._blogs' reference in index.html"
 fi
 
 # Test: Docs/Construction page entity exists in Fibery

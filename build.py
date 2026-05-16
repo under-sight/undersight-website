@@ -97,14 +97,49 @@ def api_post(path, body, token):
         return json.loads(resp.read())
 
 
+def _unwrap_doc_content(raw):
+    """
+    Defensive unwrap for Website/Blog Description docs that were written
+    by the migration script wrapped in a JSON envelope:
+        {\
+        "secret": "...",
+        "content": "<escaped markdown>"
+        }
+    Returns the inner markdown if a wrapper is detected, else the raw string.
+    """
+    if not raw or not isinstance(raw, str):
+        return raw or ""
+    s = raw.lstrip()
+    if not s.startswith("{"):
+        return raw
+    # Try strict JSON parse first (after stripping the trailing-backslash continuations).
+    candidate = s.replace("\\\n", "\n")
+    try:
+        obj = json.loads(candidate)
+        if isinstance(obj, dict) and "content" in obj:
+            inner = obj.get("content", "")
+            if isinstance(inner, str):
+                # Inner content uses \\n for newlines; unescape one level.
+                return inner.replace("\\n", "\n").replace("\\\"", '"')
+    except Exception:
+        pass
+    # Fallback regex: locate "content": "..." (greedy until last quote before closing brace).
+    m = re.search(r'"content"\s*:\s*"(.*)"\s*\\?\s*\}\s*$', candidate, re.DOTALL)
+    if m:
+        inner = m.group(1)
+        return inner.replace("\\\\n", "\n").replace("\\n", "\n").replace('\\"', '"')
+    return raw
+
+
 def fetch_all(token):
     """
-    Fetch all entities + docs from Fibery in 2 API calls.
+    Fetch all entities + docs from Fibery.
     Returns (content_map, file_map) where:
       - content_map: {name: {content, files}} (same shape as serve.py)
+        plus a synthetic '_blogs' key holding the structured blog list.
       - file_map: {opaque_id: fibery_secret} for downloading files
     """
-    print("  Querying entities...")
+    print("  Querying Pages entities...")
     entities = api_post(
         "/api/commands",
         [
@@ -138,16 +173,79 @@ def fetch_all(token):
     )[0]["result"]
     # Filter out non-dict entries (Fibery API sometimes returns metadata strings)
     entities = [e for e in entities if isinstance(e, dict)]
-    print(f"  Found {len(entities)} entities")
+    print(f"  Found {len(entities)} Pages entities")
 
-    # Batch doc fetch
+    # Filter out any legacy 'Blog -*' entries that still linger in
+    # Website/Pages — blog content now lives in Website/Blog. The CI guard
+    # in .github/workflows/deploy-production.yml will eventually fail on
+    # regressions once the user deletes the migration leftovers manually.
+    stale_blog_pages = [
+        e.get("Name") for e in entities
+        if isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
+    ]
+    if stale_blog_pages:
+        print(f"  WARNING: Ignoring {len(stale_blog_pages)} stale 'Blog -*' entries in Website/Pages")
+        for n in stale_blog_pages:
+            print(f"    - {n} (delete this in Fibery UI)")
+        entities = [
+            e for e in entities
+            if not (isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -"))
+        ]
+
+    print("  Querying Blog entities...")
+    blog_entities = api_post(
+        "/api/commands",
+        [
+            {
+                "command": "fibery.entity/query",
+                "args": {
+                    "query": {
+                        "q/from": "Website/Blog",
+                        "q/select": {
+                            "Name": "Website/name",
+                            "Slug": "Website/Slug",
+                            "Subtitle": "Website/Subtitle",
+                            "Author": "Website/Author",
+                            "Excerpt": "Website/Excerpt",
+                            "PostDate": "Website/Post Date",
+                            "CreationDate": "fibery/creation-date",
+                            "Type": ["Website/Type", "enum/name"],
+                            "DocSecret": [
+                                "Website/Description",
+                                "Collaboration~Documents/secret",
+                            ],
+                            "Files": {
+                                "q/from": "Website/Assets",
+                                "q/select": {
+                                    "FileSecret": "fibery/secret",
+                                    "FileName": "fibery/name",
+                                    "ContentType": "fibery/content-type",
+                                },
+                                "q/limit": 20,
+                            },
+                        },
+                        "q/limit": 100,
+                    }
+                },
+            }
+        ],
+        token,
+    )[0]["result"]
+    blog_entities = [e for e in blog_entities if isinstance(e, dict)]
+    print(f"  Found {len(blog_entities)} Blog entities")
+
+    # Batch doc fetch (Pages + Blog secrets in one call)
     secrets = [e["DocSecret"] for e in entities if e.get("DocSecret")]
+    secrets += [e["DocSecret"] for e in blog_entities if e.get("DocSecret")]
+    # Dedupe but preserve order
+    seen = set()
+    unique_secrets = [s for s in secrets if not (s in seen or seen.add(s))]
     docs = {}
-    if secrets:
-        print(f"  Fetching {len(secrets)} documents...")
+    if unique_secrets:
+        print(f"  Fetching {len(unique_secrets)} documents...")
         doc_results = api_post(
             "/api/documents/commands?format=md",
-            {"command": "get-documents", "args": [{"secret": s} for s in secrets]},
+            {"command": "get-documents", "args": [{"secret": s} for s in unique_secrets]},
             token,
         )
         for d in doc_results:
@@ -175,30 +273,60 @@ def fetch_all(token):
             "files": files,
         }
 
-    # Fetch whitepapers catalog (Website/Blog) for slug/name mapping
-    try:
-        wp_entities = api_post(
-            "/api/commands",
-            [{
-                "command": "fibery.entity/query",
-                "args": {
-                    "query": {
-                        "q/from": "Website/Blog",
-                        "q/select": {
-                            "Name": "Website/name",
-                            "Slug": "Website/Slug",
-                        },
-                        "q/limit": 50,
+    # Build the structured _blogs array. Skip entities without a Name or Slug
+    # (e.g., the B8 "Test Blog" / B9 null-stub entries kept around in Fibery
+    # for the user to delete manually).
+    blogs = []
+    whitepapers = []
+    for be in blog_entities:
+        name = be.get("Name")
+        slug = be.get("Slug")
+        if not name or not slug:
+            continue
+        files = []
+        for f in be.get("Files") or []:
+            sec = f.get("FileSecret", "")
+            if sec:
+                opaque = hashlib.sha256(sec.encode()).hexdigest()[:12]
+                file_map[opaque] = sec
+                files.append(
+                    {
+                        "name": f.get("FileName", ""),
+                        "type": f.get("ContentType", ""),
+                        "url": f"/api/file/{opaque}",
                     }
-                },
-            }],
-            token,
-        )[0]["result"]
-        whitepapers = [{"name": w["Name"], "slug": w.get("Slug") or ""} for w in wp_entities if w.get("Slug")]
-        result["_whitepapers"] = {"content": "", "files": [], "_data": whitepapers}
-        print(f"  Whitepapers catalog: {len(whitepapers)} entries")
-    except Exception as e:
-        print(f"  WARNING: Could not fetch whitepapers catalog: {e}")
+                )
+        body_raw = docs.get(be.get("DocSecret", ""), "")
+        body = _unwrap_doc_content(body_raw)
+        tag = ""
+        if isinstance(be.get("Type"), list) and be["Type"]:
+            tag = be["Type"][0] or ""
+        elif isinstance(be.get("Type"), str):
+            tag = be["Type"]
+        blogs.append({
+            "name": name,
+            "slug": slug,
+            "subtitle": be.get("Subtitle") or "",
+            "author": be.get("Author") or "",
+            "excerpt": be.get("Excerpt") or "",
+            "post_date": be.get("PostDate") or "",
+            "creation_date": be.get("CreationDate") or "",
+            "type": tag,
+            "body": body,
+            "files": files,
+        })
+        whitepapers.append({"name": name, "slug": slug})
+
+    # Sort: Post Date desc, tie-break by creation date desc
+    blogs.sort(
+        key=lambda b: (b.get("post_date") or "", b.get("creation_date") or ""),
+        reverse=True,
+    )
+    # Embed via files=[] / content="" placeholder for the entity map shape,
+    # plus _data carrying the structured array (renderContent reads _data).
+    result["_blogs"] = {"content": "", "files": [], "_data": blogs}
+    result["_whitepapers"] = {"content": "", "files": [], "_data": whitepapers}
+    print(f"  Blog catalog: {len(blogs)} posts (sorted by Post Date desc)")
 
     return result, file_map
 
@@ -343,27 +471,48 @@ def determine_local_path(opaque_id, files_info):
     """
     Given an opaque file ID, figure out a local filename for it.
     Returns a path relative to dist/ (e.g. 'images/files/abc123def456.png').
+
+    Walks both top-level entity files and nested `_data[i].files` lists
+    (used by `_blogs` / `_whitepapers` synthetic entries).
     """
-    # Find the file info matching this opaque ID
+    def _match(file_list):
+        for f in file_list or []:
+            if f.get("url") == f"/api/file/{opaque_id}":
+                return f
+        return None
+
+    found = None
     for entity_data in files_info.values():
-        for f in entity_data.get("files", []):
-            if f["url"] == f"/api/file/{opaque_id}":
-                name = f.get("name", opaque_id)
-                content_type = f.get("type", "")
-                # Sanitize filename
-                safe_name = re.sub(r"[^a-zA-Z0-9._-]", "_", name)
-                if not safe_name:
-                    ext = ""
-                    if "png" in content_type:
-                        ext = ".png"
-                    elif "jpeg" in content_type or "jpg" in content_type:
-                        ext = ".jpg"
-                    elif "webp" in content_type:
-                        ext = ".webp"
-                    elif "svg" in content_type:
-                        ext = ".svg"
-                    safe_name = f"{opaque_id}{ext}"
-                return f"images/files/{safe_name}"
+        found = _match(entity_data.get("files"))
+        if found:
+            break
+        nested = entity_data.get("_data")
+        if isinstance(nested, list):
+            for item in nested:
+                if isinstance(item, dict):
+                    found = _match(item.get("files"))
+                    if found:
+                        break
+            if found:
+                break
+
+    if found:
+        name = found.get("name", opaque_id)
+        content_type = found.get("type", "")
+        # Sanitize filename
+        safe_name = re.sub(r"[^a-zA-Z0-9._-]", "_", name)
+        if not safe_name:
+            ext = ""
+            if "png" in content_type:
+                ext = ".png"
+            elif "jpeg" in content_type or "jpg" in content_type:
+                ext = ".jpg"
+            elif "webp" in content_type:
+                ext = ".webp"
+            elif "svg" in content_type:
+                ext = ".svg"
+            safe_name = f"{opaque_id}{ext}"
+        return f"images/files/{safe_name}"
     return f"images/files/{opaque_id}"
 
 
@@ -421,10 +570,11 @@ def download_fibery_files(content_map, file_map, token, use_cache=True):
 def rewrite_file_urls(content_map, local_paths):
     """
     Rewrite /api/file/{opaque_id} URLs in the content map to local paths.
-    Modifies content_map in place.
+    Modifies content_map in place. Handles both top-level entity files and
+    nested `_data[i].files` lists (used by `_blogs` synthetic entry).
     """
-    for entity_name, entity_data in content_map.items():
-        for f in entity_data.get("files", []):
+    def _rewrite_list(file_list):
+        for f in file_list or []:
             url = f.get("url", "")
             match = re.match(r"/api/file/([0-9a-f]{12})", url)
             if match:
@@ -434,6 +584,14 @@ def rewrite_file_urls(content_map, local_paths):
                 else:
                     # File download failed - use empty string
                     f["url"] = ""
+
+    for entity_name, entity_data in content_map.items():
+        _rewrite_list(entity_data.get("files"))
+        nested = entity_data.get("_data")
+        if isinstance(nested, list):
+            for item in nested:
+                if isinstance(item, dict):
+                    _rewrite_list(item.get("files"))
 
 
 def bake_content_into_html(html, content_json):
@@ -854,15 +1012,16 @@ def main():
     # Strip Fibery secrets from content (document secrets in the content field)
     # The content_map values should only contain markdown text and local file paths
     # But double-check: remove any lingering Fibery references from markdown content
+    fibery_url_re = re.compile(r"https?://[a-z0-9.-]*fibery\.io[^\s\)\"']*")
     for entity_name, entity_data in content_map.items():
         md = entity_data.get("content", "")
-        # Remove any Fibery URLs that might be in markdown links
-        md = re.sub(
-            r"https?://[a-z0-9.-]*fibery\.io[^\s\)\"']*",
-            "",
-            md,
-        )
-        entity_data["content"] = md
+        entity_data["content"] = fibery_url_re.sub("", md)
+        # Also scrub nested blog bodies.
+        nested = entity_data.get("_data")
+        if isinstance(nested, list):
+            for item in nested:
+                if isinstance(item, dict) and "body" in item:
+                    item["body"] = fibery_url_re.sub("", item.get("body") or "")
 
     html = bake_content_into_html(html, content_map)
     html = strip_serve_references(html)

@@ -136,9 +136,39 @@ def api_post(path, body):
         return json.loads(resp.read())
 
 
+def _unwrap_doc_content(raw):
+    """
+    Defensive unwrap for Website/Blog Description docs written by the
+    migration script wrapped in a JSON envelope `{"secret":..., "content":"..."}`.
+    Returns the inner markdown if a wrapper is detected, else the raw string.
+    Mirrors build.py:_unwrap_doc_content.
+    """
+    if not raw or not isinstance(raw, str):
+        return raw or ""
+    s = raw.lstrip()
+    if not s.startswith("{"):
+        return raw
+    candidate = s.replace("\\\n", "\n")
+    try:
+        obj = json.loads(candidate)
+        if isinstance(obj, dict) and "content" in obj:
+            inner = obj.get("content", "")
+            if isinstance(inner, str):
+                return inner.replace("\\n", "\n").replace("\\\"", '"')
+    except Exception:
+        pass
+    m = re.search(r'"content"\s*:\s*"(.*)"\s*\\?\s*\}\s*$', candidate, re.DOTALL)
+    if m:
+        inner = m.group(1)
+        return inner.replace("\\\\n", "\n").replace("\\n", "\n").replace('\\"', '"')
+    return raw
+
+
 def fetch_all():
-    """Fetch all entities + docs in 2 API calls."""
-    # 1. Entity query: names, doc secrets, file attachments - single API call
+    """Fetch all entities (Pages + Blog) + docs."""
+    import hashlib
+
+    # 1a. Pages entity query
     entities = api_post("/api/commands", [{
         "command": "fibery.entity/query",
         "args": {
@@ -164,24 +194,70 @@ def fetch_all():
             }
         },
     }])[0]["result"]
-
-    # Filter out non-dict entries (Fibery API sometimes returns metadata strings)
     entities = [e for e in entities if isinstance(e, dict)]
 
-    # 2. Batch doc fetch: all document contents in one API call
+    # Schema guard: stale 'Blog -*' entries are forbidden in Pages.
+    stale_blog_pages = [
+        e.get("Name") for e in entities
+        if isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
+    ]
+    if stale_blog_pages:
+        print("WARNING: stale 'Blog -*' entities in Website/Pages — ignoring:",
+              ", ".join(stale_blog_pages), file=sys.stderr)
+        entities = [e for e in entities if not (
+            isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
+        )]
+
+    # 1b. Blog entity query (separate DB for blog posts since May-2026 cutover).
+    blog_entities = api_post("/api/commands", [{
+        "command": "fibery.entity/query",
+        "args": {
+            "query": {
+                "q/from": "Website/Blog",
+                "q/select": {
+                    "Name": "Website/name",
+                    "Slug": "Website/Slug",
+                    "Subtitle": "Website/Subtitle",
+                    "Author": "Website/Author",
+                    "Excerpt": "Website/Excerpt",
+                    "PostDate": "Website/Post Date",
+                    "CreationDate": "fibery/creation-date",
+                    "Type": ["Website/Type", "enum/name"],
+                    "DocSecret": [
+                        "Website/Description",
+                        "Collaboration~Documents/secret",
+                    ],
+                    "Files": {
+                        "q/from": "Website/Assets",
+                        "q/select": {
+                            "FileSecret": "fibery/secret",
+                            "FileName": "fibery/name",
+                            "ContentType": "fibery/content-type",
+                        },
+                        "q/limit": 20,
+                    },
+                },
+                "q/limit": 100,
+            }
+        },
+    }])[0]["result"]
+    blog_entities = [e for e in blog_entities if isinstance(e, dict)]
+
+    # 2. Batch doc fetch: all document contents in one API call (Pages + Blog).
     secrets = [e["DocSecret"] for e in entities if e.get("DocSecret")]
+    secrets += [e["DocSecret"] for e in blog_entities if e.get("DocSecret")]
+    seen = set()
+    unique_secrets = [s for s in secrets if not (s in seen or seen.add(s))]
     docs = {}
-    if secrets:
+    if unique_secrets:
         doc_results = api_post(
             "/api/documents/commands?format=md",
-            {"command": "get-documents", "args": [{"secret": s} for s in secrets]},
+            {"command": "get-documents", "args": [{"secret": s} for s in unique_secrets]},
         )
         for d in doc_results:
             docs[d["secret"]] = d.get("content", "")
 
-    # 3. Combine into {name: {content, files}} map
-    # Use opaque IDs instead of Fibery secrets in the response
-    import hashlib
+    # 3. Combine into {name: {content, files}} map; use opaque IDs.
     _file_map = {}  # opaque_id -> fibery_secret
 
     result = {}
@@ -201,6 +277,49 @@ def fetch_all():
             "content": docs.get(e.get("DocSecret", ""), ""),
             "files": files,
         }
+
+    # 3b. Build structured _blogs array from Website/Blog.
+    blogs = []
+    for be in blog_entities:
+        name = be.get("Name")
+        slug = be.get("Slug")
+        if not name or not slug:
+            continue
+        bfiles = []
+        for f in be.get("Files") or []:
+            sec = f.get("FileSecret", "")
+            if sec:
+                opaque = hashlib.sha256(sec.encode()).hexdigest()[:12]
+                _file_map[opaque] = sec
+                bfiles.append({
+                    "name": f.get("FileName", ""),
+                    "type": f.get("ContentType", ""),
+                    "url": f"/api/file/{opaque}",
+                })
+        body = _unwrap_doc_content(docs.get(be.get("DocSecret", ""), ""))
+        tag = ""
+        if isinstance(be.get("Type"), list) and be["Type"]:
+            tag = be["Type"][0] or ""
+        elif isinstance(be.get("Type"), str):
+            tag = be["Type"]
+        blogs.append({
+            "name": name,
+            "slug": slug,
+            "subtitle": be.get("Subtitle") or "",
+            "author": be.get("Author") or "",
+            "excerpt": be.get("Excerpt") or "",
+            "post_date": be.get("PostDate") or "",
+            "creation_date": be.get("CreationDate") or "",
+            "type": tag,
+            "body": body,
+            "files": bfiles,
+        })
+    # Sort: Post Date desc, tie-break by creation date desc.
+    blogs.sort(
+        key=lambda b: (b.get("post_date") or "", b.get("creation_date") or ""),
+        reverse=True,
+    )
+    result["_blogs"] = {"content": "", "files": [], "_data": blogs}
 
     # Store mapping for file proxy
     global _opaque_file_map
