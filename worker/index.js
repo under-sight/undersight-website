@@ -36,6 +36,7 @@ const ALLOWED_ORIGINS = [
 // Hardcoded whitelist of asset names. Mirrors functions/api/whitepaper-lead.js.
 const KNOWN_WHITEPAPERS = [
   'Chat Advance Case Study',
+  '4D Financing Case Study',
   'From Deterministic Scorecards to Agentic Credit Assessments',
   'Unlocking Institutional Capital for Mid-Tier MCA Funds',
 ];

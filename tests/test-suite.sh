@@ -2184,6 +2184,7 @@ LEAD_RECIPIENT="${LEAD_RECIPIENT:-agent@undersight.ai}"
 
 KNOWN_WHITEPAPERS=(
   "Chat Advance Case Study"
+  "4D Financing Case Study"
   "From Deterministic Scorecards to Agentic Credit Assessments"
   "Unlocking Institutional Capital for Mid-Tier MCA Funds"
 )
