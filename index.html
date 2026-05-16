@@ -1003,7 +1003,8 @@
 
     // Auto-inject companion images from Fibery file attachments
     // Hero = first image (shown above), remaining images distributed through body
-    if (post.companionImgs && post.companionImgs.length > 0) {
+    // Only inject if there are 2+ companions (skip single extras which are usually alternate hero versions)
+    if (post.companionImgs && post.companionImgs.length >= 2) {
       const paragraphs = bodyHtml.split('</p>');
       if (paragraphs.length > 2) {
         const interval = Math.max(2, Math.floor(paragraphs.length / (post.companionImgs.length + 1)));
