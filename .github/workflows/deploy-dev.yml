@@ -2,7 +2,7 @@ name: Deploy Dev (Fibery → Cloudflare Pages)
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '* * * * *'
   workflow_dispatch:
 
 concurrency:

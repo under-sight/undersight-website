@@ -2,7 +2,7 @@ name: Deploy Production (Fibery → undersight.ai)
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '* * * * *'
   workflow_dispatch:
 
 concurrency:
