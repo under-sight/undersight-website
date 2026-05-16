@@ -1188,7 +1188,7 @@ section "Image & Asset Provenance Tests"
 # and blog images must resolve to actual files.
 
 # Test: All SOLUTION_NARRATIVES images exist
-SOL_IMAGES=$(grep -oE "images/solutions/[a-z0-9]+\.(png|webp)" "$SRC_HTML" | sort -u)
+SOL_IMAGES=$(grep -oE "images/solutions/[a-z0-9]+\.(png|webp)" "$SRC_HTML" | sort -u || true)
 for IMG in $SOL_IMAGES; do
   if [ -f "$SITE_ROOT/$IMG" ]; then
     pass "Solution image exists: $IMG"
@@ -1198,7 +1198,7 @@ for IMG in $SOL_IMAGES; do
 done
 
 # Test: All BLOG_IMAGES (non-special) exist
-BLOG_IMGS=$(grep -oE "images/blog/[a-z0-9-]+\.(png|webp)" "$SRC_HTML" | sort -u)
+BLOG_IMGS=$(grep -oE "images/blog/[a-z0-9-]+\.(png|webp)" "$SRC_HTML" | sort -u || true)
 for IMG in $BLOG_IMGS; do
   if [ -f "$SITE_ROOT/$IMG" ]; then
     pass "Blog image exists: $IMG"
@@ -1356,7 +1356,7 @@ else
 fi
 
 # Test: Modal title is generic (not hardcoded to a specific case study)
-MODAL_TITLE=$(grep 'id="wpTitle"' "$SITE_ROOT/index.html" | head -1)
+MODAL_TITLE=$(grep 'id="wpTitle"' "$SITE_ROOT/index.html" | head -1 || true)
 if echo "$MODAL_TITLE" | grep -qi "chat advance"; then
   fail "Modal title is generic" "Hardcoded to 'Chat Advance'"
 else
@@ -1364,7 +1364,7 @@ else
 fi
 
 # Test: Modal description is generic (not hardcoded to a specific case study)
-MODAL_DESC=$(grep 'id="wpDesc"\|class="wp-desc"' "$SITE_ROOT/index.html" | head -1)
+MODAL_DESC=$(grep 'id="wpDesc"\|class="wp-desc"' "$SITE_ROOT/index.html" | head -1 || true)
 if echo "$MODAL_DESC" | grep -qi "chat advance"; then
   fail "Modal description is generic" "Hardcoded to 'Chat Advance'"
 else
