@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 640px; height: 640px; background: transparent; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
+
+    <!-- Background -->
+    <rect width="640" height="640" rx="24" fill="#F7F8F8"/>
+
+    <!-- STEP 2 label -->
+    <text x="48" y="56" font-family="Inter, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.1em">STEP 2</text>
+
+    <!-- === Left side: Raw Documents === -->
+    <g transform="translate(48, 90)">
+      <text x="0" y="0" font-family="Inter, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#6B7280" letter-spacing="0.06em">RAW DOCUMENTS</text>
+
+      <!-- Document 1 -->
+      <rect x="0" y="18" width="140" height="120" rx="10" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+      <!-- PDF icon area -->
+      <rect x="16" y="34" width="108" height="16" rx="3" fill="#F0F1F2"/>
+      <rect x="16" y="58" width="90" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="72" width="100" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="86" width="70" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="100" width="108" height="8" rx="2" fill="#F0F1F2"/>
+      <text x="70" y="126" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="9" fill="#6B7280">bank_mar.pdf</text>
+
+      <!-- Document 2 -->
+      <rect x="0" y="158" width="140" height="120" rx="10" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+      <rect x="16" y="174" width="108" height="16" rx="3" fill="#F0F1F2"/>
+      <rect x="16" y="198" width="80" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="212" width="100" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="226" width="60" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="240" width="108" height="8" rx="2" fill="#F0F1F2"/>
+      <text x="70" y="266" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="9" fill="#6B7280">bank_apr.pdf</text>
+
+      <!-- Document 3 -->
+      <rect x="0" y="298" width="140" height="120" rx="10" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+      <rect x="16" y="314" width="108" height="16" rx="3" fill="#F0F1F2"/>
+      <rect x="16" y="338" width="95" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="352" width="75" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="366" width="108" height="8" rx="2" fill="#F0F1F2"/>
+      <rect x="16" y="380" width="60" height="8" rx="2" fill="#F0F1F2"/>
+      <text x="70" y="406" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="9" fill="#6B7280">tax_2025.pdf</text>
+    </g>
+
+    <!-- === Center: Processing Arrow === -->
+    <g transform="translate(220, 270)">
+      <!-- Arrow shaft -->
+      <rect x="0" y="42" width="80" height="3" rx="1.5" fill="#C97A54"/>
+      <!-- Arrow head -->
+      <polygon points="80,34 100,43.5 80,53" fill="#C97A54"/>
+      <!-- Processing label -->
+      <text x="50" y="28" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#C97A54">PARSING</text>
+    </g>
+
+    <!-- === Right side: Structured Data === -->
+    <g transform="translate(344, 90)">
+      <text x="0" y="0" font-family="Inter, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#6B7280" letter-spacing="0.06em">STRUCTURED DATA</text>
+
+      <!-- Card 1: Revenue -->
+      <rect x="0" y="18" width="248" height="100" rx="12" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+      <circle cx="24" cy="46" r="10" fill="#6B9E8C" opacity="0.15"/>
+      <polyline points="19,48 22,44 25,47 29,42" fill="none" stroke="#6B9E8C" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="42" y="44" font-family="Inter, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#3A3F47">Revenue Pattern</text>
+      <rect x="170" y="34" width="60" height="20" rx="4" fill="#6B9E8C" opacity="0.12"/>
+      <text x="200" y="48" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#6B9E8C">Verified</text>
+      <!-- Data rows -->
+      <text x="16" y="74" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">Avg Monthly</text>
+      <text x="232" y="74" text-anchor="end" font-family="SF Mono, JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#23262C">$89,400</text>
+      <text x="16" y="96" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">Trend</text>
+      <text x="232" y="96" text-anchor="end" font-family="SF Mono, JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#6B9E8C">+12% QoQ</text>
+
+      <!-- Card 2: Positions -->
+      <rect x="0" y="134" width="248" height="100" rx="12" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+      <circle cx="24" cy="162" r="10" fill="#C97A54" opacity="0.15"/>
+      <rect x="19" y="158" width="10" height="8" rx="2" fill="none" stroke="#C97A54" stroke-width="1.5"/>
+      <text x="42" y="160" font-family="Inter, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#3A3F47">Existing Positions</text>
+      <rect x="170" y="150" width="60" height="20" rx="4" fill="#C97A54" opacity="0.12"/>
+      <text x="200" y="164" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#C97A54">Flagged</text>
+      <!-- Data rows -->
+      <text x="16" y="190" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">Active MCAs</text>
+      <text x="232" y="190" text-anchor="end" font-family="SF Mono, JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#C97A54">2 found</text>
+      <text x="16" y="212" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">Daily payment</text>
+      <text x="232" y="212" text-anchor="end" font-family="SF Mono, JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#23262C">$1,240</text>
+
+      <!-- Card 3: Anomalies -->
+      <rect x="0" y="250" width="248" height="100" rx="12" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+      <circle cx="24" cy="278" r="10" fill="#6B9E8C" opacity="0.15"/>
+      <circle cx="24" cy="278" r="4" fill="#6B9E8C"/>
+      <text x="42" y="276" font-family="Inter, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#3A3F47">Anomaly Detection</text>
+      <rect x="170" y="266" width="60" height="20" rx="4" fill="#6B9E8C" opacity="0.12"/>
+      <text x="200" y="280" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#6B9E8C">Clean</text>
+      <!-- Data rows -->
+      <text x="16" y="306" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">NSF/Overdrafts</text>
+      <text x="232" y="306" text-anchor="end" font-family="SF Mono, JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#6B9E8C">None</text>
+      <text x="16" y="328" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">Irregular deposits</text>
+      <text x="232" y="328" text-anchor="end" font-family="SF Mono, JetBrains Mono, monospace" font-size="11" font-weight="600" fill="#6B9E8C">None</text>
+
+      <!-- Card 4: Summary stat -->
+      <rect x="0" y="366" width="248" height="52" rx="12" fill="#23262C"/>
+      <text x="16" y="396" font-family="Inter, -apple-system, sans-serif" font-size="11" fill="#FFFFFF" opacity="0.7">Fields extracted</text>
+      <text x="232" y="396" text-anchor="end" font-family="SF Mono, JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#FFFFFF">147</text>
+    </g>
+
+    <!-- Bottom status bar -->
+    <g transform="translate(48, 540)">
+      <rect x="0" y="0" width="544" height="56" rx="12" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+      <circle cx="28" cy="28" r="8" fill="#6B9E8C" opacity="0.15"/>
+      <polyline points="23,28 26,31 33,25" fill="none" stroke="#6B9E8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="44" y="24" font-family="Inter, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#23262C">Enrichment complete</text>
+      <text x="44" y="42" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">3 documents parsed  |  147 fields extracted  |  2 signals flagged</text>
+    </g>
+
+  </svg>
+</body>
+</html>

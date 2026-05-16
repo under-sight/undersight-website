@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 640px; height: 640px; background: transparent; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
+
+    <!-- Background -->
+    <rect width="640" height="640" rx="24" fill="#F7F8F8"/>
+
+    <!-- STEP 3 label -->
+    <text x="48" y="56" font-family="Inter, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.1em">STEP 3</text>
+
+    <!-- Chat container -->
+    <rect x="40" y="76" width="560" height="520" rx="16" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1.5"/>
+
+    <!-- Header bar -->
+    <rect x="40" y="76" width="560" height="48" rx="16" fill="#23262C"/>
+    <rect x="40" y="108" width="560" height="16" fill="#23262C"/>
+
+    <!-- Header content -->
+    <text x="72" y="104" font-family="Inter, -apple-system, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Copilot</text>
+    <text x="140" y="104" font-family="Inter, -apple-system, sans-serif" font-size="10" fill="#6B7280">Acme Logistics deal</text>
+
+    <!-- Sparkle icon -->
+    <g transform="translate(544, 92)">
+      <line x1="8" y1="0" x2="8" y2="16" stroke="#C97A54" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="0" y1="8" x2="16" y2="8" stroke="#C97A54" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="2" y1="2" x2="14" y2="14" stroke="#C97A54" stroke-width="1" stroke-linecap="round"/>
+      <line x1="14" y1="2" x2="2" y2="14" stroke="#C97A54" stroke-width="1" stroke-linecap="round"/>
+    </g>
+
+    <!-- === User question === -->
+    <g transform="translate(56, 148)">
+      <!-- User bubble (right aligned) -->
+      <rect x="160" y="0" width="400" height="44" rx="12" fill="#23262C"/>
+      <text x="176" y="27" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#FFFFFF">What's the revenue trend for this applicant?</text>
+      <!-- User avatar -->
+      <circle cx="572" cy="22" r="10" fill="#C97A54" opacity="0.2"/>
+      <circle cx="572" cy="22" r="4" fill="#C97A54"/>
+    </g>
+
+    <!-- === AI response === -->
+    <g transform="translate(56, 212)">
+      <!-- AI avatar -->
+      <circle cx="14" cy="14" r="14" fill="#6B9E8C" opacity="0.15"/>
+      <circle cx="14" cy="14" r="7" fill="#6B9E8C"/>
+
+      <!-- AI response bubble -->
+      <rect x="36" y="0" width="492" height="290" rx="12" fill="#F0F1F2"/>
+
+      <!-- Response text -->
+      <text x="56" y="28" font-family="Inter, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#23262C">Revenue is trending upward at +12% QoQ.</text>
+
+      <text x="56" y="52" font-family="Inter, -apple-system, sans-serif" font-size="11" fill="#3A3F47">Monthly revenue over the last 3 statements:</text>
+
+      <!-- Mini bar chart -->
+      <g transform="translate(56, 66)">
+        <!-- Chart background -->
+        <rect x="0" y="0" width="440" height="100" rx="8" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+
+        <!-- Y axis labels -->
+        <text x="8" y="18" font-family="SF Mono, JetBrains Mono, monospace" font-size="8" fill="#6B7280">$100k</text>
+        <text x="8" y="48" font-family="SF Mono, JetBrains Mono, monospace" font-size="8" fill="#6B7280">$75k</text>
+        <text x="8" y="78" font-family="SF Mono, JetBrains Mono, monospace" font-size="8" fill="#6B7280">$50k</text>
+
+        <!-- Grid lines -->
+        <line x1="50" y1="15" x2="420" y2="15" stroke="#F0F1F2" stroke-width="1"/>
+        <line x1="50" y1="45" x2="420" y2="45" stroke="#F0F1F2" stroke-width="1"/>
+        <line x1="50" y1="75" x2="420" y2="75" stroke="#F0F1F2" stroke-width="1"/>
+
+        <!-- Bars -->
+        <rect x="80" y="38" width="60" height="50" rx="4" fill="#6B9E8C" opacity="0.3"/>
+        <rect x="80" y="38" width="60" height="50" rx="4" fill="none" stroke="#6B9E8C" stroke-width="1.5"/>
+        <text x="110" y="94" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="8" fill="#6B7280">Jan</text>
+
+        <rect x="190" y="28" width="60" height="60" rx="4" fill="#6B9E8C" opacity="0.4"/>
+        <rect x="190" y="28" width="60" height="60" rx="4" fill="none" stroke="#6B9E8C" stroke-width="1.5"/>
+        <text x="220" y="94" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="8" fill="#6B7280">Feb</text>
+
+        <rect x="300" y="18" width="60" height="70" rx="4" fill="#6B9E8C" opacity="0.6"/>
+        <rect x="300" y="18" width="60" height="70" rx="4" fill="none" stroke="#6B9E8C" stroke-width="1.5"/>
+        <text x="330" y="94" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="8" fill="#6B7280">Mar</text>
+
+        <!-- Values on bars -->
+        <text x="110" y="34" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#23262C">$78k</text>
+        <text x="220" y="24" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#23262C">$85k</text>
+        <text x="330" y="14" text-anchor="middle" font-family="SF Mono, JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#23262C">$89k</text>
+      </g>
+
+      <!-- Summary stats -->
+      <text x="56" y="186" font-family="Inter, -apple-system, sans-serif" font-size="11" fill="#3A3F47">Key findings:</text>
+
+      <!-- Findings -->
+      <g transform="translate(56, 196)">
+        <circle cx="6" cy="10" r="3" fill="#6B9E8C"/>
+        <text x="16" y="14" font-family="Inter, -apple-system, sans-serif" font-size="11" fill="#3A3F47">Consistent growth across all 3 months</text>
+      </g>
+      <g transform="translate(56, 218)">
+        <circle cx="6" cy="10" r="3" fill="#6B9E8C"/>
+        <text x="16" y="14" font-family="Inter, -apple-system, sans-serif" font-size="11" fill="#3A3F47">No seasonality concerns for this period</text>
+      </g>
+      <g transform="translate(56, 240)">
+        <circle cx="6" cy="10" r="3" fill="#C97A54"/>
+        <text x="16" y="14" font-family="Inter, -apple-system, sans-serif" font-size="11" fill="#3A3F47">Note: 1 existing position ($620/day) reduces net margin</text>
+      </g>
+
+      <!-- Citation -->
+      <rect x="56" y="258" width="180" height="22" rx="6" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+      <text x="66" y="273" font-family="SF Mono, JetBrains Mono, monospace" font-size="9" fill="#6B7280">Source: bank_mar.pdf +2</text>
+    </g>
+
+    <!-- Bottom input bar -->
+    <g transform="translate(56, 524)">
+      <rect x="0" y="0" width="528" height="40" rx="12" fill="#F0F1F2" stroke="#D1D5DB" stroke-width="1"/>
+      <text x="20" y="25" font-family="Inter, -apple-system, sans-serif" font-size="12" fill="#6B7280" opacity="0.5">Ask a follow-up question...</text>
+      <!-- Send button -->
+      <circle cx="500" cy="20" r="14" fill="#C97A54" opacity="0.2"/>
+      <polygon points="495,20 505,20 500,14" fill="#C97A54" transform="rotate(90, 500, 20)"/>
+    </g>
+
+  </svg>
+</body>
+</html>
