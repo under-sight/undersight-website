@@ -436,6 +436,26 @@
     const hero = selectHero(files);
     return hero ? hero.url : '';
   }
+  // Convention: foo.png -> foo-dark.png as a sibling Fibery attachment.
+  // When present, callers use pictureTag() to emit <picture> with a dark
+  // <source>. Returns null if no companion exists.
+  function darkVariant(files, lightFile) {
+    if (!lightFile || !lightFile.name) return null;
+    const m = lightFile.name.match(/^(.+?)(\.[^.]+)$/);
+    if (!m) return null;
+    const darkName = (m[1] + '-dark' + m[2]).toLowerCase();
+    return (files || []).find(f => (f.name || '').toLowerCase() === darkName) || null;
+  }
+  function pictureTag(files, lightFile, alt, attrs) {
+    if (!lightFile) return '';
+    const a = attrs || 'loading="lazy"';
+    const dark = darkVariant(files, lightFile);
+    if (!dark) return `<img src="${lightFile.url}" alt="${alt}" ${a}>`;
+    return `<picture>`
+      + `<source srcset="${dark.url}" media="(prefers-color-scheme: dark)">`
+      + `<img src="${lightFile.url}" alt="${alt}" ${a}>`
+      + `</picture>`;
+  }
 
   function parseMeta(md) {
     const meta = {};
@@ -1987,7 +2007,8 @@
       const desc = bodyParas[0] || '';
       const tag = meta.Tag || cfg.tag;
       const solFiles = getFiles(data, entityName);
-      const solImgs = (solFiles || []).filter(f => (f.type || '').startsWith('image/')).map(f => f.url);
+      const solFileList = (solFiles || []).filter(f => (f.type || '').startsWith('image/'));
+      const solImgs = solFileList.map(f => f.url);
       const solImg = solImgs[0] || '';
 
       // Dropdown
@@ -2008,8 +2029,8 @@
       // Home horizontal solution section
       const row = document.createElement('div');
       row.className = 'sol-row';
-      const imgHtml = solImg
-        ? `<img src="${solImg}" alt="${title}" loading="lazy">`
+      const imgHtml = solFileList[0]
+        ? pictureTag(solFileList, solFileList[0], title)
         : `[ placeholder ]`;
       row.innerHTML = `
         <div class="sol-row-img">${imgHtml}</div>
@@ -2032,10 +2053,10 @@
       } else {
         const narTitles = SOLUTION_NARRATIVE_TITLES[cfg.page] || [];
         const narDescs = SOLUTION_NARRATIVE_DESCS[cfg.page] || [];
-        const narrative = narTitles.map((t, i) => ({ img: solImgs[i] || '', title: t, desc: narDescs[i] || '' }));
+        const narrative = narTitles.map((t, i) => ({ file: solFileList[i] || null, title: t, desc: narDescs[i] || '' }));
         const narrativeHtml = narrative.map((step, i) => `
           <div class="sol-row${i % 2 === 1 ? '' : ''}">
-            ${step.img ? `<div class="sol-row-img"><img src="${step.img}" alt="${step.title}" loading="lazy"></div>` : ''}
+            ${step.file ? `<div class="sol-row-img">${pictureTag(solFileList, step.file, step.title)}</div>` : ''}
             <div class="sol-row-text">
               <h3>${step.title}</h3>
               <p>${step.desc}</p>
@@ -2125,11 +2146,15 @@
         thumbHtml = `<div class="blog-thumb">[ Hero image ]</div>`;
       }
 
-      const tagHtml = post.tag ? `<span class="blog-tag">${post.tag}</span> ` : '';
+      const tagHtml = post.tag ? `<span class="blog-tag">${post.tag}</span>` : '';
+      const dateHtml = post.date ? `<span class="date">${formatDate(post.date)}</span>` : '';
+      const metaHtml = (tagHtml || dateHtml)
+        ? `<div class="blog-meta">${tagHtml}${tagHtml && dateHtml ? '<span class="blog-meta-sep" aria-hidden="true">&middot;</span>' : ''}${dateHtml}</div>`
+        : '';
       card.innerHTML = `
         ${thumbHtml}
         <div class="blog-card-body">
-          ${tagHtml}<div class="date">${formatDate(post.date)}</div>
+          ${metaHtml}
           <h3>${post.title}</h3>
           <p>${post.excerpt}</p>
         </div>`;
