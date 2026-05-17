@@ -234,6 +234,43 @@ def fetch_all(token):
     blog_entities = [e for e in blog_entities if isinstance(e, dict)]
     print(f"  Found {len(blog_entities)} Blog entities")
 
+    print("  Querying Integrations entities...")
+    integration_entities = api_post(
+        "/api/commands",
+        [
+            {
+                "command": "fibery.entity/query",
+                "args": {
+                    "query": {
+                        "q/from": "Website/Integrations",
+                        "q/select": {
+                            "Name": "Website/name",
+                            "Rank": "Website/Rank",
+                            "Logo": {
+                                "q/from": "Website/Logo",
+                                "q/select": {
+                                    "FileSecret": "fibery/secret",
+                                    "FileName": "fibery/name",
+                                    "ContentType": "fibery/content-type",
+                                },
+                                "q/limit": 5,
+                            },
+                            "Pages": {
+                                "q/from": "Website/Used On Pages",
+                                "q/select": {"Name": "Website/Name"},
+                                "q/limit": 20,
+                            },
+                        },
+                        "q/limit": 50,
+                    }
+                },
+            }
+        ],
+        token,
+    )[0]["result"]
+    integration_entities = [e for e in integration_entities if isinstance(e, dict)]
+    print(f"  Found {len(integration_entities)} Integrations entities")
+
     # Batch doc fetch (Pages + Blog secrets in one call)
     secrets = [e["DocSecret"] for e in entities if e.get("DocSecret")]
     secrets += [e["DocSecret"] for e in blog_entities if e.get("DocSecret")]
@@ -324,6 +361,37 @@ def fetch_all(token):
     )
     # Embed via files=[] / content="" placeholder for the entity map shape,
     # plus _data carrying the structured array (renderContent reads _data).
+    integrations = []
+    for ie in integration_entities:
+        name = ie.get("Name")
+        if not name:
+            continue
+        ifiles = []
+        for f in ie.get("Logo") or []:
+            sec = f.get("FileSecret", "")
+            if sec:
+                opaque = hashlib.sha256(sec.encode()).hexdigest()[:12]
+                file_map[opaque] = sec
+                ifiles.append({
+                    "name": f.get("FileName", ""),
+                    "type": f.get("ContentType", ""),
+                    "url": f"/api/file/{opaque}",
+                })
+        pages = []
+        for p in ie.get("Pages") or []:
+            pn = p.get("Name")
+            if pn:
+                pages.append(pn)
+        integrations.append({
+            "name": name,
+            "rank": ie.get("Rank") or 0,
+            "files": ifiles,
+            "pages": pages,
+        })
+    integrations.sort(key=lambda i: (i.get("rank") or 0, i.get("name") or ""))
+    result["_integrations"] = {"content": "", "files": [], "_data": integrations}
+    print(f"  Integrations: {len(integrations)} entities")
+
     result["_blogs"] = {"content": "", "files": [], "_data": blogs}
     result["_whitepapers"] = {"content": "", "files": [], "_data": whitepapers}
     print(f"  Blog catalog: {len(blogs)} posts (sorted by Post Date desc)")
