@@ -1,0 +1,10 @@
+name = "undersight-website"
+compatibility_date = "2024-09-01"
+pages_build_output_dir = "dist"
+
+# KV binding for per-IP rate limiter in functions/api/whitepaper-lead.js
+# Created via `wrangler kv namespace create RATE_LIMIT_KV`
+# Without this binding, rate limiting is a no-op + warns to console.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "83b9dd6298074ec3ad80c36a85be6058"
