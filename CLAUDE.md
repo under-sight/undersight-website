@@ -10,28 +10,77 @@ in components.
 
 ## Development Workflow
 
-**All development happens in the `dev` branch of the `undersight-website` repo.**
-There is no separate local dev directory — this repo IS the working directory.
+**All development integrates through the `dev` branch of the
+`under-sight/undersight-website` repo.** Local work happens in the local-only
+workspace at `/Users/kyle/LocalDev/undersight`, not in iCloud, Google Drive, or
+any synced folder.
+
+Read the workspace-level guide first when starting from the local root:
+`/Users/kyle/LocalDev/undersight/AGENT.md`.
+
+### Local Workspace Layout
+
+| Purpose | Path |
+| --- | --- |
+| Workspace root | `/Users/kyle/LocalDev/undersight` |
+| Canonical clone | `/Users/kyle/LocalDev/undersight/undersight-website` |
+| Agent worktrees | `/Users/kyle/LocalDev/undersight/undersight-website-worktrees/<agent-task>` |
+| Multi-agent workflow | `docs/AGENT-WORKTREES.md` |
+
+Avoid active work in these old or synced copies:
+
+| Path | Why |
+| --- | --- |
+| `/Users/kyle/Documents/undersight-website` | iCloud/Documents copy; Git metadata may be offloaded/dataless |
+| `/Users/kyle/My Drive (kyle@undersight.ai)/undersight-website` | Google Drive copy |
+| `/Users/kyle/repos/undersight-website` | previous local bootstrap clone |
+| `/Users/kyle/repos/undersight-website-work` | side checkout on `feat/cms-federation` |
 
 ### Git Workflow
 
-1. **Every session**: start by pulling latest from `dev`
-2. **All edits**: made directly in this repo (not a separate local copy)
-3. **Commit frequently**: push to `dev` at every natural checkpoint
-4. **Merge to main**: when ready for production build/deploy
-5. **No local testing on a separate directory** — test via dev server from this repo
+1. **Every session**: update the canonical clone from `origin/dev`
+2. **Every agent/task**: create a dedicated worktree and branch from canonical local `dev`
+3. **No direct edits in the canonical clone** unless acting as the integrator
+4. **Commit only owned files**; avoid broad `git add .` in multi-agent work
+5. **Merge or rebase latest `origin/dev` before push**
+6. **Use PRs into `dev` when multiple agents are active**
+7. **Merge `dev` to `main`** only when ready for production build/deploy
 
 ```bash
 # Start of session
-cd "/Users/kyle/My Drive (kyle@undersight.ai)/undersight-website"
-git checkout dev && git pull
+cd /Users/kyle/LocalDev/undersight/undersight-website
+git checkout dev
+git fetch origin
+git pull --ff-only origin dev
+git worktree prune
 
-# After changes
-git add <files> && git commit -m "description" && git push
+# Create an isolated worktree for one agent task
+./scripts/new-agent-worktree.sh agent-a homepage-cms
+cd /Users/kyle/LocalDev/undersight/undersight-website-worktrees/<agent-task>
+
+# After changes in the worktree
+git status --short
+git add <owned-files>
+git commit -m "area: concise change"
+git fetch origin
+git merge origin/dev
+python3 build.py --verify
+bash tests/test-suite.sh
+git push -u origin HEAD
 
 # When ready for production
 git checkout main && git merge dev && git push && git checkout dev
 ```
+
+### Cross-Agent Collision Rules
+
+1. One agent gets one worktree and one branch.
+2. No two agents should edit the same file in parallel unless ownership is
+   explicitly assigned.
+3. If two tasks must touch the same file, name one integrating owner; the other
+   agent should produce notes or a patch plan.
+4. Prefer PRs into `dev` while multiple branches are active.
+5. Use direct local merges only in an explicit integrator session.
 
 ### Dev Server
 
