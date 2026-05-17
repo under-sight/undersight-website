@@ -318,3 +318,26 @@ Existing audit assumed `Website/Pages`, `Website/Blog`, `Website/Blog Leads`, `W
 - `Website/Assets` is **not a database** — it's a `fibery/file` collection field present on Pages, Blog (as `Website/Assets`), Integrations (as `Website/Logo`), Blog (as `Website/PDF`), and Animations (as `Website/Preview`).
 - `Site Config` is **not a database** — it's a single row in `Website/Pages` (public-id `17`).
 - Two databases not in the prior audit: **`Website/Animations`** (2 entities) and **`Website/Emails`** (2 templates). The Email DB drives the automation message body indirectly (the automation hardcodes the HTML — Emails entries appear to be a parallel reference catalog, not the live source of truth).
+
+---
+
+## Corrections discovered during CMS Staging mirror (2026-05-17)
+
+- **`Website/Blog.Type` is multi-select, not single-select.** This audit doc originally described it as single-select with values Case Study / Research / Insight. The live schema dump shows `fibery/collection?: True`, confirming multi-select. CMS Staging mirrors the live (multi-select) reality.
+- **`Blog Leads.Name` formula** stores its expression as a field-id UUID reference, not the friendly `[Public Id]` text. Recreating via API requires referencing the target type's own `fibery/public-id` field id. CMS Staging's formula references `019e36d8-9a25-7259-8bed-c29a842902b2` (staging Blog Leads public-id field) — functionally identical to live, just a different underlying UUID.
+
+---
+
+## CMS Staging mirror status (2026-05-17)
+
+A parallel space named **`CMS Staging`** has been created in `subscript.fibery.io` containing a schema-only mirror of `Website`. No entities, no automations, no views were copied.
+
+- **Space URL:** https://subscript.fibery.io/CMS_Staging
+- **Space id:** `2a67e790-5206-11f1-8c1b-0d88443d4ae1`
+- **Databases mirrored (7):** Pages, Blog, Blog Leads, Integrations, Deployments, Animations, Emails — all schema-equivalent to live
+- **Enums mirrored (6):** `Type_Blog`, `Environment_Deployments`, `Status_Deployments`, `Test Results_Deployments`, `Type_Animations`, `Status_Animations` — identical option values
+- **Relations mirrored:** Pages↔Integrations (M:M), Blog→Blog Leads (1:N) — both scoped to staging types, no cross-leak to live
+- **Skipped per design:** the 2 soft-deleted Blog Leads columns (`Requested At_…_deleted`, `Source_…_deleted`); the `undersight research dispatch` automation (sandbox must not fire emails); all views; all entities.
+- **Pre-existing artifact:** one soft-deleted scaffold (`CMS Staging/Database 1_0dea4oo_deleted`) from an earlier abandoned attempt — left untouched, not visible in any view.
+
+This space is the safe sandbox for the CMS federation plan (Subscript Fibery Roadmap/Task/284). Live `Website` space remains untouched.
