@@ -670,9 +670,7 @@
 
 
   function renderUnderscorePage(pageEl, tag, title, desc, contactEmail) {
-    const logoCards = Object.entries(UNDERSCORE_LOGOS).map(([name, src]) =>
-      `<div class="integration-logo-card"><img src="${src}" alt="${name}" loading="lazy"><div class="int-name">${name}</div></div>`
-    ).join('');
+    const logoCards = renderIntegrationsStrip('Solutions - underscore');
     pageEl.innerHTML = `
       <div class="sol-hero">
         <span class="tag">${tag}</span>
