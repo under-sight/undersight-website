@@ -1192,6 +1192,610 @@
       </div>`;
   }
 
+  function renderCopilotPage(pageEl, tag, title, desc, contactEmail) {
+    pageEl.innerHTML = `
+      <style>
+        #page-copilot {
+          --black: var(--color-text);
+          --dark: var(--color-text-secondary);
+          --mid: var(--color-text-muted, #6B7280);
+          --pale: var(--color-border);
+          --bg: var(--color-bg-alt);
+          --white: var(--color-bg);
+          --max-w: var(--max-width, 1120px);
+        }
+
+        /* HERO */
+        #page-copilot .sol-hero {
+          padding: 88px 24px 56px; max-width: var(--max-w); margin: 0 auto;
+          display: grid; grid-template-columns: 1fr 1fr;
+          gap: 64px; align-items: center; text-align: left;
+        }
+        #page-copilot .sol-hero .tag {
+          display: inline-block; margin-bottom: 18px; padding: 4px 12px;
+          border-radius: var(--rounded-sm); background: var(--color-accent-light);
+          font-family: var(--font-sans); font-feature-settings: 'cv01', 'ss03';
+          font-size: 12px; font-weight: 600; color: var(--color-accent);
+          text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        #page-copilot .sol-hero h1 {
+          font-size: 48px; font-weight: 700; letter-spacing: -0.035em;
+          margin: 0 0 20px; line-height: 1.05;
+        }
+        #page-copilot .sol-hero h1 em { font-style: normal; color: var(--color-accent); }
+        #page-copilot .sol-hero .lede { font-size: 18px; color: var(--dark); margin: 0 0 14px; line-height: 1.55; font-family: var(--font-body, 'DM Sans', sans-serif); max-width: 520px; }
+        #page-copilot .sol-hero .ask {
+          font-family: var(--font-mono); font-size: 13px; color: var(--mid); padding: 10px 14px;
+          background: var(--color-bg-subtle); border-left: 3px solid var(--color-accent);
+          border-radius: 0 var(--rounded-xs) var(--rounded-xs) 0;
+          margin: 0 0 28px; max-width: 520px; line-height: 1.55;
+        }
+        #page-copilot .sol-hero .ask strong { color: var(--black); font-weight: 600; }
+        #page-copilot .hero-cta-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        #page-copilot .hero-cta-row .btn { padding: 12px 26px; font-size: 14.5px; }
+        #page-copilot .hero-cta-alt { font-size: 13px; color: var(--mid); }
+        #page-copilot .hero-cta-alt a { color: var(--color-accent); font-weight: 510; text-decoration: none; }
+        #page-copilot .hero-cta-alt a:hover { text-decoration: underline; }
+
+        /* SCORECARD TILE */
+        #page-copilot .scorecard {
+          background: var(--white); border: 1px solid var(--pale); border-radius: var(--rounded-lg, 12px);
+          box-shadow: var(--shadow-medium); position: relative; overflow: hidden;
+          max-width: 480px; margin-left: auto;
+        }
+        #page-copilot .scorecard::before {
+          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+          background: linear-gradient(90deg, var(--color-accent), var(--color-eucalyptus));
+        }
+        #page-copilot .sc-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--color-border-light); background: var(--color-bg-subtle); }
+        #page-copilot .sc-head .who { display: flex; align-items: center; gap: 10px; }
+        #page-copilot .sc-head .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--color-accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+        #page-copilot .sc-head .name { font-size: 13.5px; font-weight: 600; color: var(--black); line-height: 1.2; }
+        #page-copilot .sc-head .role { font-size: 11px; color: var(--mid); line-height: 1.2; }
+        #page-copilot .sc-head .ttag { font-family: var(--font-mono); font-size: 10px; color: var(--color-eucalyptus); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(107,158,140,0.3); background: rgba(107,158,140,0.05); text-transform: uppercase; letter-spacing: 0.06em; }
+
+        #page-copilot .sc-grade { display: grid; grid-template-columns: auto 1fr; gap: 18px; padding: 18px 18px 12px; align-items: center; }
+        #page-copilot .sc-grade .ring { width: 86px; height: 86px; border-radius: 50%; background: conic-gradient(var(--color-accent) 0deg, var(--color-accent) 252deg, var(--color-border-light) 252deg); display: flex; align-items: center; justify-content: center; position: relative; }
+        #page-copilot .sc-grade .ring::after { content: ''; position: absolute; inset: 6px; background: var(--white); border-radius: 50%; }
+        #page-copilot .sc-grade .ring .label { position: relative; z-index: 1; text-align: center; }
+        #page-copilot .sc-grade .ring .grade { font-family: var(--font-sans); font-size: 28px; font-weight: 700; color: var(--color-accent); line-height: 1; }
+        #page-copilot .sc-grade .ring .sub { font-family: var(--font-mono); font-size: 9.5px; color: var(--mid); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+        #page-copilot .sc-grade .meta { display: flex; flex-direction: column; gap: 4px; }
+        #page-copilot .sc-grade .meta .row { display: flex; justify-content: space-between; font-size: 12px; }
+        #page-copilot .sc-grade .meta .row .k { color: var(--mid); }
+        #page-copilot .sc-grade .meta .row .v { color: var(--black); font-weight: 600; font-family: var(--font-mono); font-size: 11.5px; }
+        #page-copilot .sc-grade .meta .row .v.up { color: var(--color-eucalyptus); }
+        #page-copilot .sc-grade .meta .row .v.dn { color: var(--color-accent); }
+
+        #page-copilot .sc-components { padding: 8px 18px 14px; display: flex; flex-direction: column; gap: 6px; }
+        #page-copilot .sc-comp { display: grid; grid-template-columns: 88px 1fr 30px; gap: 12px; align-items: center; font-size: 11.5px; }
+        #page-copilot .sc-comp .lab { color: var(--mid); }
+        #page-copilot .sc-comp .bar { height: 6px; border-radius: 3px; background: var(--color-bg-muted); position: relative; overflow: hidden; }
+        #page-copilot .sc-comp .bar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--color-accent); border-radius: 3px; }
+        #page-copilot .sc-comp .bar .fill.good { background: var(--color-eucalyptus); }
+        #page-copilot .sc-comp .bar .ml-line { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--color-graphite-900); opacity: 0.6; }
+        #page-copilot .sc-comp .num { font-family: var(--font-mono); font-size: 11px; color: var(--black); font-weight: 600; text-align: right; }
+        #page-copilot .sc-legend { padding: 0 18px 14px; display: flex; gap: 14px; font-size: 10.5px; color: var(--mid); }
+        #page-copilot .sc-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+        #page-copilot .sc-legend .dot.ml { background: var(--color-graphite-900); }
+        #page-copilot .sc-legend .dot.ag { background: var(--color-accent); }
+        #page-copilot .sc-foot { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--color-border-light); background: var(--color-bg-subtle); }
+        #page-copilot .sc-foot .src { font-size: 11px; color: var(--mid); }
+        #page-copilot .sc-foot .check { font-size: 11px; color: var(--color-eucalyptus); display: flex; align-items: center; gap: 5px; }
+        #page-copilot .sc-foot .check::before { content: '\\2713'; font-weight: 700; }
+
+        /* NOT A WORKFLOW TOOL */
+        #page-copilot .not-workflow { background: var(--color-graphite-900); color: #fff; padding: 64px 24px; }
+        #page-copilot .not-workflow .container { max-width: var(--max-w); margin: 0 auto; }
+        #page-copilot .not-workflow .heading { display: grid; grid-template-columns: 1fr 1.2fr; gap: 56px; align-items: end; margin-bottom: 32px; }
+        #page-copilot .not-workflow .label { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        #page-copilot .not-workflow h2 { font-size: 32px; font-weight: 700; letter-spacing: -0.025em; margin: 0; color: #fff; line-height: 1.15; }
+        #page-copilot .not-workflow h2 em { font-style: normal; color: var(--color-accent); }
+        #page-copilot .not-workflow .nw-lede { font-size: 16px; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .nw-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        #page-copilot .nw-col { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--rounded-md); padding: 24px; }
+        #page-copilot .nw-col.left { background: rgba(255,255,255,0.02); }
+        #page-copilot .nw-col.right { border-color: rgba(201,122,84,0.35); background: rgba(201,122,84,0.06); }
+        #page-copilot .nw-col h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 14px; }
+        #page-copilot .nw-col.left h3 { color: rgba(255,255,255,0.4); }
+        #page-copilot .nw-col.right h3 { color: var(--color-accent); }
+        #page-copilot .nw-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+        #page-copilot .nw-col li { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; font-size: 13.5px; line-height: 1.5; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .nw-col.left li { color: rgba(255,255,255,0.5); }
+        #page-copilot .nw-col.left li::before { content: '\\d7'; font-family: var(--font-mono); font-size: 14px; color: rgba(255,255,255,0.35); font-weight: 700; line-height: 1; padding-top: 4px; }
+        #page-copilot .nw-col.right li { color: rgba(255,255,255,0.92); }
+        #page-copilot .nw-col.right li::before { content: '\\2192'; font-family: var(--font-mono); color: var(--color-accent); font-weight: 700; line-height: 1; padding-top: 2px; }
+        #page-copilot .nw-foot { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.65; max-width: 760px; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .nw-foot strong { color: #fff; font-weight: 600; }
+
+        /* HYBRID SCORING */
+        #page-copilot .hybrid { padding: 96px 24px; max-width: var(--max-w); margin: 0 auto; }
+        #page-copilot .hybrid .heading { text-align: left; margin-bottom: 48px; max-width: 720px; }
+        #page-copilot .hybrid .label { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        #page-copilot .hybrid h2 { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 16px; line-height: 1.1; color: var(--black); }
+        #page-copilot .hybrid h2 em { font-style: normal; color: var(--color-accent); }
+        #page-copilot .hybrid .lede { font-size: 17px; color: var(--dark); line-height: 1.6; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .hybrid-anatomy { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: stretch; }
+        #page-copilot .anat-stack { display: flex; flex-direction: column; gap: 12px; }
+        #page-copilot .anat-layer { border: 1px solid var(--pale); border-radius: var(--rounded-md); padding: 18px 20px; background: var(--white); position: relative; }
+        #page-copilot .anat-layer.ml { border-color: var(--color-graphite-700); background: var(--color-graphite-900); color: #fff; }
+        #page-copilot .anat-layer.ag { border-color: var(--color-accent); background: var(--color-accent-light); }
+        #page-copilot .anat-layer.out { border-color: var(--color-eucalyptus); background: var(--color-eucalyptus-light, rgba(107,158,140,0.1)); }
+        #page-copilot .anat-layer .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        #page-copilot .anat-layer .head .title { font-size: 14px; font-weight: 600; }
+        #page-copilot .anat-layer .head .badge { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+        #page-copilot .anat-layer.ml .head .title { color: #fff; }
+        #page-copilot .anat-layer.ml .head .badge { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+        #page-copilot .anat-layer.ag .head .title { color: var(--black); }
+        #page-copilot .anat-layer.ag .head .badge { background: var(--color-accent); color: #fff; }
+        #page-copilot .anat-layer.out .head .title { color: var(--black); }
+        #page-copilot .anat-layer.out .head .badge { background: var(--color-eucalyptus); color: #fff; }
+        #page-copilot .anat-layer p { font-size: 13.5px; line-height: 1.55; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .anat-layer.ml p { color: rgba(255,255,255,0.75); }
+        #page-copilot .anat-layer.ag p, #page-copilot .anat-layer.out p { color: var(--dark); }
+        #page-copilot .anat-arrow { text-align: center; margin: -4px 0; font-family: var(--font-mono); font-size: 11px; color: var(--mid); letter-spacing: 0.06em; display: flex; align-items: center; gap: 10px; padding-left: 20px; }
+        #page-copilot .anat-arrow::before { content: ''; flex: 0 0 14px; height: 14px; border-left: 2px dashed var(--color-accent); margin-left: 22px; }
+
+        #page-copilot .hybrid-claims { display: flex; flex-direction: column; gap: 14px; }
+        #page-copilot .claim { border: 1px solid var(--pale); border-radius: var(--rounded-md); padding: 22px 24px; background: var(--white); display: grid; grid-template-columns: 64px 1fr; gap: 18px; align-items: center; }
+        #page-copilot .claim .stat { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--color-accent); line-height: 1; }
+        #page-copilot .claim .stat .unit { font-size: 14px; color: var(--mid); margin-left: 2px; font-weight: 500; }
+        #page-copilot .claim .txt h4 { font-size: 15px; font-weight: 600; margin: 0 0 4px; color: var(--black); }
+        #page-copilot .claim .txt p { font-size: 13px; color: var(--mid); line-height: 1.5; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+
+        /* YIELD */
+        #page-copilot .yield { background: var(--color-bg-alt); padding: 96px 24px; }
+        #page-copilot .yield .container { max-width: var(--max-w); margin: 0 auto; }
+        #page-copilot .yield .heading { text-align: left; margin-bottom: 40px; max-width: 720px; }
+        #page-copilot .yield .label { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        #page-copilot .yield h2 { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 16px; line-height: 1.1; color: var(--black); }
+        #page-copilot .yield h2 em { font-style: normal; color: var(--color-accent); }
+        #page-copilot .yield .lede { font-size: 17px; color: var(--dark); line-height: 1.6; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .yield-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+        #page-copilot .yield-card { background: var(--white); border: 1px solid var(--pale); border-radius: var(--rounded-md); padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+        #page-copilot .yield-card .yc-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--color-border-light); }
+        #page-copilot .yield-card .yc-title { font-size: 15px; font-weight: 600; color: var(--black); }
+        #page-copilot .yield-card .yc-icon { width: 28px; height: 28px; border-radius: var(--rounded-xs); background: var(--color-accent-light); color: var(--color-accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 13px; font-weight: 700; }
+        #page-copilot .yield-card p { font-size: 13.5px; line-height: 1.55; color: var(--dark); margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .yield-card .yc-meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--mid); letter-spacing: 0.04em; text-transform: uppercase; padding-top: 10px; border-top: 1px dotted var(--color-border-light); }
+        #page-copilot .yield-table { background: var(--white); border: 1px solid var(--pale); border-radius: var(--rounded-md); overflow: hidden; }
+        #page-copilot .yt-head, #page-copilot .yt-row { display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr 1fr; gap: 14px; padding: 12px 20px; align-items: center; font-size: 12.5px; }
+        #page-copilot .yt-head { background: var(--color-bg-subtle); font-family: var(--font-mono); font-size: 10.5px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--pale); }
+        #page-copilot .yt-row { border-bottom: 1px solid var(--color-border-light); }
+        #page-copilot .yt-row:last-of-type { border-bottom: 0; }
+        #page-copilot .yt-row .deal { font-weight: 600; color: var(--black); }
+        #page-copilot .yt-row .grade { font-family: var(--font-mono); font-weight: 600; }
+        #page-copilot .yt-row .grade.b { color: var(--color-eucalyptus); }
+        #page-copilot .yt-row .grade.c { color: var(--color-accent); }
+        #page-copilot .yt-row .delta { font-family: var(--font-mono); font-weight: 600; }
+        #page-copilot .yt-row .delta.up { color: var(--color-eucalyptus); }
+        #page-copilot .yt-row .delta.dn { color: var(--color-accent); }
+        #page-copilot .yt-row .delta.neu { color: var(--mid); }
+        #page-copilot .yt-row .action { font-size: 12px; color: var(--dark); font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .yt-row .action strong { color: var(--black); font-weight: 600; }
+        #page-copilot .yt-foot { padding: 14px 20px; background: var(--color-bg-subtle); font-family: var(--font-mono); font-size: 11px; color: var(--mid); display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--pale); }
+        #page-copilot .yt-foot .lift { color: var(--color-eucalyptus); font-weight: 600; }
+
+        /* HOW YOU INTERACT */
+        #page-copilot .interact { padding: 96px 24px; max-width: var(--max-w); margin: 0 auto; }
+        #page-copilot .interact .heading { text-align: left; margin-bottom: 36px; max-width: 720px; }
+        #page-copilot .interact .label { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        #page-copilot .interact h2 { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 16px; line-height: 1.1; color: var(--black); }
+        #page-copilot .interact .lede { font-size: 17px; color: var(--dark); line-height: 1.6; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .interact-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; align-items: stretch; }
+        #page-copilot .chat-surface { background: var(--color-graphite-900); color: #fff; border-radius: var(--rounded-lg, 12px); padding: 24px; display: flex; flex-direction: column; gap: 12px; min-height: 460px; }
+        #page-copilot .chat-surface .chat-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #page-copilot .chat-surface .who { display: flex; align-items: center; gap: 10px; }
+        #page-copilot .chat-surface .who .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        #page-copilot .chat-surface .who .name { font-size: 13px; font-weight: 600; color: #fff; }
+        #page-copilot .chat-surface .who .scope { font-size: 11px; color: rgba(255,255,255,0.5); font-family: var(--font-mono); }
+        #page-copilot .chat-surface .live { font-family: var(--font-mono); font-size: 11px; color: var(--color-eucalyptus); display: flex; align-items: center; gap: 6px; }
+        #page-copilot .chat-surface .live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--color-eucalyptus); box-shadow: 0 0 8px var(--color-eucalyptus); }
+        #page-copilot .bubble { max-width: 92%; padding: 10px 14px; border-radius: 14px; font-family: var(--font-body, 'DM Sans', sans-serif); font-size: 13.5px; line-height: 1.55; }
+        #page-copilot .bubble.user { align-self: flex-end; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.1); border-bottom-right-radius: 4px; }
+        #page-copilot .bubble.agent { align-self: flex-start; background: rgba(201,122,84,0.16); color: rgba(255,255,255,0.92); border: 1px solid rgba(201,122,84,0.28); border-bottom-left-radius: 4px; }
+        #page-copilot .bubble .who-label { font-family: var(--font-sans); font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; opacity: 0.7; }
+        #page-copilot .bubble.agent .who-label { color: var(--color-accent); }
+        #page-copilot .bubble.user .who-label { color: var(--color-eucalyptus); }
+        #page-copilot .bubble .pill-action { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10.5px; margin-top: 8px; padding: 4px 10px; border-radius: var(--rounded-pill); background: var(--color-accent); color: #fff; text-transform: uppercase; letter-spacing: 0.06em; }
+        #page-copilot .bubble .pill-action::before { content: '\\25B6'; font-size: 9px; }
+
+        #page-copilot .interact-side { display: flex; flex-direction: column; gap: 14px; }
+        #page-copilot .channels-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        #page-copilot .ch-pill { background: var(--white); border: 1px solid var(--pale); border-radius: var(--rounded-md); padding: 14px 10px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        #page-copilot .ch-pill .ico { width: 28px; height: 28px; border-radius: var(--rounded-xs); display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+        #page-copilot .ch-pill .ico.chat { background: var(--color-accent); }
+        #page-copilot .ch-pill .ico.email { background: var(--color-info, #5B8DEF); }
+        #page-copilot .ch-pill .ico.slack { background: #4A154B; }
+        #page-copilot .ch-pill .ico.sms { background: var(--color-eucalyptus); }
+        #page-copilot .ch-pill .lab { font-size: 11.5px; font-weight: 600; color: var(--black); }
+        #page-copilot .ch-pill .sub { font-size: 10px; color: var(--mid); font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; }
+        #page-copilot .interact-card { background: var(--white); border: 1px solid var(--pale); border-radius: var(--rounded-md); padding: 18px 20px; }
+        #page-copilot .interact-card h4 { font-size: 14px; font-weight: 600; margin: 0 0 6px; color: var(--black); }
+        #page-copilot .interact-card p { font-size: 13px; color: var(--dark); line-height: 1.55; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .interact-card.accent { background: var(--color-accent-light); border-color: rgba(201,122,84,0.3); }
+        #page-copilot .ask-examples { background: var(--color-bg-subtle); border-radius: var(--rounded-md); padding: 18px 20px; font-family: var(--font-mono); font-size: 12.5px; color: var(--dark); line-height: 1.7; }
+        #page-copilot .ask-examples .lab { font-size: 10.5px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+        #page-copilot .ask-examples ul { list-style: none; padding: 0; margin: 0; }
+        #page-copilot .ask-examples li { padding: 4px 0 4px 18px; position: relative; }
+        #page-copilot .ask-examples li::before { content: '>'; position: absolute; left: 0; color: var(--color-accent); font-weight: 700; }
+
+        /* WORKFLOW */
+        #page-copilot .workflow-section { background: var(--color-bg-alt); padding: 80px 24px; }
+        #page-copilot .workflow-section .container { max-width: var(--max-w); margin: 0 auto; }
+        #page-copilot .workflow-section .section-head { text-align: center; margin-bottom: 36px; }
+        #page-copilot .workflow-section .label { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        #page-copilot .workflow-section h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: var(--black); margin: 0 0 8px; }
+        #page-copilot .workflow-section .lead { font-size: 15px; color: var(--mid); line-height: 1.6; max-width: 580px; margin: 0 auto; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .workflow-timeline { position: relative; display: flex; flex-direction: column; gap: 22px; max-width: 800px; margin: 0 auto; }
+        #page-copilot .timeline-spine { position: absolute; left: 21px; top: 24px; bottom: 24px; width: 2px; background: linear-gradient(to bottom, var(--color-accent) 0%, var(--color-accent) 70%, rgba(201, 122, 84, 0.18) 100%); z-index: 0; border-radius: 1px; }
+        #page-copilot .workflow-step { display: grid; grid-template-columns: 44px 1fr; gap: 22px; align-items: start; position: relative; z-index: 1; }
+        #page-copilot .ws-num { width: 44px; height: 44px; border-radius: 50%; background: var(--white); border: 2px solid var(--color-accent); color: var(--color-accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 13px; font-weight: 700; box-shadow: 0 0 0 4px var(--bg); }
+        #page-copilot .ws-content { padding-top: 8px; }
+        #page-copilot .ws-content h3 { font-size: 17px; font-weight: 600; margin: 0 0 4px; color: var(--black); }
+        #page-copilot .ws-content p { font-size: 14.5px; color: var(--mid); line-height: 1.55; max-width: 640px; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+
+        /* INTEGRATIONS (underscore-style) */
+        #page-copilot .integrations-section { padding: 80px 24px; max-width: var(--max-w); margin: 0 auto; }
+        #page-copilot .integrations-section .section-head { margin-bottom: 12px; }
+        #page-copilot .integrations-section .label { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        #page-copilot .integrations-section h2 { font-size: 28px; font-weight: 700; color: var(--black); letter-spacing: -0.02em; margin: 0 0 8px; }
+        #page-copilot .integration-logo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 32px; }
+        #page-copilot .integration-logo-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; background: var(--white); border: 1px solid var(--pale); border-radius: var(--rounded-md); transition: border-color 0.2s ease, transform 0.2s ease; gap: 12px; min-height: 100px; }
+        #page-copilot .integration-logo-card:hover { border-color: var(--color-accent); transform: translateY(-2px); }
+        #page-copilot .integration-logo-card svg { height: 28px; width: auto; max-width: 80px; filter: grayscale(1) opacity(0.6); transition: filter 0.2s ease; }
+        #page-copilot .integration-logo-card:hover svg { filter: grayscale(0) opacity(1); }
+        #page-copilot .integration-logo-card .int-name { font-family: var(--font-sans); font-size: 12px; font-weight: 510; color: var(--mid); text-align: center; line-height: 1.3; }
+        #page-copilot .integration-caps { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        #page-copilot .integration-cap { padding: 8px 18px; background: var(--white); border: 1px solid var(--pale); border-radius: var(--rounded-pill); font-family: var(--font-sans); font-size: 13px; font-weight: 510; color: var(--dark); }
+
+        /* GUARDRAILS */
+        #page-copilot .guardrails-section { padding: 64px 24px; background: var(--color-bg-alt); }
+        #page-copilot .guardrails-section .container { max-width: var(--max-w); margin: 0 auto; }
+        #page-copilot .guardrails-head { display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: end; margin-bottom: 28px; }
+        #page-copilot .guardrails-head .label { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+        #page-copilot .guardrails-head h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0; color: var(--black); line-height: 1.15; }
+        #page-copilot .guardrails-head p { font-size: 15px; color: var(--mid); line-height: 1.6; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+        #page-copilot .guard-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        #page-copilot .guard-card { padding: 16px 18px; border: 1px solid var(--pale); border-radius: var(--rounded-md); background: var(--white); }
+        #page-copilot .guard-card .gc-icon { width: 40px; height: 40px; border-radius: var(--rounded-md); background: var(--color-accent-light); color: var(--color-accent); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; border: 1px solid rgba(201, 122, 84, 0.18); position: relative; }
+        #page-copilot .guard-card .gc-icon::after { content: ''; position: absolute; inset: -3px -3px auto auto; width: 6px; height: 6px; background: var(--color-eucalyptus); border-radius: 50%; box-shadow: 0 0 0 2px var(--white); }
+        #page-copilot .guard-card .gc-icon svg { width: 20px; height: 20px; stroke: currentColor; }
+        #page-copilot .guard-card h4 { font-size: 13.5px; font-weight: 600; margin: 0 0 4px; color: var(--black); line-height: 1.3; }
+        #page-copilot .guard-card p { font-size: 12.5px; color: var(--mid); line-height: 1.5; margin: 0; font-family: var(--font-body, 'DM Sans', sans-serif); }
+
+        /* CTA */
+        #page-copilot .cta-section { padding: 80px 24px; text-align: center; }
+
+        /* RESPONSIVE */
+        @media (max-width: 960px) {
+          #page-copilot .sol-hero { grid-template-columns: 1fr; gap: 40px; padding: 56px 24px 48px; }
+          #page-copilot .scorecard { margin-left: 0; max-width: 480px; }
+          #page-copilot .not-workflow .heading { grid-template-columns: 1fr; gap: 16px; align-items: start; }
+          #page-copilot .hybrid-anatomy { grid-template-columns: 1fr; gap: 32px; }
+          #page-copilot .yield-grid { grid-template-columns: 1fr; }
+          #page-copilot .interact-grid { grid-template-columns: 1fr; gap: 28px; }
+          #page-copilot .guardrails-head { grid-template-columns: 1fr; gap: 16px; align-items: start; }
+          #page-copilot .guard-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 900px) {
+          #page-copilot .nw-split { grid-template-columns: 1fr; }
+          #page-copilot .integration-logo-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+          #page-copilot .channels-row { grid-template-columns: repeat(2, 1fr); }
+          #page-copilot .yt-head, #page-copilot .yt-row { grid-template-columns: 1fr 0.6fr 0.6fr 0.6fr; }
+          #page-copilot .yt-head .h-action, #page-copilot .yt-row .action { display: none; }
+        }
+        @media (max-width: 768px) {
+          #page-copilot .sol-hero { padding: 40px 16px 32px; gap: 28px; }
+          #page-copilot .sol-hero h1 { font-size: 32px; }
+          #page-copilot .hybrid h2, #page-copilot .yield h2, #page-copilot .interact h2 { font-size: 26px; }
+          #page-copilot .integration-logo-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      </style>
+
+      <div class="sol-hero">
+        <div class="sol-hero-text">
+          <span class="tag">${tag}</span>
+          <h1>Hybrid <em>ML + agentic</em> risk scoring for every position you hold.</h1>
+          <p class="lede">Institutional-grade scorecards on new originations, renewals, and at-risk positions &mdash; with a full evidentiary trace on every grade.</p>
+          <p class="ask"><strong>How you use it:</strong> talk to it. Chat, email, Slack, SMS. Ask &ldquo;look into this deal,&rdquo; &ldquo;why did this score drop,&rdquo; &ldquo;send the AR concentration RFI.&rdquo; The co-pilot does the work and waits for your approval.</p>
+          <div class="hero-cta-row">
+            <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+            <span class="hero-cta-alt">or <a href="#hybrid">see the scoring engine</a></span>
+          </div>
+        </div>
+        <div class="scorecard" aria-hidden="true">
+          <div class="sc-head">
+            <div class="who">
+              <div class="avatar">C</div>
+              <div>
+                <div class="name">Greenline Wholesale</div>
+                <div class="role">Deal #4827 &middot; Renewal &middot; $480K</div>
+              </div>
+            </div>
+            <div class="ttag">B+ &middot; renew</div>
+          </div>
+          <div class="sc-grade">
+            <div class="ring"><div class="label"><div class="grade">B+</div><div class="sub">grade</div></div></div>
+            <div class="meta">
+              <div class="row"><span class="k">PD (12mo)</span><span class="v">4.2%</span></div>
+              <div class="row"><span class="k">vs. last cycle</span><span class="v dn">&minus;1 notch</span></div>
+              <div class="row"><span class="k">Recommended</span><span class="v up">Renew &minus;8%</span></div>
+              <div class="row"><span class="k">Confidence</span><span class="v">0.84</span></div>
+            </div>
+          </div>
+          <div class="sc-components">
+            <div class="sc-comp"><span class="lab">Cashflow</span><div class="bar"><div class="fill good" style="width:78%"></div><div class="ml-line" style="left:62%"></div></div><span class="num">78</span></div>
+            <div class="sc-comp"><span class="lab">AR concentration</span><div class="bar"><div class="fill" style="width:42%"></div><div class="ml-line" style="left:55%"></div></div><span class="num">42</span></div>
+            <div class="sc-comp"><span class="lab">Deposit trend</span><div class="bar"><div class="fill" style="width:48%"></div><div class="ml-line" style="left:60%"></div></div><span class="num">48</span></div>
+            <div class="sc-comp"><span class="lab">Industry &amp; geo</span><div class="bar"><div class="fill good" style="width:72%"></div><div class="ml-line" style="left:70%"></div></div><span class="num">72</span></div>
+          </div>
+          <div class="sc-legend"><span><span class="dot ml"></span>ML baseline</span><span><span class="dot ag"></span>Agentic adjustment</span></div>
+          <div class="sc-foot"><span class="src">12 sources cited &middot; full trace</span><span class="check">human approval required</span></div>
+        </div>
+      </div>
+
+      <div class="not-workflow">
+        <div class="container">
+          <div class="heading">
+            <div>
+              <div class="label">Positioning</div>
+              <h2>This is <em>not</em> a workflow tool.</h2>
+            </div>
+            <p class="nw-lede">underchat co-pilot doesn&rsquo;t queue tickets or move cards across a board. It risk-grades deals. You interact with it the way you&rsquo;d interact with a senior analyst: you ask, you direct, you approve.</p>
+          </div>
+          <div class="nw-split">
+            <div class="nw-col left">
+              <h3>Workflow SaaS</h3>
+              <ul>
+                <li>Configure stages, queues, and pipelines</li>
+                <li>Drag deals across boards to make progress</li>
+                <li>Custom forms for the data the team has to fill out</li>
+                <li>Reports built from the fields the team remembered to enter</li>
+                <li>Becomes a place to record decisions, not a tool that makes them</li>
+              </ul>
+            </div>
+            <div class="nw-col right">
+              <h3>underchat co-pilot</h3>
+              <ul>
+                <li>Ask the co-pilot a question, get a scored answer with evidence</li>
+                <li>The co-pilot ingests data and grades risk &mdash; you don&rsquo;t fill forms</li>
+                <li>Direct attention: &ldquo;look into this,&rdquo; &ldquo;rescore the book,&rdquo; &ldquo;explain this drop&rdquo;</li>
+                <li>Reports are surfaced on demand, with the underlying reasoning attached</li>
+                <li>Makes decisions easier; doesn&rsquo;t replace your judgement</li>
+              </ul>
+            </div>
+          </div>
+          <p class="nw-foot">If you&rsquo;re wondering <strong>&ldquo;then how do I use it?&rdquo;</strong> &mdash; you talk to it. From the chat surface in your team&rsquo;s tools, by email, in Slack, or over SMS. The co-pilot reads your deal book, answers questions about it, scores positions, drafts RFIs, and orchestrates actions. You approve.</p>
+        </div>
+      </div>
+
+      <div class="hybrid" id="hybrid">
+        <div class="heading">
+          <div class="label">The scoring engine</div>
+          <h2>Hybrid <em>ML + agentic scoring</em>. Risk-grade with superior accuracy.</h2>
+          <p class="lede">A statistical baseline trained on your wins and losses provides the quantitative floor. An agentic reasoning layer interrogates the structured and unstructured evidence and adjusts the score with cited reasoning. One grade per deal, every component traceable.</p>
+        </div>
+        <div class="hybrid-anatomy">
+          <div class="anat-stack">
+            <div class="anat-layer ml"><div class="head"><span class="title">1 &middot; ML baseline</span><span class="badge">statistical</span></div><p>Gradient-boosted model trained on your closed deals, renewals, and unwinds. Captures base-rate patterns across cashflow, deposit behavior, industry, geography, and capital structure.</p></div>
+            <div class="anat-arrow">composes with</div>
+            <div class="anat-layer ag"><div class="head"><span class="title">2 &middot; Agentic reasoning</span><span class="badge">situational</span></div><p>Research-grade agent interrogates the evidence the model can&rsquo;t see: bank letter wording, AR aging quality, communications, RFI responses, missing documents. Adjusts components with cited reasoning.</p></div>
+            <div class="anat-arrow">produces</div>
+            <div class="anat-layer out"><div class="head"><span class="title">3 &middot; Institutional scorecard</span><span class="badge">defensible</span></div><p>One grade per deal. Every component, every assumption, every source document linked. Defensible to your IC, your capital partners, and your auditors.</p></div>
+          </div>
+          <div class="hybrid-claims">
+            <div class="claim"><div class="stat">&Delta;</div><div class="txt"><h4>Catches what each layer alone misses</h4><p>ML catches base-rate patterns humans skip. Agentic reasoning catches situational nuance that wrecks purely statistical models. Together: superior accuracy.</p></div></div>
+            <div class="claim"><div class="stat">100<span class="unit">%</span></div><div class="txt"><h4>Every score has a trace</h4><p>Drill into any component, see the ML contribution, the agent&rsquo;s reasoning, and the source documents. No black boxes.</p></div></div>
+            <div class="claim"><div class="stat">&infin;</div><div class="txt"><h4>Learns from your book</h4><p>Outcomes from your closed, renewed, and unwound deals feed back into the scoring layer. Sharper with every decision your team makes.</p></div></div>
+            <div class="claim"><div class="stat">1<span class="unit">click</span></div><div class="txt"><h4>Rescore on new guidelines</h4><p>Update your underwriting policy, the co-pilot reapplies it across your entire book in minutes. Surfaces every position that flips.</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="yield">
+        <div class="container">
+          <div class="heading">
+            <div class="label">Yield</div>
+            <h2>Unlock <em>superior yield</em> from your existing book.</h2>
+            <p class="lede">Hybrid scoring isn&rsquo;t academic. It produces price-able, sellable, defensible risk grades &mdash; and that lets you reprice live positions, evaluate deals for secondary sale, and roll out new guidelines in days, not quarters.</p>
+          </div>
+          <div class="yield-grid">
+            <div class="yield-card"><div class="yc-head"><div class="yc-title">Re-underwrite the book</div><div class="yc-icon">R</div></div><p>Pass every live position through the co-pilot. Surface deals where pricing has drifted from current risk &mdash; up or down. Reprice with a documented trail.</p><div class="yc-meta">Outcome: yield uplift, fewer surprises</div></div>
+            <div class="yield-card"><div class="yc-head"><div class="yc-title">Secondary sale</div><div class="yc-icon">S</div></div><p>Score deals for a buyer who doesn&rsquo;t know your book the way you do. Produce institutional-grade tape, defensible scorecards, and the evidence package they&rsquo;ll ask for.</p><div class="yc-meta">Outcome: cleaner exits, better pricing</div></div>
+            <div class="yield-card"><div class="yc-head"><div class="yc-title">Guideline rollout</div><div class="yc-icon">G</div></div><p>Update your underwriting policy and have it applied consistently across the team and your existing book in days. The co-pilot surfaces every position that flips under the new rules.</p><div class="yc-meta">Outcome: policy speed, decision consistency</div></div>
+          </div>
+          <div class="yield-table">
+            <div class="yt-head"><span>Position</span><span>Old grade</span><span>New grade</span><span>Delta</span><span class="h-action">Suggested action</span></div>
+            <div class="yt-row"><span class="deal">Greenline Wholesale</span><span class="grade b">B+</span><span class="grade b">B+</span><span class="delta neu">&middot;</span><span class="action">Renew at <strong>&minus;8% advance</strong></span></div>
+            <div class="yt-row"><span class="deal">Atlas Foodservice</span><span class="grade b">A&minus;</span><span class="grade b">A</span><span class="delta up">+1</span><span class="action">Increase advance &middot; <strong>+12%</strong></span></div>
+            <div class="yt-row"><span class="deal">Rivermill Logistics</span><span class="grade b">B</span><span class="grade c">C+</span><span class="delta dn">&minus;2</span><span class="action"><strong>Trigger RFI</strong> on AR aging</span></div>
+            <div class="yt-row"><span class="deal">Northpoint Retail</span><span class="grade b">B&minus;</span><span class="grade c">C</span><span class="delta dn">&minus;1</span><span class="action">Flag for <strong>secondary sale</strong></span></div>
+            <div class="yt-row"><span class="deal">Beacon Industrial</span><span class="grade b">B+</span><span class="grade b">A&minus;</span><span class="delta up">+1</span><span class="action">Reprice &middot; <strong>+45 bps</strong></span></div>
+            <div class="yt-foot"><span>Across 312 live positions &middot; 84 rescored this cycle</span><span class="lift">&uarr; +37 bps net portfolio yield</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="interact">
+        <div class="heading">
+          <div class="label">Interaction model</div>
+          <h2>You talk to your co-pilot.</h2>
+          <p class="lede">The chat surface is the interface. Ask questions, direct attention, approve actions. The co-pilot ingests, reasons, scores, drafts, and waits.</p>
+        </div>
+        <div class="interact-grid">
+          <div class="chat-surface">
+            <div class="chat-head">
+              <div class="who"><div class="avatar">C</div><div><div class="name">Co-pilot</div><div class="scope">scope: greenline-4827</div></div></div>
+              <span class="live">live</span>
+            </div>
+            <div class="bubble user"><div class="who-label">You</div>Why did Greenline drop a notch this cycle?</div>
+            <div class="bubble agent"><div class="who-label">Co-pilot</div>Two components shifted. Cashflow held at 78 &mdash; on policy. AR concentration moved from 31% to 38% (one buyer, Sysco), which pushed that component from 58 to 42. Deposit trend softened (&minus;14% MoM). Net effect: A&minus; &rarr; B+.</div>
+            <div class="bubble user"><div class="who-label">You</div>Draft an RFI on the AR concentration. Send it through their portal.</div>
+            <div class="bubble agent"><div class="who-label">Co-pilot</div>Drafted. Asks for a customer-by-customer AR breakout for the last 6 months and any buyer-side terms changes. Ready to send to ap@greenline.example.<div class="pill-action">Approve &amp; send</div></div>
+          </div>
+          <div class="interact-side">
+            <div class="channels-row">
+              <div class="ch-pill"><div class="ico chat">C</div><div class="lab">In-app chat</div><div class="sub">primary</div></div>
+              <div class="ch-pill"><div class="ico email">@</div><div class="lab">Email</div><div class="sub">forward</div></div>
+              <div class="ch-pill"><div class="ico slack">#</div><div class="lab">Slack</div><div class="sub">DM &amp; channel</div></div>
+              <div class="ch-pill"><div class="ico sms">S</div><div class="lab">SMS</div><div class="sub">on-the-go</div></div>
+            </div>
+            <div class="interact-card accent"><h4>One co-pilot, every channel</h4><p>The same agent answers in chat, email, Slack, or SMS. Conversations persist across surfaces. Context follows you.</p></div>
+            <div class="ask-examples">
+              <div class="lab">Try asking</div>
+              <ul>
+                <li>look into this deal</li>
+                <li>rescore the book on the new policy</li>
+                <li>why did this score drop?</li>
+                <li>which positions should I flag for secondary?</li>
+                <li>send the AR concentration RFI</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-section">
+        <div class="container">
+          <div class="section-head">
+            <div class="label">How the co-pilot thinks</div>
+            <h2>From raw signal to institutional scorecard.</h2>
+            <p class="lead">Five stages run end-to-end on every deal &mdash; with humans approving anything that leaves the platform.</p>
+          </div>
+          <div class="workflow-timeline">
+            <div class="timeline-spine"></div>
+            <div class="workflow-step"><div class="ws-marker"><div class="ws-num">01</div></div><div class="ws-content"><h3>Ingest</h3><p>Multimodal data from Plaid, bank statements, QuickBooks, AR/AP, cashflow, bank letters, and RFI responses &mdash; structured and unstructured.</p></div></div>
+            <div class="workflow-step"><div class="ws-marker"><div class="ws-num">02</div></div><div class="ws-content"><h3>Score</h3><p>Hybrid ML and agentic scoring produces an institutional-grade risk grade with cited evidence.</p></div></div>
+            <div class="workflow-step"><div class="ws-marker"><div class="ws-num">03</div></div><div class="ws-content"><h3>Decide</h3><p>The co-pilot recommends; you approve. Screening, autodecline, offers, renewals, and recovery routing.</p></div></div>
+            <div class="workflow-step"><div class="ws-marker"><div class="ws-num">04</div></div><div class="ws-content"><h3>Orchestrate</h3><p>RFIs, approvals, and updates flow through the channels your team uses. Strict compliance guardrails. Every action logged.</p></div></div>
+            <div class="workflow-step"><div class="ws-marker"><div class="ws-num">05</div></div><div class="ws-content"><h3>Observe</h3><p>Portfolio analytics, custom reports, and agent-surfaced insights &mdash; on demand.</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="integrations-section">
+        <div class="section-head">
+          <div class="label">Integrations</div>
+          <h2>Connects to your stack</h2>
+        </div>
+        <div class="integration-logo-grid">
+          <div class="integration-logo-card">
+            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="2" y="2" width="11" height="11" rx="2" fill="#111"/>
+              <rect x="15" y="2" width="11" height="11" rx="2" fill="#111" opacity="0.35"/>
+              <rect x="2" y="15" width="11" height="11" rx="2" fill="#111" opacity="0.35"/>
+              <rect x="15" y="15" width="11" height="11" rx="2" fill="#111"/>
+            </svg>
+            <div class="int-name">Plaid</div>
+          </div>
+          <div class="integration-logo-card">
+            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="14" cy="14" r="14" fill="#2CA01C"/>
+              <text x="14" y="19" text-anchor="middle" font-family="-apple-system, Inter, sans-serif" font-weight="800" font-size="13" fill="#fff" letter-spacing="-0.02em">qb</text>
+            </svg>
+            <div class="int-name">QuickBooks</div>
+          </div>
+          <div class="integration-logo-card">
+            <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M16.7 9.3c1.3-1.4 3.1-2.2 5.1-2.2 2.7 0 5 1.5 6.3 3.6 1.1-.5 2.3-.8 3.6-.8 4.7 0 8.5 3.9 8.5 8.6s-3.8 8.6-8.5 8.6c-.6 0-1.1-.1-1.7-.2-1.1 2-3.2 3.3-5.7 3.3-1 0-2-.2-2.9-.6-1.1 2.7-3.7 4.6-6.8 4.6-3.2 0-5.9-2-7-4.8-.5.1-1 .2-1.5.2C2 30 0 27.7 0 24.8c0-1.9.9-3.5 2.3-4.5-.3-.7-.5-1.5-.5-2.3 0-3.1 2.5-5.5 5.6-5.5 1.8 0 3.4.8 4.5 2.1.7-1.5 1.7-2.7 2.9-3.5l1.9-1.8z" fill="#00A1E0" transform="translate(0 -2) scale(0.78)"/>
+            </svg>
+            <div class="int-name">Salesforce</div>
+          </div>
+          <div class="integration-logo-card">
+            <svg viewBox="0 0 36 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="2" y="5" width="32" height="20" rx="2.5" fill="#EA4335"/>
+              <path d="M4.5 8.5l13.5 10.5L31.5 8.5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 7v17M32 7v17" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.95"/>
+            </svg>
+            <div class="int-name">Gmail</div>
+          </div>
+          <div class="integration-logo-card">
+            <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="10.5" y="2" width="4.5" height="11" rx="2.25" fill="#36C5F0"/>
+              <rect x="15" y="10.5" width="11" height="4.5" rx="2.25" fill="#2EB67D"/>
+              <rect x="13" y="15" width="4.5" height="11" rx="2.25" fill="#ECB22E"/>
+              <rect x="2" y="13" width="11" height="4.5" rx="2.25" fill="#E01E5A"/>
+            </svg>
+            <div class="int-name">Slack</div>
+          </div>
+        </div>
+        <div class="integration-caps">
+          <div class="integration-cap">Bank Statement PDFs</div>
+          <div class="integration-cap">AR / AP Statements</div>
+          <div class="integration-cap">CSV / Sheets</div>
+          <div class="integration-cap">Webhooks</div>
+          <div class="integration-cap">REST API</div>
+        </div>
+      </div>
+
+      <div class="guardrails-section">
+        <div class="container">
+          <div class="guardrails-head">
+            <div>
+              <div class="label">Guardrails</div>
+              <h2>Human-in-the-loop, by design.</h2>
+            </div>
+            <p>The co-pilot proposes &mdash; underwriters approve, trigger, and override. Every claim cites evidence; every decision is reproducible.</p>
+          </div>
+          <div class="guard-row">
+            <div class="guard-card">
+              <div class="gc-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.5L4 5.5v5.8c0 4.9 3.4 8.9 8 10.2 4.6-1.3 8-5.3 8-10.2V5.5l-8-3z"/>
+                  <path d="M8.5 12l2.5 2.5L15.5 10"/>
+                </svg>
+              </div>
+              <h4>Approval gates</h4>
+              <p>Nothing consequential leaves the platform without a human press.</p>
+            </div>
+            <div class="guard-card">
+              <div class="gc-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/>
+                  <path d="M14 3v6h6"/>
+                  <path d="M8 13.5h7M8 17h5"/>
+                </svg>
+              </div>
+              <h4>Evidence cited</h4>
+              <p>Every score traces to source docs, bank lines, and AR rows.</p>
+            </div>
+            <div class="guard-card">
+              <div class="gc-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 12a8 8 0 0 1 13.5-5.8L20 8.5"/>
+                  <path d="M20 4v4.5h-4.5"/>
+                  <path d="M20 12a8 8 0 0 1-13.5 5.8L4 15.5"/>
+                  <path d="M4 20v-4.5h4.5"/>
+                </svg>
+              </div>
+              <h4>Learns from outcomes</h4>
+              <p>Wins, renewals, and unwinds feed back into the scoring layer.</p>
+            </div>
+            <div class="guard-card">
+              <div class="gc-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="5.5" cy="6" r="1.5" fill="currentColor"/>
+                  <circle cx="5.5" cy="12" r="1.5" fill="currentColor"/>
+                  <circle cx="5.5" cy="18" r="1.5" fill="currentColor"/>
+                  <path d="M10 6h10M10 12h8M10 18h6"/>
+                </svg>
+              </div>
+              <h4>Audit trail</h4>
+              <p>Reasoning, evidence, and approvals captured end-to-end.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-section">
+        <h2>See underchat co-pilot on your own book.</h2>
+        <p>Schedule a discovery call. We&rsquo;ll walk through your deal lifecycle and demo the co-pilot scoring a representative position from your portfolio.</p>
+        <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+        <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:${contactEmail}">${contactEmail}</a></div>
+      </div>`;
+  }
+
 
   // Parse a homepage case-study markdown body into structured sections.
   // Expected format:
@@ -1423,6 +2027,8 @@
         renderUnderscorePage(pageEl, tag, title, desc, config['Contact Email'] || 'contact@undersight.ai');
       } else if (cfg.page === 'underchat') {
         renderUnderchatPage(pageEl, tag, title, desc, config['Contact Email'] || 'contact@undersight.ai');
+      } else if (cfg.page === 'copilot') {
+        renderCopilotPage(pageEl, tag, title, desc, config['Contact Email'] || 'contact@undersight.ai');
       } else {
         const narTitles = SOLUTION_NARRATIVE_TITLES[cfg.page] || [];
         const narDescs = SOLUTION_NARRATIVE_DESCS[cfg.page] || [];
