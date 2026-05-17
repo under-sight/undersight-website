@@ -461,8 +461,12 @@
   // Filters by page name (entities with no Pages link match everywhere),
   // sorts by Rank, emits one card per integration. Dark variants handled
   // by pictureTag when a sibling `<base>-dark.<ext>` file exists.
+  // Reads from module-level CONTENT_DATA so per-page renderers (which
+  // don't receive `data` as a parameter) can call this without plumbing.
+  let CONTENT_DATA = null;
   function renderIntegrationsStrip(pageName) {
-    const list = (data._integrations && data._integrations._data) || [];
+    const d = CONTENT_DATA || {};
+    const list = (d._integrations && d._integrations._data) || [];
     return list
       .filter(i => !i.pages || i.pages.length === 0 || i.pages.indexOf(pageName) !== -1)
       .sort((a, b) => (a.rank || 0) - (b.rank || 0))
@@ -2023,6 +2027,7 @@
   }
 
   function renderContent(data) {
+    CONTENT_DATA = data;
     // ---- Hero ----
     const hero = parseMeta(getContent(data, 'Home - Hero'));
     const heroEl = document.getElementById('heroTitle');
