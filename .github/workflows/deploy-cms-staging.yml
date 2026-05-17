@@ -1,0 +1,79 @@
+name: Deploy CMS Staging (feat/cms-federation → cms-federation.pages.dev)
+
+# Isolated staging deploy for the CMS federation workstream.
+# - Triggered ONLY by pushes to feat/cms-federation or manual dispatch.
+# - Does NOT touch live dev / main deploys or the live Website Fibery space.
+# - Reads content from the live Website space for now (Phase 0/1 — sandbox URL parity);
+#   Phase 3 will swap build.py to read from CMS Staging space.
+# - Does NOT write to live Website/Deployments (skipped until deploy-report.py
+#   supports CMS Staging/Deployments).
+#
+# Related Fibery roadmap entry: subscript.fibery.io/Roadmap/Task/284
+
+on:
+  push:
+    branches:
+      - feat/cms-federation
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cms-staging
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Schema guard (block stale Fibery refs)
+        run: |
+          echo "Checking for old schema references..."
+          if grep -rn 'Website/Whitepapers\|Website/Whitepaper Leads\|Website/Whitepaper[^s]' \
+            functions/ undersight-serve.py worker/index.js index.html; then
+            echo "::error::Old Fibery schema names detected. Correct schema is Website/Blog, Website/Blog Leads, Website/Blog Post."
+            exit 1
+          fi
+          echo "Schema check passed."
+
+      - name: Build site from Fibery (Website space, staging URL)
+        id: build
+        env:
+          FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
+        run: python3 build.py --verify --env staging
+        continue-on-error: true
+
+      - name: Validate build output
+        id: validate
+        if: steps.build.outcome == 'success'
+        run: bash tests/build-validation.sh
+        continue-on-error: true
+
+      - name: Fallback to under-construction on build failure
+        if: steps.build.outcome == 'failure' || steps.validate.outcome == 'failure'
+        run: |
+          echo "::warning::Build or validation failed — deploying under-construction page"
+          mkdir -p dist/css dist/images/brand
+          cp under-construction.html dist/index.html
+          cp favicon.svg dist/ 2>/dev/null || true
+          cp favicon-32.png dist/ 2>/dev/null || true
+          cp favicon-16.png dist/ 2>/dev/null || true
+          cp -r images/brand/ dist/images/brand/ 2>/dev/null || true
+          cp css/tokens.css dist/css/ 2>/dev/null || true
+
+      - name: Deploy to Cloudflare Pages (cms-federation branch alias)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name undersight-website --branch cms-federation --commit-dirty=true
+
+      # Intentionally omitted (Phase 3+):
+      # - deploy-report.py — would write to live Website/Deployments. Skipping until
+      #   deploy-report.py supports a CMS Staging target so staging deploys log to
+      #   CMS Staging/Deployments instead of polluting live.
+      # - Fibery verify step — same reason.
