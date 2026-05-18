@@ -323,12 +323,28 @@
       </div>
     </div>
 
-    <!-- CTA -->
-    <div class="cta-section">
-      <h2>Ready to see undersight in action?</h2>
-      <p>Schedule a 30-minute discovery call. We'll walk through your workflow and show you what's possible.</p>
-      <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
-      <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:contact@undersight.ai">contact@undersight.ai</a></div>
+    <!-- CTA with inline Calendly embed -->
+    <div class="cta-section cta-with-embed" data-content-entity="Home - CTA">
+      <div class="cta-copy">
+        <h2 id="ctaTitle">Ready to see undersight in action?</h2>
+        <p id="ctaSubtitle">Schedule a 30-minute discovery call. We'll walk through your workflow and show you what's possible.</p>
+        <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary cta-fallback-btn">Book a Discovery Call</a>
+        <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:contact@undersight.ai">contact@undersight.ai</a></div>
+      </div>
+      <!-- Calendly inline embed: light + dark variants gated by html.theme-dark -->
+      <div class="calendly-embed-wrap" aria-label="Book a discovery call">
+        <div class="calendly-light">
+          <!-- Calendly inline widget begin (light mode) -->
+          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?background_color=ffffff&text_color=23262c&primary_color=c97a54" style="min-width:320px;height:700px;"></div>
+          <!-- Calendly inline widget end -->
+        </div>
+        <div class="calendly-dark">
+          <!-- Calendly inline widget begin (dark mode) -->
+          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?background_color=1a1d21&text_color=ffffff&primary_color=c97a54" style="min-width:320px;height:700px;"></div>
+          <!-- Calendly inline widget end -->
+        </div>
+        <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+      </div>
     </div>
   </div>
 </section>
@@ -2118,6 +2134,19 @@
     const contact = parseMeta(getContent(data, 'Contact Page'));
     if (contact._title) document.getElementById('contactTitle').textContent = contact._title;
     if (contact._body) document.getElementById('contactSubtitle').textContent = contact._body.split('\n')[0];
+
+    // ---- Home CTA (V2: heading + subtitle from Fibery) ----
+    const homeCta = parseMeta(getContent(data, 'Home - CTA'));
+    const ctaHeading = homeCta['Heading'] || homeCta._title;
+    const ctaSub = homeCta['Subtitle'] || homeCta._body;
+    if (ctaHeading) {
+      const el = document.getElementById('ctaTitle');
+      if (el) el.textContent = ctaHeading;
+    }
+    if (ctaSub) {
+      const el = document.getElementById('ctaSubtitle');
+      if (el) el.textContent = ctaSub;
+    }
 
     // ---- Homepage Case Studies (structured Fibery body) ----
     renderHomeCaseStudy(data, 'Home - Case Study: Chat Advance', 'caseStudyChatAdvanceInner');

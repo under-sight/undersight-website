@@ -642,6 +642,59 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
 .cta-alt a { text-decoration: underline; color: var(--mid); }
 .cta-alt a:hover { color: var(--color-accent); }
 
+/* ---- CTA WITH INLINE CALENDLY EMBED (V2) ---- */
+.cta-section.cta-with-embed {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  text-align: left;
+  padding: 80px 24px;
+}
+.cta-section.cta-with-embed .cta-copy { padding-top: 24px; }
+.cta-section.cta-with-embed h2 { text-align: left; margin-bottom: 12px; }
+.cta-section.cta-with-embed > .cta-copy > p {
+  margin-left: 0; margin-right: 0; text-align: left;
+}
+.cta-section.cta-with-embed .cta-alt { text-align: left; }
+.cta-section.cta-with-embed .cta-fallback-btn { display: inline-flex; margin-top: 4px; }
+
+.calendly-embed-wrap {
+  border: 1px solid var(--pale);
+  border-radius: var(--rounded-lg, 12px);
+  background: var(--white);
+  overflow: hidden;
+  min-height: 700px;
+}
+.calendly-embed-wrap .calendly-inline-widget { border-radius: inherit; }
+
+/* Theme-gated visibility */
+.calendly-light { display: block; }
+.calendly-dark { display: none; }
+html.theme-dark .calendly-light { display: none; }
+html.theme-dark .calendly-dark { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  html:not(.theme-light) .calendly-light { display: none; }
+  html:not(.theme-light) .calendly-dark { display: block; }
+}
+
+@media (max-width: 880px) {
+  .cta-section.cta-with-embed {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+    padding: 56px 16px;
+  }
+  .cta-section.cta-with-embed .cta-copy { padding-top: 0; }
+  .cta-section.cta-with-embed h2,
+  .cta-section.cta-with-embed > .cta-copy > p,
+  .cta-section.cta-with-embed .cta-alt { text-align: center; }
+  .cta-section.cta-with-embed > .cta-copy > p { margin-left: auto; margin-right: auto; }
+}
+
 /* ---- CARDS ---- */
 .card-grid { display: grid; gap: 24px; }
 .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
