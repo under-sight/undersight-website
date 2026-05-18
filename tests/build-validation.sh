@@ -31,6 +31,29 @@ done
 # Website/Blog database in May 2026, so legacy "Blog - " prefix is gone.
 grep -q '"_blogs"' "$DIST/index.html" && grep -q '"slug":' "$DIST/index.html" && pass "Blog content baked" || fail "Blog content baked"
 
+# Migration-created JSON/markdown escaping should not surface in site copy.
+if python3 - <<'PY'
+from pathlib import Path
+import sys
+
+html = Path("dist/index.html").read_text(encoding="utf-8")
+bad = [
+    r"\\* Offer",
+    r"\\* **",
+    r"\\u2014",
+    r"\\~8",
+]
+found = [pattern for pattern in bad if pattern in html]
+if found:
+    print("Escaped CMS artifacts found: " + ", ".join(found))
+    sys.exit(1)
+PY
+then
+  pass "No escaped CMS markdown artifacts in dist"
+else
+  fail "No escaped CMS markdown artifacts in dist"
+fi
+
 # No Fibery secrets/UUIDs leaked
 ! grep -qE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' "$DIST/index.html" && pass "No Fibery UUIDs in dist" || fail "No Fibery UUIDs in dist"
 

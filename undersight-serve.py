@@ -137,6 +137,22 @@ def api_post(path, body):
         return json.loads(resp.read())
 
 
+def _normalize_doc_markdown(text):
+    """
+    Normalize migration-created escape artifacts that would otherwise render as
+    visible backslashes in markdown-derived site copy.
+    """
+    if not text or not isinstance(text, str):
+        return text or ""
+    text = re.sub(
+        r"\\+u([0-9a-fA-F]{4})",
+        lambda m: chr(int(m.group(1), 16)),
+        text,
+    )
+    text = re.sub(r"\\+([*~])", r"\1", text)
+    return text
+
+
 def _unwrap_doc_content(raw):
     """
     Defensive unwrap for Website/Blog Description docs written by the
@@ -155,14 +171,18 @@ def _unwrap_doc_content(raw):
         if isinstance(obj, dict) and "content" in obj:
             inner = obj.get("content", "")
             if isinstance(inner, str):
-                return inner.replace("\\n", "\n").replace("\\\"", '"')
+                return _normalize_doc_markdown(
+                    inner.replace("\\n", "\n").replace("\\\"", '"')
+                )
     except Exception:
         pass
     m = re.search(r'"content"\s*:\s*"(.*)"\s*\\?\s*\}\s*$', candidate, re.DOTALL)
     if m:
         inner = m.group(1)
-        return inner.replace("\\\\n", "\n").replace("\\n", "\n").replace('\\"', '"')
-    return raw
+        return _normalize_doc_markdown(
+            inner.replace("\\\\n", "\n").replace("\\n", "\n").replace('\\"', '"')
+        )
+    return _normalize_doc_markdown(raw)
 
 
 def fetch_all():
@@ -306,9 +326,9 @@ def fetch_all():
         blogs.append({
             "name": name,
             "slug": slug,
-            "subtitle": be.get("Subtitle") or "",
+            "subtitle": _normalize_doc_markdown(be.get("Subtitle") or ""),
             "author": be.get("Author") or "",
-            "excerpt": be.get("Excerpt") or "",
+            "excerpt": _normalize_doc_markdown(be.get("Excerpt") or ""),
             "post_date": be.get("PostDate") or "",
             "creation_date": be.get("CreationDate") or "",
             "type": tag,
