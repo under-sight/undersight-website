@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: undersight-design-system
-description: A light-first editorial design system for undersight.ai — an AI underwriting platform for private credit. The system anchors on a clean white canvas with warm Graphite text, a dual-font voice (Inter for headlines and UI, DM Sans for body), and a single chromatic accent in Amber Rust reserved exclusively for CTAs and interactive elements. The brand communicates trustworthiness and precision through generous whitespace, an 8px spacing grid, card-based layouts with subtle borders, and monochrome editorial illustration. Dark mode is supported via CSS custom property swap on prefers-color-scheme. OpenType features cv01 and ss03 are enabled globally on all Inter text.
+description: A light-first editorial design system for undersight.ai — an AI underwriting platform for private credit. The system anchors on a clean white canvas with warm Graphite text, a dual-font voice (Inter for headlines and UI, DM Sans for body), and a dual chromatic accent system: Amber Rust as the ACTION voice (CTAs and interactive elements) and Eucalyptus as the INSIGHT voice (data, status, validated truth). The two accents pair complementary under strict separation — Rust never decorates, Eucalyptus never calls to action. The brand communicates trustworthiness and precision through generous whitespace, an 8px spacing grid, card-based layouts with subtle borders, and monochrome editorial illustration. Dark mode is supported via CSS custom property swap on prefers-color-scheme. OpenType features cv01 and ss03 are enabled globally on all Inter text.
 
 colors:
   # Primary palette
@@ -18,7 +18,9 @@ colors:
   amber-rust-light: "rgba(201,122,84,0.08)"
   amber-rust-focus: "rgba(201,122,84,0.2)"
   eucalyptus: "#6B9E8C"
-  eucalyptus-light: "rgba(107,158,140,0.1)"
+  eucalyptus-hover: "#588977"
+  eucalyptus-light: "rgba(107,158,140,0.08)"
+  eucalyptus-focus: "rgba(107,158,140,0.2)"
   paper-white: "#FFFFFF"
   bg-surface: "#FAFAFA"
   on-accent: "#FFFFFF"
@@ -274,7 +276,9 @@ components:
 
 ## Overview
 
-undersight's design system is a light-first editorial interface built for an AI underwriting platform. The system anchors on a clean white canvas (`{colors.paper-white}` -- #FFFFFF) with warm Graphite text (`{colors.graphite-900}` -- #23262C), producing a reading experience that feels precise, trustworthy, and intelligent -- qualities essential for a platform operating in private credit. The single chromatic accent, Amber Rust (`{colors.amber-rust}` -- #C97A54), is reserved exclusively for calls to action and interactive elements. It never appears decoratively. This scarcity is the brand's voltage: when Amber Rust appears, something is actionable.
+undersight's design system is a light-first editorial interface built for an AI underwriting platform. The system anchors on a clean white canvas (`{colors.paper-white}` -- #FFFFFF) with warm Graphite text (`{colors.graphite-900}` -- #23262C), producing a reading experience that feels precise, trustworthy, and intelligent -- qualities essential for a platform operating in private credit.
+
+The brand operates on a **dual chromatic accent system** built around the product's core promise -- act on insight. **Amber Rust** (`{colors.amber-rust}` -- #C97A54) is the ACTION voice, reserved for CTAs and interactive elements: when Amber Rust appears, something is actionable. **Eucalyptus** (`{colors.eucalyptus}` -- #6B9E8C) is the INSIGHT voice, used for data eyebrows, metric callouts, status pills, validated indicators, and illustrative graphics: when Eucalyptus appears, something is known, validated, or measured. The two never compete for the same role: Rust never decorates, Eucalyptus never calls to action. Their separation is the brand's structural rhythm and the source of its voltage.
 
 The type system runs a dual-font voice. **Inter** (with OpenType features `cv01` and `ss03` enabled globally) handles all headlines, navigation, labels, buttons, and UI chrome -- the structural skeleton of the page. **DM Sans** handles body copy, descriptions, and long-form reading -- the humanist voice that carries explanatory content. The weight `510` (not 500) is used for UI elements: buttons, navigation links, labels, and form fields. This fractional weight is a quiet signal of typographic intention; it sits between regular and medium, giving interface chrome just enough presence without the heaviness of a traditional medium weight. Display headlines use `600` and `700` with negative letter-spacing (`-0.03em` to `-0.01em`) for editorial density.
 
@@ -282,7 +286,7 @@ The layout philosophy is uniform light page rhythm. There are no dark hero bands
 
 **Key Characteristics:**
 - Clean white canvas (`{colors.paper-white}` -- #FFFFFF) with warm Graphite text (`{colors.graphite-900}` -- #23262C). No cream tints, no cool grays -- pure white with warm dark text.
-- Single chromatic accent: Amber Rust (`{colors.amber-rust}` -- #C97A54) reserved for CTAs, interactive elements, active states, and section labels. Never decorative.
+- Dual chromatic accent system: Amber Rust (`{colors.amber-rust}` -- #C97A54) for ACTION (CTAs, interactive elements, active states, action-section eyebrows) and Eucalyptus (`{colors.eucalyptus}` -- #6B9E8C) for INSIGHT (data eyebrows, metric callouts, status pills, illustrative graphics). Each is scarce within its own role; the two never overlap in function.
 - Dual-font voice: Inter (cv01, ss03) for headlines and UI, DM Sans for body copy. The split is structural vs. narrative.
 - UI weight `510` for buttons, navigation, labels, form fields. Display weight `600`/`700` with negative tracking for editorial density.
 - Card-based layouts with 1px `{colors.cloud-zinc}` borders and `{rounded.lg}` (12px) corners. No shadows at rest -- depth comes from border and whitespace.
@@ -290,15 +294,59 @@ The layout philosophy is uniform light page rhythm. There are no dark hero bands
 - Monochrome editorial illustration style -- clean line work in Graphite tones, not photorealistic.
 - 8px spacing grid with `{spacing.section}` (80px) between major bands.
 - Dark mode via CSS custom property swap on `prefers-color-scheme: dark`.
-- Eucalyptus (`{colors.eucalyptus}` -- #6B9E8C) reserved for success states and positive indicators only.
+- Eucalyptus (`{colors.eucalyptus}` -- #6B9E8C) used for the INSIGHT voice: data eyebrows, metric callouts, status pills, validated/positive indicators, and illustrative line work. Pairs complementary with Amber Rust under strict role separation.
 
 ## Colors
 
 ### Brand & Accent
-- **Amber Rust** (`{colors.amber-rust}` -- #C97A54): The brand's single chromatic accent. Used on every primary CTA button, on section eyebrow labels, on active states, and on interactive pill tags. The scarcity rule is absolute: Amber Rust means "actionable."
+
+The system runs on **two complementary chromatic accents** under strict role separation. Amber Rust carries the ACTION voice; Eucalyptus carries the INSIGHT voice. They never substitute for each other.
+
+#### Amber Rust — ACTION voice
+- **Amber Rust** (`{colors.amber-rust}` -- #C97A54): Primary CTA buttons, action-section eyebrow labels (hero, solutions, CTA bands), active nav states, interactive pill tags, inline links in body copy. Means "actionable."
 - **Amber Rust Hover** (`{colors.amber-rust-hover}` -- #B56A45): The pressed/hover state, one step darker. Used as `button-primary-hover` background.
-- **Amber Rust Light** (`{colors.amber-rust-light}` -- rgba(201,122,84,0.08)): A translucent warm wash used as tag and pill backgrounds. Pairs with Amber Rust text for solution tags.
+- **Amber Rust Light** (`{colors.amber-rust-light}` -- rgba(201,122,84,0.08)): A translucent warm wash used as tag and pill backgrounds for interactive categories (solution tags). Pairs with Amber Rust text.
 - **Amber Rust Focus** (`{colors.amber-rust-focus}` -- rgba(201,122,84,0.2)): A translucent ring used as the focus outline on inputs and interactive elements. Visible, warm, accessible.
+
+#### Eucalyptus — INSIGHT voice
+- **Eucalyptus** (`{colors.eucalyptus}` -- #6B9E8C): Data-section eyebrow labels (metrics band, case studies, testimonials, blog), metric callout numerals, status pill text ("Live", "Verified", "Approved"), checkmark/shield icons, illustrative line-work accents in graphics. Means "known, validated, measured."
+- **Eucalyptus Hover** (`{colors.eucalyptus-hover}` -- #588977): Pressed/emphasized state, one step darker. Use as fill on Eucalyptus icon buttons or status pills carrying white text — improves contrast over the base hue.
+- **Eucalyptus Light** (`{colors.eucalyptus-light}` -- rgba(107,158,140,0.08)): Translucent wash for status pills, metric badges, and metadata tag backgrounds (e.g., "Research", "Case Study" content-type chips). Pairs with Eucalyptus text. Mirrors `{colors.amber-rust-light}` opacity exactly.
+- **Eucalyptus Focus** (`{colors.eucalyptus-focus}` -- rgba(107,158,140,0.2)): Focus ring for validated-state inputs (verified email field, confirmed selection). Signals "this input has passed validation," distinct from `{colors.amber-rust-focus}` which signals an interactive-but-not-yet-validated state.
+
+#### Dual-Accent Pairing Rules
+
+The two accents coexist on a single page but never inside a single component. The voltage of the brand comes from their separation.
+
+**By section**
+- An "action-led" section (hero, solutions grid, CTA band, pricing) uses Amber Rust eyebrows + Amber Rust CTAs.
+- An "insight-led" section (metrics bar, case study results, testimonial quotes, blog grid) uses Eucalyptus eyebrows + Eucalyptus metric callouts. If the section ends with a CTA, the CTA itself uses Amber Rust — the eyebrow voice does not override the action color.
+- Never mix Rust and Eucalyptus eyebrows on the same section.
+
+**By text role**
+- **CTA copy, inline links, navigation:** Amber Rust only.
+- **Metric numerals, validated data points, "live"/"verified"/"approved" descriptors, content-type labels (Research / Case Study):** Eucalyptus only.
+- **Body paragraphs, headlines, helper text:** Graphite — never tinted with either accent.
+
+**By outline / border role**
+- **Default 1px card and input borders:** `{colors.cloud-zinc}` -- not an accent.
+- **Active interactive outline** (focused input, active tab, selected pill): `{colors.amber-rust-focus}` ring or Amber Rust 1px border.
+- **Validated/positive outline** (verified input, "live" status pill, success badge): `{colors.eucalyptus-focus}` ring or Eucalyptus 1px border.
+- A single element may carry only one outline accent at a time. If an input is both interactive AND validated, the Eucalyptus outline wins (state is more informative than interactivity).
+
+**By tag / pill role**
+- **Interactive tag** (clickable category, solution chip): `{colors.amber-rust-light}` background + Amber Rust text.
+- **Metadata tag** (content-type, "Research", "Case Study", date, tag list): `{colors.eucalyptus-light}` background + Eucalyptus text.
+- **Status pill** ("Live", "Verified", "Approved", positive trend indicator): `{colors.eucalyptus-light}` background + Eucalyptus text, optionally with a `{colors.eucalyptus}` dot.
+
+**By icon role**
+- **Action icons** (arrow, plus, external-link, chevron, hamburger): Amber Rust when colored, Graphite when neutral.
+- **Insight icons** (checkmark, shield, trending-up, sparkline, "live" dot): Eucalyptus.
+
+**By illustration**
+- Monochrome editorial line work uses Graphite tones as the base. **Both accents may appear in illustrations** -- Amber Rust on interactive nodes or flagged data points, Eucalyptus on validated nodes, stable signals, or "approved" markers. This is the only context where both accents share a surface, because the illustration is *narrating* the action/insight pairing.
+
+**Contrast note.** Both Amber Rust (#C97A54, 3.28:1 on white) and Eucalyptus (#6B9E8C, 3.07:1 on white) pass WCAG AA for large text and UI components (3:1) but not for normal text (4.5:1). When either accent carries body-sized text (≤14px regular), prefer pairing with `{colors.graphite-900}` for the body and using the accent only on the emphasized phrase, or use `{colors.amber-rust-hover}` / `{colors.eucalyptus-hover}` for slightly improved contrast.
 
 ### Surface
 - **Paper White** (`{colors.paper-white}` -- #FFFFFF): The default page background. Pure white, not tinted. The brand's canvas.
@@ -316,10 +364,13 @@ The layout philosophy is uniform light page rhythm. There are no dark hero bands
 - **On Accent** (`{colors.on-accent}` -- #FFFFFF): Text on Amber Rust buttons and surfaces. Always white.
 
 ### Semantic
-- **Eucalyptus** (`{colors.eucalyptus}` -- #6B9E8C): Success states, positive indicators, "approved" badges. Never used as a decorative accent.
-- **Eucalyptus Light** (`{colors.eucalyptus-light}` -- rgba(107,158,140,0.1)): Translucent background for success badges and positive-state containers.
-- **Error** (`{colors.error}` -- #D05454): Form validation errors, destructive action warnings.
-- **Info** (`{colors.info}` -- #5B8DEF): Informational callouts and neutral status indicators. Used sparingly.
+
+Success / positive state is a subset of the Eucalyptus INSIGHT voice -- "approved" / "verified" / "live" are simply the most common forms of validated data. See Eucalyptus under **Brand & Accent** above for the full token family. The semantic aliases below are kept for component-API readability (e.g., `--color-success` reads more clearly than `--color-accent-secondary` on a success badge), but resolve to the same primitives.
+
+- **Success** alias -- resolves to `{colors.eucalyptus}` -- #6B9E8C.
+- **Success Light** alias -- resolves to `{colors.eucalyptus-light}` -- rgba(107,158,140,0.08).
+- **Error** (`{colors.error}` -- #D05454): Form validation errors, destructive action warnings. Distinct from both accents -- never substitutes for Amber Rust.
+- **Info** (`{colors.info}` -- #5B8DEF): Informational callouts and neutral status indicators. Used sparingly; prefer Eucalyptus where the state is positive rather than merely informational.
 
 ### Dark Mode
 - **Dark BG** (`{colors.dark-bg}` -- #1A1D21): Page background in dark mode. Replaces Paper White.
@@ -484,22 +535,25 @@ Photography is minimal. When used (team photos, case studies), images are treate
 ## Do's and Don'ts
 
 ### Do
-- Reserve `{colors.amber-rust}` for primary CTAs, active states, section labels, and interactive tags. It should appear sparingly -- one filled button per visible viewport.
+- Reserve `{colors.amber-rust}` for primary CTAs, active states, action-section eyebrows, and interactive tags. It should appear sparingly -- one filled button per visible viewport.
+- Use `{colors.eucalyptus}` for data-section eyebrows, metric numerals, status pills, validated-state outlines, and "insight" icons (checkmark, shield, trending-up).
+- Choose **one accent voice per section.** Action-led sections use Rust eyebrows; insight-led sections use Eucalyptus eyebrows. Never mix the two in the same section header.
 - Apply `font-feature-settings: 'cv01', 'ss03'` to every Inter element. This is the brand's typographic identity.
 - Use weight `510` for all UI chrome (nav links, form labels, field text). Not 500, not 600.
 - Use `{typography.display-xl}` (Inter 48px / 700) for hero headlines only. One per page.
-- Pair every `{component.section-label}` eyebrow with an Amber Rust color. The eyebrow + section title pattern is the brand's content-section opener.
 - Keep the page rhythm uniform: white canvas throughout, with `{colors.graphite-100}` or `{colors.bg-surface}` for subtle background variation.
 - Define card boundaries with 1px `{colors.cloud-zinc}` borders. No resting-state shadows.
 - Apply `{spacing.section}` (80px) between major bands consistently.
 
 ### Don't
-- Don't use Amber Rust decoratively. It is never a background fill, never a border color on non-interactive elements, never a text color for body copy.
+- Don't use Amber Rust decoratively. It is never a background fill on non-interactive elements, never a border color on resting cards, never a text color for body copy.
+- Don't use Eucalyptus as a CTA color or to signal interactivity. It is the INSIGHT voice -- if it carries meaning, that meaning is "known / validated / measured," never "click me."
+- Don't mix Amber Rust and Eucalyptus inside a single component (button, badge, card header). The voltage of the dual system comes from their separation.
+- Don't use both accents on the same eyebrow / section opener. Choose one voice per section.
 - Don't use Inter for body paragraphs. Body copy is DM Sans only.
 - Don't use DM Sans for headlines, buttons, or labels. Headlines and UI chrome are Inter only.
 - Don't add drop shadows to resting-state cards. The system is border-first.
 - Don't introduce dark section bands or alternating dark/light page rhythm. The page stays uniformly light.
-- Don't use Eucalyptus as a decorative accent. It is for success states and positive indicators only.
 - Don't capitalize "undersight" in any context. It is always lowercase.
 - Don't use weight 500 for UI elements. The brand weight is 510.
 

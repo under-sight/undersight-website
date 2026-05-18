@@ -19,7 +19,9 @@
   --color-amber-rust-light: rgba(201, 122, 84, 0.08);
   --color-amber-rust-focus: rgba(201, 122, 84, 0.2);
   --color-eucalyptus: #6B9E8C;
-  --color-eucalyptus-light: rgba(107, 158, 140, 0.1);
+  --color-eucalyptus-hover: #588977;
+  --color-eucalyptus-light: rgba(107, 158, 140, 0.08);
+  --color-eucalyptus-focus: rgba(107, 158, 140, 0.2);
   --color-paper-white: #FFFFFF;
   --color-bg-surface: #FAFAFA;
   --color-on-accent: #FFFFFF;
@@ -47,15 +49,24 @@
   --color-text-secondary: var(--color-graphite-700);
   --color-text-hover: var(--color-graphite-800);
 
+  /* Primary accent — ACTION voice (CTAs, interactive, active states) */
   --color-accent: var(--color-amber-rust);
   --color-accent-hover: var(--color-amber-rust-hover);
   --color-accent-light: var(--color-amber-rust-light);
   --color-accent-focus: var(--color-amber-rust-focus);
   --color-accent-text: var(--color-on-accent);
 
+  /* Secondary accent — INSIGHT voice (data, status, validated, metrics) */
+  --color-accent-secondary: var(--color-eucalyptus);
+  --color-accent-secondary-hover: var(--color-eucalyptus-hover);
+  --color-accent-secondary-light: var(--color-eucalyptus-light);
+  --color-accent-secondary-focus: var(--color-eucalyptus-focus);
+  --color-accent-secondary-text: var(--color-on-accent);
+
   --color-border: var(--color-cloud-zinc);
   --color-border-light: var(--color-cloud-zinc-light);
 
+  /* Success aliases — same primitive as Eucalyptus (positive-state subset of insight voice) */
   --color-success: var(--color-eucalyptus);
   --color-success-light: var(--color-eucalyptus-light);
 

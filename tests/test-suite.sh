@@ -193,17 +193,23 @@ if violations:
   fi
 done
 
-# Test: All 3 solution entities present
+# Test: All 3 top-level solution entities present (excludes sub-pages like
+# "Solutions - copilot - Scoring Engine" which are nested content sections)
 SOLUTION_COUNT=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-count = sum(1 for k in data if k.startswith('Solutions - '))
+# Top-level solutions have exactly two ' - ' separated parts:
+# 'Solutions - <name>'. Sub-pages have three or more.
+count = sum(
+  1 for k in data
+  if k.startswith('Solutions - ') and k.count(' - ') == 1
+)
 print(count)
 " 2>/dev/null)
 if [ "$SOLUTION_COUNT" = "3" ]; then
-  pass "All 3 solution entities present"
+  pass "All 3 top-level solution entities present"
 else
-  fail "All 3 solution entities present" "Found $SOLUTION_COUNT"
+  fail "All 3 top-level solution entities present" "Found $SOLUTION_COUNT"
 fi
 
 # Test: Blog entries have post_date and slug (post-cutover structured fields)
@@ -562,6 +568,74 @@ else
   fail "Dev server has SPA fallback" "Direct URLs will 404 on dev server"
 fi
 
+# =============================================================================
+# === V2 STRUCTURE TESTS (Website V2 markup) ===
+# =============================================================================
+
+# Test: Floating theme toggle exists at expected selector
+if grep -q '\[data-theme-toggle\]\[data-floating\]\|data-theme-toggle data-floating' "$SRC_HTML"; then
+  pass "Floating theme toggle exists at [data-theme-toggle][data-floating]"
+else
+  fail "Floating theme toggle exists" "Expected a button with data-theme-toggle + data-floating attrs"
+fi
+
+# Test: Theme toggle is NOT in the footer (it lives as floating moon)
+if grep -E '<footer.*toggleTheme|footer-bottom.*toggleTheme' "$SRC_HTML" >/dev/null; then
+  fail "Theme toggle removed from footer" "Still present in footer markup"
+else
+  pass "Theme toggle removed from footer (floating moon only)"
+fi
+
+# Test: Hero overlay book-a-call CTA exists inside hero visual
+if grep -q 'class="hero-overlay-cta"' "$SRC_HTML"; then
+  pass "Hero overlay book-a-call CTA exists"
+else
+  fail "Hero overlay book-a-call CTA exists" "Expected .hero-overlay-cta element"
+fi
+
+# Test: Calendly inline embed present with our brand color in URL
+if grep -q 'calendly-inline-widget' "$SRC_HTML" && grep -q 'primary_color=c97a54' "$SRC_HTML"; then
+  pass "Calendly embed includes Amber Rust brand color (c97a54)"
+else
+  fail "Calendly embed includes brand color" "Expected primary_color=c97a54 in widget URL"
+fi
+
+# Test: Calendly embed has both light and dark theme variants
+if grep -q 'calendly-light' "$SRC_HTML" && grep -q 'calendly-dark' "$SRC_HTML"; then
+  pass "Calendly embed has both light and dark variants"
+else
+  fail "Calendly embed has both variants" "Expected .calendly-light and .calendly-dark wrappers"
+fi
+
+# Test: No SOC 2 or status pill from the Claude Design handoff
+if grep -qi 'SOC 2\|SOC2\|all systems operational' "$SRC_HTML"; then
+  fail "No SOC 2 / status pill in markup" "Found a reference; should be stripped from V2"
+else
+  pass "No SOC 2 / 'All systems operational' in markup"
+fi
+
+# Test: Combined footer (no separate .footer-bottom band in V2)
+if grep -q 'class="footer-bottom"' "$SRC_HTML"; then
+  fail "Combined footer (no .footer-bottom)" "Old sub-footer band still present"
+else
+  pass "Combined footer (no separate .footer-bottom band)"
+fi
+
+# Test: Footer logo uses real horizontal SVG (not just inline 24x24 icon)
+if grep -q 'class="footer-logo"' "$SRC_HTML" && grep -q 'logo-horizontal-line-primary.svg' "$SRC_HTML"; then
+  pass "Footer logo uses horizontal SVG asset"
+else
+  fail "Footer logo uses horizontal SVG" "Expected .footer-logo wrapping logo-horizontal-line-primary.svg"
+fi
+
+# Test: Footer links carry data-nav for clean SPA routing
+DATA_NAV_COUNT=$(grep -c 'data-nav=' "$SRC_HTML" || true)
+if [ "$DATA_NAV_COUNT" -ge 5 ]; then
+  pass "Footer / solution links carry data-nav attributes (found $DATA_NAV_COUNT)"
+else
+  fail "Footer links carry data-nav" "Only $DATA_NAV_COUNT found; expected >=5"
+fi
+
 # Test: All page sections exist for navigate() targets
 for PAGE in "home" "underscore" "rfi" "copilot" "docs" "blog" "post" "contact"; do
   if grep -q "id=\"page-$PAGE\"" "$SRC_HTML"; then
@@ -891,6 +965,9 @@ consumed_exact = {'Home - Hero', 'Home - Who We Serve', 'Home - Metrics',
                   'Footer', 'SEO', 'Solutions - underscore',
                   'Solutions - underchat agent',
                   'Solutions - AI Underwriting Copilot',
+                  # V2 additions — sub-pages rendered inside the Copilot detail
+                  'Solutions - copilot - Scoring Engine',
+                  'Copilot - Feature Matrix',
                   '_blogs', '_whitepapers'}
 consumed_prefixes = ['Blog - ']
 orphans = []
