@@ -110,6 +110,7 @@ def _normalize_doc_markdown(text):
         text,
     )
     text = re.sub(r"\\+([*~])", r"\1", text)
+    text = re.sub(r"\\+\s*(?=\n|$)", "", text)
     return text
 
 
@@ -326,7 +327,7 @@ def fetch_all(token):
                     }
                 )
         result[e["Name"]] = {
-            "content": docs.get(e.get("DocSecret", ""), ""),
+            "content": _normalize_doc_markdown(docs.get(e.get("DocSecret", ""), "")),
             "files": files,
         }
 

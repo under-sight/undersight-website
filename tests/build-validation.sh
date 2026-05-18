@@ -42,6 +42,10 @@ bad = [
     r"\\* **",
     r"\\u2014",
     r"\\~8",
+    r"\\n",
+    r"\\\n",
+    r"\\\\n",
+    r"\\\\\n",
 ]
 found = [pattern for pattern in bad if pattern in html]
 if found:
