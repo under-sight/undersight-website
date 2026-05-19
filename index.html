@@ -306,36 +306,85 @@
       </div>
     </section>
 
-    <!-- 3. SOLUTIONS -->
-    <div class="home-section">
+    <!-- SOLUTIONS — editorial alternating rows -->
+    <section class="bleed">
       <div class="container">
-        <div class="home-section-head">
-          <div class="home-section-label">Solutions</div>
-          <h2>Three solutions, one underwriting fabric.</h2>
-          <p class="home-section-lede">Pick the entry point that fits your team: programmatic risk scoring, an agent that engages your clients, or a co-pilot that grades your full deal book.</p>
+        <div class="sect-head">
+          <span class="eyebrow">Solutions</span>
+          <h2>Three products. One underwriting fabric.</h2>
+          <p class="lede">Pick the entry point that fits your team: programmatic risk scoring, an agent that engages your clients, or a co-pilot that grades your full deal book.</p>
         </div>
         <div id="homeSolutions"></div>
       </div>
-    </div>
+    </section>
 
 
-    <!-- 5. CASE STUDY -->
-    <div class="case-study" data-content-entity="Home - Case Study: Chat Advance">
+    <!-- CASE STUDY TILES (editorial 2-up with metric overlay + 3-up footer stats) -->
+    <section class="bleed alt">
       <div class="container">
-        <div class="home-section-label">Case study</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">See it in action</h2>
-        <div class="case-study-inner" id="caseStudyChatAdvanceInner">
-          <div class="case-study-graphic"></div>
-          <div class="case-study-text">
-            <a class="cs-link" href="javascript:void(0)" onclick="openCaseStudy()">Read the full case study &rarr;</a>
-            <button class="btn btn-ghost" onclick="openWhitepaperModal('Chat Advance Case Study')" style="margin-top:12px;">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
-              Download as PDF
-            </button>
-          </div>
+        <div class="sect-head">
+          <span class="eyebrow">Case studies</span>
+          <h2>In production with operators who run real books.</h2>
+        </div>
+        <div class="cs-grid">
+
+          <article class="cs-tile" data-content-entity="Home - Case Study: Chat Advance">
+            <div class="cs-thumb" data-pattern="diag">
+              <span class="cs-badge">Chat Advance &middot; Pilot</span>
+              <div class="cs-metric">
+                <div class="cs-num">71<span class="cs-unit">%</span></div>
+                <div class="cs-lab">Deal-cycle reduction</div>
+              </div>
+              <span class="cs-corner">2025 &middot; 12 weeks</span>
+            </div>
+            <div class="cs-body" id="caseStudyChatAdvanceInner">
+              <div class="cs-ttl">From 3-day turnaround to same-day decisions, without growing the underwriting bench.</div>
+              <div class="cs-desc">Replacing manual document review with agentic intake and ML-graded risk freed three FTEs of capacity in the first quarter.</div>
+            </div>
+            <div class="cs-stats">
+              <div><div class="cs-n">3.1&times;</div><div class="cs-l">Throughput</div></div>
+              <div><div class="cs-n">22%</div><div class="cs-l">More booked</div></div>
+              <div><div class="cs-n">$0</div><div class="cs-l">Added headcount</div></div>
+            </div>
+            <div class="cs-foot">
+              <a href="javascript:void(0)" class="cs-more" onclick="openCaseStudy()">Read the case study <span class="arr">&rarr;</span></a>
+              <button class="cs-dl" onclick="openWhitepaperModal('Chat Advance Case Study')" aria-label="Download as PDF">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+                PDF &middot; 8 min read
+              </button>
+            </div>
+          </article>
+
+          <article class="cs-tile" data-content-entity="Home - Case Study: 4D Financing">
+            <div class="cs-thumb" data-pattern="grid">
+              <span class="cs-badge">4D Financing &middot; Production</span>
+              <div class="cs-metric">
+                <div class="cs-num">650<span class="cs-unit"> bps</span></div>
+                <div class="cs-lab">Loss-ratio reduction</div>
+              </div>
+              <span class="cs-corner">2024&ndash;25 &middot; 18 months</span>
+            </div>
+            <div class="cs-body" id="caseStudy4DFinancingInner">
+              <div class="cs-ttl">Institutional-grade underwriting with a four-person team.</div>
+              <div class="cs-desc">4D Financing uses underscore + co-pilot to give every applicant the rigor of a large institution &mdash; without the headcount.</div>
+            </div>
+            <div class="cs-stats">
+              <div><div class="cs-n">4 FTE</div><div class="cs-l">Team size</div></div>
+              <div><div class="cs-n">$48M</div><div class="cs-l">Originated</div></div>
+              <div><div class="cs-n">100%</div><div class="cs-l">Audit-ready</div></div>
+            </div>
+            <div class="cs-foot">
+              <a href="javascript:void(0)" class="cs-more" onclick="open4DCaseStudy()">Read the case study <span class="arr">&rarr;</span></a>
+              <button class="cs-dl" onclick="openWhitepaperModal('4D Financing Case Study')" aria-label="Download as PDF">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+                PDF &middot; 6 min read
+              </button>
+            </div>
+          </article>
+
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- TESTIMONIAL (Rust glyph + em-wrapped pull quote + 3-part cite) -->
     <section class="testimonial-band" data-content-entity="Home - Testimonial">
@@ -357,23 +406,7 @@
       </div>
     </section>
 
-    <!-- 7. CASE STUDY: 4D FINANCING -->
-    <div class="case-study case-study--alt" data-content-entity="Home - Case Study: 4D Financing">
-      <div class="container">
-        <div class="home-section-label">Case study</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">Institutional-grade underwriting, lean team</h2>
-        <div class="case-study-inner" id="caseStudy4DFinancingInner">
-          <div class="case-study-graphic"></div>
-          <div class="case-study-text">
-            <a class="cs-link" href="javascript:void(0)" onclick="open4DCaseStudy()">Read the full case study &rarr;</a>
-            <button class="btn btn-ghost" onclick="openWhitepaperModal('4D Financing Case Study')" style="margin-top:12px;">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px;"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
-              Download as PDF
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- (4D Financing case study is now consolidated into the cs-tile grid above) -->
 
     <!-- CTA with inline Calendly embed -->
     <div class="cta-section cta-with-embed" data-content-entity="Home - CTA">
@@ -436,7 +469,14 @@
 
 <!-- ============ BLOG ============ -->
 <section class="page" id="page-blog">
-  <div class="container" style="padding-top:48px;">
+  <div class="blog-hero">
+    <div class="container">
+      <span class="eyebrow">The undersight blog</span>
+      <h1>Field notes on AI underwriting, private credit, and the small business stack.</h1>
+      <p class="lede">Operator-level writing from the team building the underwriting fabric.</p>
+    </div>
+  </div>
+  <div class="container blog-container">
     <div class="blog-filters" id="blogFilters"></div>
     <div class="blog-grid" id="blogGrid">
       <!-- populated from Fibery -->
@@ -2253,23 +2293,29 @@
       mobItem.textContent = title;
       mobileSol.appendChild(mobItem);
 
-      // Home horizontal solution row — flat layout with signature
-      // mini-graphic per product (scorecard / chat / grade ring) and
-      // feature pills. Editable copy (tag/title/desc) flows from Fibery.
+      // Home solution row — editorial alternating layout adopted from
+      // the Claude Design handoff. Copy on one side, mini-visual frame
+      // on the other; rows alternate via .flip. Eucalyptus on category
+      // tags (insight), Amber Rust on primary CTA (action).
       const row = document.createElement('div');
-      row.className = 'sol-row';
+      row.className = 'solrow' + (homeSolutions.children.length % 2 === 1 ? ' flip' : '');
       const pills = (SOLUTION_PILLS[cfg.page] || [])
-        .map(p => `<span class="pill">${p}</span>`).join('');
+        .map(p => `<span class="chip"><span class="dot"></span>${p}</span>`).join('');
+      const claim = meta._claim || title;
       row.innerHTML = `
-        <div class="sol-mini-tile">${solutionMiniGraphic(cfg.page)}</div>
-        <div class="sol-row-text">
-          <div class="sol-row-head"><span class="tag">${tag}</span></div>
-          <h3>${title}</h3>
-          <p class="oneliner">${desc}</p>
-          <div class="row-meta">
-            <div class="pills">${pills}</div>
-            <a class="explore" href="/${cfg.page}" onclick="event.preventDefault();navigate('${cfg.page}')">Explore ${title} &rarr;</a>
+        <div class="sol-copy">
+          <span class="sol-tag">&mdash; ${tag}</span>
+          <div class="sol-name">${title}</div>
+          <h3 class="sol-claim">${claim}</h3>
+          <p class="sol-body">${desc}</p>
+          <div class="sol-pills">${pills}</div>
+          <div class="sol-cta">
+            <a class="btn btn-primary" href="/${cfg.page}" data-nav="${cfg.page}" onclick="event.preventDefault();navigate('${cfg.page}')">Explore ${title}</a>
+            <a class="btn btn-link" href="/${cfg.page}" data-nav="${cfg.page}" onclick="event.preventDefault();navigate('${cfg.page}')">Learn more <span class="arr">&rarr;</span></a>
           </div>
+        </div>
+        <div class="sol-visual">
+          <div class="frame">${solutionMiniGraphic(cfg.page)}</div>
         </div>`;
       homeSolutions.appendChild(row);
 
