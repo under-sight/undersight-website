@@ -2097,3 +2097,159 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
   color: var(--color-on-accent);
 }
 .blog-filter.active:hover { background: var(--color-amber-rust-hover); }
+
+/* =============================================================
+   PAGE COHESION POLISH — bring solution detail pages, contact, and
+   docs into visual cohesion with the home page editorial language.
+   No HTML rewrites: target existing renderer-emitted classes.
+   ============================================================= */
+
+/* All `.home-section-label` eyebrows across pages get Rust treatment
+   (action-led pages default); insight-content pages tagged via parent
+   override below. The renderer-emitted `.tag` chips on solution heroes
+   match the Eucalyptus INSIGHT voice. */
+.home-section-label,
+.sol-section-label {
+  font: 600 11px/1.4 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-amber-rust);
+  display: inline-block;
+}
+
+/* Insight-leaning sections on solution detail pages: API previews, MCA
+   detection, integrations — these describe DATA, not action. Eucalyptus. */
+#page-underscore .home-section-label,
+#page-copilot .home-section-label,
+#page-underchat .home-section-label {
+  /* default Rust; specific data sections override below */
+}
+#page-underscore [data-section="api-preview"] .home-section-label,
+#page-underscore [data-section="mca"] .home-section-label,
+#page-underscore [data-section="integrations"] .home-section-label,
+#page-copilot [data-section="integrations"] .home-section-label,
+#page-underchat [data-section="integrations"] .home-section-label {
+  color: var(--color-eucalyptus);
+}
+
+/* Solution-page hero treatment: bring the .sol-hero into line with the
+   home hero typography (fluid clamp, Inter cv01 ss03, negative tracking)
+   without rebuilding the layout. */
+.sol-hero {
+  background: var(--white);
+  border-bottom: 1px solid var(--pale);
+}
+.sol-hero h1 {
+  font: 700 clamp(36px, 4vw + 12px, 64px) / 1.1 'Inter', sans-serif !important;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.025em !important;
+}
+.sol-hero p {
+  font: 400 17px/1.6 'DM Sans', sans-serif !important;
+  color: var(--mid) !important;
+}
+.sol-hero .tag {
+  /* mono em-dash style for the solution-page tag chip */
+  font: 600 11px/1.4 'Inter', sans-serif !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-eucalyptus) !important;  /* INSIGHT: persona/category */
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Status pills, "live" badges, score chips on solution mini-graphics:
+   apply Eucalyptus per dual-accent rule */
+.pill-live, .live, .badge-success, .status-pill {
+  background: var(--color-eucalyptus-light) !important;
+  color: var(--color-eucalyptus) !important;
+  border-color: transparent !important;
+}
+.pill-live::before, .live::before {
+  background: var(--color-eucalyptus) !important;
+}
+
+/* Mini-grade ring & score chip on solution pages get Eucalyptus on the
+   numeric value (INSIGHT voice: measured data), Rust on the action
+   adjustment legend dot. */
+.mini-grade .grade, .mini-score .num { color: var(--color-eucalyptus); }
+.mini-grade .legend .dot.ml { background: var(--color-cloud-zinc); }
+.mini-grade .legend .dot.ag { background: var(--color-amber-rust); }
+
+/* Cohesive section background alternation on solution detail pages */
+#page-underscore .home-section:nth-of-type(even),
+#page-underchat .home-section:nth-of-type(even),
+#page-copilot .home-section:nth-of-type(even) {
+  background: var(--color-bg-alt, #FAFAFA);
+}
+
+/* Contact page polish: eyebrow + editorial type for the heading */
+#page-contact h2,
+#page-contact h1 {
+  font: 700 clamp(28px, 2.4vw + 14px, 40px) / 1.15 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.02em;
+  color: var(--black);
+}
+#page-contact .contact-wrap { padding-top: 80px; padding-bottom: 80px; }
+
+/* Docs gate styling: cohesion polish */
+.docs-gate {
+  background: var(--white);
+}
+.docs-gate h2 {
+  font: 700 clamp(28px, 2.4vw + 14px, 36px) / 1.2 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.02em;
+}
+.docs-gate .note {
+  font: 500 11px/1.4 'SF Mono', monospace;
+  color: var(--color-eucalyptus);    /* INSIGHT: authorization gate is a fact */
+  background: var(--color-eucalyptus-light);
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  margin-top: 12px;
+}
+
+/* Section-header pattern (used on docs gate landing): adopt editorial
+   header typography across pages */
+.section-header h2 {
+  font: 700 clamp(28px, 2.4vw + 14px, 40px) / 1.15 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.02em;
+  color: var(--black);
+}
+.section-header p {
+  font: 400 17px/1.6 'DM Sans', sans-serif;
+  color: var(--mid);
+  max-width: 620px;
+  margin-top: 12px;
+}
+
+/* Generic card grid polish (docs page card-grid) to match home rhythm */
+.card-grid .card {
+  background: var(--white);
+  border: 1px solid var(--pale);
+  border-radius: var(--rounded-md);
+  padding: 24px;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+.card-grid .card:hover {
+  border-color: var(--color-cloud-zinc);
+  transform: translateY(-2px);
+}
+.card-grid .card h3 {
+  font: 600 18px/1.35 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  color: var(--black);
+}
+.card-grid .card p {
+  font: 400 14px/1.6 'DM Sans', sans-serif;
+  color: var(--mid);
+  margin: 0;
+}
