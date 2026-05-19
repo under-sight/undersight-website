@@ -1423,24 +1423,118 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
      Amber Rust = ACTION (CTAs, interactive, eyebrows on action sections)
    ============================================================= */
 
-/* ---- Hero trust strip ---- */
-.hero-trust {
-  margin-top: 32px;
-  display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+/* ---- Hero visual: 3-card stack (score panel + chat thread + composite chip) ---- */
+.hero-visual { min-height: 420px; }
+
+.hv-card-score {
+  top: 0;
+  left: 0;
+  width: 64%;
+  z-index: 2;
 }
-.hero-trust-label {
-  font: 600 11px/1 'Inter', sans-serif;
-  text-transform: uppercase; letter-spacing: 0.08em; color: var(--mid);
+.hv-card-chat {
+  position: absolute;
+  top: 132px;
+  right: 4%;
+  width: 56%;
+  padding: 14px 16px;
+  z-index: 3;
 }
-.hero-trust-marks { display: inline-flex; flex-wrap: wrap; gap: 18px; }
-.hero-trust-marks .trust-mark {
-  font: 600 14px/1 'Inter', sans-serif; color: var(--dark);
-  letter-spacing: -0.005em; opacity: 0.7; transition: opacity 0.15s ease;
+.hv-card-chip {
+  bottom: 8px;
+  left: 8%;
+  z-index: 4;
 }
-.hero-trust-marks .trust-mark:hover { opacity: 1; }
+
+/* Chat card internals */
+.hv-chat-head {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 10px; margin-bottom: 10px;
+  border-bottom: 1px solid var(--pale);
+}
+.hv-chat-avatar {
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 9999px;
+  background: var(--color-amber-rust-light);
+  color: var(--color-amber-rust);
+  font: 600 12px/1 'Inter', sans-serif;
+  flex-shrink: 0;
+}
+.hv-chat-who { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.hv-chat-name { font: 600 12px/1.2 'Inter', sans-serif; color: var(--black); }
+.hv-chat-role { font: 400 10px/1.3 'SF Mono', monospace; color: var(--mid); }
+.hv-chat-live {
+  display: inline-flex; align-items: center; gap: 4px;
+  font: 600 10px/1 'Inter', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--color-eucalyptus);
+  background: var(--color-eucalyptus-light);
+  padding: 3px 7px; border-radius: 9999px;
+}
+.hv-chat-live::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--color-eucalyptus);
+  animation: hvLiveDot 1.4s ease-in-out infinite;
+}
+@keyframes hvLiveDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.hv-chat-thread { display: flex; flex-direction: column; gap: 6px; }
+.hv-bubble {
+  display: inline-block;
+  padding: 7px 11px;
+  border-radius: 12px;
+  font: 400 12px/1.4 'DM Sans', sans-serif;
+  max-width: 90%;
+}
+.hv-bubble-agent {
+  background: var(--color-bg-alt, #FAFAFA);
+  color: var(--dark);
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+.hv-bubble-client {
+  background: var(--color-amber-rust);
+  color: var(--color-on-accent);
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+.hv-typing {
+  display: inline-flex; gap: 3px;
+  padding: 9px 11px;
+  background: var(--color-bg-alt, #FAFAFA);
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+.hv-typing i {
+  width: 5px; height: 5px;
+  border-radius: 50%; background: var(--mid);
+  animation: hvTyping 1.2s ease-in-out infinite;
+}
+.hv-typing i:nth-child(2) { animation-delay: 0.15s; }
+.hv-typing i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes hvTyping {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-3px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hv-chat-live::before, .hv-typing i { animation: none; }
+}
+
 @media (max-width: 880px) {
-  .hero-trust { align-items: center; }
-  .hero-trust-marks { justify-content: center; }
+  .hero-visual { min-height: 460px; max-width: 480px; }
+  .hv-card-chat { width: 64%; top: 156px; right: 0; }
+  .hv-card-chip { left: 0; }
+}
+@media (max-width: 560px) {
+  .hero-visual { min-height: 480px; }
+  .hv-card-score { width: 100%; }
+  .hv-card-chat { width: 78%; top: 200px; right: 2%; }
+  .hv-card-chip { left: 4%; bottom: 0; }
 }
 
 /* ---- Section bands ---- */
