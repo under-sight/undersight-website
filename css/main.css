@@ -1415,3 +1415,309 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 @media (max-width: 768px) {
   .wp-modal { padding: 24px; }
 }
+
+/* =============================================================
+   V2 EDITORIAL HOME PAGE — adopted from Claude Design handoff.
+   Dual-accent rules applied:
+     Eucalyptus = INSIGHT (metric numerals, status pills, validated)
+     Amber Rust = ACTION (CTAs, interactive, eyebrows on action sections)
+   ============================================================= */
+
+/* ---- Hero trust strip ---- */
+.hero-trust {
+  margin-top: 32px;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+}
+.hero-trust-label {
+  font: 600 11px/1 'Inter', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--mid);
+}
+.hero-trust-marks { display: inline-flex; flex-wrap: wrap; gap: 18px; }
+.hero-trust-marks .trust-mark {
+  font: 600 14px/1 'Inter', sans-serif; color: var(--dark);
+  letter-spacing: -0.005em; opacity: 0.7; transition: opacity 0.15s ease;
+}
+.hero-trust-marks .trust-mark:hover { opacity: 1; }
+@media (max-width: 880px) {
+  .hero-trust { align-items: center; }
+  .hero-trust-marks { justify-content: center; }
+}
+
+/* ---- Section bands ---- */
+.bleed {
+  padding: 96px 0;
+  border-top: 1px solid var(--pale);
+  background: var(--white);
+}
+.bleed.alt { background: var(--color-bg-alt, #FAFAFA); }
+.bleed.tight {
+  padding: 56px 0;
+  border-top: 2px solid var(--color-text);
+  border-bottom: 1px solid var(--pale);
+}
+@media (max-width: 768px) {
+  .bleed { padding: 64px 0; }
+  .bleed.tight { padding: 40px 0; }
+}
+
+/* ---- Section header (eyebrow + h2 + lede) ---- */
+.sect-head { max-width: 720px; margin-bottom: 56px; }
+.sect-head .eyebrow {
+  display: inline-block;
+  font: 600 11px/1.4 'Inter', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--color-amber-rust);
+  margin-bottom: 14px;
+}
+/* INSIGHT-led sections get a Eucalyptus eyebrow */
+.bleed.alt .sect-head .eyebrow,
+.testimonial-band .sect-head .eyebrow { color: var(--color-eucalyptus); }
+.sect-head h2 {
+  font: 700 clamp(28px, 2.4vw + 14px, 40px) / 1.15 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.02em; color: var(--black); margin: 0;
+}
+.sect-head .lede {
+  font: 400 17px/1.6 'DM Sans', sans-serif;
+  color: var(--mid); margin-top: 14px; max-width: 620px;
+}
+
+/* ---- Stats bar (editorial mono numerals + source attribution) ---- */
+.stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px;
+}
+.stats .stat { display: flex; flex-direction: column; gap: 6px; }
+.stats .stat-label {
+  font: 600 11px/1.4 'Inter', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--color-eucalyptus); margin-bottom: 6px;
+}
+.stats .stat-num {
+  font: 500 clamp(48px, 6vw + 12px, 84px) / 1 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  color: var(--black);
+  display: inline-flex; align-items: baseline;
+}
+.stats .stat-unit {
+  font-size: 0.4em; color: var(--color-eucalyptus);
+  font-weight: 600; letter-spacing: 0; margin-left: 2px;
+}
+.stats .stat-desc {
+  font: 400 14px/1.55 'DM Sans', sans-serif;
+  color: var(--dark); margin-top: 8px; max-width: 320px;
+}
+.stats .stat-src {
+  font: 500 11px/1.4 'SF Mono', monospace;
+  color: var(--mid); margin-top: 6px;
+}
+@media (max-width: 768px) {
+  .stats { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* ---- Who We Serve: numbered editorial cards ---- */
+.serve-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+}
+.serve-grid .serve-card {
+  padding: 32px;
+  border: 1px solid var(--pale);
+  margin-left: -1px;
+  background: var(--white);
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.serve-grid .serve-card:first-child { margin-left: 0; }
+.serve-grid .serve-card:hover { background: var(--color-bg-alt, #FAFAFA); }
+.serve-grid .serve-card .serve-num {
+  font: 500 11px/1 'SF Mono', monospace;
+  color: var(--mid); letter-spacing: 0.04em;
+}
+.serve-grid .serve-card .serve-cat {
+  font: 600 11px/1.4 'Inter', sans-serif;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--color-eucalyptus);
+}
+.serve-grid .serve-card h3 {
+  font: 600 22px/1.3 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.01em; color: var(--black); margin: 4px 0 0;
+}
+.serve-grid .serve-card p {
+  font: 400 15px/1.6 'DM Sans', sans-serif;
+  color: var(--dark); margin: 0; flex: 1;
+}
+.serve-grid .serve-card .more {
+  margin-top: 14px;
+  display: inline-flex; align-items: center; gap: 4px;
+  font: 510 14px/1 'Inter', sans-serif;
+  color: var(--color-amber-rust); text-decoration: none;
+}
+.serve-grid .serve-card .more:hover { color: var(--color-amber-rust-hover); }
+.serve-grid .serve-card .more .arr { transition: transform 0.15s ease; }
+.serve-grid .serve-card .more:hover .arr { transform: translateX(3px); }
+@media (max-width: 880px) {
+  .serve-grid { grid-template-columns: 1fr; }
+  .serve-grid .serve-card { margin-left: 0; margin-top: -1px; }
+  .serve-grid .serve-card:first-child { margin-top: 0; }
+}
+
+/* ---- How It Works: 4-col timeline with Rust accent stub + Eucalyptus metric ---- */
+.how {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  position: relative;
+}
+.how .how-step {
+  padding: 32px 24px 32px 0;
+  position: relative;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.how .how-step + .how-step { padding-left: 24px; border-left: 1px solid var(--pale); }
+.how .how-step::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 32px; height: 2px; background: var(--color-amber-rust);
+}
+.how .how-step + .how-step::before { left: 24px; }
+.how .step-n {
+  font: 600 11px/1 'SF Mono', monospace;
+  letter-spacing: 0.06em; color: var(--color-amber-rust); margin-top: 18px;
+}
+.how .how-step h3 {
+  font: 600 18px/1.35 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.01em; color: var(--black); margin: 0;
+}
+.how .how-step p {
+  font: 400 14px/1.6 'DM Sans', sans-serif;
+  color: var(--dark); margin: 0; flex: 1;
+}
+.how .step-meta {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 6px; padding: 4px 10px;
+  font: 500 12px/1.4 'SF Mono', monospace;
+  color: var(--color-eucalyptus);
+  background: var(--color-eucalyptus-light);
+  border-radius: 9999px;
+  align-self: flex-start;
+}
+.how .step-meta b { font-weight: 600; }
+@media (max-width: 880px) {
+  .how { grid-template-columns: repeat(2, 1fr); }
+  .how .how-step:nth-child(3) { border-top: 1px solid var(--pale); padding-top: 32px; }
+  .how .how-step:nth-child(3)::before { top: 0; }
+}
+@media (max-width: 560px) {
+  .how { grid-template-columns: 1fr; }
+  .how .how-step + .how-step { border-left: none; border-top: 1px solid var(--pale); padding-left: 0; padding-top: 32px; }
+  .how .how-step + .how-step::before { left: 0; }
+}
+
+/* ---- Testimonial band (Rust quote mark + 3-part cite) ---- */
+.testimonial-band {
+  padding: 96px 0;
+  background: var(--color-bg-alt, #FAFAFA);
+  border-top: 1px solid var(--pale);
+  border-bottom: 1px solid var(--pale);
+}
+.testimonial-band .testimonial-quote-wrap {
+  max-width: 880px; margin: 0 auto; position: relative;
+}
+.testimonial-band .testimonial-mark {
+  display: block;
+  font: 700 clamp(80px, 10vw, 160px) / 0.8 'Inter', serif;
+  color: var(--color-amber-rust);
+  letter-spacing: -0.05em; margin-bottom: -24px;
+}
+.testimonial-band .testimonial-quote {
+  font: 500 clamp(20px, 1.6vw + 12px, 28px) / 1.5 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.015em; color: var(--black);
+  margin: 0 0 32px; max-width: none; padding: 0;
+}
+.testimonial-band .testimonial-quote em {
+  font-style: normal;
+  background: linear-gradient(to top, var(--color-eucalyptus-light) 50%, transparent 50%);
+  padding: 0 2px;
+}
+.testimonial-band .testimonial-cite {
+  display: flex; align-items: center; gap: 14px;
+  font: 510 14px/1.4 'Inter', sans-serif; color: var(--dark);
+}
+.testimonial-band .cite-avatar {
+  width: 40px; height: 40px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 9999px;
+  background: var(--color-amber-rust-light);
+  color: var(--color-amber-rust);
+  font-weight: 600; letter-spacing: 0.02em;
+}
+.testimonial-band .cite-who { display: inline-flex; flex-direction: column; gap: 2px; }
+.testimonial-band .cite-name { font-weight: 600; color: var(--black); }
+.testimonial-band .cite-role { font-size: 13px; color: var(--mid); }
+.testimonial-band .cite-logo {
+  margin-left: auto; padding: 6px 12px;
+  border: 1px solid var(--pale); border-radius: 6px;
+  font: 700 12px/1 'Inter', sans-serif;
+  letter-spacing: 0.04em; color: var(--dark);
+}
+@media (max-width: 768px) {
+  .testimonial-band { padding: 64px 0; }
+  .testimonial-band .testimonial-cite { flex-wrap: wrap; }
+  .testimonial-band .cite-logo { margin-left: 0; margin-top: 8px; }
+}
+
+/* ---- Calendly embed sizing fix (no internal scroll) ---- */
+.calendly-embed-wrap {
+  min-height: 1080px;
+  overflow: visible;
+}
+.calendly-embed-wrap .calendly-inline-widget { height: 1080px !important; }
+@media (max-width: 880px) {
+  .calendly-embed-wrap { min-height: 1180px; }
+  .calendly-embed-wrap .calendly-inline-widget { height: 1180px !important; }
+}
+
+/* ---- Cookie consent banner ---- */
+.cookie-banner {
+  position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 95;
+  background: var(--white);
+  border: 1px solid var(--pale);
+  border-radius: var(--rounded-md);
+  box-shadow: 0 8px 32px rgba(35, 38, 44, 0.12);
+  animation: cookieBannerIn 0.32s ease both;
+}
+@keyframes cookieBannerIn {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.cookie-banner[hidden] { display: none; }
+.cookie-banner-inner {
+  max-width: var(--max-w); margin: 0 auto;
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.cookie-banner-copy {
+  flex: 1 1 320px; margin: 0;
+  font: 400 13px/1.55 'DM Sans', sans-serif; color: var(--dark);
+}
+.cookie-banner-copy a {
+  color: var(--color-amber-rust); text-decoration: underline;
+}
+.cookie-banner-copy a:hover { color: var(--color-amber-rust-hover); }
+.cookie-banner-actions {
+  display: inline-flex; gap: 8px; align-items: center; flex-shrink: 0;
+}
+.cookie-banner-actions .btn { padding: 8px 14px; font-size: 13px; }
+@media (max-width: 560px) {
+  .cookie-banner-inner { padding: 14px 16px; gap: 14px; }
+  .cookie-banner-actions { width: 100%; justify-content: flex-end; }
+  .cookie-banner-actions .btn { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .cookie-banner { animation: none; } }
+
+/* Lift the floating moon above the cookie banner while it is visible */
+body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
+@media (max-width: 560px) {
+  body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 140px; }
+}

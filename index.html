@@ -163,6 +163,14 @@
             <a class="btn btn-ghost" href="/underscore" data-nav="underscore"
                onclick="event.preventDefault();navigate('underscore')">See the API</a>
           </div>
+          <div class="hero-trust">
+            <span class="hero-trust-label">In production with</span>
+            <span class="hero-trust-marks">
+              <span class="trust-mark">4D Financing</span>
+              <span class="trust-mark">Chat Advance</span>
+              <span class="trust-mark">Cohort I</span>
+            </span>
+          </div>
         </div>
         <div class="hero-visual" aria-hidden="true">
           <!-- Score panel -->
@@ -202,64 +210,101 @@
       </div>
     </div>
 
-    <!-- 1. WHO WE SERVE -->
-    <div class="home-section">
+    <!-- STATS BAR (editorial: mono numerals + source attribution) -->
+    <section class="bleed tight" data-content-entity="Home - Metrics">
       <div class="container">
-        <div class="home-section-label">Who we serve</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;">Built for private credit</h2>
-        <p style="font-size:15px;color:var(--mid);margin-bottom:32px;">Servicing the long tail of US small businesses</p>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Deal cycle</span>
+            <span class="stat-num">71<span class="stat-unit">%</span></span>
+            <span class="stat-desc">Reduction in time-to-decision across active customers.</span>
+            <span class="stat-src">Source: Q1 2026 deployments</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Booked volume</span>
+            <span class="stat-num">22<span class="stat-unit">%</span></span>
+            <span class="stat-desc">More booked receivables vs. prior underwriting baseline.</span>
+            <span class="stat-src">Source: Chat Advance pilot, 12mo</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Loss ratio</span>
+            <span class="stat-num">650<span class="stat-unit"> bps</span></span>
+            <span class="stat-desc">Reduction in 90-day default rate at constant approval volume.</span>
+            <span class="stat-src">Source: backtested cohort, 2024&ndash;25</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHO WE SERVE (numbered editorial cards) -->
+    <section class="bleed" data-content-entity="Home - Who We Serve">
+      <div class="container">
+        <div class="sect-head">
+          <span class="eyebrow">Who we serve</span>
+          <h2>Built for private credit teams serving the long tail.</h2>
+          <p class="lede">Three personas, one underwriting fabric. Plug into whichever stage of the lifecycle you own.</p>
+        </div>
         <div class="serve-grid">
           <div class="serve-card">
-            <div class="cat">Funds</div>
-            <h3>Underwrite faster</h3>
-            <p>Score deals via API, monitor portfolios continuously, flag pre-default signals before collections. Stop sticking to known industries — model risk across diverse small businesses.</p>
+            <span class="serve-num">01 / 03</span>
+            <span class="serve-cat">Funds</span>
+            <h3>Underwrite faster, monitor continuously.</h3>
+            <p>Score deals via API. Watch portfolios for pre-default signals before collections. Stop limiting yourself to known industries.</p>
+            <a href="/underscore" class="more" data-nav="underscore" onclick="event.preventDefault();navigate('underscore')">See underscore <span class="arr">&rarr;</span></a>
           </div>
           <div class="serve-card">
-            <div class="cat">Brokerages</div>
-            <h3>Convert more</h3>
-            <p>AI intake agent handles applicants 24/7, builds funder-ready submission packages automatically. No more siloed data or incomplete submissions — everything structured and verified.</p>
+            <span class="serve-num">02 / 03</span>
+            <span class="serve-cat">Brokerages</span>
+            <h3>Convert more, with funder-ready packages.</h3>
+            <p>AI intake handles applicants 24/7 and assembles submissions automatically. No more siloed data or missing docs.</p>
+            <a href="/underchat" class="more" data-nav="underchat" onclick="event.preventDefault();navigate('underchat')">See underchat <span class="arr">&rarr;</span></a>
           </div>
           <div class="serve-card">
-            <div class="cat">Marketplaces</div>
-            <h3>Scale the workflow</h3>
-            <p>End-to-end from application to funded deal. Fully agentic intake, scoring, and matching. Replace manual document review that kills good deals with seconds-fast analysis.</p>
+            <span class="serve-num">03 / 03</span>
+            <span class="serve-cat">Marketplaces</span>
+            <h3>Scale the entire workflow.</h3>
+            <p>End-to-end from application to funded deal. Fully agentic intake, scoring, and matching with audit-grade reasoning.</p>
+            <a href="/copilot" class="more" data-nav="copilot" onclick="event.preventDefault();navigate('copilot')">See co-pilot <span class="arr">&rarr;</span></a>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- METRICS -->
-    <div class="stats-bar stats-bar--compact">
-      <div class="stat-item"><div class="stat-num">71%</div><div class="stat-label">Reduction in deal time</div></div>
-      <div class="stat-item"><div class="stat-num">22%</div><div class="stat-label">More booked receivables</div></div>
-      <div class="stat-item"><div class="stat-num">650<span> bps</span></div><div class="stat-label">Loss ratio reduction</div></div>
-    </div>
-
-    <!-- 2. HOW IT WORKS -->
-    <div class="how-section">
+    <!-- HOW IT WORKS (4-col timeline with Rust accent stubs + Eucalyptus metric chips) -->
+    <section class="bleed alt" data-content-entity="Home - How It Works">
       <div class="container">
-        <div class="home-section-label">How it works</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;">From application to funded deal</h2>
-        <div class="how-timeline">
+        <div class="sect-head">
+          <span class="eyebrow">How it works</span>
+          <h2>From application to funded deal &mdash; in one continuous loop.</h2>
+        </div>
+        <div class="how">
           <div class="how-step">
+            <span class="step-n">STEP 01</span>
             <h3>An applicant or broker starts a conversation</h3>
             <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time.</p>
+            <span class="step-meta"><b>~6 min</b> median intake</span>
           </div>
           <div class="how-step">
+            <span class="step-n">STEP 02</span>
             <h3>Documents are enriched and verified</h3>
             <p>Raw data becomes structured intelligence. Revenue patterns, existing positions, and anomalies surfaced automatically.</p>
+            <span class="step-meta"><b>150+</b> metrics</span>
           </div>
           <div class="how-step">
+            <span class="step-n">STEP 03</span>
             <h3>Risk is scored in seconds</h3>
-            <p>ML models trained on deal outcomes deliver a risk score with full supporting analysis.</p>
+            <p>ML models trained on real deal outcomes deliver a composite score with full supporting analysis.</p>
+            <span class="step-meta"><b>&lt; 3s</b> response</span>
           </div>
           <div class="how-step">
+            <span class="step-n">STEP 04</span>
             <h3>The underwriter makes the call</h3>
-            <p>AI surfaces what matters. The human decides. 30% faster screening, institutional-grade consistency.</p>
+            <p>AI surfaces what matters; the human decides. Institutional consistency with 30% faster screening.</p>
+            <span class="step-meta"><b>30%</b> faster</span>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- 3. SOLUTIONS -->
     <div class="home-section">
@@ -292,18 +337,25 @@
       </div>
     </div>
 
-    <!-- 6. TESTIMONIAL -->
-    <div class="testimonial-section">
+    <!-- TESTIMONIAL (Rust glyph + em-wrapped pull quote + 3-part cite) -->
+    <section class="testimonial-band" data-content-entity="Home - Testimonial">
       <div class="container">
-        <blockquote class="testimonial-quote">
-          We started 4D because business owners deserve a better deal. undersight gives us the underwriting rigor of a large institution without the headcount. Every decision is backed by data, cross-referenced across documents, and fully auditable. That's how we keep our promise to clients — we only fund deals that make sense for them.
-        </blockquote>
-        <cite class="testimonial-cite">
-          <strong>Josh James</strong>
-          <span>Director, 4D Financing</span>
-        </cite>
+        <div class="testimonial-quote-wrap">
+          <span class="testimonial-mark" aria-hidden="true">&ldquo;</span>
+          <blockquote class="testimonial-quote">
+            We started 4D because business owners deserve a better deal. <em>undersight gives us the underwriting rigor of a large institution without the headcount</em> &mdash; every decision backed by data, cross-referenced across documents, and fully auditable.
+          </blockquote>
+          <div class="testimonial-cite">
+            <span class="cite-avatar" aria-hidden="true">JJ</span>
+            <div class="cite-who">
+              <span class="cite-name">Josh James</span>
+              <span class="cite-role">Director, 4D Financing</span>
+            </div>
+            <span class="cite-logo" aria-hidden="true">4D</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
     <!-- 7. CASE STUDY: 4D FINANCING -->
     <div class="case-study case-study--alt" data-content-entity="Home - Case Study: 4D Financing">
@@ -335,12 +387,12 @@
       <div class="calendly-embed-wrap" aria-label="Book a discovery call">
         <div class="calendly-light">
           <!-- Calendly inline widget begin (light mode) -->
-          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?background_color=ffffff&text_color=23262c&primary_color=c97a54" style="min-width:320px;height:700px;"></div>
+          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?hide_gdpr_banner=1&hide_event_type_details=1&background_color=ffffff&text_color=23262c&primary_color=c97a54" style="min-width:320px;height:1080px;"></div>
           <!-- Calendly inline widget end -->
         </div>
         <div class="calendly-dark">
           <!-- Calendly inline widget begin (dark mode) -->
-          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?background_color=1a1d21&text_color=ffffff&primary_color=c97a54" style="min-width:320px;height:700px;"></div>
+          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?hide_gdpr_banner=1&hide_event_type_details=1&background_color=1a1d21&text_color=ffffff&primary_color=c97a54" style="min-width:320px;height:1080px;"></div>
           <!-- Calendly inline widget end -->
         </div>
         <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
@@ -449,6 +501,20 @@
 </footer>
 
 <!-- ============ FLOATING THEME TOGGLE ============ -->
+<!-- ============ COOKIE CONSENT BANNER ============ -->
+<div id="cookieBanner" class="cookie-banner" role="region" aria-label="Cookie consent" hidden>
+  <div class="cookie-banner-inner">
+    <p class="cookie-banner-copy">
+      We use a small set of cookies to keep this site secure and remember your theme preference. No cross-site tracking, no advertising profiles.
+      <a href="https://legal.undersight.ai" target="_blank" rel="noopener">Privacy details &rarr;</a>
+    </p>
+    <div class="cookie-banner-actions">
+      <button type="button" class="btn btn-ghost cookie-decline" onclick="cookieConsent('decline')">Decline non-essential</button>
+      <button type="button" class="btn btn-primary cookie-accept" onclick="cookieConsent('accept')">Accept</button>
+    </div>
+  </div>
+</div>
+
 <button id="themeToggle" class="theme-toggle-floating" data-theme-toggle data-floating
         onclick="toggleTheme()" aria-label="Toggle light or dark theme" title="Toggle theme">
   <svg class="theme-toggle-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2795,6 +2861,31 @@
     }
     setTimeout(initReveals, 100);
   });
+
+  // ---- Cookie consent banner ----
+  // Show on first visit; remember accept/decline in localStorage. We only set
+  // a few first-party cookies (Cloudflare Turnstile for spam protection,
+  // theme preference); no cross-site tracking. Decline removes any optional
+  // analytics hooks that may be added later (none today — placeholder).
+  window.cookieConsent = function(choice) {
+    try { localStorage.setItem('undersight-cookie-consent', choice + ':' + Date.now()); } catch (e) {}
+    var b = document.getElementById('cookieBanner');
+    if (b) b.hidden = true;
+    if (choice === 'decline') {
+      // Hook for future opt-out wiring (analytics, third-party widgets)
+      window.__cookiesDeclined = true;
+    }
+  };
+  (function showCookieBannerIfNeeded() {
+    try {
+      if (localStorage.getItem('undersight-cookie-consent')) return;
+    } catch (e) {}
+    var b = document.getElementById('cookieBanner');
+    if (b) {
+      // Small delay so the banner doesn't fight the page-load animation
+      setTimeout(function () { b.hidden = false; }, 600);
+    }
+  })();
 </script>
 </body>
 </html>
