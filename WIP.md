@@ -251,9 +251,11 @@ Only one breakpoint at 768px. Between 768px-1024px, some layouts (case study, so
 
 ### 24. JSON-LD structured data enhancements
 
-Missing: `logo` property on Organization, `sameAs` for social profiles, `url` on Offer entities, more precise `foundingDate`.
+Still missing: `logo` property on Organization, `url` on Offer entities, more precise `foundingDate`.
 
-- **What to do:** Add `"logo": "https://undersight.ai/images/brand/logo-horizontal-line-primary.svg"`, `"sameAs": ["https://linkedin.com/company/undersight-ai"]`, and `"url"` to each Offer.
+LinkedIn `sameAs` shipped 2026-05-23 via Fibery #313 / PR #19 (commit c0f501e).
+
+- **What to do:** Add `"logo": "https://undersight.ai/images/brand/logo-horizontal-line-primary.svg"` and `"url"` on each Offer.
 - **Effort:** Quick
 - **Files:** `index.html` (JSON-LD blocks in head)
 - **Dependencies:** None

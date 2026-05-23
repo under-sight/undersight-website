@@ -72,6 +72,25 @@ git push -u origin HEAD
 git checkout main && git merge dev && git push && git checkout dev
 ```
 
+### Production Hotfix Workflow (off `main`, not `dev`)
+
+For urgent fixes that must ship to `undersight.ai` immediately and **must not**
+pull in unmerged feature work from `dev` (which usually carries
+in-progress branches like `feat/website-v2`):
+
+1. Branch off `origin/main`, not `origin/dev`: `git checkout main && git pull && git checkout -b hotfix/<id>-<slug>`.
+2. Make the minimal change. Commit. Push the branch.
+3. Open a PR with `--base main` (never `--base dev`).
+4. Merge into `main`.
+5. `sync-dev.yml` auto-merges `main` → `dev` on every push to main, so the
+   hotfix lands on dev automatically — no manual back-merge.
+6. Trigger the production deploy if you don't want to wait for the hourly
+   cron: `gh workflow run deploy-production.yml --ref main`.
+
+Do **not** branch hotfixes off `dev` — when `dev` is ahead of `main` with
+unfinished features, those features will follow the hotfix into prod at
+the next `dev → main` merge.
+
 ### Cross-Agent Collision Rules
 
 1. One agent gets one worktree and one branch.
@@ -601,7 +620,8 @@ a `DEPRECATED` header — production traffic flows through the Pages Function.
 ## Known Issues
 
 - Cloudflare Pages needs `FIBERY_TOKEN` env var set in dashboard for whitepaper leads
-- Sign In link points to `staging.app.underchat.ai` (intentional until prod auth)
+- Sign In links (header + `/docs` gate) point to `staging.app.underchat.ai/login`
+  as an interim measure. Replace with a real login gate per Fibery #307.
 - Font stack validated (Inter) but display font TBD
 - Test suite has curl flakes on large HTML responses from Python dev server
   (meta tags, OG tags occasionally fail — not real issues)
