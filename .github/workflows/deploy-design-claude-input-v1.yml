@@ -1,0 +1,34 @@
+name: Deploy design/claude-input-v1 (static bundle)
+
+# Publishes the Claude Design handoff bundle under
+# dist/design/v1/ to Cloudflare Pages on the
+# `design-claude-input-v1` branch alias. No Fibery build —
+# the bundle is pre-rendered HTML/CSS shipped as-is.
+
+on:
+  push:
+    branches:
+      - design/claude-input-v1
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-design-claude-input-v1
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage bundle into dist/design/v1/
+        run: |
+          mkdir -p dist/design/v1
+          cp -R design-bundles/v1/. dist/design/v1/
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name undersight-website --branch design-claude-input-v1 --commit-dirty=true

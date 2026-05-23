@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>undersight | AI Underwriting for Private Credit — Polished Mock</title>
+<meta name="description" content="Polished marketing site mock for undersight.ai. Home, solution pages, blog, post, docs gate. Light / dark.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/polished.css">
+</head>
+<body>
+
+<!-- ====================== HEADER ====================== -->
+<header class="site-header">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand" data-nav="home" data-screen-label="Brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><g fill="currentColor"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g><rect x="31" y="21" width="2" height="35" fill="var(--surface)"/><circle cx="32" cy="32" r="5" fill="var(--surface)"/></svg>
+      undersight
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <div class="dd">
+        <button type="button" aria-haspopup="true">Solutions
+          <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,4 6,8 10,4"/></svg>
+        </button>
+        <div class="dd-panel" role="menu">
+          <a class="dd-item" href="#" data-nav="underscore">
+            <span class="ico">S</span>
+            <span><span class="ttl">underscore</span><span class="sub">API-first risk scoring. 150+ SMB metrics in a single call.</span></span>
+          </a>
+          <a class="dd-item" href="#" data-nav="underchat">
+            <span class="ico">U</span>
+            <span><span class="ttl">underchat agent</span><span class="sub">AI agent that engages clients 24/7 across every channel.</span></span>
+          </a>
+          <a class="dd-item" href="#" data-nav="copilot">
+            <span class="ico">C</span>
+            <span><span class="ttl">underchat co-pilot</span><span class="sub">Underwriter workspace with hybrid ML + agentic grading.</span></span>
+          </a>
+          <a class="dd-item" href="#" data-nav="rfi">
+            <span class="ico">R</span>
+            <span><span class="ttl">RFI &amp; intake</span><span class="sub">Funder-ready submission packages from raw client input.</span></span>
+          </a>
+        </div>
+      </div>
+      <a href="#" data-nav="docs">Docs</a>
+      <a href="#" data-nav="blog">Blog</a>
+      <a href="#" data-nav="post">Customers</a>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="themeIcon"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.5 3.5l1.5 1.5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/></svg>
+      </button>
+      <a class="btn btn-ghost" href="#" data-nav="docs">Sign in</a>
+      <a class="btn btn-primary" href="#">Book a discovery call
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h6M7 3l3 3-3 3"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ====================== HOME ====================== -->
+<section class="page is-active" id="page-home" data-screen-label="Home">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow">AI Underwriting Infrastructure</span>
+        <h1 style="margin-top:24px;">Underwrite the long&nbsp;tail of small business <em>without losing rigor</em>.</h1>
+        <p class="lede">Agentic intake, ML-graded risk, continuous portfolio monitoring — one fabric for funds, brokerages, and marketplaces serving US SMBs.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-primary">Book a discovery call
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h6M7 3l3 3-3 3"/></svg>
+          </a>
+          <a href="#" class="btn btn-ghost" data-nav="underscore">See the API</a>
+        </div>
+        <div class="trust">
+          <span class="label">In production with</span>
+          <span class="marks">
+            <span class="mark">4D Financing</span>
+            <span class="mark">Chat Advance</span>
+            <span class="mark">Cohort I</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- HERO VISUAL -->
+      <div class="hero-visual" aria-hidden="true">
+        <!-- score panel -->
+        <div class="hv-card hv-card-1">
+          <div class="score-head">
+            <div class="who">
+              <span class="nm">Riverside Cafe LLC</span>
+              <span class="meta">NAICS 722511 · scored 11s ago</span>
+            </div>
+            <span class="rating">R4</span>
+          </div>
+          <div class="dim-row"><span class="k">Revenue quality</span><span class="bar"><i style="width:62%"></i></span><span class="v">56.0</span></div>
+          <div class="dim-row"><span class="k">Existing debt</span><span class="bar"><i class="warn" style="width:74%"></i></span><span class="v">66.6</span></div>
+          <div class="dim-row"><span class="k">Inflow quality</span><span class="bar"><i style="width:34%"></i></span><span class="v">33.5</span></div>
+          <div class="dim-row"><span class="k">Outflow quality</span><span class="bar"><i class="ok" style="width:68%"></i></span><span class="v">61.8</span></div>
+          <div class="dim-row"><span class="k">Net cashflow</span><span class="bar"><i style="width:22%"></i></span><span class="v">20.8</span></div>
+        </div>
+        <!-- chat -->
+        <div class="hv-card hv-card-2">
+          <div class="chat-head">
+            <div class="agent">
+              <span class="av">M</span>
+              <span>
+                <span class="nm">Macy</span><br>
+                <span class="role">underchat · intake</span>
+              </span>
+            </div>
+            <span class="live">live</span>
+          </div>
+          <div style="display:flex;flex-direction:column;">
+            <span class="bubble agent">Hi Maria — a few questions on Q1 deposits, excluding tax refunds?</span>
+            <span class="bubble client">$284k</span>
+            <span class="typing"><i></i><i></i><i></i></span>
+          </div>
+        </div>
+        <!-- score chip -->
+        <div class="hv-card hv-card-3 score-chip">
+          <div class="grade">742</div>
+          <div class="sub">composite</div>
+          <span class="delta">↑ 12 wk/wk</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <section class="bleed tight">
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <span class="label">Deal cycle</span>
+          <span class="num">71<span class="unit">%</span></span>
+          <span class="desc">Reduction in time-to-decision across active customers.</span>
+          <span class="src">Source: Q1 2026 deployments</span>
+        </div>
+        <div class="stat">
+          <span class="label">Booked volume</span>
+          <span class="num">22<span class="unit">%</span></span>
+          <span class="desc">More booked receivables vs. prior underwriting baseline.</span>
+          <span class="src">Source: Chat Advance pilot, 12mo</span>
+        </div>
+        <div class="stat">
+          <span class="label">Loss ratio</span>
+          <span class="num">650<span class="unit"> bps</span></span>
+          <span class="desc">Reduction in 90-day default rate at constant approval volume.</span>
+          <span class="src">Source: backtested cohort, 2024–25</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO WE SERVE -->
+  <section class="bleed">
+    <div class="container">
+      <div class="sect-head">
+        <span class="eyebrow">Who we serve</span>
+        <h2>Built for private credit teams serving the long tail.</h2>
+        <p class="lede">Three personas, one underwriting fabric. Plug into whichever stage of the lifecycle you own.</p>
+      </div>
+      <div class="serve-grid">
+        <div class="serve-card">
+          <span class="num">01 / 03</span>
+          <span class="cat">Funds</span>
+          <h3>Underwrite faster, monitor continuously.</h3>
+          <p>Score deals via API. Watch portfolios for pre-default signals before collections. Stop limiting yourself to known industries.</p>
+          <a href="#" class="more" data-nav="underscore">See underscore <span class="arr">→</span></a>
+        </div>
+        <div class="serve-card">
+          <span class="num">02 / 03</span>
+          <span class="cat">Brokerages</span>
+          <h3>Convert more, with funder-ready packages.</h3>
+          <p>AI intake handles applicants 24/7 and assembles submissions automatically. No more siloed data or missing docs.</p>
+          <a href="#" class="more" data-nav="underchat">See underchat <span class="arr">→</span></a>
+        </div>
+        <div class="serve-card">
+          <span class="num">03 / 03</span>
+          <span class="cat">Marketplaces</span>
+          <h3>Scale the entire workflow.</h3>
+          <p>End-to-end from application to funded deal. Fully agentic intake, scoring, and matching with audit-grade reasoning.</p>
+          <a href="#" class="more" data-nav="copilot">See co-pilot <span class="arr">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="bleed alt">
+    <div class="container">
+      <div class="sect-head">
+        <span class="eyebrow">How it works</span>
+        <h2>From application to funded deal — in one continuous loop.</h2>
+      </div>
+      <div class="how">
+        <div class="how-step">
+          <span class="step-n">STEP 01</span>
+          <h3>An applicant or broker starts a conversation</h3>
+          <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time.</p>
+          <span class="meta"><b>~6&nbsp;min</b> median intake</span>
+        </div>
+        <div class="how-step">
+          <span class="step-n">STEP 02</span>
+          <h3>Documents are enriched and verified</h3>
+          <p>Raw data becomes structured intelligence. Revenue patterns, existing positions, and anomalies surfaced automatically.</p>
+          <span class="meta"><b>150+</b> metrics</span>
+        </div>
+        <div class="how-step">
+          <span class="step-n">STEP 03</span>
+          <h3>Risk is scored in seconds</h3>
+          <p>ML models trained on real deal outcomes deliver a composite score with full supporting analysis.</p>
+          <span class="meta"><b>&lt; 3s</b> response</span>
+        </div>
+        <div class="how-step">
+          <span class="step-n">STEP 04</span>
+          <h3>The underwriter makes the call</h3>
+          <p>AI surfaces what matters; the human decides. Institutional consistency with 30% faster screening.</p>
+          <span class="meta"><b>30%</b> faster</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUTIONS — rich rows -->
+  <section class="bleed">
+    <div class="container">
+      <div class="sect-head row">
+        <div>
+          <span class="eyebrow">Solutions</span>
+          <h2 style="margin-top:14px;">Three products. One underwriting fabric.</h2>
+        </div>
+        <a href="#" class="btn btn-link" data-nav="underscore">Compare all <span class="arr">→</span></a>
+      </div>
+
+      <!-- underscore -->
+      <div class="solrow">
+        <div class="sol-copy">
+          <span class="sol-tag">— Risk scoring</span>
+          <div class="sol-name">underscore</div>
+          <h3 class="sol-claim">150+ SMB metrics from a single API call.</h3>
+          <p class="sol-body">Send bank statements, QuickBooks exports, or Plaid connections — get back composite scores, 21 sub-scorecards, and MCA position detection in seconds.</p>
+          <div class="sol-pills">
+            <span class="chip"><span class="dot"></span>API + Batch</span>
+            <span class="chip"><span class="dot"></span>Bank PDFs</span>
+            <span class="chip"><span class="dot"></span>Plaid · Yodlee · MX</span>
+          </div>
+          <div class="sol-cta">
+            <a href="#" class="btn btn-primary" data-nav="underscore">Explore underscore</a>
+            <a href="#" class="btn btn-link">Read API docs <span class="arr">→</span></a>
+          </div>
+        </div>
+        <div class="sol-visual">
+          <div class="frame">
+            <div class="frame-head">
+              <span class="ttl">POST /v1/score · response</span>
+              <span class="sub">~280 ms</span>
+            </div>
+            <div class="dim-row"><span class="k">Composite</span><span class="bar"><i class="warn" style="width:47%"></i></span><span class="v">47.5</span></div>
+            <div class="dim-row"><span class="k">Revenue qual.</span><span class="bar"><i style="width:56%"></i></span><span class="v">56.0</span></div>
+            <div class="dim-row"><span class="k">Existing debt</span><span class="bar"><i style="width:66%"></i></span><span class="v">66.6</span></div>
+            <div class="dim-row"><span class="k">Net cashflow</span><span class="bar"><i style="width:21%"></i></span><span class="v">20.8</span></div>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+              <span class="chip"><span class="dot" style="background:var(--accent)"></span>Stacking 67.0</span>
+              <span class="chip"><span class="dot"></span>2 active funders</span>
+              <span class="chip"><span class="dot"></span>NSF rate 0.0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- underchat -->
+      <div class="solrow flip">
+        <div class="sol-copy">
+          <span class="sol-tag">— Client engagement</span>
+          <div class="sol-name">underchat agent</div>
+          <h3 class="sol-claim">Brand-matched AI that resolves 80% of cases.</h3>
+          <p class="sol-body">Engage clients 24/7 across web, email, SMS, and Slack — handling intake, RFIs, document collection, recovery, and renewals with guardrails you control.</p>
+          <div class="sol-pills">
+            <span class="chip is-on"><span class="dot"></span>Web · Email</span>
+            <span class="chip"><span class="dot"></span>SMS · Slack</span>
+            <span class="chip"><span class="dot"></span>Guardrailed</span>
+          </div>
+          <div class="sol-cta">
+            <a href="#" class="btn btn-primary" data-nav="underchat">Explore underchat</a>
+            <a href="#" class="btn btn-link">See use cases <span class="arr">→</span></a>
+          </div>
+        </div>
+        <div class="sol-visual">
+          <div class="frame">
+            <div class="chat-head">
+              <div class="agent">
+                <span class="av">M</span>
+                <span>
+                  <span class="nm">Macy</span><br>
+                  <span class="role">brand-matched intake agent</span>
+                </span>
+              </div>
+              <span class="live">live</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0;">
+              <span class="bubble agent">Hi Maria — I have a few questions on your application.</span>
+              <span class="bubble client">go ahead</span>
+              <span class="bubble agent">What were your Q1 deposits, excluding tax refunds?</span>
+              <span class="bubble client">$284k. Most of it in March.</span>
+              <span class="typing"><i></i><i></i><i></i></span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+              <span class="chip"><span class="dot"></span>Auto-resolve 80%</span>
+              <span class="chip"><span class="dot"></span>RFI workflows</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- copilot -->
+      <div class="solrow">
+        <div class="sol-copy">
+          <span class="sol-tag">— Copilot</span>
+          <div class="sol-name">underchat co-pilot</div>
+          <h3 class="sol-claim">Hybrid ML + agentic grading, one pane of glass.</h3>
+          <p class="sol-body">Screen deals in minutes, analyze transactions with AI, and ask questions with inline source citations. The underwriter makes the call — backed by audit-grade reasoning.</p>
+          <div class="sol-pills">
+            <span class="chip"><span class="dot"></span>Hybrid scoring</span>
+            <span class="chip"><span class="dot"></span>Portfolio view</span>
+            <span class="chip"><span class="dot"></span>Human-in-loop</span>
+          </div>
+          <div class="sol-cta">
+            <a href="#" class="btn btn-primary" data-nav="copilot">Explore co-pilot</a>
+            <a href="#" class="btn btn-link">Watch product tour <span class="arr">→</span></a>
+          </div>
+        </div>
+        <div class="sol-visual">
+          <div class="frame">
+            <div class="frame-head">
+              <span class="ttl">Composite grade · deal #4471</span>
+              <span class="sub">12 sources cited</span>
+            </div>
+            <div class="grade-ring">
+              <div class="ring">
+                <svg viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--line)" stroke-width="10"/>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--ink)" stroke-width="10" stroke-linecap="round" stroke-dasharray="195 314" />
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="69 314" stroke-dashoffset="-195" />
+                </svg>
+                <div class="center"><div class="grade">B+</div><div class="lab">Grade</div></div>
+              </div>
+              <div class="legend">
+                <div class="item"><span class="dot ml"></span><span>ML baseline</span><span class="v">0.62</span></div>
+                <div class="item"><span class="dot ag"></span><span>Agentic adjustment</span><span class="v">+0.22</span></div>
+                <div class="src">Stacking risk · NSF 0 · Revenue concentration ↓</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CASE STUDY TILES -->
+  <section class="bleed alt">
+    <div class="container">
+      <div class="sect-head row">
+        <div>
+          <span class="eyebrow">Case studies</span>
+          <h2 style="margin-top:14px;">In production with operators who run real books.</h2>
+        </div>
+        <a href="#" class="btn btn-link">All customer stories <span class="arr">→</span></a>
+      </div>
+      <div class="cs-grid">
+        <article class="cs-tile">
+          <div class="cs-thumb">
+            <div class="pattern"></div>
+            <span class="badge">Chat Advance · Pilot</span>
+            <div class="metric">
+              <div class="num">71%</div>
+              <div class="lab">Deal-cycle reduction</div>
+            </div>
+            <span class="corner">2025 · 12 weeks</span>
+          </div>
+          <div class="cs-body">
+            <div class="ttl">From 3-day turnaround to same-day decisions, without growing the underwriting bench.</div>
+            <div class="desc">Replacing manual document review with agentic intake and ML-graded risk freed three FTEs of capacity in the first quarter.</div>
+          </div>
+          <div class="cs-stats">
+            <div><div class="n">3.1×</div><div class="l">Throughput</div></div>
+            <div><div class="n">22%</div><div class="l">More booked</div></div>
+            <div><div class="n">$0</div><div class="l">Added headcount</div></div>
+          </div>
+          <div class="cs-foot">
+            <a href="#" class="more" data-nav="post">Read the case study <span class="arr">→</span></a>
+            <span class="dl">PDF · 8&nbsp;min read</span>
+          </div>
+        </article>
+
+        <article class="cs-tile">
+          <div class="cs-thumb">
+            <div class="pattern"></div>
+            <span class="badge">4D Financing · Production</span>
+            <div class="metric">
+              <div class="num">650<span style="font-size:24px;letter-spacing:-.01em;color:var(--ink-2);"> bps</span></div>
+              <div class="lab">Loss-ratio reduction</div>
+            </div>
+            <span class="corner">2024–25 · 18 months</span>
+          </div>
+          <div class="cs-body">
+            <div class="ttl">Institutional-grade underwriting with a four-person team.</div>
+            <div class="desc">4D Financing uses underscore + co-pilot to give every applicant the rigor of a large institution — without the headcount.</div>
+          </div>
+          <div class="cs-stats">
+            <div><div class="n">4 FTE</div><div class="l">Team size</div></div>
+            <div><div class="n">$48M</div><div class="l">Originated</div></div>
+            <div><div class="n">100%</div><div class="l">Audit-ready</div></div>
+          </div>
+          <div class="cs-foot">
+            <a href="#" class="more" data-nav="post">Read the case study <span class="arr">→</span></a>
+            <span class="dl">PDF · 6&nbsp;min read</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="testimonial" data-screen-label="Testimonial">
+    <div class="tq">
+      <span class="mark" aria-hidden="true">“</span>
+      <blockquote>
+        We started 4D because business owners deserve a better deal. <em>undersight gives us the underwriting rigor of a large institution without the headcount</em> — every decision backed by data, cross-referenced across documents, and fully auditable.
+      </blockquote>
+      <div class="cite">
+        <span class="av">JJ</span>
+        <div class="who">
+          <span class="nm">Josh James</span>
+          <span class="role">Director, 4D Financing</span>
+        </div>
+        <span class="logo">4D</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container cta-inner">
+      <div>
+        <span class="eyebrow">Get started</span>
+        <h2 style="margin-top:16px;">See undersight against <em>your</em> deal book.</h2>
+        <p class="lede">Bring us a recent application or a portfolio sample. In 30 minutes we'll show what changes when underwriting becomes a continuous loop.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-primary">Book a discovery call
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h6M7 3l3 3-3 3"/></svg>
+          </a>
+          <a href="#" class="btn btn-ghost" data-nav="underscore">See the API</a>
+        </div>
+        <p class="contact">Or email us at <a href="mailto:contact@undersight.ai">contact@undersight.ai</a></p>
+      </div>
+      <div class="cta-card">
+        <div class="cc-eyebrow">Next available · This week</div>
+        <h3>30-minute discovery call with Kyle</h3>
+        <div class="calwk">
+          <div class="day"><div class="d">Mon</div><div class="n">19</div></div>
+          <div class="day open"><div class="d">Tue</div><div class="n">20</div></div>
+          <div class="day open"><div class="d">Wed</div><div class="n">21</div></div>
+          <div class="day"><div class="d">Thu</div><div class="n">22</div></div>
+          <div class="day open"><div class="d">Fri</div><div class="n">23</div></div>
+        </div>
+        <div class="slots">
+          <button type="button" class="slot">09:30</button>
+          <button type="button" class="slot taken">10:00</button>
+          <button type="button" class="slot">11:00</button>
+          <button type="button" class="slot">14:30</button>
+          <button type="button" class="slot">15:00</button>
+          <button type="button" class="slot taken">16:00</button>
+        </div>
+        <div class="foot">Times shown in your local zone · Powered by Calendly</div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ====================== UNDERSCORE ====================== -->
+<section class="page" id="page-underscore" data-screen-label="Underscore">
+  <div class="sol-hero">
+    <div class="container sol-hero-inner">
+      <div>
+        <span class="eyebrow">Solution · Risk scoring</span>
+        <h1>150+ SMB-specific metrics from a single API call.</h1>
+        <p class="lede">ML and agentic scoring built for private credit. Send bank statements, QuickBooks exports, or Plaid connections — get back institutional-grade risk intelligence in seconds.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-primary">Book a discovery call</a>
+          <a href="#" class="btn btn-ghost">Read the API reference</a>
+        </div>
+        <div class="endpoint">
+          <span class="method">POST</span>
+          <span class="path">/v1/score</span>
+          <span>·</span>
+          <span style="color:var(--ink-3);">bank statements, CSVs, QuickBooks, Plaid, raw PDFs</span>
+        </div>
+      </div>
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span class="ttl">Composite · Riverside Cafe LLC</span><span class="sub">R4 · 280 ms</span></div>
+          <div class="dim-row"><span class="k">Revenue qual.</span><span class="bar"><i style="width:56%"></i></span><span class="v">56.0</span></div>
+          <div class="dim-row"><span class="k">Existing debt</span><span class="bar"><i class="warn" style="width:66%"></i></span><span class="v">66.6</span></div>
+          <div class="dim-row"><span class="k">Inflow qual.</span><span class="bar"><i style="width:34%"></i></span><span class="v">33.5</span></div>
+          <div class="dim-row"><span class="k">Outflow qual.</span><span class="bar"><i class="ok" style="width:62%"></i></span><span class="v">61.8</span></div>
+          <div class="dim-row"><span class="k">Net cashflow</span><span class="bar"><i style="width:21%"></i></span><span class="v">20.8</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API preview -->
+  <section class="bleed alt">
+    <div class="container">
+      <div class="sect-head"><span class="eyebrow">API preview</span><h2>Deep SMB intelligence, not just a number.</h2><p class="lede">Every response includes a composite score, 5 weighted dimensions, 21 sub-scorecards, and 150+ granular metrics — all derived from business context, not generic credit bureau data.</p></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom:10px;">Request</div>
+          <div class="code-block"><span class="mth">POST</span> /v1/score
+<span class="cmt">Authorization: Bearer us_live_…</span>
+
+{
+  <span class="key">"applicant"</span>: {
+    <span class="key">"legal_name"</span>: <span class="str">"Riverside Cafe LLC"</span>,
+    <span class="key">"industry_naics"</span>: <span class="str">"722511"</span>
+  },
+  <span class="key">"bank_data"</span>: {
+    <span class="key">"source"</span>: <span class="str">"plaid"</span>,
+    <span class="key">"access_token"</span>: <span class="str">"access-sandbox-…"</span>
+  }
+}</div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:10px;">Response (abridged)</div>
+          <div class="code-block">{
+  <span class="key">"score"</span>: <span class="num">47.5</span>,
+  <span class="key">"rating"</span>: <span class="str">"R4"</span>,
+  <span class="key">"dimensions"</span>: {
+    <span class="key">"revenue_quality"</span>:  { <span class="key">"score"</span>: <span class="num">56.0</span>, <span class="key">"weight"</span>: <span class="str">"22%"</span> },
+    <span class="key">"existing_debt"</span>:    { <span class="key">"score"</span>: <span class="num">66.6</span>, <span class="key">"weight"</span>: <span class="str">"26%"</span> },
+    <span class="key">"net_cashflow"</span>:     { <span class="key">"score"</span>: <span class="num">20.8</span>, <span class="key">"weight"</span>: <span class="str">"28%"</span> }
+  },
+  <span class="key">"mca_positions"</span>: {
+    <span class="key">"active_funder_count"</span>: <span class="num">2</span>,
+    <span class="key">"stacking_score"</span>:      <span class="num">67.0</span>
+  }
+}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capabilities -->
+  <section class="bleed">
+    <div class="container">
+      <div class="sect-head"><span class="eyebrow">Capabilities</span><h2>Built for the metrics that matter in private credit.</h2></div>
+      <div class="card-grid cols-4">
+        <div class="card"><div class="badge">150+</div><h3>SMB-specific metrics</h3><p>Revenue sufficiency, concentration HHI, deposit regularity, cash decay velocity, balance volatility.</p></div>
+        <div class="card"><div class="badge">21</div><h3>Weighted sub-scorecards</h3><p>Industry-tuned weights by NAICS, organized across 5 dimensions of business health.</p></div>
+        <div class="card"><div class="badge">ML+</div><h3>Agentic scoring</h3><p>ML on real outcomes combined with agentic reasoning that understands industry context.</p></div>
+        <div class="card"><div class="badge">&lt;3s</div><h3>API response</h3><p>Full scorecard with metrics, dimensions, MCA detection, and recommendations in one call.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MCA callout -->
+  <section class="bleed alt">
+    <div class="container">
+      <div class="split">
+        <div class="split-copy">
+          <span class="eyebrow">MCA position detection</span>
+          <h2>Especially strong where it matters most.</h2>
+          <p><b style="color:var(--ink);">underscore</b> detects existing MCA positions from bank transaction data — no self-reporting. It identifies funders, estimates remittance burden, and flags stacking risk.</p>
+          <ul>
+            <li>Detect active funder count and daily debit overlap</li>
+            <li>Estimate daily remittance as a percentage of deposits</li>
+            <li>Identify refinancing dependency and treadmill behavior</li>
+            <li>Flag new funder entries and same-day funding-and-debt events</li>
+            <li>Score stacking structure, creditor behavior, and payment performance</li>
+          </ul>
+        </div>
+        <div class="metrics-grid">
+          <div><div class="label">Active funders</div><div class="value">2</div><div class="desc">From ACH debit patterns</div></div>
+          <div><div class="label">Daily remit.</div><div class="value">57.6%</div><div class="desc">Of daily deposits consumed</div></div>
+          <div><div class="label">Payment freq.</div><div class="value">95%</div><div class="desc">Debits on most business days</div></div>
+          <div><div class="label">Stacking</div><div class="value">67.0</div><div class="desc">Manageable, low overlap</div></div>
+          <div><div class="label">MCA dep. %</div><div class="value">33%</div><div class="desc">Financing vs. organic revenue</div></div>
+          <div><div class="label">Refinance dep.</div><div class="value">96.0</div><div class="desc">Low — no debt treadmill</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Integrations -->
+  <section class="bleed">
+    <div class="container">
+      <div class="sect-head center"><span class="eyebrow">Integrations</span><h2>Connects to your stack.</h2></div>
+      <div class="logos">
+        <div>Plaid</div><div>Yodlee</div><div>MX</div><div>QuickBooks</div><div>Xero</div><div>Slack</div>
+      </div>
+      <div class="caps">
+        <span class="c">Bank statement PDFs</span>
+        <span class="c">CSV / Excel</span>
+        <span class="c">Webhooks</span>
+        <span class="c">REST API</span>
+        <span class="c">Batch API</span>
+      </div>
+    </div>
+  </section>
+
+  <div data-shared="cta"></div>
+</section>
+
+<!-- ====================== UNDERCHAT ====================== -->
+<section class="page" id="page-underchat" data-screen-label="Underchat">
+  <div class="sol-hero">
+    <div class="container sol-hero-inner">
+      <div>
+        <span class="eyebrow">Solution · Client engagement</span>
+        <h1>An agent that engages clients <em style="color:var(--accent);font-style:normal;">24/7</em>.</h1>
+        <p class="lede">Brand-matched AI agents that handle intake, RFIs, document collection, recovery, and renewals across web, email, SMS, and Slack. Resolves 80% of cases autonomously — escalates the rest.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-primary">Book a discovery call</a>
+          <a href="#" class="btn btn-ghost">See live demo</a>
+        </div>
+        <div class="trust" style="margin-top:32px;">
+          <span class="label" style="color:var(--ink-3);">Channels</span>
+          <span class="marks">
+            <span class="mark">Web</span>
+            <span class="mark">Email</span>
+            <span class="mark">SMS</span>
+            <span class="mark">Slack</span>
+          </span>
+        </div>
+      </div>
+      <div>
+        <div class="frame">
+          <div class="chat-head">
+            <div class="agent"><span class="av">M</span><span><span class="nm">Macy</span><br><span class="role">brand-matched intake</span></span></div>
+            <span class="live">live</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <span class="bubble agent">Hi Maria — I have a few questions on your application.</span>
+            <span class="bubble client">go ahead</span>
+            <span class="bubble agent">What were your Q1 deposits, excluding tax refunds?</span>
+            <span class="bubble client">$284k. Most of it in March.</span>
+            <span class="bubble agent">Got it. I see two MCA positions on the statement — are you actively paying both?</span>
+            <span class="typing"><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="bleed alt">
+    <div class="container">
+      <div class="sect-head"><span class="eyebrow">Use cases</span><h2>One agent. The full lifecycle.</h2></div>
+      <div class="card-grid cols-3">
+        <div class="card"><span class="tag">Intake</span><h3>24/7 application capture</h3><p>Collect bank statements, answer questions, resolve gaps. Hand off complete packages to your team.</p></div>
+        <div class="card"><span class="tag">RFI</span><h3>Programmatic follow-ups</h3><p>Identify missing data, ask the right questions, and assemble responses into structured fields.</p></div>
+        <div class="card"><span class="tag">Recovery</span><h3>Pre-default outreach</h3><p>Detect early stress, open conversations, offer restructure options before collections.</p></div>
+        <div class="card"><span class="tag">Renewals</span><h3>Lifecycle marketing</h3><p>Right-time outreach based on remaining balance and account health signals.</p></div>
+        <div class="card"><span class="tag">Servicing</span><h3>Inbox triage</h3><p>Categorize, draft, and reply across email and SMS — escalate complex threads with full context.</p></div>
+        <div class="card"><span class="tag">Guardrails</span><h3>Compliant by default</h3><p>Brand voice, regulatory templates, and human-in-loop for sensitive flows.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bleed">
+    <div class="container">
+      <div class="split">
+        <div class="split-copy">
+          <span class="eyebrow">Why it works</span>
+          <h2>Built for the cadence of small-business credit.</h2>
+          <p>underchat is not a generic chatbot wrapper. It is grounded in your underwriting policies, your document requirements, and your funder relationships.</p>
+          <ul>
+            <li>Trained on real intake transcripts and document patterns</li>
+            <li>Persistent memory across channels and conversations</li>
+            <li>Brand-matched tone, voice, and visual styling</li>
+            <li>Inline citations for every commitment it makes</li>
+          </ul>
+        </div>
+        <div>
+          <div class="frame">
+            <div class="frame-head"><span class="ttl">Resolution rate · last 30d</span><span class="sub">2,481 conversations</span></div>
+            <div style="display:flex;align-items:end;gap:14px;justify-content:space-between;height:140px;padding:14px 0;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;"><div style="height:80%;width:100%;background:var(--accent);border-radius:6px 6px 0 0;"></div><span style="font-family:var(--font-num);font-size:11px;color:var(--ink-3);">Mon</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;"><div style="height:76%;width:100%;background:var(--accent);border-radius:6px 6px 0 0;opacity:.85;"></div><span style="font-family:var(--font-num);font-size:11px;color:var(--ink-3);">Tue</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;"><div style="height:88%;width:100%;background:var(--accent);border-radius:6px 6px 0 0;"></div><span style="font-family:var(--font-num);font-size:11px;color:var(--ink-3);">Wed</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;"><div style="height:82%;width:100%;background:var(--accent);border-radius:6px 6px 0 0;opacity:.9;"></div><span style="font-family:var(--font-num);font-size:11px;color:var(--ink-3);">Thu</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;"><div style="height:78%;width:100%;background:var(--accent);border-radius:6px 6px 0 0;opacity:.85;"></div><span style="font-family:var(--font-num);font-size:11px;color:var(--ink-3);">Fri</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;"><div style="height:60%;width:100%;background:var(--accent);border-radius:6px 6px 0 0;opacity:.7;"></div><span style="font-family:var(--font-num);font-size:11px;color:var(--ink-3);">Sat</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;"><div style="height:54%;width:100%;background:var(--accent);border-radius:6px 6px 0 0;opacity:.65;"></div><span style="font-family:var(--font-num);font-size:11px;color:var(--ink-3);">Sun</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line-soft);padding-top:14px;">
+              <div><div style="font-family:var(--font-sans);font-weight:700;font-size:24px;color:var(--ink);letter-spacing:-.03em;font-feature-settings:'tnum';">80%</div><div style="font-size:11px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-top:4px;">Auto-resolved</div></div>
+              <div><div style="font-family:var(--font-sans);font-weight:700;font-size:24px;color:var(--ink);letter-spacing:-.03em;font-feature-settings:'tnum';">3.4 min</div><div style="font-size:11px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-top:4px;">Median response</div></div>
+              <div><div style="font-family:var(--font-sans);font-weight:700;font-size:24px;color:var(--ink);letter-spacing:-.03em;font-feature-settings:'tnum';">4.7</div><div style="font-size:11px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-top:4px;">CSAT (1–5)</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div data-shared="cta"></div>
+</section>
+
+<!-- ====================== COPILOT ====================== -->
+<section class="page" id="page-copilot" data-screen-label="Copilot">
+  <div class="sol-hero">
+    <div class="container sol-hero-inner">
+      <div>
+        <span class="eyebrow">Solution · Underwriter copilot</span>
+        <h1>The underwriter makes the call. <em style="color:var(--accent);font-style:normal;">AI does the work.</em></h1>
+        <p class="lede">A single-pane underwriting workspace. Hybrid ML + agentic grading, transaction analysis, and conversational deal Q&amp;A with inline source citations. 30% faster screening.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-primary">Book a discovery call</a>
+          <a href="#" class="btn btn-ghost">Watch product tour</a>
+        </div>
+      </div>
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span class="ttl">Composite grade · deal #4471</span><span class="sub">12 sources cited</span></div>
+          <div class="grade-ring">
+            <div class="ring">
+              <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--line)" stroke-width="10"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--ink)" stroke-width="10" stroke-linecap="round" stroke-dasharray="195 314" />
+                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="69 314" stroke-dashoffset="-195" />
+              </svg>
+              <div class="center"><div class="grade">B+</div><div class="lab">Grade</div></div>
+            </div>
+            <div class="legend">
+              <div class="item"><span class="dot ml"></span><span>ML baseline</span><span class="v">0.62</span></div>
+              <div class="item"><span class="dot ag"></span><span>Agentic adj.</span><span class="v">+0.22</span></div>
+              <div class="src">Stacking · NSF 0 · Revenue concentration ↓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="bleed alt">
+    <div class="container">
+      <div class="sect-head"><span class="eyebrow">Workflow</span><h2>Three moves that change how a deal gets graded.</h2></div>
+      <div class="card-grid cols-3">
+        <div class="card"><div class="badge">01</div><h3>Screen in minutes</h3><p>AI identifies clear declines instantly. Deal queues are prioritized by risk signal strength, freeing capacity for complex deals.</p></div>
+        <div class="card"><div class="badge">02</div><h3>Analyze with AI</h3><p>Revenue patterns, anomalies, and risk factors surfaced in a unified transaction viewer. Every deal gets institutional-grade analysis.</p></div>
+        <div class="card"><div class="badge">03</div><h3>Ask &amp; cite</h3><p>Chat about deals, raise RFIs, and get structured responses with inline data citations. The underwriter makes the call.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bleed">
+    <div class="container">
+      <div class="sect-head row">
+        <div><span class="eyebrow">Inside the workspace</span><h2 style="margin-top:14px;">Everything one workspace pulls together.</h2></div>
+      </div>
+      <div class="card-grid cols-4">
+        <div class="card"><h3>Deal queue</h3><p>Prioritized by risk signal strength and SLA.</p></div>
+        <div class="card"><h3>Transaction viewer</h3><p>Patterns, anomalies, and MCA positions in one canvas.</p></div>
+        <div class="card"><h3>Composite grade</h3><p>Hybrid ML + agentic, with full reasoning trail.</p></div>
+        <div class="card"><h3>Ask co-pilot</h3><p>Natural language Q&amp;A with inline source citations.</p></div>
+        <div class="card"><h3>RFI builder</h3><p>One-click follow-ups routed via underchat.</p></div>
+        <div class="card"><h3>Portfolio monitor</h3><p>Continuous pre-default signal detection.</p></div>
+        <div class="card"><h3>Audit trail</h3><p>Every decision logged, exportable, and reviewable.</p></div>
+        <div class="card"><h3>Integrations</h3><p>Salesforce, Hubspot, Slack, custom webhooks.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div data-shared="cta"></div>
+</section>
+
+<!-- ====================== RFI ====================== -->
+<section class="page" id="page-rfi" data-screen-label="RFI">
+  <div class="sol-hero">
+    <div class="container sol-hero-inner">
+      <div>
+        <span class="eyebrow">Solution · RFI &amp; intake</span>
+        <h1>Funder-ready submission packages from raw client input.</h1>
+        <p class="lede">Macy collects bank statements, fills out the application, resolves gaps, and assembles a clean submission package. Your team picks it up where the work actually starts.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-primary">Book a discovery call</a>
+          <a href="#" class="btn btn-ghost">See sample package</a>
+        </div>
+      </div>
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span class="ttl">Submission package · #SUB-2014</span><span class="sub">complete · ready to send</span></div>
+          <div style="display:grid;gap:10px;">
+            <div class="dim-row" style="grid-template-columns:1fr auto;"><span class="k">Bank statements (6mo)</span><span class="v" style="color:var(--color-eucalyptus);">✓ Verified</span></div>
+            <div class="dim-row" style="grid-template-columns:1fr auto;"><span class="k">Voided check</span><span class="v" style="color:var(--color-eucalyptus);">✓ Verified</span></div>
+            <div class="dim-row" style="grid-template-columns:1fr auto;"><span class="k">Driver's license</span><span class="v" style="color:var(--color-eucalyptus);">✓ Verified</span></div>
+            <div class="dim-row" style="grid-template-columns:1fr auto;"><span class="k">Application form</span><span class="v" style="color:var(--color-eucalyptus);">✓ Complete</span></div>
+            <div class="dim-row" style="grid-template-columns:1fr auto;"><span class="k">MCA disclosures</span><span class="v" style="color:var(--color-eucalyptus);">✓ Disclosed</span></div>
+            <div class="dim-row" style="grid-template-columns:1fr auto;"><span class="k">RFI responses</span><span class="v" style="color:var(--color-eucalyptus);">3 / 3 resolved</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="bleed alt">
+    <div class="container">
+      <div class="sect-head"><span class="eyebrow">How it flows</span><h2>From a single message to a funder-ready package.</h2></div>
+      <div class="how">
+        <div class="how-step"><span class="step-n">STEP 01</span><h3>Agent starts the conversation</h3><p>Macy reaches out via the channel the client used — web, email, or SMS.</p><span class="meta"><b>~10s</b> first response</span></div>
+        <div class="how-step"><span class="step-n">STEP 02</span><h3>Documents collected and parsed</h3><p>OCR + agentic parsing extracts transactions and detects MCA positions automatically.</p><span class="meta"><b>0 manual</b> data entry</span></div>
+        <div class="how-step"><span class="step-n">STEP 03</span><h3>Gaps resolved with RFIs</h3><p>Missing fields trigger structured follow-up questions until everything is verified.</p><span class="meta"><b>80%</b> auto-resolved</span></div>
+        <div class="how-step"><span class="step-n">STEP 04</span><h3>Package delivered</h3><p>Complete submission with enriched data, signed disclosures, and preliminary risk signals.</p><span class="meta"><b>Ready to fund</b></span></div>
+      </div>
+    </div>
+  </section>
+
+  <div data-shared="cta"></div>
+</section>
+
+<!-- ====================== BLOG INDEX ====================== -->
+<section class="page" id="page-blog" data-screen-label="Blog">
+  <div class="blog-hero">
+    <div class="container">
+      <span class="eyebrow">The undersight blog</span>
+      <h1 style="margin-top:18px;">Field notes on AI underwriting, private credit, and the small business stack.</h1>
+      <p class="lede">Operator-level writing from the team building the underwriting fabric.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="blog-filters">
+      <button type="button" class="f is-on">All</button>
+      <button type="button" class="f">Underwriting</button>
+      <button type="button" class="f">AI agents</button>
+      <button type="button" class="f">Product</button>
+      <button type="button" class="f">Customer stories</button>
+      <button type="button" class="f">Engineering</button>
+    </div>
+
+    <!-- featured -->
+    <div class="blog-featured">
+      <div class="thumb">
+        <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,transparent 0 14px,var(--line) 14px 15px);opacity:.4;"></div>
+        <div style="position:absolute;right:24px;bottom:24px;font-family:var(--font-sans);font-weight:700;font-size:96px;color:var(--ink);letter-spacing:-.04em;line-height:1;font-feature-settings:'tnum';">71<span style="font-size:48px;">%</span></div>
+        <span class="badge" style="position:absolute;top:18px;left:18px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--rounded-pill);background:var(--surface);border:1px solid var(--line);font-family:var(--font-sans);font-size:11.5px;font-weight:600;color:var(--ink);letter-spacing:0.04em;">Featured · Case study</span>
+      </div>
+      <div class="body">
+        <div class="meta" style="display:flex;gap:10px;font-size:12px;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase;font-weight:600;font-family:var(--font-sans);font-feature-settings:'cv01';">
+          <span>Customer stories</span><span>·</span><span>May 12, 2026</span><span>·</span><span>8 min read</span>
+        </div>
+        <h2>How Chat Advance cut their deal cycle by 71% in twelve weeks.</h2>
+        <p>What happens when document review stops being a bottleneck. A close look at the underwriting workflow before and after, with the metrics our team tracked weekly.</p>
+        <a class="btn btn-link more" href="#" data-nav="post">Read the case study <span class="arr">→</span></a>
+      </div>
+    </div>
+
+    <!-- grid -->
+    <div class="blog-grid">
+      <article class="blog-card">
+        <div class="thumb"><div class="pattern"></div><span class="glyph">underscore</span></div>
+        <div class="meta"><span>Underwriting</span><span class="dot">·</span><span>May 8, 2026</span></div>
+        <h3>The 150-metric problem: why one composite score isn't enough.</h3>
+        <p>A walkthrough of the five dimensions and 21 sub-scorecards behind every underscore decision.</p>
+      </article>
+      <article class="blog-card">
+        <div class="thumb"><div class="pattern" style="background-image:repeating-linear-gradient(135deg,transparent 0 10px,var(--line) 10px 11px);"></div><span class="glyph">macy</span></div>
+        <div class="meta"><span>AI agents</span><span class="dot">·</span><span>Apr 29, 2026</span></div>
+        <h3>Designing an AI agent that knows when to escalate.</h3>
+        <p>Guardrails, escalation patterns, and the cases we deliberately do not automate.</p>
+      </article>
+      <article class="blog-card">
+        <div class="thumb"><div class="pattern" style="background-image:repeating-linear-gradient(0deg,transparent 0 6px,var(--line) 6px 7px);"></div><span class="glyph">MCA</span></div>
+        <div class="meta"><span>Underwriting</span><span class="dot">·</span><span>Apr 18, 2026</span></div>
+        <h3>Stacking, treadmills, and what the bank statement really shows.</h3>
+        <p>How we detect MCA positions from transaction data alone — and why self-reporting underreports them by ~40%.</p>
+      </article>
+      <article class="blog-card">
+        <div class="thumb"><div class="pattern"></div><span class="glyph">co-pilot</span></div>
+        <div class="meta"><span>Product</span><span class="dot">·</span><span>Apr 9, 2026</span></div>
+        <h3>What we learned from giving underwriters chat-based deal Q&amp;A.</h3>
+        <p>Six months in: which questions get asked, which get cited, and what we changed about the UI.</p>
+      </article>
+      <article class="blog-card">
+        <div class="thumb"><div class="pattern" style="background-image:repeating-linear-gradient(90deg,transparent 0 8px,var(--line) 8px 9px);"></div><span class="glyph">infra</span></div>
+        <div class="meta"><span>Engineering</span><span class="dot">·</span><span>Mar 28, 2026</span></div>
+        <h3>Building deterministic agents on top of non-deterministic models.</h3>
+        <p>The audit-trail patterns that make hybrid ML + agentic systems defensible in a regulated context.</p>
+      </article>
+      <article class="blog-card">
+        <div class="thumb"><div class="pattern" style="background-image:repeating-linear-gradient(45deg,transparent 0 12px,var(--line) 12px 13px);"></div><span class="glyph">4D</span></div>
+        <div class="meta"><span>Customer stories</span><span class="dot">·</span><span>Mar 18, 2026</span></div>
+        <h3>Inside 4D Financing's lean underwriting practice.</h3>
+        <p>Four people. $48M originated. 650 bps loss-ratio reduction. The toolkit and the workflow.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== POST ====================== -->
+<section class="page" id="page-post" data-screen-label="Post">
+  <article class="post">
+    <a href="#" class="back" data-nav="blog">← Back to the blog</a>
+    <div class="post-meta">
+      <span>Customer stories</span><span>·</span><span>May 12, 2026</span><span>·</span><span>8 min read</span>
+    </div>
+    <h1>How Chat Advance cut their deal cycle by 71% in twelve weeks.</h1>
+    <p class="post-lede">What happens when document review stops being a bottleneck. A close look at the underwriting workflow before and after, with the metrics our team tracked weekly.</p>
+    <div class="post-hero">
+      <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,transparent 0 14px,var(--line) 14px 15px);opacity:.4;"></div>
+      <div style="position:absolute;right:32px;bottom:32px;font-family:var(--font-sans);font-weight:700;font-size:120px;color:var(--ink);letter-spacing:-.04em;line-height:1;font-feature-settings:'tnum';">71<span style="font-size:60px;">%</span></div>
+    </div>
+    <div class="post-body">
+      <p>Chat Advance came to us with a problem we'd seen a hundred times: deals were stalling not because they were bad, but because nobody had time to look at them. A four-person underwriting team was reading PDFs, copying numbers into spreadsheets, and chasing brokers for missing pages. Same-day decisions were a goal, never a default.</p>
+      <h2>The before picture</h2>
+      <p>Every application went through three manual passes — intake screening, transaction analysis, and committee review — with a median turnaround of three days. The team's bottleneck wasn't decision quality. It was data quality.</p>
+      <blockquote>"We were spending 70% of our underwriting time on document handling and 30% on actual judgment. We knew the ratio had to flip."</blockquote>
+      <h2>What changed</h2>
+      <p>We deployed underchat as the front door — handling intake, document collection, and RFI follow-ups across web and SMS — and pushed every clean submission through underscore for an initial composite grade and MCA detection.</p>
+      <ul>
+        <li><strong>Intake automation:</strong> Macy replaced the email back-and-forth. Median time from first message to complete package dropped from 41 hours to 9.</li>
+        <li><strong>Scoring at the door:</strong> underscore returned a graded scorecard in under three seconds, eliminating the "first read" pass entirely.</li>
+        <li><strong>Co-pilot for committee:</strong> Underwriters used chat-based deal Q&amp;A to interrogate the package — answers came back with inline citations.</li>
+      </ul>
+      <h2>The results</h2>
+      <p>Twelve weeks in, the headline numbers were already striking: 71% reduction in deal cycle time, 22% more booked receivables at constant approval volume, and zero added headcount. But the metric the team cares about most isn't on the deck — it's how many evenings their underwriters spend at their desks.</p>
+      <h3>What we'd do differently</h3>
+      <p>The fastest unlock turned out to be the brokerage-facing intake flow, not the internal copilot. If we were starting over, we'd ship that first and let everything else follow from clean data.</p>
+    </div>
+    <div class="post-author">
+      <span class="av">KH</span>
+      <div>
+        <div class="nm">Kyle Harlowe</div>
+        <div class="role">Co-founder &amp; CEO · <b>undersight</b></div>
+      </div>
+      <a class="btn btn-ghost" href="#" style="margin-left:auto;">Subscribe</a>
+    </div>
+  </article>
+</section>
+
+<!-- ====================== DOCS GATE ====================== -->
+<section class="page" id="page-docs" data-screen-label="Docs">
+  <div class="docs-gate">
+    <div class="lock">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="11" width="16" height="10" rx="2"/>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+      </svg>
+    </div>
+    <span class="eyebrow no-rule" style="display:inline-block;">API documentation</span>
+    <h1 style="margin-top:14px;">Sign in to access docs.</h1>
+    <p>Reference guides, SDKs, and integration resources for the undersight platform. Sign in with your team account to continue.</p>
+    <a href="#" class="btn btn-primary">Sign in to view docs</a>
+    <div class="note">Powered by Clerk · Only authorized undersight customers can access documentation.</div>
+  </div>
+</section>
+
+</main>
+
+<!-- ====================== FOOTER ====================== -->
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="mark" href="#" data-nav="home">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><g fill="currentColor"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g><rect x="31" y="21" width="2" height="35" fill="var(--surface)"/><circle cx="32" cy="32" r="5" fill="var(--surface)"/></svg>
+            undersight
+          </a>
+          <p class="desc">AI underwriting infrastructure for private credit. Built for funds, brokerages, and marketplaces serving the long tail.</p>
+          <div class="social">
+            <a href="#" aria-label="LinkedIn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+            <a href="#" aria-label="X"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#" aria-label="GitHub"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <a href="#" data-nav="underscore">underscore</a>
+          <a href="#" data-nav="underchat">underchat agent</a>
+          <a href="#" data-nav="copilot">underchat co-pilot</a>
+          <a href="#" data-nav="rfi">RFI &amp; intake</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="#" data-nav="docs">API docs</a>
+          <a href="#" data-nav="blog">Blog</a>
+          <a href="#" data-nav="post">Customer stories</a>
+          <a href="#">Pricing</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#">About</a>
+          <a href="#">Careers</a>
+          <a href="#">Press</a>
+          <a href="#">Security</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <a href="#">Book a call</a>
+          <a href="mailto:contact@undersight.ai">contact@undersight.ai</a>
+          <a href="#">Support</a>
+          <a href="#">Status</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container footer-bar">
+      <span class="copy">© 2026 undersight. All rights reserved.</span>
+      <div class="meta">
+        <span class="status"><span class="dot"></span>All systems operational</span>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">SOC 2</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ====================== SHARED CTA TEMPLATE ====================== -->
+<template id="tpl-cta">
+  <section class="cta">
+    <div class="container cta-inner">
+      <div>
+        <span class="eyebrow">Get started</span>
+        <h2 style="margin-top:16px;">See undersight against <em>your</em> deal book.</h2>
+        <p class="lede">Bring us a recent application or a portfolio sample. In 30 minutes we'll show what changes when underwriting becomes a continuous loop.</p>
+        <div class="cta-row">
+          <a href="#" class="btn btn-primary">Book a discovery call</a>
+          <a href="#" class="btn btn-ghost" data-nav="underscore">See the API</a>
+        </div>
+        <p class="contact">Or email us at <a href="mailto:contact@undersight.ai">contact@undersight.ai</a></p>
+      </div>
+      <div class="cta-card">
+        <div class="cc-eyebrow">Next available · This week</div>
+        <h3>30-minute discovery call with Kyle</h3>
+        <div class="calwk">
+          <div class="day"><div class="d">Mon</div><div class="n">19</div></div>
+          <div class="day open"><div class="d">Tue</div><div class="n">20</div></div>
+          <div class="day open"><div class="d">Wed</div><div class="n">21</div></div>
+          <div class="day"><div class="d">Thu</div><div class="n">22</div></div>
+          <div class="day open"><div class="d">Fri</div><div class="n">23</div></div>
+        </div>
+        <div class="slots">
+          <button type="button" class="slot">09:30</button>
+          <button type="button" class="slot taken">10:00</button>
+          <button type="button" class="slot">11:00</button>
+          <button type="button" class="slot">14:30</button>
+          <button type="button" class="slot">15:00</button>
+          <button type="button" class="slot taken">16:00</button>
+        </div>
+        <div class="foot">Times shown in your local zone · Powered by Calendly</div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script>
+  // ---- Inject the shared CTA into every solution page ----
+  (function injectCTA() {
+    const tpl = document.getElementById('tpl-cta');
+    document.querySelectorAll('[data-shared="cta"]').forEach(slot => {
+      slot.replaceWith(tpl.content.cloneNode(true));
+    });
+  })();
+
+  // ---- Navigation ----
+  function navigate(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('is-active'));
+    const el = document.getElementById('page-' + page);
+    if (el) {
+      el.classList.add('is-active');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+    document.querySelectorAll('[data-nav]').forEach(a => {
+      a.classList.toggle('is-active', a.dataset.nav === page);
+    });
+    history.replaceState({}, '', '#' + page);
+  }
+
+  document.addEventListener('click', e => {
+    const target = e.target.closest('[data-nav]');
+    if (target) {
+      e.preventDefault();
+      navigate(target.dataset.nav);
+    }
+  });
+
+  // initial route
+  const initial = (location.hash || '#home').slice(1);
+  if (document.getElementById('page-' + initial)) navigate(initial);
+
+  // ---- Theme toggle ----
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.classList.toggle('theme-dark');
+    html.classList.toggle('theme-light', !isDark);
+    try { localStorage.setItem('undersight-theme', isDark ? 'dark' : 'light'); } catch(e){}
+    updateThemeIcon(isDark);
+  }
+  function updateThemeIcon(isDark) {
+    const ico = document.getElementById('themeIcon');
+    if (!ico) return;
+    ico.innerHTML = isDark
+      ? '<path d="M13 8.5A5 5 0 1 1 7.5 3a4 4 0 0 0 5.5 5.5z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+      : '<circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.5 3.5l1.5 1.5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/>';
+  }
+  try {
+    const saved = localStorage.getItem('undersight-theme');
+    if (saved === 'dark') {
+      document.documentElement.classList.add('theme-dark');
+      document.documentElement.classList.remove('theme-light');
+      updateThemeIcon(true);
+    }
+  } catch(e){}
+</script>
+</body>
+</html>
