@@ -290,14 +290,17 @@
 <section class="page" id="page-rfi"></section>
 <section class="page" id="page-copilot"></section>
 
-<!-- ============ DOCS (Clerk-gated) ============ -->
+<!-- ============ DOCS (auth via staging app — see #307) ============ -->
+<!-- TODO(#307): replace this interim link with a real login gate.
+     Public docs must not advertise Clerk; until #307 lands, all auth entry
+     routes to the staging underchat login. -->
 <section class="page" id="page-docs">
   <div class="docs-gate" id="docsGate">
     <div class="lock-icon">&#128274;</div>
     <h2>API Documentation</h2>
     <p>Access our API reference, integration guides, and developer resources. Sign in with your undersight account to continue.</p>
-    <button class="btn btn-primary" onclick="clerkSignIn()">Sign In to View Docs</button>
-    <div class="note">Powered by Clerk. Only authorized undersight customers can access documentation.</div>
+    <a class="btn btn-primary" href="https://staging.app.underchat.ai/login">Sign In to View Docs</a>
+    <div class="note">Only authorized undersight customers can access documentation.</div>
   </div>
   <div id="docsContent" style="display:none;">
     <div class="section-header">
@@ -2360,13 +2363,6 @@
     document.querySelectorAll('.blog-card').forEach(card => {
       card.style.display = (tag === 'all' || card.dataset.tag === tag) ? '' : 'none';
     });
-  }
-
-  function clerkSignIn() {
-    if (confirm('This will use Clerk authentication in production.\n\nSimulate successful sign-in for skeleton preview?')) {
-      document.getElementById('docsGate').style.display = 'none';
-      document.getElementById('docsContent').style.display = 'block';
-    }
   }
 
   function closeDropdowns() {
