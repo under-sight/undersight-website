@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wave 6 plan — Home page migration to input design</title>
+<style>
+  :root {
+    --ink: #23262C;
+    --ink-2: #3A3F47;
+    --muted: #6B7280;
+    --border: #E8EAED;
+    --hairline: #F0F1F2;
+    --accent: #C97A54;
+    --accent-soft: rgba(201, 122, 84, 0.08);
+    --insight: #6B9E8C;
+    --insight-soft: rgba(107, 158, 140, 0.08);
+    --error: #D05454;
+    --bg: #F7F8F8;
+    --canvas: #FFFFFF;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-body: 'DM Sans', -apple-system, system-ui, sans-serif;
+    --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  /* Title */
+  .doc-eyebrow {
+    display: inline-block;
+    font: 600 11px/1.4 var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font: 700 clamp(28px, 2.6vw + 14px, 44px) / 1.1 var(--font-sans);
+    font-feature-settings: 'cv01', 'ss03';
+    letter-spacing: -0.025em;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .doc-lede {
+    color: var(--muted);
+    font-size: 17px;
+    margin: 0 0 32px;
+    max-width: 720px;
+  }
+
+  /* Pinned ACK strip */
+  .ack {
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    border-left: 3px solid var(--accent);
+  }
+  .ack strong { color: var(--ink); font-weight: 600; font-family: var(--font-sans); }
+  .ack p { margin: 0; font-size: 14px; color: var(--ink-2); }
+  .ack-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  /* Section bands */
+  h2 {
+    font: 600 22px/1.3 var(--font-sans);
+    font-feature-settings: 'cv01', 'ss03';
+    letter-spacing: -0.015em;
+    margin: 48px 0 16px;
+    color: var(--ink);
+  }
+  h2 .num {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--accent);
+    color: var(--canvas);
+    border-radius: 50%;
+    font: 600 12px/1 var(--font-sans);
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  h3 {
+    font: 600 16px/1.35 var(--font-sans);
+    font-feature-settings: 'cv01', 'ss03';
+    letter-spacing: -0.005em;
+    margin: 24px 0 8px;
+    color: var(--ink);
+  }
+  h3 .eyebrow {
+    display: inline-block;
+    font: 600 10px/1 var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--insight);
+    margin-right: 8px;
+    padding: 3px 6px;
+    background: var(--insight-soft);
+    border-radius: 4px;
+    vertical-align: 2px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card.warn { border-left: 3px solid var(--error); }
+  .card.insight { border-left: 3px solid var(--insight); }
+  .card.action { border-left: 3px solid var(--accent); }
+  .card.note { background: var(--hairline); }
+
+  ul { margin: 8px 0; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  li code { font: 500 12px/1.3 var(--font-mono); background: var(--hairline); padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+  p { margin: 8px 0; }
+  p code, td code, dd code { font: 500 12px/1.3 var(--font-mono); background: var(--hairline); padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--hairline);
+    font: 600 11px/1.4 var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.input { background: var(--insight-soft); }
+  td.output { background: var(--accent-soft); }
+
+  /* Code blocks */
+  pre {
+    background: var(--ink);
+    color: #E8EAED;
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font: 400 12.5px/1.55 var(--font-mono);
+    margin: 12px 0;
+  }
+  pre code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+
+  /* Step list */
+  ol.steps {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+    counter-reset: step;
+  }
+  ol.steps li {
+    counter-increment: step;
+    padding: 10px 14px 10px 44px;
+    margin: 6px 0;
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    position: relative;
+  }
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    width: 22px; height: 22px;
+    background: var(--insight);
+    color: var(--canvas);
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 600 11px/1 var(--font-sans);
+  }
+
+  /* Pills */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    font: 600 11px/1.4 var(--font-sans);
+    margin-right: 4px;
+  }
+  .pill.preserve { background: var(--insight-soft); color: var(--insight); }
+  .pill.change { background: var(--accent-soft); color: var(--accent); }
+  .pill.skip { background: var(--hairline); color: var(--muted); }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  .toc {
+    position: sticky;
+    top: 16px;
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .toc h4 {
+    margin: 0 0 8px;
+    font: 600 11px/1.4 var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .toc a {
+    display: block;
+    padding: 4px 0;
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+  .toc a:hover { color: var(--accent); }
+
+  .actions-bar {
+    position: sticky;
+    bottom: 16px;
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-top: 32px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    box-shadow: 0 12px 32px rgba(35,38,44,0.08);
+  }
+  .actions-bar .lede {
+    flex: 1;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+  }
+  .actions-bar a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font: 600 14px/1 var(--font-sans);
+    text-decoration: none;
+  }
+  .actions-bar a.primary { background: var(--accent); color: #fff; }
+  .actions-bar a.ghost { border: 1px solid var(--border); color: var(--ink); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="doc-eyebrow">Plan · awaiting approval</span>
+<h1>Wave 6 — Wholesale home page migration to the input design</h1>
+<p class="doc-lede">
+  Replace the home page section markup verbatim with the Claude Design source (the <strong>input design</strong>), then patch in CMS bindings, Calendly URLs, and link routes so no behavior breaks. Solutions detail pages, blog, docs, contact, footer, cookie banner, theme toggle, whitepaper modal — all untouched. Production (<code>main</code>) untouched.
+</p>
+
+<div class="ack">
+  <span class="ack-icon">!</span>
+  <div>
+    <p><strong>Direction change.</strong> After reviewing <a href="/tools/hero-compare.html" style="color:var(--accent)">/tools/hero-compare.html</a>, Kyle's call: input design is materially better. Wave 5's incremental polish for #13-#16 is being collapsed into this single migration. Wave 5 tasks for blog (#18, #19, #20), typography on non-home (#21), and docs (#22) remain pending after Wave 6.</p>
+  </div>
+</div>
+
+<div class="toc">
+  <h4>Sections</h4>
+  <a href="#preserve">1. Preservation contract — what must keep working</a>
+  <a href="#strategy">2. Strategy</a>
+  <a href="#substitutions">3. Markup substitutions (input → migration)</a>
+  <a href="#renderer">4. Solution-row renderer rewrite</a>
+  <a href="#css">5. CSS migration</a>
+  <a href="#files">6. Files to modify</a>
+  <a href="#oos">7. Out of scope</a>
+  <a href="#exec">8. Execution plan</a>
+  <a href="#verify">9. Verification</a>
+  <a href="#promote">10. Promotion</a>
+</div>
+
+<h2 id="preserve"><span class="num">1</span>Preservation contract</h2>
+
+<p>Everything below MUST keep working after the migration. The script block at <code>index.html</code> lines 419-2864 reads/writes these IDs, fires these handlers, and respects these contracts.</p>
+
+<h3><span class="eyebrow">preserve</span>13 DOM IDs the script block reads/writes</h3>
+<table>
+  <thead><tr><th>ID</th><th>Where</th><th>Read/written by</th></tr></thead>
+  <tbody>
+    <tr><td><code>heroTitle</code></td><td>hero h1</td><td><code>renderContent()</code> line 2237-2248 — splits hero entity title on first period, inner-htmls with <code>.accent</code> span</td></tr>
+    <tr><td><code>heroSubtitle</code></td><td>hero p</td><td><code>renderContent()</code> line 2250 — textContent from <code>Home - Hero _body</code></td></tr>
+    <tr><td><code>homeSolutions</code></td><td>solutions section mount point</td><td><code>renderContent()</code> line 2291-2348 — clears + appends solution rows from Fibery</td></tr>
+    <tr><td><code>caseStudyChatAdvanceInner</code></td><td>inside Chat Advance tile</td><td><code>renderHomeCaseStudy()</code> line 2184 — injects Fibery body before scaffolding</td></tr>
+    <tr><td><code>caseStudy4DFinancingInner</code></td><td>inside 4D Financing tile</td><td>same as above</td></tr>
+    <tr><td><code>ctaTitle</code></td><td>CTA h2</td><td><code>renderContent()</code> line 2277</td></tr>
+    <tr><td><code>ctaSubtitle</code></td><td>CTA lede</td><td><code>renderContent()</code> line 2281</td></tr>
+    <tr><td><code>wpOverlay, wpTitle, wpDesc, wpEmail, wpForm, wpSuccess, wpError, wpTurnstile</code></td><td>whitepaper modal</td><td>OUTSIDE <code>#page-home</code>; untouched</td></tr>
+  </tbody>
+</table>
+
+<h3><span class="eyebrow">preserve</span>7 <code>data-content-entity</code> attributes (Fibery contracts)</h3>
+<div class="card insight">
+  <p style="margin:0;font-size:13px;">
+    <span class="pill preserve">Home - Metrics</span>
+    <span class="pill preserve">Home - Who We Serve</span>
+    <span class="pill preserve">Home - How It Works</span>
+    <span class="pill preserve">Home - Case Study: Chat Advance</span>
+    <span class="pill preserve">Home - Case Study: 4D Financing</span>
+    <span class="pill preserve">Home - Testimonial</span>
+    <span class="pill preserve">Home - CTA</span>
+  </p>
+  <p style="margin-top:8px;font-size:12px;color:var(--muted);">All seven must be present on their corresponding sections so the build-time CMS validator passes.</p>
+</div>
+
+<h3><span class="eyebrow">preserve</span>SPA routes + external URLs + modal triggers</h3>
+<div class="grid-2">
+  <div class="card insight">
+    <strong style="font-family:var(--font-sans);font-size:13px;">Internal routes</strong>
+    <ul style="font-size:13px;">
+      <li><code>/underscore</code> × 3 (hero, Who We Serve, CTA)</li>
+      <li><code>/underchat</code> × 1 (Who We Serve)</li>
+      <li><code>/copilot</code> × 1 (Who We Serve)</li>
+    </ul>
+    <p style="margin:0;font-size:12px;color:var(--muted);">Pattern: <code>&lt;a href="/x" data-nav="x" onclick="event.preventDefault();navigate('x')"&gt;</code></p>
+  </div>
+  <div class="card insight">
+    <strong style="font-family:var(--font-sans);font-size:13px;">External</strong>
+    <ul style="font-size:13px;">
+      <li>Calendly: <code>https://calendly.com/d/cym7-q65-cht/discovery</code> (×3 — hero, CTA primary, CTA card)</li>
+      <li><code>mailto:contact@undersight.ai</code> (CTA section)</li>
+    </ul>
+  </div>
+  <div class="card insight">
+    <strong style="font-family:var(--font-sans);font-size:13px;">Modal triggers</strong>
+    <ul style="font-size:13px;">
+      <li><code>openCaseStudy()</code>, <code>open4DCaseStudy()</code></li>
+      <li><code>openWhitepaperModal('Chat Advance Case Study')</code></li>
+      <li><code>openWhitepaperModal('4D Financing Case Study')</code></li>
+    </ul>
+  </div>
+  <div class="card insight">
+    <strong style="font-family:var(--font-sans);font-size:13px;">JS hooks called against #page-home</strong>
+    <ul style="font-size:13px;">
+      <li><code>renderContent(data)</code> — fires on boot</li>
+      <li><code>renderHomeCaseStudy(data, entity, innerId)</code></li>
+      <li><code>solutionMiniGraphic(page)</code> — score/chat/grade ring</li>
+      <li><code>initReveals()</code> — on each page mount</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card note">
+  <strong style="font-family:var(--font-sans);">Cookie banner + theme toggle</strong>
+  <p style="margin:6px 0 0;font-size:13px;">Both live OUTSIDE <code>#page-home</code> (siblings of all <code>.page</code> sections, inserted just before <code>&lt;/body&gt;</code>). Migration must NOT move them. Whitepaper modal markup also lives outside — untouched.</p>
+</div>
+
+<h2 id="strategy"><span class="num">2</span>Strategy</h2>
+<p>
+  The input design and current dev share most class names already (<code>.bleed</code>, <code>.bleed.alt</code>, <code>.bleed.tight</code>, <code>.sect-head</code>, <code>.solrow</code>, <code>.cs-tile</code>, <code>.testimonial-band</code>). The gap is markup <em>structure</em> and CSS <em>fidelity</em>, not class naming.
+</p>
+<div class="card action">
+  <strong>Approach: copy the input design home page section verbatim, then patch in CMS bindings and link routes.</strong>
+  <ol class="steps" style="margin-top:12px;">
+    <li>Extract <code>&lt;section id="page-home"&gt;...&lt;/section&gt;</code> from <code>tools/input-design/index.html</code> lines 66-486</li>
+    <li><strong>Strip</strong> the stats bar per Kyle's task #13 (until attribution is right)</li>
+    <li>Patch in preservation contract: IDs, data-content-entity, links, Calendly URL, modal triggers</li>
+    <li>Replace current <code>#page-home</code> section in <code>index.html</code> (lines 131-435) with the patched markup</li>
+    <li>Update <code>renderContent()</code> solution-row generator (lines 2291-2348) to emit input design's <code>.solrow .sol-copy .sol-visual</code> structure</li>
+    <li>Import input design's section CSS from <code>tools/input-design/css/polished.css</code> into <code>css/main.css</code>, replacing our current section blocks with the polished.css versions</li>
+    <li>Add fluid type tokens from polished.css to <code>tokens/tokens.css</code></li>
+  </ol>
+</div>
+
+<h2 id="substitutions"><span class="num">3</span>Markup substitutions</h2>
+<p>For each row, LEFT is what's in input design (placeholders / hardcoded), RIGHT is what migration writes.</p>
+
+<table>
+  <thead><tr><th style="width:46%">Input design source</th><th style="width:54%">Migration writes</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="input"><code>&lt;h1&gt;Underwrite the long tail of small business &lt;em&gt;without losing rigor&lt;/em&gt;.&lt;/h1&gt;</code></td>
+      <td class="output"><code>&lt;h1 id="heroTitle"&gt;&lt;/h1&gt;</code> — renderContent populates from Fibery</td>
+    </tr>
+    <tr>
+      <td class="input"><code>&lt;p class="lede"&gt;Agentic intake, ML-graded risk...&lt;/p&gt;</code></td>
+      <td class="output"><code>&lt;p class="lede" id="heroSubtitle"&gt;&lt;/p&gt;</code></td>
+    </tr>
+    <tr>
+      <td class="input">Hero <code>&lt;a href="#" class="btn btn-primary"&gt;Book a discovery call&lt;/a&gt;</code></td>
+      <td class="output"><code>href="https://calendly.com/d/cym7-q65-cht/discovery" target="_blank" rel="noopener"</code></td>
+    </tr>
+    <tr>
+      <td class="input">Hero <code>&lt;a href="#" class="btn btn-ghost" data-nav="underscore"&gt;See the API&lt;/a&gt;</code></td>
+      <td class="output">Add real route + click handler: <code>href="/underscore" data-nav="underscore" onclick="event.preventDefault();navigate('underscore')"</code></td>
+    </tr>
+    <tr>
+      <td class="input"><code>&lt;section class="bleed tight"&gt;&lt;div class="stats"&gt;...&lt;/div&gt;&lt;/section&gt;</code> (stats bar)</td>
+      <td class="output" style="background:rgba(208,84,84,0.08);"><strong style="color:var(--error);">REMOVED ENTIRELY</strong> per task #13 (attribution issue)</td>
+    </tr>
+    <tr>
+      <td class="input">Who-we-serve cards: <code>&lt;a href="#" class="more" data-nav="underscore"&gt;See underscore →&lt;/a&gt;</code></td>
+      <td class="output">Same pattern with real route + click handler. Same for underchat and copilot.</td>
+    </tr>
+    <tr>
+      <td class="input">Solutions section: three hardcoded <code>.solrow</code> blocks</td>
+      <td class="output">Single <code>&lt;div id="homeSolutions"&gt;&lt;/div&gt;</code> mount point. Renderer (next section) emits the rows from Fibery.</td>
+    </tr>
+    <tr>
+      <td class="input"><code>&lt;article class="cs-tile"&gt;</code> (Chat Advance)</td>
+      <td class="output">Add <code>data-content-entity="Home - Case Study: Chat Advance"</code> and <code>id="caseStudyChatAdvanceInner"</code> on inner; wire <code>onclick="openCaseStudy()"</code> and <code>onclick="openWhitepaperModal('Chat Advance Case Study')"</code></td>
+    </tr>
+    <tr>
+      <td class="input"><code>&lt;article class="cs-tile"&gt;</code> (4D Financing)</td>
+      <td class="output">Same as above with 4D-specific entity name, id, and modal triggers</td>
+    </tr>
+    <tr>
+      <td class="input"><code>&lt;section class="testimonial"&gt;</code></td>
+      <td class="output"><code>&lt;section class="testimonial-band" data-content-entity="Home - Testimonial"&gt;</code></td>
+    </tr>
+    <tr>
+      <td class="input"><code>&lt;section class="cta"&gt;</code> (input design's CTA + calendar mock)</td>
+      <td class="output"><code>&lt;section class="cta cta-band" data-content-entity="Home - CTA"&gt;</code> — replace input design's calendar mock with our <strong>already-shipped <code>.cta-card</code> static tile</strong> from PR #15</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="renderer"><span class="num">4</span>Solution-row renderer rewrite</h2>
+<p>The current <code>renderHomeSolutions</code> generator emits <code>.sol-row</code> markup. Input design emits <code>.solrow</code> (no hyphen). Migration step: rewrite the output at <code>index.html:2291-2348</code> to emit input design's structure:</p>
+
+<pre><code>row.className = 'solrow' + (idx % 2 === 1 ? ' flip' : '');
+row.innerHTML = `
+  &lt;div class="sol-copy"&gt;
+    &lt;span class="sol-tag"&gt;— ${tag}&lt;/span&gt;
+    &lt;div class="sol-name"&gt;${title}&lt;/div&gt;
+    &lt;h3 class="sol-claim"&gt;${claim}&lt;/h3&gt;
+    &lt;p class="sol-body"&gt;${desc}&lt;/p&gt;
+    &lt;div class="sol-pills"&gt;${pillsHtml}&lt;/div&gt;
+    &lt;div class="sol-cta"&gt;
+      &lt;a class="btn btn-primary" href="/${cfg.page}" data-nav="${cfg.page}"
+         onclick="event.preventDefault();navigate('${cfg.page}')"&gt;Explore ${title}&lt;/a&gt;
+      &lt;a class="btn btn-link" href="/${cfg.page}" data-nav="${cfg.page}"
+         onclick="event.preventDefault();navigate('${cfg.page}')"&gt;Learn more &lt;span class="arr"&gt;→&lt;/span&gt;&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="sol-visual"&gt;&lt;div class="frame"&gt;${solutionMiniGraphic(cfg.page)}&lt;/div&gt;&lt;/div&gt;`;</code></pre>
+
+<p>Source <code>claim</code> from Fibery Solutions entity body (first paragraph after the <code>**Tag:**</code> line). Falls back to truncated description.</p>
+
+<div class="card action">
+  <strong>Highest visual impact change.</strong> Solutions section currently uses dead screen real estate (per your "doesn't use screen real estate well" feedback); input design's full-width alternating layout fills it edge to edge.
+</div>
+
+<h2 id="css"><span class="num">5</span>CSS migration</h2>
+<p>Replace these blocks in <code>css/main.css</code> with the corresponding selectors from <code>tools/input-design/css/polished.css</code>:</p>
+
+<div class="grid-2">
+  <div class="card">
+    <strong style="font-family:var(--font-sans);font-size:13px;">Layout + headings</strong>
+    <ul style="font-size:12px;">
+      <li><code>.bleed</code>, <code>.bleed.alt</code>, <code>.bleed.tight</code></li>
+      <li><code>.sect-head</code>, <code>.sect-head .eyebrow</code>, <code>.sect-head h2</code>, <code>.sect-head .lede</code></li>
+      <li><code>.serve-grid</code>, <code>.serve-card</code>, <code>.serve-num</code>, <code>.serve-cat</code></li>
+      <li><code>.how</code>, <code>.how-step</code>, <code>.step-n</code>, <code>.step-meta</code></li>
+    </ul>
+  </div>
+  <div class="card">
+    <strong style="font-family:var(--font-sans);font-size:13px;">Solutions + case studies</strong>
+    <ul style="font-size:12px;">
+      <li><code>.solrow</code>, <code>.sol-tag</code>, <code>.sol-name</code>, <code>.sol-claim</code>, <code>.sol-body</code>, <code>.sol-pills</code>, <code>.sol-cta</code>, <code>.sol-visual</code></li>
+      <li><code>.frame</code>, <code>.chip</code>, <code>.dim-row</code>, <code>.bar</code>, <code>.grade-ring</code>, <code>.ring</code>, <code>.legend</code></li>
+      <li><code>.cs-grid</code>, <code>.cs-tile</code>, <code>.cs-thumb</code>, <code>.cs-badge</code>, <code>.cs-metric</code>, <code>.cs-num</code>, <code>.cs-stats</code>, <code>.cs-foot</code>, <code>.cs-more</code>, <code>.cs-dl</code></li>
+    </ul>
+  </div>
+  <div class="card">
+    <strong style="font-family:var(--font-sans);font-size:13px;">Testimonial</strong>
+    <ul style="font-size:12px;">
+      <li><code>.testimonial</code>, <code>.testimonial-quote-wrap</code>, <code>.testimonial-mark</code>, <code>.testimonial-quote</code>, <code>.testimonial-cite</code></li>
+      <li><code>.cite-avatar</code>, <code>.cite-who</code>, <code>.cite-name</code>, <code>.cite-role</code>, <code>.cite-logo</code></li>
+    </ul>
+  </div>
+  <div class="card">
+    <strong style="font-family:var(--font-sans);font-size:13px;">CTA tile</strong>
+    <ul style="font-size:12px;">
+      <li><code>.cta-inner</code>, <code>.cta-row</code></li>
+      <li><code>.cta-card</code>, <code>.cc-eyebrow</code>, <code>.cc-week</code>, <code>.cc-day</code>, <code>.cc-slots</code>, <code>.cc-slot</code>, <code>.cc-foot</code></li>
+    </ul>
+  </div>
+</div>
+
+<h3>Fluid type tokens (add to tokens.css + tokens.json)</h3>
+<pre><code>--fs-h1: clamp(40px, 5.2vw + 12px, 76px);
+--fs-h2: clamp(28px, 2.6vw + 14px, 44px);
+--fs-h3: clamp(22px, 1.6vw + 14px, 28px);
+--fs-data-xl: clamp(48px, 6vw + 12px, 92px);</code></pre>
+
+<h2 id="files"><span class="num">6</span>Critical files to modify</h2>
+<div class="card warn">
+  <strong>Files I will edit:</strong>
+  <ul>
+    <li><code>index.html</code> — lines 131-435 (the <code>#page-home</code> block, wholesale replace) + lines 2291-2348 (solution-row generator inside renderContent)</li>
+    <li><code>css/main.css</code> — replace section blocks listed above with polished.css equivalents</li>
+    <li><code>tokens/tokens.css</code> + <code>tokens/tokens.json</code> — add fluid type tokens</li>
+  </ul>
+  <strong>Read-only references:</strong>
+  <ul>
+    <li><code>tools/input-design/index.html</code> (input design source)</li>
+    <li><code>tools/input-design/css/polished.css</code> (input design CSS source)</li>
+    <li><code>tools/hero-compare.html</code> (side-by-side reference)</li>
+  </ul>
+</div>
+
+<h2 id="oos"><span class="num">7</span>Out of scope</h2>
+<div class="card note">
+  <ul style="margin:0;">
+    <li>Solution detail pages, blog, docs, contact — <span class="pill skip">unchanged</span></li>
+    <li>Footer, cookie banner, theme toggle, whitepaper modal — <span class="pill skip">unchanged</span></li>
+    <li>Calendly URL propagation across non-home pages — <span class="pill skip">deferred</span></li>
+    <li>Wave 5 tasks #18 (blog reload), #19 (blog match handoff), #20 (CMS featured), #21 (typography non-home), #22 (docs coloration) — <span class="pill skip">still pending after Wave 6</span></li>
+  </ul>
+</div>
+
+<h2 id="exec"><span class="num">8</span>Execution plan</h2>
+<p><strong>Single commit, scoped to the home page migration.</strong> No background agents — this is one coherent rewrite that must land atomic.</p>
+<ol class="steps">
+  <li>Open feat/website-v2 in worktree; sync with origin/dev</li>
+  <li>Read <code>tools/input-design/index.html</code> lines 66-486 (home page section)</li>
+  <li>Read <code>tools/input-design/css/polished.css</code> for corresponding section CSS</li>
+  <li>Write the new <code>&lt;section id="page-home"&gt;</code> markup with all preservation contract items patched in (stats bar stripped)</li>
+  <li>Rewrite the solution-row generator at <code>index.html:2291-2348</code></li>
+  <li>Update <code>css/main.css</code> with polished.css rule blocks</li>
+  <li>Update <code>tokens.css</code> + <code>tokens.json</code> with fluid type tokens</li>
+  <li>Run <code>python3 build.py --verify</code> — must pass</li>
+  <li>Run <code>bash tests/test-suite.sh</code> — expect <code>Home - Metrics</code> orphan flag; update allowlist</li>
+  <li>Manual UAT via <code>http://localhost:8088/</code> and <code>/tools/hero-compare.html</code></li>
+  <li>Commit: <code>feat(home): migrate to input design markup; preserve CMS + Calendly + routes; drop stats bar</code></li>
+  <li>Push, open PR feat/website-v2 → dev, merge, trigger deploy-dev workflow</li>
+</ol>
+
+<h2 id="verify"><span class="num">9</span>Verification</h2>
+<h3>Preservation contract sanity checks</h3>
+<pre><code>grep -c 'id="heroTitle"' index.html                                       # ≥ 1
+grep -c 'id="heroSubtitle"' index.html                                    # ≥ 1
+grep -c 'id="homeSolutions"' index.html                                   # ≥ 1
+grep -c 'id="caseStudyChatAdvanceInner"' index.html                       # ≥ 1
+grep -c 'id="caseStudy4DFinancingInner"' index.html                       # ≥ 1
+grep -c 'id="ctaTitle"' index.html                                        # ≥ 1
+grep -c 'id="ctaSubtitle"' index.html                                     # ≥ 1
+grep -c 'data-content-entity="Home - Who We Serve"' index.html            # ≥ 1
+grep -c 'data-content-entity="Home - How It Works"' index.html            # ≥ 1
+grep -c 'data-content-entity="Home - Case Study: Chat Advance"' index.html # ≥ 1
+grep -c 'data-content-entity="Home - Case Study: 4D Financing"' index.html # ≥ 1
+grep -c 'data-content-entity="Home - Testimonial"' index.html             # ≥ 1
+grep -c 'data-content-entity="Home - CTA"' index.html                     # ≥ 1
+grep -c 'openWhitepaperModal' index.html                                  # ≥ 2
+grep -c 'openCaseStudy()' index.html                                      # ≥ 1
+grep -c 'open4DCaseStudy()' index.html                                    # ≥ 1
+grep -c 'calendly.com/d/cym7-q65-cht/discovery' index.html                # ≥ 3 inside #page-home</code></pre>
+
+<h3>Live dev preview checks</h3>
+<ul>
+  <li><strong>Visual match.</strong> http://localhost:8088/ should now visually mirror the input design (modulo dropped stats bar)</li>
+  <li><strong>Side-by-side.</strong> <a href="/tools/hero-compare.html" style="color:var(--accent)">/tools/hero-compare.html</a> — both panes should look near-identical at hero/who-we-serve/how-it-works/solutions/case-studies/testimonial/CTA</li>
+  <li><strong>Click test.</strong> Every CTA: solution links navigate via SPA; Calendly opens in new tab; PDF chips open modal; "Read the case study →" opens blog post</li>
+  <li><strong>Theme toggle.</strong> Floating moon works; both modes render correctly</li>
+  <li><strong>Mobile.</strong> Sections collapse correctly (polished.css media queries come along)</li>
+  <li><strong>Production safety.</strong> <code>grep -c 'calendly.com' index.html</code> on origin/main vs feat/website-v2 — confirm main untouched</li>
+</ul>
+
+<h2 id="promote"><span class="num">10</span>Promotion</h2>
+<div class="card action">
+  After you review the dev preview and approve:
+  <ul style="margin-top:8px;">
+    <li>Land as one PR <code>feat/website-v2 → dev</code></li>
+    <li>Cloudflare auto-builds dev preview</li>
+    <li><strong>Main untouched</strong> until V2 is explicitly promoted in a separate session</li>
+  </ul>
+</div>
+
+<div class="actions-bar">
+  <p class="lede">Ready to execute? Reply <strong>approve wave 6</strong> and I'll start the migration as a single atomic commit.</p>
+  <a class="ghost" href="/tools/hero-compare.html">Hero compare ↗</a>
+  <a class="ghost" href="/tools/input-design/index.html">Input design ↗</a>
+</div>
+
+</div>
+</body>
+</html>

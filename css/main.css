@@ -1956,13 +1956,13 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
    ============================================================= */
 .solrow {
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 64px;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 48px;
   align-items: center;
-  padding: 64px 0;
+  padding: 56px 0;
   border-top: 1px solid var(--pale);
 }
-.solrow:first-of-type { border-top: none; padding-top: 32px; }
+.solrow:first-of-type { border-top: none; padding-top: 24px; }
 .solrow.flip { direction: rtl; }
 .solrow.flip > * { direction: ltr; }
 
@@ -2035,24 +2035,47 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 .solrow .sol-cta .btn-link .arr { transition: transform 0.15s ease; }
 .solrow .sol-cta .btn-link:hover .arr { transform: translateX(3px); }
 
-/* Visual frame */
-.solrow .sol-visual { position: relative; }
+/* Visual frame — wider, less padding, no fixed min-height so the
+   mini-graphic doesn't sit in dead space. The content scales to fill. */
+.solrow .sol-visual { position: relative; max-width: none; margin: 0; padding: 0; }
 .solrow .sol-visual .frame {
   background: var(--white);
   border: 1px solid var(--pale);
   border-radius: var(--rounded-lg, 12px);
-  padding: 24px;
+  padding: 28px 32px;
   box-shadow: 0 12px 32px rgba(35, 38, 44, 0.06);
-  min-height: 280px;
+  width: 100%;
   display: flex;
   align-items: stretch;
-  justify-content: center;
+  justify-content: stretch;
 }
 .solrow.flip .sol-visual .frame {
   box-shadow: 0 12px 32px rgba(107, 158, 140, 0.06);
 }
 /* Containment for inline mini-graphic markup that comes from solutionMiniGraphic() */
 .solrow .sol-visual .frame > * { flex: 1; }
+
+/* Make mini-graphics fill the frame width rather than living as a small chip */
+.solrow .frame .mini-score,
+.solrow .frame .mini-chat,
+.solrow .frame .mini-grade {
+  width: 100%;
+}
+.solrow .frame .mini-score .row,
+.solrow .frame .mini-chat .bubble {
+  font-size: 13px;
+}
+.solrow .frame .mini-score .chip {
+  width: 72px;
+  height: 72px;
+}
+.solrow .frame .mini-score .chip .num { font-size: 17px; }
+.solrow .frame .mini-grade .ring {
+  width: 96px;
+  height: 96px;
+}
+.solrow .frame .mini-grade .ring .grade { font-size: 28px; }
+.solrow .frame .mini-grade .ring .sub { font-size: 9.5px; }
 
 @media (max-width: 880px) {
   .solrow { grid-template-columns: 1fr; gap: 40px; padding: 48px 0; }

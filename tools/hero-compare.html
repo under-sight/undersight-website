@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hero compare — current dev vs input design</title>
+<style>
+  :root {
+    --ink: #23262C;
+    --muted: #6B7280;
+    --border: #E8EAED;
+    --accent: #C97A54;
+    --insight: #6B9E8C;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: 'Inter', -apple-system, system-ui, sans-serif; color: var(--ink); background: #F7F8F8; }
+  header.cmp-header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  }
+  header.cmp-header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+  header.cmp-header .lede { color: var(--muted); font-size: 13px; margin: 0; flex: 1; min-width: 240px; }
+  header.cmp-header .controls { display: inline-flex; gap: 8px; align-items: center; font-size: 12px; }
+  header.cmp-header .controls label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: #FAFAFA; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+  header.cmp-header .controls input[type="number"] { width: 64px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 4px; font: inherit; }
+  .legend { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 10px; border-radius: 9999px; }
+  .legend.input { background: rgba(107,158,140,0.1); color: var(--insight); }
+  .legend.current { background: rgba(201,122,84,0.08); color: var(--accent); }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  .pane {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .pane-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: #FAFAFA;
+  }
+  .pane-head .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 600 11px/1 'Inter', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .pane.input .pane-head .tag { color: var(--insight); }
+  .pane.current .pane-head .tag { color: var(--accent); }
+  .pane-head a {
+    font: 500 11px/1 'SF Mono', monospace;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .pane-head a:hover { color: var(--ink); border-color: var(--ink); }
+
+  .frame-wrap {
+    position: relative;
+    background: repeating-conic-gradient(#F7F8F8 0% 25%, #FFF 0% 50%) 50% / 16px 16px;
+    overflow: hidden;
+    flex: 1;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+    display: block;
+  }
+
+  /* Section diff annotations */
+  details.diff {
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 0;
+  }
+  details.diff summary {
+    padding: 12px 16px;
+    font: 600 13px/1.4 'Inter', sans-serif;
+    cursor: pointer;
+    user-select: none;
+  }
+  details.diff[open] summary { border-bottom: 1px solid var(--border); }
+  details.diff .body {
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  details.diff .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    font-size: 12px;
+  }
+  details.diff .col { background: #FAFAFA; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  details.diff .col h4 {
+    margin: 0 0 6px;
+    font: 600 11px/1.4 'Inter', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  details.diff .col.input h4 { color: var(--insight); }
+  details.diff .col.current h4 { color: var(--accent); }
+  details.diff .col.delta h4 { color: #D05454; }
+  details.diff .col code { font: 500 11px/1.4 'SF Mono', monospace; color: var(--ink); }
+  details.diff ul { margin: 0; padding-left: 18px; }
+  details.diff li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<header class="cmp-header">
+  <h1>Hero compare</h1>
+  <p class="lede">Left = the <strong>input design</strong> (Claude Design source / Undersight Polished.html). Right = <strong>current dev</strong> (feat/website-v2 deployed on dev). Both iframes scroll independently; both have the same viewport width so type sizes are directly comparable.</p>
+  <div class="controls">
+    <span class="legend input">Input design</span>
+    <span class="legend current">Current dev</span>
+    <label>Pane height
+      <input type="number" id="heightInput" min="300" max="1600" value="780" step="20">
+      px
+    </label>
+  </div>
+</header>
+
+<div class="compare" id="compare">
+  <section class="pane input">
+    <div class="pane-head">
+      <span class="tag">Input design</span>
+      <a href="/tools/input-design/index.html" target="_blank">Open full page →</a>
+    </div>
+    <div class="frame-wrap">
+      <iframe src="/tools/input-design/index.html#page-home" title="Input design — Claude Design hero"></iframe>
+    </div>
+  </section>
+
+  <section class="pane current">
+    <div class="pane-head">
+      <span class="tag">Current dev</span>
+      <a href="/" target="_blank">Open full page →</a>
+    </div>
+    <div class="frame-wrap">
+      <iframe src="/" title="Current dev hero"></iframe>
+    </div>
+  </section>
+</div>
+
+<details class="diff" open>
+  <summary>Annotated diff — hero section only</summary>
+  <div class="body">
+    <div class="grid">
+
+      <div class="col input">
+        <h4>Input design (left)</h4>
+        <ul>
+          <li><strong>Layout:</strong> 2-col grid <code>1.05fr 1fr</code> in <code>.hero-inner</code></li>
+          <li><strong>Eyebrow:</strong> "AI Underwriting Infrastructure" (Rust, monospace, 11px)</li>
+          <li><strong>H1:</strong> "Underwrite the long&nbsp;tail of small business <em>without losing rigor</em>." Em-wrapped accent on Rust. Fluid <code>clamp(40px, 5.2vw+12px, 76px)</code>, weight 700, tracking -0.04em</li>
+          <li><strong>Lede:</strong> "Agentic intake, ML-graded risk, continuous portfolio monitoring — one fabric for funds, brokerages, and marketplaces serving US SMBs."</li>
+          <li><strong>CTA row:</strong> Primary "Book a discovery call →" + ghost "See the API"</li>
+          <li><strong>Trust strip:</strong> "In production with" + 3 customer wordmarks (4D Financing / Chat Advance / Cohort I)</li>
+          <li><strong>Visual stack:</strong> 3 cards layered, all absolute-positioned inside <code>.hero-visual</code>:
+            <ul>
+              <li>Score panel (5 risk dimension rows w/ bars + R4 rating chip)</li>
+              <li>Macy chat thread (live pill, agent + client bubbles, typing dots)</li>
+              <li>Composite chip ("742 composite ↑ 12 wk/wk")</li>
+            </ul>
+          </li>
+          <li><strong>Backdrop:</strong> 2 soft radial gradients (Rust + Eucalyptus) at low opacity</li>
+        </ul>
+      </div>
+
+      <div class="col current">
+        <h4>Current dev (right)</h4>
+        <ul>
+          <li><strong>Layout:</strong> 2-col grid <code>1.05fr 1fr</code> in <code>.hero-inner</code> ✓ same</li>
+          <li><strong>Eyebrow:</strong> none — Fibery <code>Home - Hero</code> entity doesn't have an eyebrow field</li>
+          <li><strong>H1:</strong> Fibery-driven: "Manual underwriting can't scale. <span style="color:var(--accent)">Agentic underwriting can.</span>" Accent applied via <code>renderContent()</code> splitting on first period. Fixed 48px (not fluid clamp)</li>
+          <li><strong>Lede:</strong> Fibery-driven from <code>Home - Hero _body</code>: "AI agents that intake, enrich, score, and monitor across the funding lifecycle."</li>
+          <li><strong>CTA row:</strong> Only ghost "See the API" — primary CTA was removed per Kyle's "double CTA" feedback (overlay pill on visual was the kept one, then later overlay was also removed per task #14)</li>
+          <li><strong>Trust strip:</strong> Removed per Kyle's "remove in production with"</li>
+          <li><strong>Visual stack:</strong> 3 cards (score panel + Macy chat + composite chip) ✓ matches input design</li>
+          <li><strong>Backdrop:</strong> radial gradients present ✓</li>
+        </ul>
+      </div>
+
+      <div class="col delta">
+        <h4>Delta — what to change</h4>
+        <ul>
+          <li><strong>Add eyebrow</strong> "AI Underwriting Infrastructure" above H1 (Rust, mono, 11px caps). Sourceable from Fibery <code>Home - Hero</code> as a new <code>**Eyebrow:**</code> meta line</li>
+          <li><strong>Adopt fluid H1</strong> <code>clamp(40px, 5.2vw+12px, 76px)</code> with -0.04em tracking. Currently fixed 48px which feels small vs input</li>
+          <li><strong>Restore primary CTA</strong> "Book a discovery call →" in copy column. Pending task #14: it was removed; Kyle wants it back where "See the API" sits now</li>
+          <li><strong>Drop "See the API"</strong> ghost button (task #14)</li>
+          <li><strong>Keep trust strip removed</strong> — Kyle's call from review</li>
+          <li><strong>Optional:</strong> em-wrap last word of H1 in <code>&lt;em class="accent"&gt;</code> instead of splitting on period. Lets editors control which word is highlighted via markdown <code>*word*</code></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</details>
+
+<details class="diff">
+  <summary>How to use this comparison</summary>
+  <div class="body">
+    <ul>
+      <li><strong>Both iframes scroll independently</strong> — drag inside each to scroll. The header nav is fixed in both, so the hero stays visible at the top.</li>
+      <li><strong>Resize the pane height</strong> using the input top-right to see more of each design at once.</li>
+      <li><strong>Open full pages</strong> via the link in each pane header to compare beyond the hero.</li>
+      <li><strong>Input design</strong> renders from the Claude Design handoff (read-only copy at <code>tools/input-design/</code>).</li>
+      <li><strong>Current dev</strong> is your local dev server (port 8088); reflects Fibery content in real time (~5s cache).</li>
+    </ul>
+  </div>
+</details>
+
+<script>
+  const heightInput = document.getElementById('heightInput');
+  const apply = (h) => {
+    document.querySelectorAll('.frame-wrap').forEach(el => el.style.height = h + 'px');
+  };
+  apply(parseInt(heightInput.value, 10));
+  heightInput.addEventListener('input', e => apply(parseInt(e.target.value, 10) || 780));
+</script>
+
+</body>
+</html>
