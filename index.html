@@ -2030,10 +2030,14 @@
     const hero = parseMeta(getContent(data, 'Home - Hero'));
     const heroEl = document.getElementById('heroTitle');
     const heroTitle = hero._title || "Manual underwriting can't scale. Agentic underwriting can.";
-    // Render accent color on second sentence if it contains a period
-    const parts = heroTitle.split(/\.\s*/);
-    if (parts.length > 1) { parts[0] = parts[0] + '.';
-      heroEl.innerHTML = parts[0] + '<br><span class="accent">' + parts.slice(1).join(' ') + '</span>';
+    // Render accent color on second sentence if it contains a period.
+    // Both clauses are normalized to end with a period so parallel punctuation
+    // survives even if the CMS entity drops the trailing period (#305).
+    const parts = heroTitle.split(/\.\s*/).map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      const lead = parts[0] + '.';
+      const rest = parts.slice(1).join(' ').replace(/\.+$/, '') + '.';
+      heroEl.innerHTML = lead + '<br><span class="accent">' + rest + '</span>';
     } else {
       heroEl.textContent = heroTitle;
     }
