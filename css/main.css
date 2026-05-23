@@ -642,57 +642,171 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
 .cta-alt a { text-decoration: underline; color: var(--mid); }
 .cta-alt a:hover { color: var(--color-accent); }
 
-/* ---- CTA WITH INLINE CALENDLY EMBED (V2) ---- */
-.cta-section.cta-with-embed {
+/* ---- CTA BAND with static calendar mock (per Claude Design draft) ---- */
+.cta.cta-band {
+  padding: 96px 0;
+  background: var(--white);
+  border-top: 1px solid var(--pale);
+}
+.cta.cta-band .cta-inner {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 56px;
+  align-items: center;
   max-width: var(--max-w);
-  margin: 0 auto;
-  text-align: left;
-  padding: 80px 24px;
 }
-.cta-section.cta-with-embed .cta-copy { padding-top: 24px; }
-.cta-section.cta-with-embed h2 { text-align: left; margin-bottom: 12px; }
-.cta-section.cta-with-embed > .cta-copy > p {
-  margin-left: 0; margin-right: 0; text-align: left;
+.cta.cta-band .cta-copy { display: flex; flex-direction: column; gap: 14px; }
+.cta.cta-band .eyebrow {
+  display: inline-block;
+  font: 600 11px/1.4 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-amber-rust);
 }
-.cta-section.cta-with-embed .cta-alt { text-align: left; }
-.cta-section.cta-with-embed .cta-fallback-btn { display: inline-flex; margin-top: 4px; }
+.cta.cta-band h2 {
+  font: 700 clamp(28px, 2.6vw + 14px, 44px) / 1.15 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.025em;
+  color: var(--black);
+  margin: 0;
+}
+.cta.cta-band h2 em {
+  font-style: normal;
+  background: linear-gradient(to top, var(--color-amber-rust-light) 50%, transparent 50%);
+  padding: 0 2px;
+}
+.cta.cta-band .lede {
+  font: 400 17px/1.6 'DM Sans', sans-serif;
+  color: var(--mid);
+  margin: 0;
+  max-width: 520px;
+}
+.cta.cta-band .cta-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.cta.cta-band .cta-row .btn { display: inline-flex; align-items: center; gap: 8px; }
+.cta.cta-band .cta-contact {
+  font: 400 13px/1.5 'DM Sans', sans-serif;
+  color: var(--mid);
+  margin: 6px 0 0;
+}
+.cta.cta-band .cta-contact a {
+  color: var(--color-amber-rust);
+  text-decoration: underline;
+}
 
-.calendly-embed-wrap {
+/* Static calendar mock (links through to Calendly) */
+.cta-card {
+  display: block;
+  text-decoration: none;
+  padding: 28px;
   border: 1px solid var(--pale);
   border-radius: var(--rounded-lg, 12px);
   background: var(--white);
-  overflow: hidden;
-  min-height: 700px;
+  box-shadow: 0 12px 32px rgba(35, 38, 44, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  color: inherit;
 }
-.calendly-embed-wrap .calendly-inline-widget { border-radius: inherit; }
-
-/* Theme-gated visibility */
-.calendly-light { display: block; }
-.calendly-dark { display: none; }
-html.theme-dark .calendly-light { display: none; }
-html.theme-dark .calendly-dark { display: block; }
-
-@media (prefers-color-scheme: dark) {
-  html:not(.theme-light) .calendly-light { display: none; }
-  html:not(.theme-light) .calendly-dark { display: block; }
+.cta-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-cloud-zinc);
+  box-shadow: 0 16px 40px rgba(35, 38, 44, 0.1);
 }
+.cta-card:focus-visible {
+  outline: 2px solid var(--color-accent-focus);
+  outline-offset: 2px;
+}
+.cta-card .cc-eyebrow {
+  display: inline-block;
+  font: 600 11px/1.4 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-eucalyptus);
+  margin-bottom: 10px;
+}
+.cta-card .cc-title {
+  font: 600 20px/1.3 'Inter', sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  letter-spacing: -0.015em;
+  color: var(--black);
+  margin: 0 0 6px;
+}
+.cta-card .cc-desc {
+  font: 400 14px/1.55 'DM Sans', sans-serif;
+  color: var(--dark);
+  margin: 0 0 18px;
+}
+.cta-card .cc-week {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.cta-card .cc-day {
+  padding: 10px 4px;
+  text-align: center;
+  border: 1px solid var(--pale);
+  border-radius: var(--rounded-sm, 6px);
+  background: var(--white);
+}
+.cta-card .cc-day .cc-d {
+  font: 500 10px/1 'SF Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mid);
+  margin-bottom: 4px;
+}
+.cta-card .cc-day .cc-n {
+  font: 600 15px/1 'Inter', sans-serif;
+  color: var(--dark);
+}
+.cta-card .cc-day.cc-open {
+  border-color: var(--color-amber-rust);
+  background: var(--color-amber-rust-light);
+}
+.cta-card .cc-day.cc-open .cc-n { color: var(--color-amber-rust); }
+.cta-card .cc-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.cta-card .cc-slot {
+  padding: 8px 4px;
+  text-align: center;
+  font: 500 12px/1 'SF Mono', monospace;
+  color: var(--dark);
+  background: var(--white);
+  border: 1px solid var(--pale);
+  border-radius: var(--rounded-sm, 6px);
+}
+.cta-card .cc-slot.cc-taken {
+  color: var(--mid);
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+.cta-card .cc-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 500 11px/1.4 'SF Mono', monospace;
+  color: var(--mid);
+}
+.cta-card .cc-cta {
+  color: var(--color-amber-rust);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+.cta-card .cc-cta .arr { transition: transform 0.15s ease; display: inline-block; }
+.cta-card:hover .cc-cta .arr { transform: translateX(3px); }
 
 @media (max-width: 880px) {
-  .cta-section.cta-with-embed {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    text-align: center;
-    padding: 56px 16px;
-  }
-  .cta-section.cta-with-embed .cta-copy { padding-top: 0; }
-  .cta-section.cta-with-embed h2,
-  .cta-section.cta-with-embed > .cta-copy > p,
-  .cta-section.cta-with-embed .cta-alt { text-align: center; }
-  .cta-section.cta-with-embed > .cta-copy > p { margin-left: auto; margin-right: auto; }
+  .cta.cta-band { padding: 64px 0; }
+  .cta.cta-band .cta-inner { grid-template-columns: 1fr; gap: 32px; }
+  .cta.cta-band h2 { text-align: left; }
 }
 
 /* ---- CARDS ---- */

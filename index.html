@@ -408,29 +408,53 @@
 
     <!-- (4D Financing case study is now consolidated into the cs-tile grid above) -->
 
-    <!-- CTA with inline Calendly embed -->
-    <div class="cta-section cta-with-embed" data-content-entity="Home - CTA">
-      <div class="cta-copy">
-        <h2 id="ctaTitle">Ready to see undersight in action?</h2>
-        <p id="ctaSubtitle">Schedule a 30-minute discovery call. We'll walk through your workflow and show you what's possible.</p>
-        <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary cta-fallback-btn">Book a Discovery Call</a>
-        <div class="cta-alt">Or email us at <a class="contact-email-link" href="mailto:contact@undersight.ai">contact@undersight.ai</a></div>
-      </div>
-      <!-- Calendly inline embed: light + dark variants gated by html.theme-dark -->
-      <div class="calendly-embed-wrap" aria-label="Book a discovery call">
-        <div class="calendly-light">
-          <!-- Calendly inline widget begin (light mode) -->
-          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?hide_gdpr_banner=1&hide_event_type_details=1&background_color=ffffff&text_color=23262c&primary_color=c97a54" style="min-width:320px;height:1080px;"></div>
-          <!-- Calendly inline widget end -->
+    <!-- CTA with static calendar mock (links through to Calendly on click) -->
+    <section class="cta cta-band" data-content-entity="Home - CTA">
+      <div class="container cta-inner">
+        <div class="cta-copy">
+          <span class="eyebrow">Get started</span>
+          <h2 id="ctaTitle">See undersight against <em>your</em> deal book.</h2>
+          <p id="ctaSubtitle" class="lede">Bring us a recent application or a portfolio sample. In 30 minutes we'll show what changes when underwriting becomes a continuous loop.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="https://calendly.com/d/cym7-q65-cht/discovery" target="_blank" rel="noopener">
+              Book a demo
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h6M7 3l3 3-3 3"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="/underscore" data-nav="underscore" onclick="event.preventDefault();navigate('underscore')">See the API</a>
+          </div>
+          <p class="cta-contact">Or email us at <a class="contact-email-link" href="mailto:contact@undersight.ai">contact@undersight.ai</a></p>
         </div>
-        <div class="calendly-dark">
-          <!-- Calendly inline widget begin (dark mode) -->
-          <div class="calendly-inline-widget" data-url="https://calendly.com/d/cym7-q65-cht/discovery?hide_gdpr_banner=1&hide_event_type_details=1&background_color=1a1d21&text_color=ffffff&primary_color=c97a54" style="min-width:320px;height:1080px;"></div>
-          <!-- Calendly inline widget end -->
-        </div>
-        <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+        <!-- Static calendar mock from Claude Design handoff -->
+        <a class="cta-card"
+           href="https://calendly.com/d/cym7-q65-cht/discovery"
+           target="_blank" rel="noopener"
+           aria-label="Open Calendly to book a 30 minute product demo">
+          <span class="cc-eyebrow">Next available &middot; this week</span>
+          <h3 class="cc-title">30-minute product demo</h3>
+          <p class="cc-desc">A live walkthrough of agentic intake, ML-graded risk, and continuous portfolio monitoring &mdash; tailored to your deal book.</p>
+          <div class="cc-week" aria-hidden="true">
+            <div class="cc-day"><div class="cc-d">Mon</div><div class="cc-n">19</div></div>
+            <div class="cc-day cc-open"><div class="cc-d">Tue</div><div class="cc-n">20</div></div>
+            <div class="cc-day cc-open"><div class="cc-d">Wed</div><div class="cc-n">21</div></div>
+            <div class="cc-day"><div class="cc-d">Thu</div><div class="cc-n">22</div></div>
+            <div class="cc-day cc-open"><div class="cc-d">Fri</div><div class="cc-n">23</div></div>
+          </div>
+          <div class="cc-slots" aria-hidden="true">
+            <span class="cc-slot">09:30</span>
+            <span class="cc-slot cc-taken">10:00</span>
+            <span class="cc-slot">11:00</span>
+            <span class="cc-slot">14:30</span>
+            <span class="cc-slot">15:00</span>
+            <span class="cc-slot cc-taken">16:00</span>
+          </div>
+          <div class="cc-foot">
+            <span>Times shown in your local zone</span>
+            <span class="cc-cta">Open Calendly <span class="arr">&rarr;</span></span>
+          </div>
+        </a>
       </div>
-    </div>
+    </section>
   </div>
 </section>
 
