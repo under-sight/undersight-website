@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '* * * * *'
   workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Cloudflare Pages branch to deploy to (default: dev)'
+        required: false
+        default: 'dev'
 
 concurrency:
   group: deploy-dev
@@ -54,15 +59,28 @@ jobs:
           cp -r images/brand/ dist/images/brand/ 2>/dev/null || true
           cp css/tokens.css dist/css/ 2>/dev/null || true
 
-      - name: Deploy to Cloudflare Pages (dev)
+      - name: Resolve target branch
+        id: target
+        run: |
+          BRANCH="${{ github.event.inputs.target_branch }}"
+          if [ -z "$BRANCH" ]; then BRANCH="dev"; fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          if [ "$BRANCH" = "dev" ]; then
+            echo "url=https://dev.undersight-website.pages.dev" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://${BRANCH}.undersight-website.pages.dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name undersight-website --branch dev --commit-dirty=true
+          command: pages deploy dist --project-name undersight-website --branch ${{ steps.target.outputs.branch }} --commit-dirty=true
 
       - name: Report deployment to Fibery
+        if: steps.target.outputs.branch == 'dev'
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
           BUILD_STATUS: ${{ (steps.build.outcome == 'success' && steps.validate.outcome == 'success') && 'success' || (steps.build.outcome == 'failure' && 'failed' || 'degraded') }}
-        run: python3 deploy-report.py --env dev --url "https://dev.undersight-website.pages.dev" --status "$BUILD_STATUS"
+        run: python3 deploy-report.py --env dev --url "${{ steps.target.outputs.url }}" --status "$BUILD_STATUS"
