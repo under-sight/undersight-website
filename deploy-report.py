@@ -16,7 +16,8 @@ import urllib.request
 from datetime import datetime, timezone
 
 WORKSPACE = "subscript.fibery.io"
-DB = "CMS/Deployments"
+FIBERY_SPACE = "CMS"
+DB = f"{FIBERY_SPACE}/Deployments"
 
 
 def get_token():
@@ -60,8 +61,8 @@ def find_deployment(token, env_name):
         "args": {
             "query": {
                 "q/from": DB,
-                "q/select": ["fibery/id", "CMS/name", "CMS/Commit",
-                              "CMS/Site Mode", "CMS/Content Hash"],
+                "q/select": ["fibery/id", f"{FIBERY_SPACE}/name", f"{FIBERY_SPACE}/Commit",
+                              f"{FIBERY_SPACE}/Site Mode", f"{FIBERY_SPACE}/Content Hash"],
                 "q/limit": 20,
             },
         },
@@ -74,7 +75,7 @@ def find_deployment(token, env_name):
     }
     target_name = env_map.get(env_name, env_name)
     for e in entities:
-        if e.get("CMS/name") == target_name:
+        if e.get(f"{FIBERY_SPACE}/name") == target_name:
             return e
     return None
 
@@ -84,13 +85,13 @@ def update_deployment(token, entity_id, commit, site_mode, content_hash, url, bu
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     entity = {
         "fibery/id": entity_id,
-        "CMS/Commit": commit,
-        "CMS/Deployed At": now,
-        "CMS/Status": site_mode,
-        "CMS/Site Mode": site_mode,
-        "CMS/Content Hash": content_hash,
-        "CMS/URL": url,
-        "CMS/Build Status": build_status,
+        f"{FIBERY_SPACE}/Commit": commit,
+        f"{FIBERY_SPACE}/Deployed At": now,
+        f"{FIBERY_SPACE}/Status": site_mode,
+        f"{FIBERY_SPACE}/Site Mode": site_mode,
+        f"{FIBERY_SPACE}/Content Hash": content_hash,
+        f"{FIBERY_SPACE}/URL": url,
+        f"{FIBERY_SPACE}/Build Status": build_status,
     }
     api_post("/api/commands", [{
         "command": "fibery.entity/update",
@@ -114,17 +115,17 @@ def read_build_meta():
 
 def get_site_mode_from_fibery(token):
     """Read current Site Mode from Site Config entity (same query pattern as build.py)."""
-    CMS_DB = "CMS/Pages"
+    CMS_DB = f"{FIBERY_SPACE}/Pages"
     entities = api_post("/api/commands", [{
         "command": "fibery.entity/query",
         "args": {
             "query": {
                 "q/from": CMS_DB,
                 "q/select": {
-                    "Name": "CMS/Name",
-                    "DocSecret": ["CMS/Description", "Collaboration~Documents/secret"],
+                    "Name": f"{FIBERY_SPACE}/Name",
+                    "DocSecret": [f"{FIBERY_SPACE}/Description", "Collaboration~Documents/secret"],
                 },
-                "q/where": ["=", ["CMS/Name"], "$name"],
+                "q/where": ["=", [f"{FIBERY_SPACE}/Name"], "$name"],
                 "q/limit": 1,
             },
             "params": {"$name": "Site Config"},
@@ -178,8 +179,8 @@ def main():
         # Check if anything changed since last deploy
         existing = find_deployment(token, env_name)
         if existing:
-            last_hash = existing.get("CMS/Content Hash", "")
-            last_mode = existing.get("CMS/Site Mode", "")
+            last_hash = existing.get(f"{FIBERY_SPACE}/Content Hash", "")
+            last_mode = existing.get(f"{FIBERY_SPACE}/Site Mode", "")
             current_mode = get_site_mode_from_fibery(token)
             # For dev, we always build full site, so only check content hash
             if env_name == "dev":
@@ -217,7 +218,7 @@ def main():
     if existing:
         entity_id = existing["fibery/id"]
         ts = update_deployment(token, entity_id, commit, site_mode, content_hash, url, build_status)
-        print(f"Updated Fibery Deployment: {existing.get('CMS/name')} at {ts} (build_status={build_status})")
+        print(f"Updated Fibery Deployment: {existing.get(FIBERY_SPACE + '/name')} at {ts} (build_status={build_status})")
     else:
         print(f"WARNING: No deployment entity found for env={env_name} — skipping Fibery update")
 

@@ -29,7 +29,8 @@ from concurrent.futures import ThreadPoolExecutor
 # ---------------------------------------------------------------------------
 
 WORKSPACE = "subscript.fibery.io"
-DB = "CMS/Pages"
+FIBERY_SPACE = "CMS"
+DB = f"{FIBERY_SPACE}/Pages"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")
 CACHE_DIR = os.path.join(SRC_DIR, ".fibery-file-cache")
@@ -178,13 +179,13 @@ def fetch_all(token):
                     "query": {
                         "q/from": DB,
                         "q/select": {
-                            "Name": "CMS/Name",
+                            "Name": f"{FIBERY_SPACE}/Name",
                             "DocSecret": [
-                                "CMS/Description",
+                                f"{FIBERY_SPACE}/Description",
                                 "Collaboration~Documents/secret",
                             ],
                             "Files": {
-                                "q/from": "CMS/Assets",
+                                "q/from": f"{FIBERY_SPACE}/Assets",
                                 "q/select": {
                                     "FileSecret": "fibery/secret",
                                     "FileName": "fibery/name",
@@ -213,7 +214,7 @@ def fetch_all(token):
         if isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
     ]
     if stale_blog_pages:
-        print(f"  WARNING: Ignoring {len(stale_blog_pages)} stale 'Blog -*' entries in CMS/Pages")
+        print(f"  WARNING: Ignoring {len(stale_blog_pages)} stale 'Blog -*' entries in {DB}")
         for n in stale_blog_pages:
             print(f"    - {n} (delete this in Fibery UI)")
         entities = [
@@ -229,22 +230,22 @@ def fetch_all(token):
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "CMS/Blog",
+                        "q/from": f"{FIBERY_SPACE}/Blog",
                         "q/select": {
-                            "Name": "CMS/name",
-                            "Slug": "CMS/Slug",
-                            "Subtitle": "CMS/Subtitle",
-                            "Author": "CMS/Author",
-                            "Excerpt": "CMS/Excerpt",
-                            "PostDate": "CMS/Post Date",
+                            "Name": f"{FIBERY_SPACE}/name",
+                            "Slug": f"{FIBERY_SPACE}/Slug",
+                            "Subtitle": f"{FIBERY_SPACE}/Subtitle",
+                            "Author": f"{FIBERY_SPACE}/Author",
+                            "Excerpt": f"{FIBERY_SPACE}/Excerpt",
+                            "PostDate": f"{FIBERY_SPACE}/Post Date",
                             "CreationDate": "fibery/creation-date",
-                            "Type": ["CMS/Type", "enum/name"],
+                            "Type": [f"{FIBERY_SPACE}/Type", "enum/name"],
                             "DocSecret": [
-                                "CMS/Description",
+                                f"{FIBERY_SPACE}/Description",
                                 "Collaboration~Documents/secret",
                             ],
                             "Files": {
-                                "q/from": "CMS/Assets",
+                                "q/from": f"{FIBERY_SPACE}/Assets",
                                 "q/select": {
                                     "FileSecret": "fibery/secret",
                                     "FileName": "fibery/name",
@@ -271,12 +272,12 @@ def fetch_all(token):
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "CMS/Integrations",
+                        "q/from": f"{FIBERY_SPACE}/Integrations",
                         "q/select": {
-                            "Name": "CMS/name",
-                            "Rank": "CMS/Rank",
+                            "Name": f"{FIBERY_SPACE}/name",
+                            "Rank": f"{FIBERY_SPACE}/Rank",
                             "Logo": {
-                                "q/from": "CMS/Logo",
+                                "q/from": f"{FIBERY_SPACE}/Logo",
                                 "q/select": {
                                     "FileSecret": "fibery/secret",
                                     "FileName": "fibery/name",
@@ -285,8 +286,8 @@ def fetch_all(token):
                                 "q/limit": 5,
                             },
                             "Pages": {
-                                "q/from": "CMS/Used On Pages",
-                                "q/select": {"Name": "CMS/Name"},
+                                "q/from": f"{FIBERY_SPACE}/Used On Pages",
+                                "q/select": {"Name": f"{FIBERY_SPACE}/Name"},
                                 "q/limit": 20,
                             },
                         },
