@@ -350,16 +350,20 @@ section "CSS Tests"
 MAIN_CSS=$(fetch "$BASE/css/main.css")
 TOKENS_CSS=$(fetch "$BASE/css/tokens.css")
 
-# Test: Zero hardcoded hex colors in main.css (excluding comments and #fff/#999)
-# #fff is allowed for white-on-dark text (stats bar, case study, testimonial)
-# #999 is allowed for muted text on dark backgrounds
+# Test: Zero hardcoded hex colors in main.css (excluding comments)
+# var(--token, #hex) fallbacks are stripped first — hex inside var() is
+# legitimate token usage with a literal fallback (older iOS Safari).
+# #fff/#ffffff and #C97A54 remain allowed only for the iOS-Safari
+# double-declaration pairs (.btn-primary literal-before-var fallbacks,
+# required by the Cross-Browser tests). The strict per-line check lives in
+# the "WIP fixes regression" section (no_raw_hex_in_main_css).
 HEX_MATCHES=$(echo "$MAIN_CSS" \
   | sed 's|/\*[^*]*\*\+\([^/*][^*]*\*\+\)*/||g' \
+  | sed -E 's/var\([^()]*\)//g' \
   | grep -oE '#[0-9a-fA-F]{3,8}\b' \
   | grep -v '^$' \
   | grep -vi '^#fff$' \
   | grep -vi '^#ffffff$' \
-  | grep -vi '^#999$' \
   | grep -vi '^#C97A54$' || true)
 if [ -z "$HEX_MATCHES" ]; then
   pass "Zero hardcoded hex colors in main.css"
@@ -2359,6 +2363,64 @@ except Exception as e:
       fail "Fibery lead created exactly once for: $WP" "Duplicate lead created — got $LEAD_COUNT rows (expected 1)"
     fi
   done
+fi
+
+# =============================================================================
+section "WIP fixes regression"
+# =============================================================================
+# File-level checks only (read from SITE_ROOT, no server needed). These lock
+# in the cheap WIP.md fixes: token discipline in main.css, theme toggle
+# behavior, single-source contact email, webp-aware image templates, and
+# dead-asset removal.
+
+# -- no_raw_hex_in_main_css --
+# Raw hex colors must not appear in css/main.css outside of two legitimate
+# patterns:
+#   (a) var(--token, #hex) fallbacks — token usage with a literal fallback
+#   (b) the iOS-Safari double-declaration pattern: a literal value immediately
+#       re-declared with var() on the next line (e.g. .btn-primary), which the
+#       Cross-Browser tests above explicitly require.
+HEX_VIOLATIONS=$(python3 - "$SITE_ROOT/css/main.css" <<'PYEOF'
+import re, sys
+css = open(sys.argv[1]).read()
+css = re.sub(r'/\*.*?\*/', '', css, flags=re.S)        # strip comments
+for _ in range(3):                                     # drop var() fallbacks (handles nesting)
+    css = re.sub(r'var\([^()]*\)', 'var0', css)
+lines = css.split('\n')
+decl = re.compile(r'([-a-zA-Z]+)\s*:\s*[^;{}]*#[0-9a-fA-F]{3,8}')
+violations = []
+for i, line in enumerate(lines):
+    m = decl.search(line)
+    if not m:
+        continue
+    nxt = lines[i + 1] if i + 1 < len(lines) else ''
+    if re.search(re.escape(m.group(1)) + r'\s*:\s*[^;{}]*var0', nxt):
+        continue  # iOS-Safari literal-before-var fallback pair
+    violations.append('%d: %s' % (i + 1, line.strip()))
+print('\n'.join(violations))
+PYEOF
+)
+if [ -z "$HEX_VIOLATIONS" ]; then
+  pass "no_raw_hex_in_main_css: no raw hex outside var() fallbacks / iOS pairs"
+else
+  HEX_V_COUNT=$(echo "$HEX_VIOLATIONS" | wc -l | tr -d ' ')
+  fail "no_raw_hex_in_main_css: no raw hex outside var() fallbacks / iOS pairs" "$HEX_V_COUNT violation(s): $(echo "$HEX_VIOLATIONS" | head -3 | tr '\n' '; ')"
+fi
+
+# -- no_raw_hex_in_main_css (white-alpha rgba baseline) --
+# rgba(255,…) literals remain on permanently-dark panels (stats bar,
+# case-study graphic, testimonial, api-preview/code-block, mca-callout,
+# header glass, and the theme-dark scoped blocks). tokens.css defines no
+# white-alpha scale beyond --color-dark-border (0.1), so these are
+# theme-scoped allowances rather than missed tokens. The count is locked:
+# any NEW white-alpha literal is a violation (exact 0.1 borders must use
+# var(--color-dark-border)).
+RGBA_WHITE_BASELINE=28
+RGBA_WHITE_COUNT=$(sed 's|/\*[^*]*\*\+\([^/*][^*]*\*\+\)*/||g' "$SITE_ROOT/css/main.css" | grep -o 'rgba(255' | wc -l | tr -d ' ')
+if [ "$RGBA_WHITE_COUNT" -le "$RGBA_WHITE_BASELINE" ]; then
+  pass "no_raw_hex_in_main_css: white-alpha rgba count within baseline ($RGBA_WHITE_COUNT <= $RGBA_WHITE_BASELINE)"
+else
+  fail "no_raw_hex_in_main_css: white-alpha rgba count within baseline" "$RGBA_WHITE_COUNT literals (baseline $RGBA_WHITE_BASELINE) — use semantic tokens for new dark-panel styles"
 fi
 
 # =============================================================================
