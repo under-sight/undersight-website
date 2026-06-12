@@ -24,9 +24,6 @@
  *   ALLOWED_ORIGIN — e.g. https://undersight.ai
  */
 
-// Fibery space prefix for all type/field names.
-const FIBERY_SPACE = 'CMS';
-
 // Allowed CORS origins. Matches functions/api/whitepaper-lead.js.
 const ALLOWED_ORIGINS = [
   'https://undersight.ai',
@@ -150,6 +147,9 @@ async function verifyTurnstile(env, request, token) {
 
 export default {
   async fetch(request, env) {
+    // Space prefix for all Fibery type/field names; dev preview sets
+    // FIBERY_SPACE="CMS Staging", production defaults to "CMS".
+    const FIBERY_SPACE = env.FIBERY_SPACE || 'CMS';
     // CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(request) });
