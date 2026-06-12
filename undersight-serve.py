@@ -21,7 +21,7 @@ import urllib.request
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
 WORKSPACE = "subscript.fibery.io"
-DB = "Website/Pages"
+DB = "CMS/Pages"
 CACHE_TTL = 5  # seconds - short for dev, increase for prod
 
 # Input validation constants (mirror production handlers)
@@ -134,7 +134,14 @@ def api_post(path, body):
         headers=HEADERS,
     )
     with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read())
+        data = json.loads(resp.read())
+    # Fibery returns HTTP 200 with success:false on command errors (e.g. a
+    # missing database). Raise instead of silently yielding zero entities.
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict) and item.get("success") is False:
+                raise RuntimeError(f"Fibery command failed: {item.get('result')}")
+    return data
 
 
 def _normalize_doc_markdown(text):
@@ -156,7 +163,7 @@ def _normalize_doc_markdown(text):
 
 def _unwrap_doc_content(raw):
     """
-    Defensive unwrap for Website/Blog Description docs written by the
+    Defensive unwrap for CMS/Blog Description docs written by the
     migration script wrapped in a JSON envelope `{"secret":..., "content":"..."}`.
     Returns the inner markdown if a wrapper is detected, else the raw string.
     Mirrors build.py:_unwrap_doc_content.
@@ -197,13 +204,13 @@ def fetch_all():
             "query": {
                 "q/from": DB,
                 "q/select": {
-                    "Name": "Website/Name",
+                    "Name": "CMS/Name",
                     "DocSecret": [
-                        "Website/Description",
+                        "CMS/Description",
                         "Collaboration~Documents/secret",
                     ],
                     "Files": {
-                        "q/from": "Website/Assets",
+                        "q/from": "CMS/Assets",
                         "q/select": {
                             "FileSecret": "fibery/secret",
                             "FileName": "fibery/name",
@@ -224,7 +231,7 @@ def fetch_all():
         if isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
     ]
     if stale_blog_pages:
-        print("WARNING: stale 'Blog -*' entities in Website/Pages — ignoring:",
+        print("WARNING: stale 'Blog -*' entities in CMS/Pages — ignoring:",
               ", ".join(stale_blog_pages), file=sys.stderr)
         entities = [e for e in entities if not (
             isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
@@ -235,22 +242,22 @@ def fetch_all():
         "command": "fibery.entity/query",
         "args": {
             "query": {
-                "q/from": "Website/Blog",
+                "q/from": "CMS/Blog",
                 "q/select": {
-                    "Name": "Website/name",
-                    "Slug": "Website/Slug",
-                    "Subtitle": "Website/Subtitle",
-                    "Author": "Website/Author",
-                    "Excerpt": "Website/Excerpt",
-                    "PostDate": "Website/Post Date",
+                    "Name": "CMS/name",
+                    "Slug": "CMS/Slug",
+                    "Subtitle": "CMS/Subtitle",
+                    "Author": "CMS/Author",
+                    "Excerpt": "CMS/Excerpt",
+                    "PostDate": "CMS/Post Date",
                     "CreationDate": "fibery/creation-date",
-                    "Type": ["Website/Type", "enum/name"],
+                    "Type": ["CMS/Type", "enum/name"],
                     "DocSecret": [
-                        "Website/Description",
+                        "CMS/Description",
                         "Collaboration~Documents/secret",
                     ],
                     "Files": {
-                        "q/from": "Website/Assets",
+                        "q/from": "CMS/Assets",
                         "q/select": {
                             "FileSecret": "fibery/secret",
                             "FileName": "fibery/name",
@@ -300,7 +307,7 @@ def fetch_all():
             "files": files,
         }
 
-    # 3b. Build structured _blogs array from Website/Blog.
+    # 3b. Build structured _blogs array from CMS/Blog.
     blogs = []
     for be in blog_entities:
         name = be.get("Name")
@@ -439,9 +446,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "Website/Blog",
+                        "q/from": "CMS/Blog",
                         "q/select": ["fibery/id"],
-                        "q/where": ["=", ["Website/name"], "$name"],
+                        "q/where": ["=", ["CMS/name"], "$name"],
                         "q/limit": 1,
                     },
                     "params": {"$name": whitepaper_name},
@@ -464,14 +471,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
             # 2. Create the lead entity, linked to the blog post
             lead_entity = {
-                "Website/Email": email,
-                "Website/Blog Post": {"fibery/id": wp_id},
+                "CMS/Email": email,
+                "CMS/Blog Post": {"fibery/id": wp_id},
             }
 
             api_post("/api/commands", [{
                 "command": "fibery.entity/create",
                 "args": {
-                    "type": "Website/Blog Leads",
+                    "type": "CMS/Blog Leads",
                     "entity": lead_entity,
                 },
             }])

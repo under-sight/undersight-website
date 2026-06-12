@@ -100,8 +100,8 @@ else
 fi
 
 # Test: All entity types present in content API
-# Blog content moved from Website/Pages 'Blog -*' entries to the dedicated
-# Website/Blog DB in May 2026 — it now arrives under data['_blogs']['_data'].
+# Blog content moved from CMS/Pages 'Blog -*' entries to the dedicated
+# CMS/Blog DB in May 2026 — it now arrives under data['_blogs']['_data'].
 for ENTITY_PREFIX in "Home" "Solutions" "Site Config" "Contact"; do
   if echo "$CONTENT_JSON" | python3 -c "
 import sys, json
@@ -914,7 +914,7 @@ print('content' if has_content else 'empty' if '$ENTITY' in data else 'missing')
   esac
 done
 
-# -- Blog entries (Website/Blog DB): at least 1 must exist with slug + post_date --
+# -- Blog entries (CMS/Blog DB): at least 1 must exist with slug + post_date --
 
 BLOG_COUNT=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
@@ -1225,7 +1225,7 @@ done
 section "Whitepaper Download Capture Tests"
 # =============================================================================
 # Research posts gated behind email capture must store submissions in a Fibery
-# database (Website/Blog). The PDF modal must reference
+# database (CMS/Blog). The PDF modal must reference
 # a functioning endpoint, not be in mock mode.
 
 # Test: WORKER_URL is configured (not empty string)
@@ -1351,12 +1351,12 @@ else
   fail "Solution pages are CMS-driven via SOLUTION_MAP + getContent(data, entityName)"
 fi
 
-# Test: Blog posts are CMS-driven (dynamic rendering from Website/Blog DB)
+# Test: Blog posts are CMS-driven (dynamic rendering from CMS/Blog DB)
 # Post-cutover: blogs arrive as data._blogs._data, no longer via 'Blog - ' prefix.
 if grep -q "data\._blogs" "$SRC_HTML"; then
-  pass "Blog grid dynamically renders from Website/Blog DB (data._blogs)"
+  pass "Blog grid dynamically renders from CMS/Blog DB (data._blogs)"
 else
-  fail "Blog grid dynamically renders from Website/Blog DB" "Expected 'data._blogs' reference in index.html"
+  fail "Blog grid dynamically renders from CMS/Blog DB" "Expected 'data._blogs' reference in index.html"
 fi
 
 # Test: Docs/Construction page entity exists in Fibery
@@ -1560,11 +1560,11 @@ for name, entity in data.items():
 # Get all Blog delivery entity names
 try:
     req = urllib.request.Request('https://subscript.fibery.io/api/commands',
-        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'Website/Blog','q/select':['Website/name'],'q/limit':50}}}]).encode(),
+        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'CMS/Blog','q/select':['CMS/name'],'q/limit':50}}}]).encode(),
         headers={'Authorization':'Token '+token,'Content-Type':'application/json'})
     resp = urllib.request.urlopen(req)
     wp_data = json.loads(resp.read())
-    wp_names = set(e.get('Website/name','') for e in wp_data[0].get('result',[]))
+    wp_names = set(e.get('CMS/name','') for e in wp_data[0].get('result',[]))
 except:
     print('ERROR:could not query Blog database')
     sys.exit(0)
@@ -2328,11 +2328,11 @@ else
       continue
     fi
 
-    LEAD_COUNT=$(/Users/kyle/bin/fibery -o json subscript query 'Website/Blog Leads' \
-      --where "Website/Email=$LEAD_RECIPIENT" \
-      --where "Website/Blog Post.Website/name=$WP" \
+    LEAD_COUNT=$(/Users/kyle/bin/fibery -o json subscript query 'CMS/Blog Leads' \
+      --where "CMS/Email=$LEAD_RECIPIENT" \
+      --where "CMS/Blog Post.CMS/name=$WP" \
       --where "fibery/creation-date>=$TEST_WINDOW_START" \
-      --select 'fibery/id,Website/Email,fibery/creation-date' \
+      --select 'fibery/id,CMS/Email,fibery/creation-date' \
       --limit 10 2>/dev/null | python3 -c "
 import sys, json
 try:

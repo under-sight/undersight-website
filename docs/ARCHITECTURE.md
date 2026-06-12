@@ -234,7 +234,7 @@ Several objects map Fibery entity names to rendering configuration:
 
 ### Fibery CMS Structure
 
-Content lives in a Fibery workspace at `subscript.fibery.io` in the database `Website/Pages`. Blog delivery assets live in `Website/Blog`, and lead captures live in `Website/Blog Leads`. Each page entity has:
+Content lives in a Fibery workspace at `subscript.fibery.io` in the database `CMS/Pages`. Blog delivery assets live in `CMS/Blog`, and lead captures live in `CMS/Blog Leads`. Each page entity has:
 
 - **Name**: Entity identifier (e.g., `Home - Hero`, `Blog - The RFI bottleneck`)
 - **Description**: A rich text document (fetched separately via document secret)
@@ -505,7 +505,7 @@ Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automat
 
 ### Fibery Schema
 
-**`Website/Blog`** — catalog of downloadable blog/case-study assets
+**`CMS/Blog`** — catalog of downloadable blog/case-study assets
 
 | Field | Type | Purpose |
 |-------|------|---------|
@@ -513,7 +513,7 @@ Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automat
 | PDF | file collection | Attached PDF file(s) |
 | Leads | relation (one-to-many) | Reverse relation to Blog Leads |
 
-**`Website/Blog Leads`** — captured email entries
+**`CMS/Blog Leads`** — captured email entries
 
 | Field | Type | Purpose |
 |-------|------|---------|
@@ -542,7 +542,7 @@ Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automat
 **Dev server** (`undersight-serve.py`):
 - `POST /api/whitepaper-lead` accepts `{ email, whitepaper }` JSON
 - Looks up blog entity by name via Fibery query (uses `$name` param syntax)
-- Creates `Website/Blog Leads` entity with linked blog relation
+- Creates `CMS/Blog Leads` entity with linked blog relation
 - Logs: `[LEAD] email -> post_name (linked)` or `(no match)`
 
 **Production** (Cloudflare Worker at `worker/index.js`):

@@ -193,8 +193,8 @@ later" — the contract is content-first.
 - Blog grid, post bodies, post images
 - Contact page (`Contact Page`)
 - Site Config (contact email, Calendly, copyright, sign-in URL)
-- Whitepapers + lead capture (`Website/Blog` + `Website/Blog Leads`)
-- Deployment tracking (`Website/Deployments`)
+- Whitepapers + lead capture (`CMS/Blog` + `CMS/Blog Leads`)
+- Deployment tracking (`CMS/Deployments`)
 
 ### Migration backlog (currently hardcoded — should move to Fibery)
 
@@ -229,13 +229,13 @@ undetected.
 
 | Type | Key Fields | Used By |
 |------|------------|---------|
-| `Website/Pages` | `Website/Name`, `Website/Description` (markdown doc), `Website/Assets` (files) | `build.py:97-200`, `undersight-serve.py:53-123` |
-| `Website/Blog` | `Website/name`, `Website/Slug`, `Website/PDF`, `Website/Assets`, `Website/Post Date`, `Website/Tag`, `Website/Subtitle`, `Website/Author`, `Website/Excerpt` | `build.py:183-194`, `functions/api/whitepaper-lead.js:79`, `undersight-serve.py:164-166` |
-| `Website/Blog Leads` | `Website/Email`, `Website/Blog Post`, `Website/Sent` | `functions/api/whitepaper-lead.js:97-105` |
-| `Website/Deployments` | `Website/Commit`, `Website/Site Mode`, `Website/Content Hash`, `Website/Build Status`, `Website/URL`, `Website/Deployed At` | `deploy-report.py:56-102` |
-| `Site Config` (entity in `Website/Pages`) | contact email, Calendly URL, copyright, sign-in URL (markdown body keys) | `index.html:784-794` |
+| `CMS/Pages` | `CMS/Name`, `CMS/Description` (markdown doc), `CMS/Assets` (files) | `build.py:97-200`, `undersight-serve.py:53-123` |
+| `CMS/Blog` | `CMS/name`, `CMS/Slug`, `CMS/PDF`, `CMS/Assets`, `CMS/Post Date`, `CMS/Tag`, `CMS/Subtitle`, `CMS/Author`, `CMS/Excerpt` | `build.py:183-194`, `functions/api/whitepaper-lead.js:79`, `undersight-serve.py:164-166` |
+| `CMS/Blog Leads` | `CMS/Email`, `CMS/Blog Post`, `CMS/Sent` | `functions/api/whitepaper-lead.js:97-105` |
+| `CMS/Deployments` | `CMS/Commit`, `CMS/Site Mode`, `CMS/Content Hash`, `CMS/Build Status`, `CMS/URL`, `CMS/Deployed At` | `deploy-report.py:56-102` |
+| `Site Config` (entity in `CMS/Pages`) | contact email, Calendly URL, copyright, sign-in URL (markdown body keys) | `index.html:784-794` |
 
-**Markdown front-matter convention** used inside `Website/Description` documents:
+**Markdown front-matter convention** used inside `CMS/Description` documents:
 `_title`, `_body` for primary copy; `Date`, `Excerpt`, `Tag`, `Subtitle`,
 `Author` for Blog metadata.
 
@@ -429,32 +429,32 @@ Website modal → submitWhitepaperEmail()
   → Dev: undersight-serve.py _capture_lead()
   → Prod: Cloudflare Worker (WORKER_URL — TODO: deploy)
   → Fibery API:
-      1. Query Website/Blog by name → get fibery/id
-      2. Create Website/Blog Leads entity
-         - Website/Email: submitted email
-         - Website/Blog Post: linked to blog/case-study entity
+      1. Query CMS/Blog by name → get fibery/id
+      2. Create CMS/Blog Leads entity
+         - CMS/Email: submitted email
+         - CMS/Blog Post: linked to blog/case-study entity
   → Fibery Automation triggers on new lead
   → Sends email with PDF attachment from blog/case-study entity
-  → Sets Website/Sent = true on the lead
+  → Sets CMS/Sent = true on the lead
 ```
 
 ### Fibery Schema
 
-**Website/Blog** (catalog of downloadable PDFs):
+**CMS/Blog** (catalog of downloadable PDFs):
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `Website/name` | text | Entity name — must match the `whitepaper` param from the modal |
-| `Website/PDF` | file | The PDF attachment sent to leads |
-| `Website/Leads` | relation (1:M) | Back-reference to all leads for this asset |
+| `CMS/name` | text | Entity name — must match the `whitepaper` param from the modal |
+| `CMS/PDF` | file | The PDF attachment sent to leads |
+| `CMS/Leads` | relation (1:M) | Back-reference to all leads for this asset |
 
-**Website/Blog Leads** (captured submissions):
+**CMS/Blog Leads** (captured submissions):
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `Website/Email` | text | Visitor's email |
-| `Website/Blog Post` | relation (M:1) | Link to the blog/case-study entity |
-| `Website/Sent` | bool | Set to true by Fibery automation when email is sent |
+| `CMS/Email` | text | Visitor's email |
+| `CMS/Blog Post` | relation (M:1) | Link to the blog/case-study entity |
+| `CMS/Sent` | bool | Set to true by Fibery automation when email is sent |
 | `fibery/creation-date` | date-time | (system) When the lead was captured |
 
 ### Current PDF Assets (must exist in Fibery with PDF attached)
@@ -468,7 +468,7 @@ Website modal → submitWhitepaperEmail()
 ### PDF Asset Name Mapping (JS → Fibery)
 
 The modal receives a whitepaper name via `openWhitepaperModal(name)`. This name
-**must exactly match** the `Website/name` field in the Fibery Blog database.
+**must exactly match** the `CMS/name` field in the Fibery Blog database.
 
 - Homepage case study CTA → hardcoded `'Chat Advance Case Study'`
 - Blog posts with tag `Research` or `Case Study` → uses `post.title` directly,
@@ -476,8 +476,8 @@ The modal receives a whitepaper name via `openWhitepaperModal(name)`. This name
 
 ### Adding a New PDF Asset
 
-1. Create a `Website/Blog` entity in Fibery with the exact name
-2. Attach the PDF file to the `Website/PDF` field
+1. Create a `CMS/Blog` entity in Fibery with the exact name
+2. Attach the PDF file to the `CMS/PDF` field
 3. In `index.html`, add a download button that calls
    `openWhitepaperModal('Exact Whitepaper Name')` — OR ensure the blog post
    title matches the whitepaper name and has tag `Research` or `Case Study`
@@ -492,7 +492,7 @@ curl -s -X POST http://localhost:8088/api/whitepaper-lead \
   -d '{"email":"test@example.com","whitepaper":"Chat Advance Case Study"}'
 ```
 
-Verify in Fibery: Website/Blog Leads should show the new entity linked to
+Verify in Fibery: CMS/Blog Leads should show the new entity linked to
 the correct blog/case-study asset, with `Sent` eventually set to true by the automation.
 
 ### Production Status
@@ -583,7 +583,7 @@ a `DEPRECATED` header — production traffic flows through the Pages Function.
 
 - [ ] Hardcoded marketing copy migrated to Fibery (per migration backlog above)
 - [ ] Hybrid case study sections fully wired (no hardcoded fallback)
-- [ ] Blog consolidation complete (all posts in `Website/Blog`, not `Website/Pages`)
+- [ ] Blog consolidation complete (all posts in `CMS/Blog`, not `CMS/Pages`)
 - [ ] `/blog` sorted by post date desc
 
 ### Safeguards

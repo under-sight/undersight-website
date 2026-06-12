@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Migrate Website/Pages 'Blog - *' entities into Website/Blog entities.
+"""Migrate CMS/Pages 'Blog - *' entities into CMS/Blog entities.
 
-PREREQUISITE: 6 fields must be added to Website/Blog in Fibery UI first:
-  - Website/Description  (rich-text, Collaboration~Documents/Document)
-  - Website/Assets       (file collection)
-  - Website/Post Date    (date or date-time)
-  - Website/Subtitle     (text)
-  - Website/Author       (text)
-  - Website/Excerpt      (text)
+PREREQUISITE: 6 fields must be added to CMS/Blog in Fibery UI first:
+  - CMS/Description  (rich-text, Collaboration~Documents/Document)
+  - CMS/Assets       (file collection)
+  - CMS/Post Date    (date or date-time)
+  - CMS/Subtitle     (text)
+  - CMS/Author       (text)
+  - CMS/Excerpt      (text)
 
 This script:
   1. Verifies the 6 fields exist (exits 2 if not).
   2. For each of 7 source/target pairs, copies Description doc, Assets,
-     and metadata fields from a Website/Pages "Blog - *" entity into the
-     existing Website/Blog entity.
+     and metadata fields from a CMS/Pages "Blog - *" entity into the
+     existing CMS/Blog entity.
   3. Is idempotent — running twice should be a no-op the second time.
   4. Skips B8 (Test Blog) and B9 (null stub) explicitly.
 
@@ -24,7 +24,7 @@ Usage:
 Exit codes:
   0 = success (including dry-run that found schema gaps when --dry-run)
   1 = unexpected error
-  2 = schema gap (required fields missing from Website/Blog)
+  2 = schema gap (required fields missing from CMS/Blog)
 """
 
 from __future__ import annotations
@@ -41,14 +41,14 @@ from typing import Any
 FIBERY = "/Users/kyle/bin/fibery"
 WORKSPACE = "subscript"
 
-# These six fields must exist on Website/Blog before we can migrate.
+# These six fields must exist on CMS/Blog before we can migrate.
 REQUIRED_FIELDS = [
-    "Website/Description",
-    "Website/Assets",
-    "Website/Post Date",
-    "Website/Subtitle",
-    "Website/Author",
-    "Website/Excerpt",
+    "CMS/Description",
+    "CMS/Assets",
+    "CMS/Post Date",
+    "CMS/Subtitle",
+    "CMS/Author",
+    "CMS/Excerpt",
 ]
 
 # Skip these entities entirely (B8 + B9 in the existing Blog DB).
@@ -57,7 +57,7 @@ SKIP_BLOG_IDS = {
     "6a8bfb90-5148-11f1-988b-3b8e74536b68": "null stub",
 }
 
-# Tag enum UUIDs for Website/Type — used for verification only (no mutation).
+# Tag enum UUIDs for CMS/Type — used for verification only (no mutation).
 TAG_IDS = {
     "Case Study": "019e2dd0-3d19-7294-8479-237720ed58ee",
     "Research":   "019e2dd0-3d19-7295-8d6c-d7ca4f7b0eda",
@@ -185,7 +185,7 @@ def run_fibery(*args: str, capture_json: bool = True) -> Any:
 
 def assert_schema_ready() -> tuple[bool, list[str]]:
     """Return (ok, missing_fields)."""
-    schema = run_fibery("describe", "Website/Blog")
+    schema = run_fibery("describe", "CMS/Blog")
     have = {f["name"] for f in schema.get("fields", [])}
     missing = [f for f in REQUIRED_FIELDS if f not in have]
     return (len(missing) == 0, missing)
@@ -241,42 +241,42 @@ def parse_front_matter(md: str) -> tuple[dict[str, str], str]:
 # ----------------------------------------------------------------------------
 
 def fetch_pages_entity(entity_id: str) -> dict[str, Any]:
-    """Fetch a Website/Pages entity with name, description doc, and assets."""
+    """Fetch a CMS/Pages entity with name, description doc, and assets."""
     q = {
-        "q/from": "Website/Pages",
+        "q/from": "CMS/Pages",
         "q/where": ["=", ["fibery/id"], "$id"],
         "q/select": {
             "id":   ["fibery/id"],
-            "name": ["Website/Name"],
-            "doc":  ["Website/Description", "Collaboration~Documents/secret"],
+            "name": ["CMS/Name"],
+            "doc":  ["CMS/Description", "Collaboration~Documents/secret"],
         },
         "q/limit": 1,
     }
     params = {"$id": entity_id}
-    res = run_fibery("query", "Website/Pages", "--json-query", json.dumps(q), "--params", json.dumps(params))
+    res = run_fibery("query", "CMS/Pages", "--json-query", json.dumps(q), "--params", json.dumps(params))
     if not res:
         raise RuntimeError(f"Pages entity not found: {entity_id}")
     return res[0]
 
 def fetch_blog_entity(entity_id: str) -> dict[str, Any]:
-    """Fetch a Website/Blog entity with all relevant fields."""
+    """Fetch a CMS/Blog entity with all relevant fields."""
     q = {
-        "q/from": "Website/Blog",
+        "q/from": "CMS/Blog",
         "q/where": ["=", ["fibery/id"], "$id"],
         "q/select": {
             "id":        ["fibery/id"],
-            "name":      ["Website/name"],
-            "slug":      ["Website/Slug"],
-            "doc":       ["Website/Description", "Collaboration~Documents/secret"],
-            "post_date": ["Website/Post Date"],
-            "subtitle":  ["Website/Subtitle"],
-            "author":    ["Website/Author"],
-            "excerpt":   ["Website/Excerpt"],
+            "name":      ["CMS/name"],
+            "slug":      ["CMS/Slug"],
+            "doc":       ["CMS/Description", "Collaboration~Documents/secret"],
+            "post_date": ["CMS/Post Date"],
+            "subtitle":  ["CMS/Subtitle"],
+            "author":    ["CMS/Author"],
+            "excerpt":   ["CMS/Excerpt"],
         },
         "q/limit": 1,
     }
     params = {"$id": entity_id}
-    res = run_fibery("query", "Website/Blog", "--json-query", json.dumps(q), "--params", json.dumps(params))
+    res = run_fibery("query", "CMS/Blog", "--json-query", json.dumps(q), "--params", json.dumps(params))
     if not res:
         raise RuntimeError(f"Blog entity not found: {entity_id}")
     return res[0]
@@ -343,8 +343,8 @@ def merge_one(item: dict[str, Any], dry_run: bool) -> dict[str, int]:
     body_will_change = (body.strip() != target_md_current.strip())
 
     # 4. Asset diff.
-    source_files = list_files_on("Website/Pages", source_id, "Website/Assets")
-    target_files = list_files_on("Website/Blog",  target_id, "Website/Assets")
+    source_files = list_files_on("CMS/Pages", source_id, "CMS/Assets")
+    target_files = list_files_on("CMS/Blog",  target_id, "CMS/Assets")
     target_filenames = {f.get("name") for f in target_files if f.get("name")}
 
     files_to_upload = []
@@ -362,24 +362,24 @@ def merge_one(item: dict[str, Any], dry_run: bool) -> dict[str, int]:
     fields_to_update: dict[str, Any] = {}
 
     if item["target_name"] and target_name_current != item["target_name"]:
-        fields_to_update["Website/name"] = item["target_name"]
+        fields_to_update["CMS/name"] = item["target_name"]
 
     current_post_date = target.get("post_date")
     desired_post_date = item["post_date"]
     if desired_post_date and not _date_matches(current_post_date, desired_post_date):
-        fields_to_update["Website/Post Date"] = desired_post_date
+        fields_to_update["CMS/Post Date"] = desired_post_date
 
     if not target.get("slug") and item["slug"]:
-        fields_to_update["Website/Slug"] = item["slug"]
+        fields_to_update["CMS/Slug"] = item["slug"]
 
     if subtitle and target.get("subtitle") != subtitle:
-        fields_to_update["Website/Subtitle"] = subtitle
+        fields_to_update["CMS/Subtitle"] = subtitle
     if author and target.get("author") != author:
-        fields_to_update["Website/Author"] = author
+        fields_to_update["CMS/Author"] = author
     if excerpt and target.get("excerpt") != excerpt:
-        fields_to_update["Website/Excerpt"] = excerpt
+        fields_to_update["CMS/Excerpt"] = excerpt
 
-    # 6. Verify Tag (Website/Type) — log only, no mutation.
+    # 6. Verify Tag (CMS/Type) — log only, no mutation.
     # (Not querying Type here to keep query simple; can be added later.)
 
     # 7. Print plan / execute.
@@ -436,9 +436,9 @@ def merge_one(item: dict[str, Any], dry_run: bool) -> dict[str, int]:
             run_fibery(
                 "file", "attach",
                 "--paths", ",".join(local_paths),
-                "--type", "Website/Blog",
+                "--type", "CMS/Blog",
                 "--entity-id", target_id,
-                "--field", "Website/Assets",
+                "--field", "CMS/Assets",
             )
             uploaded_count = len(local_paths)
 
@@ -446,7 +446,7 @@ def merge_one(item: dict[str, Any], dry_run: bool) -> dict[str, int]:
     if fields_to_update:
         run_fibery(
             "update",
-            "--type", "Website/Blog",
+            "--type", "CMS/Blog",
             "--fields", json.dumps(fields_to_update),
             target_id,
         )
@@ -493,7 +493,7 @@ def main() -> int:
     # 1. Schema check.
     ok, missing = assert_schema_ready()
     if not ok:
-        print("Schema check FAILED. Missing required fields on Website/Blog:")
+        print("Schema check FAILED. Missing required fields on CMS/Blog:")
         for f in missing:
             print(f"  - {f}")
         print("")

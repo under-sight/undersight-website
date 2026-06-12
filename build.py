@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 # ---------------------------------------------------------------------------
 
 WORKSPACE = "subscript.fibery.io"
-DB = "Website/Pages"
+DB = "CMS/Pages"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")
 CACHE_DIR = os.path.join(SRC_DIR, ".fibery-file-cache")
@@ -94,7 +94,15 @@ def api_post(path, body, token):
         headers=headers,
     )
     with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read())
+        data = json.loads(resp.read())
+    # Fibery returns HTTP 200 with success:false on command errors (e.g. a
+    # missing database). Raise so the under-construction fallback fires
+    # instead of building a content-empty "full" site.
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict) and item.get("success") is False:
+                raise RuntimeError(f"Fibery command failed: {item.get('result')}")
+    return data
 
 
 def _normalize_doc_markdown(text):
@@ -116,7 +124,7 @@ def _normalize_doc_markdown(text):
 
 def _unwrap_doc_content(raw):
     """
-    Defensive unwrap for Website/Blog Description docs that were written
+    Defensive unwrap for CMS/Blog Description docs that were written
     by the migration script wrapped in a JSON envelope:
         {\
         "secret": "...",
@@ -170,13 +178,13 @@ def fetch_all(token):
                     "query": {
                         "q/from": DB,
                         "q/select": {
-                            "Name": "Website/Name",
+                            "Name": "CMS/Name",
                             "DocSecret": [
-                                "Website/Description",
+                                "CMS/Description",
                                 "Collaboration~Documents/secret",
                             ],
                             "Files": {
-                                "q/from": "Website/Assets",
+                                "q/from": "CMS/Assets",
                                 "q/select": {
                                     "FileSecret": "fibery/secret",
                                     "FileName": "fibery/name",
@@ -197,7 +205,7 @@ def fetch_all(token):
     print(f"  Found {len(entities)} Pages entities")
 
     # Filter out any legacy 'Blog -*' entries that still linger in
-    # Website/Pages — blog content now lives in Website/Blog. The CI guard
+    # CMS/Pages — blog content now lives in CMS/Blog. The CI guard
     # in .github/workflows/deploy-production.yml will eventually fail on
     # regressions once the user deletes the migration leftovers manually.
     stale_blog_pages = [
@@ -205,7 +213,7 @@ def fetch_all(token):
         if isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
     ]
     if stale_blog_pages:
-        print(f"  WARNING: Ignoring {len(stale_blog_pages)} stale 'Blog -*' entries in Website/Pages")
+        print(f"  WARNING: Ignoring {len(stale_blog_pages)} stale 'Blog -*' entries in CMS/Pages")
         for n in stale_blog_pages:
             print(f"    - {n} (delete this in Fibery UI)")
         entities = [
@@ -221,22 +229,22 @@ def fetch_all(token):
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "Website/Blog",
+                        "q/from": "CMS/Blog",
                         "q/select": {
-                            "Name": "Website/name",
-                            "Slug": "Website/Slug",
-                            "Subtitle": "Website/Subtitle",
-                            "Author": "Website/Author",
-                            "Excerpt": "Website/Excerpt",
-                            "PostDate": "Website/Post Date",
+                            "Name": "CMS/name",
+                            "Slug": "CMS/Slug",
+                            "Subtitle": "CMS/Subtitle",
+                            "Author": "CMS/Author",
+                            "Excerpt": "CMS/Excerpt",
+                            "PostDate": "CMS/Post Date",
                             "CreationDate": "fibery/creation-date",
-                            "Type": ["Website/Type", "enum/name"],
+                            "Type": ["CMS/Type", "enum/name"],
                             "DocSecret": [
-                                "Website/Description",
+                                "CMS/Description",
                                 "Collaboration~Documents/secret",
                             ],
                             "Files": {
-                                "q/from": "Website/Assets",
+                                "q/from": "CMS/Assets",
                                 "q/select": {
                                     "FileSecret": "fibery/secret",
                                     "FileName": "fibery/name",
@@ -263,12 +271,12 @@ def fetch_all(token):
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "Website/Integrations",
+                        "q/from": "CMS/Integrations",
                         "q/select": {
-                            "Name": "Website/name",
-                            "Rank": "Website/Rank",
+                            "Name": "CMS/name",
+                            "Rank": "CMS/Rank",
                             "Logo": {
-                                "q/from": "Website/Logo",
+                                "q/from": "CMS/Logo",
                                 "q/select": {
                                     "FileSecret": "fibery/secret",
                                     "FileName": "fibery/name",
@@ -277,8 +285,8 @@ def fetch_all(token):
                                 "q/limit": 5,
                             },
                             "Pages": {
-                                "q/from": "Website/Used On Pages",
-                                "q/select": {"Name": "Website/Name"},
+                                "q/from": "CMS/Used On Pages",
+                                "q/select": {"Name": "CMS/Name"},
                                 "q/limit": 20,
                             },
                         },
