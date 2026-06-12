@@ -350,16 +350,20 @@ section "CSS Tests"
 MAIN_CSS=$(fetch "$BASE/css/main.css")
 TOKENS_CSS=$(fetch "$BASE/css/tokens.css")
 
-# Test: Zero hardcoded hex colors in main.css (excluding comments and #fff/#999)
-# #fff is allowed for white-on-dark text (stats bar, case study, testimonial)
-# #999 is allowed for muted text on dark backgrounds
+# Test: Zero hardcoded hex colors in main.css (excluding comments)
+# var(--token, #hex) fallbacks are stripped first — hex inside var() is
+# legitimate token usage with a literal fallback (older iOS Safari).
+# #fff/#ffffff and #C97A54 remain allowed only for the iOS-Safari
+# double-declaration pairs (.btn-primary literal-before-var fallbacks,
+# required by the Cross-Browser tests). The strict per-line check lives in
+# the "WIP fixes regression" section (no_raw_hex_in_main_css).
 HEX_MATCHES=$(echo "$MAIN_CSS" \
   | sed 's|/\*[^*]*\*\+\([^/*][^*]*\*\+\)*/||g' \
+  | sed -E 's/var\([^()]*\)//g' \
   | grep -oE '#[0-9a-fA-F]{3,8}\b' \
   | grep -v '^$' \
   | grep -vi '^#fff$' \
   | grep -vi '^#ffffff$' \
-  | grep -vi '^#999$' \
   | grep -vi '^#C97A54$' || true)
 if [ -z "$HEX_MATCHES" ]; then
   pass "Zero hardcoded hex colors in main.css"
@@ -2359,6 +2363,175 @@ except Exception as e:
       fail "Fibery lead created exactly once for: $WP" "Duplicate lead created — got $LEAD_COUNT rows (expected 1)"
     fi
   done
+fi
+
+# =============================================================================
+section "WIP fixes regression"
+# =============================================================================
+# File-level checks only (read from SITE_ROOT, no server needed). These lock
+# in the cheap WIP.md fixes: token discipline in main.css, theme toggle
+# behavior, single-source contact email, webp-aware image templates, and
+# dead-asset removal.
+
+# -- no_raw_hex_in_main_css --
+# Raw hex colors must not appear in css/main.css outside of two legitimate
+# patterns:
+#   (a) var(--token, #hex) fallbacks — token usage with a literal fallback
+#   (b) the iOS-Safari double-declaration pattern: a literal value immediately
+#       re-declared with var() on the next line (e.g. .btn-primary), which the
+#       Cross-Browser tests above explicitly require.
+HEX_VIOLATIONS=$(python3 - "$SITE_ROOT/css/main.css" <<'PYEOF'
+import re, sys
+css = open(sys.argv[1]).read()
+css = re.sub(r'/\*.*?\*/', '', css, flags=re.S)        # strip comments
+for _ in range(3):                                     # drop var() fallbacks (handles nesting)
+    css = re.sub(r'var\([^()]*\)', 'var0', css)
+lines = css.split('\n')
+decl = re.compile(r'([-a-zA-Z]+)\s*:\s*[^;{}]*#[0-9a-fA-F]{3,8}')
+violations = []
+for i, line in enumerate(lines):
+    m = decl.search(line)
+    if not m:
+        continue
+    nxt = lines[i + 1] if i + 1 < len(lines) else ''
+    if re.search(re.escape(m.group(1)) + r'\s*:\s*[^;{}]*var0', nxt):
+        continue  # iOS-Safari literal-before-var fallback pair
+    violations.append('%d: %s' % (i + 1, line.strip()))
+print('\n'.join(violations))
+PYEOF
+)
+if [ -z "$HEX_VIOLATIONS" ]; then
+  pass "no_raw_hex_in_main_css: no raw hex outside var() fallbacks / iOS pairs"
+else
+  HEX_V_COUNT=$(echo "$HEX_VIOLATIONS" | wc -l | tr -d ' ')
+  fail "no_raw_hex_in_main_css: no raw hex outside var() fallbacks / iOS pairs" "$HEX_V_COUNT violation(s): $(echo "$HEX_VIOLATIONS" | head -3 | tr '\n' '; ')"
+fi
+
+# -- no_raw_hex_in_main_css (white-alpha rgba baseline) --
+# rgba(255,…) literals remain on permanently-dark panels (stats bar,
+# case-study graphic, testimonial, api-preview/code-block, mca-callout,
+# header glass, and the theme-dark scoped blocks). tokens.css defines no
+# white-alpha scale beyond --color-dark-border (0.1), so these are
+# theme-scoped allowances rather than missed tokens. The count is locked:
+# any NEW white-alpha literal is a violation (exact 0.1 borders must use
+# var(--color-dark-border)).
+RGBA_WHITE_BASELINE=28
+RGBA_WHITE_COUNT=$(sed 's|/\*[^*]*\*\+\([^/*][^*]*\*\+\)*/||g' "$SITE_ROOT/css/main.css" | grep -o 'rgba(255' | wc -l | tr -d ' ')
+if [ "$RGBA_WHITE_COUNT" -le "$RGBA_WHITE_BASELINE" ]; then
+  pass "no_raw_hex_in_main_css: white-alpha rgba count within baseline ($RGBA_WHITE_COUNT <= $RGBA_WHITE_BASELINE)"
+else
+  fail "no_raw_hex_in_main_css: white-alpha rgba count within baseline" "$RGBA_WHITE_COUNT literals (baseline $RGBA_WHITE_BASELINE) — use semantic tokens for new dark-panel styles"
+fi
+
+# -- theme_dark_class_defined --
+# Manual dark mode relies on toggleTheme() adding .theme-dark to <html>;
+# tokens.css must define the matching override block.
+if grep -q 'html\.theme-dark' "$SITE_ROOT/css/tokens.css"; then
+  pass "theme_dark_class_defined: css/tokens.css defines html.theme-dark"
+else
+  fail "theme_dark_class_defined: css/tokens.css defines html.theme-dark" "Manual toggle class has no token overrides"
+fi
+
+# -- toggle_persists_localStorage --
+# The chosen theme must survive reloads: toggleTheme() writes the state to
+# localStorage and an early script reads it back on load (before first paint).
+TOGGLE_FN_BODY=$(sed -n '/function toggleTheme()/,/^  }/p' "$SITE_ROOT/index.html")
+if echo "$TOGGLE_FN_BODY" | grep -q 'localStorage' \
+  && grep -q "localStorage.getItem('undersight-theme')" "$SITE_ROOT/index.html"; then
+  pass "toggle_persists_localStorage: toggleTheme writes + boot reads undersight-theme"
+else
+  fail "toggle_persists_localStorage: toggleTheme writes + boot reads undersight-theme" "Theme choice does not survive a reload"
+fi
+
+# -- preview_uses_theme_dark --
+# The component catalog must demo the same manual dark class as production
+# (theme-dark), not its own parallel dark-mode class.
+if grep -q 'dark-mode' "$SITE_ROOT/preview.html"; then
+  fail "preview_uses_theme_dark: preview.html does not use class dark-mode" "Catalog theming diverges from production toggleTheme()"
+elif grep -q 'theme-dark' "$SITE_ROOT/preview.html"; then
+  pass "preview_uses_theme_dark: preview.html themes via theme-dark"
+else
+  fail "preview_uses_theme_dark: preview.html themes via theme-dark" "No manual dark class found at all"
+fi
+
+# -- email_single_source --
+# Every mailto anchor (hardcoded contact@undersight.ai or templated
+# ${contactEmail}) must carry class contact-email-link: renderContent()
+# patches exactly that selector from Site Config, so an anchor without the
+# class silently drifts from the CMS value.
+EMAIL_ANCHOR_VIOLATIONS=$(grep -n 'mailto:' "$SITE_ROOT/index.html" | grep '<a ' | grep -v 'contact-email-link' || true)
+if [ -z "$EMAIL_ANCHOR_VIOLATIONS" ]; then
+  pass "email_single_source: all mailto anchors carry contact-email-link"
+else
+  V_COUNT=$(echo "$EMAIL_ANCHOR_VIOLATIONS" | wc -l | tr -d ' ')
+  fail "email_single_source: all mailto anchors carry contact-email-link" "$V_COUNT anchor(s) missing the class: $(echo "$EMAIL_ANCHOR_VIOLATIONS" | head -2 | tr '\n' '; ')"
+fi
+
+# The CMS patch mechanism itself must keep using that selector.
+if grep -q "querySelectorAll('.contact-email-link')" "$SITE_ROOT/index.html"; then
+  pass "email_single_source: renderContent patches .contact-email-link from Site Config"
+else
+  fail "email_single_source: renderContent patches .contact-email-link from Site Config" "Patch selector changed — update this test AND the anchor class together"
+fi
+
+# -- blog_images_webp --
+# Blog/solution images come from CMS file attachments (not hardcoded
+# images/... paths — the old BLOG_IMAGES/SOLUTION_IMAGES maps are gone), so
+# the JS templates must be webp-aware: when a `<base>.webp` sibling exists in
+# the entity's files, emit <picture> with <source type="image/webp"> and the
+# PNG <img> fallback; when no sibling exists, emit plain <img> (current CMS
+# state — attachment counts are locked by the Image Integrity tests above).
+if grep -q 'type="image/webp"' "$SITE_ROOT/index.html"; then
+  pass "blog_images_webp: picture template emits <source type=\"image/webp\">"
+else
+  fail "blog_images_webp: picture template emits <source type=\"image/webp\">" "Templates serve PNG only — no webp progressive enhancement"
+fi
+
+if grep -q 'webpVariant' "$SITE_ROOT/index.html"; then
+  pass "blog_images_webp: webp sibling lookup (webpVariant) exists"
+else
+  fail "blog_images_webp: webp sibling lookup (webpVariant) exists" "No sibling check — webp <source> can't be emitted conditionally"
+fi
+
+# Asset inventory: every PNG referenced from index.html under images/blog/ or
+# images/solutions/, and every PNG on disk in those dirs, must have a .webp
+# sibling so the webp path is guaranteed once assets are referenced/baked.
+WEBP_MISSING=""
+for P in $(grep -oE 'images/(blog|solutions)/[A-Za-z0-9_.-]+\.png' "$SITE_ROOT/index.html" | sort -u); do
+  [ -f "$SITE_ROOT/${P%.png}.webp" ] || WEBP_MISSING="$WEBP_MISSING $P"
+done
+for P in "$SITE_ROOT"/images/blog/*.png "$SITE_ROOT"/images/solutions/*.png; do
+  [ -f "$P" ] || continue
+  [ -f "${P%.png}.webp" ] || WEBP_MISSING="$WEBP_MISSING ${P#"$SITE_ROOT"/}"
+done
+if [ -z "$WEBP_MISSING" ]; then
+  pass "blog_images_webp: every blog/solution PNG has a .webp sibling"
+else
+  fail "blog_images_webp: every blog/solution PNG has a .webp sibling" "Missing webp for:$WEBP_MISSING"
+fi
+
+# -- dead_assets_absent --
+# images/hero.png (991KB, never referenced), css/palette.css and css/fonts.css
+# (legacy token duplicates, never linked) must stay deleted and unreferenced.
+for DEAD in "images/hero.png" "css/palette.css" "css/fonts.css"; do
+  if [ -e "$SITE_ROOT/$DEAD" ]; then
+    fail "dead_assets_absent: $DEAD removed" "File still present in repo"
+  else
+    pass "dead_assets_absent: $DEAD removed"
+  fi
+done
+
+# Zero functional references repo-wide. Markdown docs (WIP.md, docs/,
+# .planning/) legitimately describe the removal itself and are excluded, as
+# are this test file, the gitignored dist/ build output, and .git.
+DEAD_ASSET_REFS=$(grep -rnE 'hero\.png|palette\.css|fonts\.css' "$SITE_ROOT" \
+  --exclude-dir=.git --exclude-dir=dist --exclude-dir=node_modules \
+  --exclude='*.md' --exclude='test-suite.sh' 2>/dev/null || true)
+if [ -z "$DEAD_ASSET_REFS" ]; then
+  pass "dead_assets_absent: zero functional references to dead assets"
+else
+  REF_COUNT=$(echo "$DEAD_ASSET_REFS" | wc -l | tr -d ' ')
+  fail "dead_assets_absent: zero functional references to dead assets" "$REF_COUNT reference(s): $(echo "$DEAD_ASSET_REFS" | head -3 | tr '\n' '; ')"
 fi
 
 # =============================================================================
