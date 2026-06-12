@@ -1887,6 +1887,9 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .testimonial-band .testimonial-quote-wrap {
   max-width: 880px; margin: 0 auto; position: relative;
+  /* pull-quote rule pair, top (B2) — pairs with the metrics totals row */
+  border-top: 1px solid var(--color-border);
+  padding-top: 24px;
 }
 .testimonial-band .testimonial-mark {
   display: block;
@@ -1899,8 +1902,14 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   font: 500 clamp(20px, 1.6vw + 12px, 28px) / 1.5 'Inter', sans-serif;
   font-feature-settings: 'cv01', 'ss03';
   letter-spacing: -0.015em; color: var(--black);
-  margin: 0 0 32px; max-width: none; padding: 0;
+  margin: 0 0 32px; max-width: none; padding: 0 0 32px;
+  /* pull-quote rule pair, bottom (B2) */
+  border-bottom: 1px solid var(--color-border);
 }
+/* the legacy .testimonial-quote::before glyph (dead .testimonial-section
+   styling) leaked a second, smaller quote mark under .testimonial-mark —
+   one voice, one mark (B2) */
+.testimonial-band .testimonial-quote::before { content: none; }
 .testimonial-band .testimonial-quote em {
   font-style: normal;
   background: linear-gradient(to top, var(--color-eucalyptus-light) 50%, transparent 50%);
@@ -1914,8 +1923,11 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   width: 40px; height: 40px;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 9999px;
-  background: var(--color-amber-rust-light);
-  color: var(--color-amber-rust);
+  /* cite marker joins the ring grammar (B2) — and drops a non-interactive
+     amber instance per the B0 amber-is-action rule */
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   font-weight: 600; letter-spacing: 0.02em;
 }
 .testimonial-band .cite-who { display: inline-flex; flex-direction: column; gap: 2px; }
