@@ -61,14 +61,13 @@ jobs:
                    if isinstance(r, dict) and isinstance(r.get("name"), str)
                    and r["name"].startswith("Blog -")]
           if stale:
-              # WARN only (not fail) until user deletes the legacy Blog -* entries
-              # in Fibery UI. Cutover commit ca74a80 added code that ignores these
-              # entries at build time, so they are dormant — just clutter. Once
-              # deleted, this guard can be promoted back to a hard fail by
-              # changing the next line to sys.exit(1).
-              print("::warning::Stale 'Blog -*' entities detected in CMS/Pages — content lives in CMS/Blog now; delete these via Fibery UI to enable strict mode:")
+              # Hard fail: the legacy Blog -* entries were deleted from
+              # CMS/Pages on 2026-06-12 (backup: tests/fixtures/cms-backup-2026-06-12.json).
+              # Any reappearance is a regression — blog content lives in CMS/Blog.
+              print("::error::Stale 'Blog -*' entities detected in CMS/Pages — content lives in CMS/Blog now:")
               for n in stale:
                   print(f"  - {n}")
+              sys.exit(1)
           else:
               print("Pages 'Blog -*' guard passed (no regressions).")
           PY
