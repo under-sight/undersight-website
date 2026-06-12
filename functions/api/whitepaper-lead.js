@@ -12,6 +12,9 @@
  *   FIBERY_TOKEN — Fibery API token for subscript.fibery.io
  */
 
+// Fibery space prefix for all type/field names.
+const FIBERY_SPACE = 'CMS';
+
 const ALLOWED_ORIGINS = [
   'https://undersight.ai',
   'https://www.undersight.ai',
@@ -268,9 +271,9 @@ export async function onRequestPost(context) {
         command: 'fibery.entity/query',
         args: {
           query: {
-            'q/from': 'CMS/Blog',
+            'q/from': `${FIBERY_SPACE}/Blog`,
             'q/select': ['fibery/id'],
-            'q/where': ['=', ['CMS/name'], '$name'],
+            'q/where': ['=', [`${FIBERY_SPACE}/name`], '$name'],
             'q/limit': 1,
           },
           params: { '$name': whitepaperName },
@@ -296,8 +299,8 @@ export async function onRequestPost(context) {
 
     // 2. Create the lead, linking to the blog post
     const leadEntity = {
-      'CMS/Email': email,
-      'CMS/Blog Post': { 'fibery/id': wpId },
+      [`${FIBERY_SPACE}/Email`]: email,
+      [`${FIBERY_SPACE}/Blog Post`]: { 'fibery/id': wpId },
     };
 
     const fiberyResp = await fetch('https://subscript.fibery.io/api/commands', {
@@ -305,7 +308,7 @@ export async function onRequestPost(context) {
       headers: fiberyHeaders,
       body: JSON.stringify([{
         command: 'fibery.entity/create',
-        args: { type: 'CMS/Blog Leads', entity: leadEntity },
+        args: { type: `${FIBERY_SPACE}/Blog Leads`, entity: leadEntity },
       }]),
     });
 

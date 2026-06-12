@@ -18,7 +18,8 @@ const { chromium } = require('playwright');
 // ---------------------------------------------------------------------------
 
 const WORKSPACE = 'subscript.fibery.io';
-const DB = 'CMS/Blog';
+const FIBERY_SPACE = 'CMS';
+const DB = `${FIBERY_SPACE}/Blog`;
 const IMG_DIR = path.resolve(__dirname, '../dist/images/blog');
 
 const WHITEPAPERS = [
@@ -118,8 +119,8 @@ async function fetchBlogPosts() {
       query: {
         'q/from': DB,
         'q/select': {
-          Name: 'CMS/name',
-          DocSecret: ['CMS/Description', 'Collaboration~Documents/secret'],
+          Name: `${FIBERY_SPACE}/name`,
+          DocSecret: [`${FIBERY_SPACE}/Description`, 'Collaboration~Documents/secret'],
         },
         'q/limit': 100,
       },
