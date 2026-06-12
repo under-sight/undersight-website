@@ -17,11 +17,11 @@ jobs:
       # to the repo's default branch (main), which would deploy main's code to
       # dev.undersight-website.pages.dev — defeating the purpose of staging on
       # dev. workflow_dispatch can still override via the run-from ref.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: dev
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -70,7 +70,7 @@ jobs:
           cp css/tokens.css dist/css/ 2>/dev/null || true
 
       - name: Deploy to Cloudflare Pages (dev)
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
