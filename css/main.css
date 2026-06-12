@@ -1680,7 +1680,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 .bleed.alt { background: var(--color-bg-alt, #FAFAFA); }
 .bleed.tight {
   padding: 56px 0;
-  border-top: 2px solid var(--color-text);
+  /* ledger re-rule (B2): heavy 2px ink dropped — one weight, 1px */
+  border-top: 1px solid var(--pale);
   border-bottom: 1px solid var(--pale);
 }
 @media (max-width: 768px) {
@@ -1711,14 +1712,26 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 
 /* ---- Stats bar (editorial mono numerals + source attribution) ---- */
+/* Ledger totals row (B2): accounting grammar — single 1px rule above the
+   figures, double rule below (the universal "total" mark), hairline
+   separators between items. */
 .stats {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-bg),
+              0 calc(var(--rule-double-gap) + 1px) 0 0 var(--color-border-light);
 }
 .stats .stat { display: flex; flex-direction: column; gap: 6px; }
+.stats .stat + .stat {
+  border-left: 1px solid var(--color-border-light);
+  padding-left: 24px;
+}
 .stats .stat-label {
   font: 600 11px/1.4 'Inter', sans-serif;
   text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--color-eucalyptus); margin-bottom: 6px;
+  color: var(--color-text-secondary); margin-bottom: 6px;
 }
 .stats .stat-num {
   font: 500 clamp(48px, 6vw + 12px, 84px) / 1 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
@@ -1741,6 +1754,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 @media (max-width: 768px) {
   .stats { grid-template-columns: 1fr; gap: 32px; }
+  .stats .stat + .stat { border-left: none; padding-left: 0; }
 }
 
 /* ---- Who We Serve: numbered editorial cards ---- */
@@ -1973,7 +1987,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 .stats .stat-unit { font-size: 0.45em; font-weight: 500; }
 .bleed.tight { padding: 40px 0; }
-.stats { gap: 56px; }
+.stats { gap: 48px; }
 .stats .stat-desc { font-size: 13px; max-width: 280px; }
 .stats .stat-src { font-size: 10.5px; }
 @media (max-width: 768px) {
@@ -2519,10 +2533,13 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
     var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch-dense));
 }
 
-/* Editorial double rule: 1px line + offset hairline echo. */
+/* Editorial double rule: 1px line + offset 1px hairline echo. The first
+   shadow masks the gap in the local background color so the echo stays a
+   true 1px stroke (one weight) rather than a 3px band. */
 .rule-double {
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-border-light);
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-bg),
+              0 calc(var(--rule-double-gap) + 1px) 0 0 var(--color-border-light);
 }
 
 /* Eye ring: 12px hairline ring with a 4px center dot — the marker that
