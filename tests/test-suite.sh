@@ -2252,6 +2252,16 @@ else
   fail "Turnstile verification wired in Pages Function"
 fi
 
+# Turnstile site key is a real key, not the placeholder. While the assignment
+# still reads TURNSTILE_SITE_KEY_PLACEHOLDER, _turnstileEnabled() returns false,
+# the client never sends a token, and prod bot protection silently no-ops.
+# Real site keys are issued by Cloudflare with an 0x prefix.
+if grep -qE "const TURNSTILE_SITE_KEY = '0x[0-9A-Za-z_-]{10,}'" "$SITE_ROOT/index.html"; then
+  pass "Turnstile site key configured (placeholder replaced)"
+else
+  fail "Turnstile site key configured (placeholder replaced)"
+fi
+
 # =============================================================================
 section "Deliverable Lead Capture Tests (opt-in)"
 # =============================================================================

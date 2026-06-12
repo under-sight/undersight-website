@@ -2697,11 +2697,12 @@
   // Dev: handled by undersight-serve.py. Prod: Cloudflare Pages Function (functions/api/whitepaper-lead.js).
   // Same path works in both environments — no URL switch needed.
   const WORKER_URL = '/api/whitepaper-lead';
-  // Cloudflare Turnstile site key. Replace 'TURNSTILE_SITE_KEY_PLACEHOLDER' with the
-  // real key from Cloudflare dashboard (Turnstile > Add site > invisible widget).
-  // While the placeholder is in place, the client posts without a token and the
-  // server-side verification is skipped (deploy-safe).
-  const TURNSTILE_SITE_KEY = 'TURNSTILE_SITE_KEY_PLACEHOLDER';
+  // Cloudflare Turnstile site key (public) for the "undersight-website lead
+  // capture" invisible widget in the Cloudflare account hosting this Pages
+  // project. Pairs with CF_TURNSTILE_SECRET_KEY in Pages env; if this ever
+  // reverts to a placeholder the client stops sending tokens and server-side
+  // verification silently no-ops.
+  const TURNSTILE_SITE_KEY = '0x4AAAAAADjmGCG7oge1QeeC';
   var _activeWhitepaper = '';
   var _wpTurnstileWidgetId = null;
   var _wpInFlight = false;
