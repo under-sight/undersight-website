@@ -39,6 +39,9 @@ jobs:
         id: build
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
+          # Dev reads the staging content space; production reads CMS.
+          # Mirror content with scripts/mirror-cms-to-staging.py.
+          FIBERY_SPACE: "CMS Staging"
         run: python3 build.py --verify --env dev
         continue-on-error: true
 
@@ -76,5 +79,6 @@ jobs:
       - name: Report deployment to Fibery
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
+          FIBERY_SPACE: "CMS Staging"
           BUILD_STATUS: ${{ (steps.build.outcome == 'success' && steps.validate.outcome == 'success' && steps.linkcheck.outcome == 'success') && 'success' || (steps.build.outcome == 'failure' && 'failed' || 'degraded') }}
         run: python3 deploy-report.py --env dev --url "https://dev.undersight-website.pages.dev" --status "$BUILD_STATUS"
