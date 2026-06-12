@@ -259,6 +259,17 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   width: 48px; height: 3px; background: var(--color-accent);
   border-radius: 2px; margin: 24px auto 0;
   animation: barDraw 0.8s ease 0.3s both;
+  position: relative;
+}
+/* "Written baseline" (B2): the amber pen-stroke rests on a 1px ledger rule
+   extending across the section — the line-logo geometry. The overshoot is
+   clipped by .hero { overflow: hidden }; the stroke keeps its barDraw
+   animation (covered by the reduced-motion block), the rule is static. */
+.hero-bar::after {
+  content: '';
+  position: absolute; bottom: 0; left: -100vw; right: -100vw;
+  height: 1px; background: var(--color-border);
+  pointer-events: none;
 }
 @keyframes barDraw {
   from { width: 0; }
@@ -641,6 +652,21 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
   padding: 96px 0;
   background: var(--white);
   border-top: 1px solid var(--pale);
+  position: relative;
+}
+/* Signature line (B2): the closing bookend mirrors the hero's written
+   baseline — a 48px pen-stroke resting on the section's existing 1px top
+   rule at the container's left edge. Static, no animation. Amber is
+   logo-derived and flagged for Kyle's ruling; graphite variant is a
+   one-line swap to background: var(--color-text). */
+.cta.cta-band::after {
+  content: '';
+  position: absolute; top: -2px;
+  left: calc(max(0px, 50% - var(--max-width) / 2) + 24px);
+  width: 48px; height: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  pointer-events: none;
 }
 .cta.cta-band .cta-inner {
   display: grid;
@@ -983,7 +1009,29 @@ a.back:hover { color: var(--color-accent); }
 .contact-email a:hover { color: var(--color-accent); }
 
 /* ---- FOOTER (combined, no sub-footer) ---- */
-.site-footer { border-top: 1px solid var(--pale); background: var(--white); padding: 48px 0 40px; }
+.site-footer { border-top: 1px solid var(--pale); background: var(--white); padding: 48px 0 40px; position: relative; }
+/* Colophon double rule (B2): self-contained editorial double rule on the
+   footer's top edge — 1px border + 1px hairline echo drawn inside the
+   footer's own background, so it works over any preceding section. */
+.site-footer::before {
+  content: '';
+  position: absolute; top: var(--rule-double-gap); left: 0; right: 0;
+  height: 1px; background: var(--color-border-light);
+  pointer-events: none;
+}
+/* Colophon mark (B2): the favicon nib beside the copyright line. The SVG
+   self-inverts only on prefers-color-scheme, so the manual theme classes
+   counter-filter it to stay in sync. */
+.site-footer .footer-copy img {
+  width: 16px; height: 16px;
+  vertical-align: -4px; margin-right: 8px;
+  opacity: 0.4;
+}
+html.theme-dark .site-footer .footer-copy img { filter: invert(1); }
+@media (prefers-color-scheme: dark) {
+  html.theme-dark .site-footer .footer-copy img { filter: none; }
+  html.theme-light .site-footer .footer-copy img { filter: invert(1); }
+}
 .site-footer .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
 .site-footer .footer-brand { display: flex; flex-direction: column; gap: 12px; }
 .site-footer .footer-logo { display: inline-block; line-height: 0; }
@@ -1669,7 +1717,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 .bleed.alt { background: var(--color-bg-alt, #FAFAFA); }
 .bleed.tight {
   padding: 56px 0;
-  border-top: 2px solid var(--color-text);
+  /* ledger re-rule (B2): heavy 2px ink dropped — one weight, 1px */
+  border-top: 1px solid var(--pale);
   border-bottom: 1px solid var(--pale);
 }
 @media (max-width: 768px) {
@@ -1700,14 +1749,26 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 
 /* ---- Stats bar (editorial mono numerals + source attribution) ---- */
+/* Ledger totals row (B2): accounting grammar — single 1px rule above the
+   figures, double rule below (the universal "total" mark), hairline
+   separators between items. */
 .stats {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px;
+  padding: 24px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-bg),
+              0 calc(var(--rule-double-gap) + 1px) 0 0 var(--color-border-light);
 }
 .stats .stat { display: flex; flex-direction: column; gap: 6px; }
+.stats .stat + .stat {
+  border-left: 1px solid var(--color-border-light);
+  padding-left: 24px;
+}
 .stats .stat-label {
   font: 600 11px/1.4 'Inter', sans-serif;
   text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--color-eucalyptus); margin-bottom: 6px;
+  color: var(--color-text-secondary); margin-bottom: 6px;
 }
 .stats .stat-num {
   font: 500 clamp(48px, 6vw + 12px, 84px) / 1 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
@@ -1730,6 +1791,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 @media (max-width: 768px) {
   .stats { grid-template-columns: 1fr; gap: 32px; }
+  .stats .stat + .stat { border-left: none; padding-left: 0; }
 }
 
 /* ---- Who We Serve: numbered editorial cards ---- */
@@ -1747,6 +1809,16 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .serve-grid .serve-card:first-child { margin-left: 0; }
 .serve-grid .serve-card:hover { background: var(--color-bg-alt, #FAFAFA); }
+/* Registration tick (B2): a single 12px crop-mark just outside each card's
+   top-left corner — exhibits pinned to the underwriting sheet. */
+.serve-grid .serve-card::before {
+  content: '';
+  position: absolute; top: -4px; left: -4px;
+  width: 12px; height: 12px;
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  pointer-events: none;
+}
 .serve-grid .serve-card .serve-num {
   font: 500 11px/1 'SF Mono', monospace;
   color: var(--mid); letter-spacing: 0.04em;
@@ -1784,19 +1856,31 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 .how {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
   position: relative;
+  counter-reset: how-step;
 }
 .how .how-step {
   padding: 32px 24px 32px 0;
   position: relative;
   display: flex; flex-direction: column; gap: 10px;
+  counter-increment: how-step;
 }
 .how .how-step + .how-step { padding-left: 24px; border-left: 1px solid var(--pale); }
 .how .how-step::before {
-  /* hairline stub, not an amber accent bar (B0: amber = interactive only) */
+  /* eye-ring step marker (B2) — ring border + center dot shared with the
+     .eye-ring primitive (see MOTIF PRIMITIVES at the end of this file) */
   content: ''; position: absolute; top: 0; left: 0;
-  width: 32px; height: 2px; background: var(--pale);
+  width: 12px; height: 12px;
 }
 .how .how-step + .how-step::before { left: 24px; }
+.how .how-step::after {
+  /* ghost folio index (B2): counter-driven 01–04 in pattern ink */
+  content: counter(how-step, decimal-leading-zero);
+  position: absolute; top: 8px; right: 24px;
+  font: 500 48px/1 var(--font-mono);
+  letter-spacing: -0.02em;
+  color: var(--pattern-line-strong);
+  pointer-events: none;
+}
 .how .step-n {
   font: 600 11px/1 'SF Mono', monospace;
   letter-spacing: 0.06em; color: var(--mid); margin-top: 18px;
@@ -1840,6 +1924,9 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .testimonial-band .testimonial-quote-wrap {
   max-width: 880px; margin: 0 auto; position: relative;
+  /* pull-quote rule pair, top (B2) — pairs with the metrics totals row */
+  border-top: 1px solid var(--color-border);
+  padding-top: 24px;
 }
 .testimonial-band .testimonial-mark {
   display: block;
@@ -1852,8 +1939,14 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   font: 500 clamp(20px, 1.6vw + 12px, 28px) / 1.5 'Inter', sans-serif;
   font-feature-settings: 'cv01', 'ss03';
   letter-spacing: -0.015em; color: var(--black);
-  margin: 0 0 32px; max-width: none; padding: 0;
+  margin: 0 0 32px; max-width: none; padding: 0 0 32px;
+  /* pull-quote rule pair, bottom (B2) */
+  border-bottom: 1px solid var(--color-border);
 }
+/* the legacy .testimonial-quote::before glyph (dead .testimonial-section
+   styling) leaked a second, smaller quote mark under .testimonial-mark —
+   one voice, one mark (B2) */
+.testimonial-band .testimonial-quote::before { content: none; }
 .testimonial-band .testimonial-quote em {
   font-style: normal;
   background: linear-gradient(to top, var(--color-eucalyptus-light) 50%, transparent 50%);
@@ -1867,8 +1960,11 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   width: 40px; height: 40px;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 9999px;
-  background: var(--color-amber-rust-light);
-  color: var(--color-amber-rust);
+  /* cite marker joins the ring grammar (B2) — and drops a non-interactive
+     amber instance per the B0 amber-is-action rule */
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   font-weight: 600; letter-spacing: 0.02em;
 }
 .testimonial-band .cite-who { display: inline-flex; flex-direction: column; gap: 2px; }
@@ -1952,7 +2048,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 .stats .stat-unit { font-size: 0.45em; font-weight: 500; }
 .bleed.tight { padding: 40px 0; }
-.stats { gap: 56px; }
+.stats { gap: 48px; }
 .stats .stat-desc { font-size: 13px; max-width: 280px; }
 .stats .stat-src { font-size: 10.5px; }
 @media (max-width: 768px) {
@@ -2085,18 +2181,38 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
   background: var(--white);
   border: 1px solid var(--pale);
   border-radius: var(--rounded-lg, 12px);
-  overflow: hidden;
+  /* overflow moved to .cs-thumb (B2) so the exhibit crop marks can sit
+     outside the tile border without being clipped */
+  position: relative;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .cs-tile:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(35, 38, 44, 0.08); }
+/* Exhibit framing (B2): four 12px corner ticks 8px outside the tile —
+   the case study pinned to the underwriting sheet. Pattern ink only. */
+.cs-tile::before {
+  content: '';
+  position: absolute; top: -8px; right: -8px; bottom: -8px; left: -8px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) left top / 12px 1px,
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) left top / 1px 12px,
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) right top / 12px 1px,
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) right top / 1px 12px,
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) left bottom / 12px 1px,
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) left bottom / 1px 12px,
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) right bottom / 12px 1px,
+    linear-gradient(var(--pattern-line-strong), var(--pattern-line-strong)) right bottom / 1px 12px;
+  background-repeat: no-repeat;
+}
 
 .cs-thumb {
   position: relative;
   aspect-ratio: 16 / 8;
   background: var(--color-bg-alt, #FAFAFA);
   overflow: hidden;
+  border-radius: var(--rounded-lg, 12px) var(--rounded-lg, 12px) 0 0;
 }
 .cs-thumb::before {
   content: '';
@@ -2299,6 +2415,15 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 
 /* Filter buttons: Rust on active (action), neutral when off */
 .blog-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+/* Section-front rule (B2): newspaper double rule between the filter row
+   and the grid. Gap mask uses --bg (the page canvas behind the filters),
+   not --color-bg, because the blog container sits on the alt surface. */
+.blog-filters.rule-double {
+  padding-bottom: 24px;
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--bg),
+              0 calc(var(--rule-double-gap) + 1px) 0 0 var(--color-border-light);
+}
+.blog-filters:empty { display: none; }
 .blog-filter {
   border: 1px solid var(--pale);
   background: var(--white);
@@ -2498,10 +2623,13 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
     var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch-dense));
 }
 
-/* Editorial double rule: 1px line + offset hairline echo. */
+/* Editorial double rule: 1px line + offset 1px hairline echo. The first
+   shadow masks the gap in the local background color so the echo stays a
+   true 1px stroke (one weight) rather than a 3px band. */
 .rule-double {
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-border-light);
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-bg),
+              0 calc(var(--rule-double-gap) + 1px) 0 0 var(--color-border-light);
 }
 
 /* Eye ring: 12px hairline ring with a 4px center dot — the marker that
@@ -2513,6 +2641,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 .eye-ring,
 .how-timeline .how-step::before,
+.how .how-step::before,
 .case-study-graphic .cs-num {
   border-radius: 50%;
   border: 1px solid var(--color-border);
@@ -2528,4 +2657,10 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 /* Context overrides: the timeline dot occludes the line running behind
    it; the dark case-study band needs its light hairline. */
 .how-timeline .how-step::before { background: var(--white); }
+/* Live .how grid markers are a single pseudo, so the 4px center dot is
+   painted as a token-colored gradient rather than .eye-ring's ::after. */
+.how .how-step::before {
+  background: radial-gradient(circle,
+    var(--color-text-muted) 0 2px, transparent 2px);
+}
 .case-study-graphic .cs-num { border-color: var(--color-dark-text-muted); }

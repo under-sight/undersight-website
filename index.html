@@ -159,7 +159,7 @@
   </div>
   <!-- Live content (hidden until loaded) -->
   <div class="live-content">
-    <div class="hero hero-split">
+    <div class="hero hero-split bg-ruled">
       <div class="container hero-inner">
         <div class="hero-copy">
           <h1 id="heroTitle"></h1>
@@ -516,7 +516,7 @@
     </div>
   </div>
   <div class="container blog-container">
-    <div class="blog-filters" id="blogFilters"></div>
+    <div class="blog-filters rule-double" id="blogFilters"></div>
     <div class="blog-grid" id="blogGrid">
       <!-- populated from Fibery -->
     </div>
@@ -552,7 +552,7 @@
           <img src="images/brand/logo-horizontal-line-primary.svg" alt="undersight" width="148" height="22">
         </a>
         <p class="footer-tagline">AI underwriting infrastructure for private credit.</p>
-        <p class="footer-copy" id="footerCopy">&copy; <script>document.write(new Date().getFullYear())</script> undersight. All rights reserved.</p>
+        <p class="footer-copy"><img src="/favicon.svg" alt="" width="16" height="16" aria-hidden="true"><span id="footerCopy">&copy; <script>document.write(new Date().getFullYear())</script> undersight. All rights reserved.</span></p>
       </div>
       <div class="footer-col">
         <h4>Solutions</h4>
@@ -905,7 +905,7 @@
   function renderUnderscorePage(pageEl, tag, title, desc, contactEmail) {
     const logoCards = renderIntegrationsStrip('Solutions - underscore');
     pageEl.innerHTML = `
-      <div class="sol-hero">
+      <div class="sol-hero bg-ruled">
         <span class="tag">${tag}</span>
         <h1>150+ SMB-specific metrics from a single API call</h1>
         <p>ML and agentic scoring models built for private credit. Send bank statements, QuickBooks exports, or Plaid connections &mdash; get back institutional-grade risk intelligence in seconds.</p>
@@ -1340,7 +1340,7 @@
         }
       </style>
 
-      <div class="sol-hero">
+      <div class="sol-hero bg-ruled">
         <div class="sol-hero-text">
           <span class="tag">${tag}</span>
           <h1>Brand-matched AI agents that engage your clients 24/7</h1>
@@ -1817,7 +1817,7 @@
         }
       </style>
 
-      <div class="sol-hero">
+      <div class="sol-hero bg-ruled">
         <div class="sol-hero-text">
           <span class="tag">${tag}</span>
           <h1>Hybrid <em>ML + agentic</em> risk scoring for every position you hold.</h1>
@@ -2402,7 +2402,7 @@
             </div>
           </div>`).join('');
         pageEl.innerHTML = `
-          <div class="sol-hero">
+          <div class="sol-hero bg-ruled">
             <span class="tag">${tag}</span>
             <h1>${title}</h1>
             <p>${desc}</p>

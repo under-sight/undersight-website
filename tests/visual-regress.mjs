@@ -30,9 +30,20 @@ const OUT_DIR = path.resolve(
   process.argv[2] || path.join('tests', 'visual-baselines', `run-${new Date().toISOString().replace(/[:.]/g, '-')}`)
 );
 
+// Live homepage selectors (the legacy .stats-bar/.how-section/.case-study/
+// .testimonial-section/.cta-section classes only survive in solution-page
+// templates). Sections are targeted via their data-content-entity attribute
+// where one exists; the case-study grid section carries none, so it is
+// matched structurally.
 const SECTIONS = [
-  '.hero', '.serve-grid', '.stats-bar', '.how-section', '.case-study',
-  '.testimonial-section', '.cta-section', 'footer',
+  '.hero.hero-split',
+  '[data-content-entity="Home - Metrics"]',
+  '[data-content-entity="Home - Who We Serve"]',
+  '[data-content-entity="Home - How It Works"]',
+  'section.bleed.alt:has(.cs-grid)',
+  '.testimonial-band',
+  '.cta.cta-band',
+  'footer',
 ];
 
 const CONTEXTS = [];
@@ -100,7 +111,12 @@ async function main() {
       await page.waitForTimeout(700);
 
       for (const sel of SECTIONS) {
-        const slug = sel.replace(/^\./, '');
+        const slug = sel
+          .replace(/^\[data-content-entity="Home - (.+)"\]$/, '$1')
+          .replace(/^\./, '')
+          .replace(/[^A-Za-z0-9.-]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .toLowerCase();
         const file = path.join(OUT_DIR, `${label}--${slug}.png`);
         // First *visible* match — the SPA keeps inactive pages and skeleton
         // wrappers in the DOM with display:none.
