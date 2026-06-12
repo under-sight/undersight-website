@@ -1758,6 +1758,16 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .serve-grid .serve-card:first-child { margin-left: 0; }
 .serve-grid .serve-card:hover { background: var(--color-bg-alt, #FAFAFA); }
+/* Registration tick (B2): a single 12px crop-mark just outside each card's
+   top-left corner — exhibits pinned to the underwriting sheet. */
+.serve-grid .serve-card::before {
+  content: '';
+  position: absolute; top: -4px; left: -4px;
+  width: 12px; height: 12px;
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  pointer-events: none;
+}
 .serve-grid .serve-card .serve-num {
   font: 500 11px/1 'SF Mono', monospace;
   color: var(--mid); letter-spacing: 0.04em;
