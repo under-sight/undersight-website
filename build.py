@@ -812,8 +812,13 @@ def strip_serve_references(html):
 # ---------------------------------------------------------------------------
 
 
-def copy_static_files():
-    """Copy all static assets to dist/. Returns (file_count, total_bytes)."""
+def copy_static_files(env_name="dev"):
+    """Copy all static assets to dist/. Returns (file_count, total_bytes).
+
+    Non-production builds also ship the design catalog (preview.html and its
+    tokens/tokens.css dependency) so design reviews can happen on the dev URL.
+    Production never ships it.
+    """
     file_count = 0
     total_bytes = 0
 
@@ -837,10 +842,12 @@ def copy_static_files():
             print(f"    WARNING: Directory {dirname}/ not found, skipping")
 
     # Copy individual files
-    for fname in STATIC_FILES:
+    extra = [] if env_name == "production" else ["preview.html", "tokens/tokens.css"]
+    for fname in STATIC_FILES + extra:
         src = os.path.join(SRC_DIR, fname)
         dst = os.path.join(DIST_DIR, fname)
         if os.path.isfile(src):
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copy2(src, dst)
             size = os.path.getsize(dst)
             total_bytes += size
@@ -1071,7 +1078,7 @@ def main():
 
     # 4. Copy static files (before file downloads so directory structure exists)
     print("\n[4/6] Copying static files...")
-    file_count, static_bytes = copy_static_files()
+    file_count, static_bytes = copy_static_files(env_name)
 
     # 5. Download Fibery file attachments and rewrite URLs
     print("\n[5/6] Downloading file attachments...")

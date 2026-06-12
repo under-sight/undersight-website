@@ -70,6 +70,15 @@ fi
 # Favicon present
 [ -f "$DIST/favicon.svg" ] && pass "Favicon present" || fail "Favicon present"
 
+# Design catalog: deployed on dev builds for review, never on production
+BUILD_ENV=$(python3 -c "import json;print(json.load(open('$DIST/.build-meta.json')).get('env',''))" 2>/dev/null)
+if [ "$BUILD_ENV" = "production" ]; then
+  [ ! -f "$DIST/preview.html" ] && pass "preview.html excluded from production build" || fail "preview.html excluded from production build"
+else
+  [ -f "$DIST/preview.html" ] && pass "preview.html present in dev build" || fail "preview.html present in dev build"
+  [ -f "$DIST/tokens/tokens.css" ] && pass "tokens/tokens.css present (preview.html dependency)" || fail "tokens/tokens.css present (preview.html dependency)"
+fi
+
 echo ""
 echo "Results: $((PASS+FAIL)) tests — PASS: $PASS, FAIL: $FAIL"
 [ $FAIL -eq 0 ] && echo "ALL PASSED" && exit 0 || echo "FAILED" && exit 1
