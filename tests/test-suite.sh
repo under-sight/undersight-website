@@ -2362,6 +2362,103 @@ except Exception as e:
 fi
 
 # =============================================================================
+section "Background motif guards"
+# =============================================================================
+# File-level guards for the "underwriting paper" motif foundation (B0/B1).
+# No server required — these read css/, preview.html directly.
+
+MAIN_CSS_FILE="$SITE_ROOT/css/main.css"
+TOKENS_CSS_FILE="$SITE_ROOT/css/tokens.css"
+
+# Test: pattern_tokens_defined — --pattern-line / --pattern-line-strong defined
+# in BOTH the light :root block and the dark prefers-color-scheme block.
+if python3 - "$TOKENS_CSS_FILE" <<'PY'
+import re, sys
+css = open(sys.argv[1]).read()
+dark_at = css.find('@media (prefers-color-scheme: dark)')
+if dark_at < 0:
+    sys.exit(1)
+light = css[:dark_at]
+# Dark block ends at the first 'html.theme' override (or EOF)
+dark_end = css.find('html.theme', dark_at)
+dark = css[dark_at:dark_end if dark_end > 0 else len(css)]
+need = ('--pattern-line:', '--pattern-line-strong:')
+sys.exit(0 if all(t in light for t in need) and all(t in dark for t in need) else 1)
+PY
+then
+  pass "pattern_tokens_defined: pattern line tokens in light :root and dark override blocks"
+else
+  fail "pattern_tokens_defined: pattern line tokens in light :root and dark override blocks"
+fi
+
+# Test: no_hero_gradient_wash — no radial-gradient inside any .hero rule block.
+if python3 - "$MAIN_CSS_FILE" <<'PY'
+import sys
+css = open(sys.argv[1]).read()
+pos, bad = 0, []
+while True:
+    hit = css.find('radial-gradient', pos)
+    if hit < 0:
+        break
+    # Selector = text between the previous block boundary and the nearest '{'
+    open_brace = css.rfind('{', 0, hit)
+    boundary = max(css.rfind('}', 0, open_brace), css.rfind(';', 0, open_brace))
+    selector = css[boundary + 1:open_brace]
+    if '.hero' in selector:
+        bad.append(selector.strip().replace('\n', ' '))
+    pos = hit + 1
+print('\n'.join(bad), file=sys.stderr)
+sys.exit(1 if bad else 0)
+PY
+then
+  pass "no_hero_gradient_wash: no radial-gradient in any .hero rule block"
+else
+  fail "no_hero_gradient_wash: no radial-gradient in any .hero rule block" "ambient wash still present"
+fi
+
+# Test: keyframes_reduced_motion_covered — every @keyframes name in main.css
+# also appears inside a prefers-reduced-motion block (rule or coverage note).
+if python3 - "$MAIN_CSS_FILE" <<'PY'
+import re, sys
+css = open(sys.argv[1]).read()
+names = set(re.findall(r'@keyframes\s+([A-Za-z0-9_-]+)', css))
+rm_content = []
+for m in re.finditer(r'@media[^{]*prefers-reduced-motion[^{]*\{', css):
+    depth, i = 1, m.end()
+    while i < len(css) and depth:
+        if css[i] == '{': depth += 1
+        elif css[i] == '}': depth -= 1
+        i += 1
+    rm_content.append(css[m.end():i])
+rm = '\n'.join(rm_content)
+missing = sorted(n for n in names if n not in rm)
+print(', '.join(missing), file=sys.stderr)
+sys.exit(1 if missing else 0)
+PY
+then
+  pass "keyframes_reduced_motion_covered: all @keyframes covered by prefers-reduced-motion"
+else
+  fail "keyframes_reduced_motion_covered: all @keyframes covered by prefers-reduced-motion" "uncovered keyframes exist"
+fi
+
+# Test: preview_has_motif_catalog — preview.html documents the motif primitives.
+if grep -q "Background Motifs" "$SITE_ROOT/preview.html"; then
+  pass "preview_has_motif_catalog: preview.html contains 'Background Motifs' section"
+else
+  fail "preview_has_motif_catalog: preview.html contains 'Background Motifs' section"
+fi
+
+# Test: backdrop_filter_unchanged — pinned count of (unprefixed) backdrop-filter
+# uses in main.css. Baseline = 2: sticky header glass + whitepaper modal overlay.
+# Motif work must not add blur surfaces.
+BACKDROP_COUNT=$(grep -cE '(^|[^-])backdrop-filter:' "$MAIN_CSS_FILE" || true)
+if [ "$BACKDROP_COUNT" = "2" ]; then
+  pass "backdrop_filter_unchanged: backdrop-filter count pinned at 2"
+else
+  fail "backdrop_filter_unchanged: backdrop-filter count pinned at 2" "Found $BACKDROP_COUNT"
+fi
+
+# =============================================================================
 section "Summary"
 # =============================================================================
 
