@@ -242,16 +242,8 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   text-align: center; padding: 96px 24px 80px;
   overflow: hidden;
 }
-.hero::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 80%, rgba(201, 122, 84, 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(107, 158, 140, 0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 90% 40% at 50% 0%, rgba(209, 213, 219, 0.12) 0%, transparent 60%);
-  z-index: 0;
-}
-.hero > * { position: relative; z-index: 1; }
+/* Ambient radial wash removed (B0): the hero sits flat on the paper canvas.
+   Background texture arrives via the .bg-ruled motif primitive instead. */
 .hero h1 {
   font-size: 48px; font-weight: 700; letter-spacing: -0.03em;
   color: var(--black); max-width: 720px; line-height: 1.1;
@@ -609,8 +601,9 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
 }
 .stat-item:last-child { border-right: none; }
 .stat-num {
-  font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
-  font-size: 40px; font-weight: 700; color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 40px; font-weight: 700; color: var(--color-paper-white);
   letter-spacing: -0.02em; line-height: 1;
 }
 .stat-num span { font-size: 20px; }
@@ -953,7 +946,8 @@ a.back:hover { color: var(--color-accent); }
 .post-body ul, .post-body ol { margin: 0 0 20px 24px; }
 .post-body li { margin-bottom: 8px; }
 .post-body blockquote {
-  border-left: 3px solid var(--color-accent); padding: 12px 20px; margin: 20px 0;
+  /* quoted content: INSIGHT voice, not amber (B0) */
+  border-left: 3px solid var(--color-eucalyptus); padding: 12px 20px; margin: 20px 0;
   background: var(--bg); border-radius: 0 var(--rounded-sm) var(--rounded-sm) 0; color: var(--mid); font-style: italic;
 }
 .post-body blockquote p { margin-bottom: 8px; }
@@ -961,9 +955,10 @@ a.back:hover { color: var(--color-accent); }
 
 /* Blog tag badge */
 .blog-tag {
+  /* metadata chip: INSIGHT voice per DESIGN.md tag rules (B0) */
   display: inline-block; padding: 3px 10px; border-radius: var(--rounded-sm);
-  background: rgba(201, 122, 84, 0.08); font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 11px; font-weight: 600; color: var(--color-accent);
+  background: var(--color-eucalyptus-light); font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 11px; font-weight: 600; color: var(--color-eucalyptus);
   text-transform: uppercase; letter-spacing: 0.06em; vertical-align: middle;
 }
 
@@ -1100,11 +1095,12 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
 }
 .how-step { position: relative; margin-bottom: 32px; }
 .how-step:last-child { margin-bottom: 0; }
-.how-step::before {
+.how-timeline .how-step::before {
+  /* ring geometry/border shared with .eye-ring — see BACKGROUND MOTIF
+     PRIMITIVES at the end of this file. Scoped to .how-timeline so the
+     V2 .how bar stubs no longer inherit dot styling. */
   content: ''; position: absolute; left: -30px; top: 6px;
-  width: 12px; height: 12px; border-radius: 50%;
-  background: var(--color-accent); border: 3px solid var(--white);
-  box-shadow: 0 0 0 2px var(--pale);
+  width: 12px; height: 12px;
 }
 .how-step h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
 .how-step p { font-size: 15px; color: var(--mid); line-height: 1.6; }
@@ -1112,7 +1108,7 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
   .how-section { padding: 48px 16px; }
   .how-timeline { padding-left: 32px; }
   .how-step h3 { font-size: 16px; }
-  .how-step::before { left: -22px; }
+  .how-timeline .how-step::before { left: -22px; }
 }
 
 /* ---- WHO WE SERVE ---- */
@@ -1139,7 +1135,7 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
   display: flex; gap: 0; align-items: stretch;
   background: var(--white); border: 1px solid var(--pale);
   border-radius: var(--rounded-lg); overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  /* border-first: no resting box-shadow (B0) */
 }
 .case-study-graphic {
   flex: 0 0 480px; max-width: 100%;
@@ -1156,8 +1152,9 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
   display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start;
 }
 .case-study-graphic .cs-num {
-  width: 24px; height: 24px; border-radius: 50%;
-  background: var(--color-accent); color: var(--color-on-accent);
+  /* hairline ring on the dark band — ring border shared with .eye-ring,
+     border-color overridden for the graphite band (see MOTIF PRIMITIVES) */
+  width: 24px; height: 24px; color: var(--color-paper-white);
   font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
@@ -1169,7 +1166,7 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
 .case-study-graphic .cs-stat { flex: 1; text-align: center; }
 .case-study-graphic .cs-stat .num {
   font-family: 'JetBrains Mono', 'SF Mono', monospace;
-  font-size: 18px; font-weight: 700; color: var(--color-accent);
+  font-size: 18px; font-weight: 700; color: var(--color-paper-white);
 }
 .case-study-graphic .cs-stat .label { font-size: 10px; color: rgba(255, 255, 255, 0.5); margin-top: 4px; }
 
@@ -1230,7 +1227,8 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
   font-family: 'Inter', sans-serif;
   font-size: 48px;
   font-weight: 700;
-  color: var(--color-accent);
+  /* INSIGHT voice (B0: amber = action only) */
+  color: var(--color-eucalyptus);
   line-height: 1;
   display: block;
   margin-bottom: 12px;
@@ -1310,8 +1308,10 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
   padding: 6px 0 6px 20px; position: relative;
 }
 .mca-callout-text li::before {
+  /* hairline ring bullet, not a filled accent dot (B0) */
   content: ''; position: absolute; left: 0; top: 14px;
-  width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: transparent; border: 1px solid var(--color-dark-text-muted);
 }
 .mca-metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mca-metric-card {
@@ -1325,13 +1325,15 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
 }
 .mca-metric-card .value {
   font-family: var(--font-mono); font-size: 22px; font-weight: 700;
-  color: var(--color-accent); line-height: 1; margin-bottom: 4px;
+  /* light foreground on the dark band, not amber (B0) */
+  color: var(--color-paper-white); line-height: 1; margin-bottom: 4px;
 }
 .mca-metric-card .desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.4; }
 
 .card .metric-highlight {
   font-family: var(--font-mono); font-size: 28px; font-weight: 700;
-  color: var(--color-accent); margin-bottom: 12px; line-height: 1;
+  /* INSIGHT voice: metric numerals are Eucalyptus, never amber (B0) */
+  color: var(--color-eucalyptus); margin-bottom: 12px; line-height: 1;
 }
 
 .integration-logo-grid {
@@ -1395,9 +1397,15 @@ html.theme-light .integration-logo-card:hover img { filter: grayscale(0) opacity
 }
 
 /* ---- REDUCED MOTION ---- */
+/* keyframes coverage manifest: skelPulse, barDraw, penWrite, hvLiveDot,
+   hvTyping, cookieBannerIn — every @keyframes in this file is disabled
+   under reduced motion (hvLiveDot/hvTyping/cookieBannerIn in their own
+   component blocks below). */
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal-stagger > .sol-row { opacity: 1; transform: none; transition: none; }
-  .hero-bar { animation: none; width: 48px; }
+  .hero-bar { animation: none; width: 48px; } /* barDraw */
+  .skel-pulse { animation: none; } /* skelPulse */
+  [style*="penWrite"] { animation: none !important; } /* penWrite (applied inline) */
   .page { transition: none; }
   .card, .blog-card, .btn-primary, .btn-ghost, .sol-row,
   .sol-row-img img, .serve-card { transition: none !important; transform: none !important; }
@@ -1637,7 +1645,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   30% { transform: translateY(-3px); opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hv-chat-live::before, .hv-typing i { animation: none; }
+  .hv-chat-live::before, .hv-typing i { animation: none; } /* hvLiveDot, hvTyping */
 }
 
 @media (max-width: 880px) {
@@ -1784,13 +1792,14 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .how .how-step + .how-step { padding-left: 24px; border-left: 1px solid var(--pale); }
 .how .how-step::before {
+  /* hairline stub, not an amber accent bar (B0: amber = interactive only) */
   content: ''; position: absolute; top: 0; left: 0;
-  width: 32px; height: 2px; background: var(--color-amber-rust);
+  width: 32px; height: 2px; background: var(--pale);
 }
 .how .how-step + .how-step::before { left: 24px; }
 .how .step-n {
   font: 600 11px/1 'SF Mono', monospace;
-  letter-spacing: 0.06em; color: var(--color-amber-rust); margin-top: 18px;
+  letter-spacing: 0.06em; color: var(--mid); margin-top: 18px;
 }
 .how .how-step h3 {
   font: 600 18px/1.35 'Inter', sans-serif;
@@ -1835,7 +1844,8 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 .testimonial-band .testimonial-mark {
   display: block;
   font: 700 clamp(80px, 10vw, 160px) / 0.8 'Inter', serif;
-  color: var(--color-amber-rust);
+  /* INSIGHT voice: testimonial is an insight-led section (B0: amber = action only) */
+  color: var(--color-eucalyptus);
   letter-spacing: -0.05em; margin-bottom: -24px;
 }
 .testimonial-band .testimonial-quote {
@@ -1923,7 +1933,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   .cookie-banner-actions { width: 100%; justify-content: flex-end; }
   .cookie-banner-actions .btn { flex: 1; }
 }
-@media (prefers-reduced-motion: reduce) { .cookie-banner { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .cookie-banner { animation: none; /* cookieBannerIn */ } }
 
 /* Lift the floating moon above the cookie banner while it is visible */
 body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
@@ -2462,3 +2472,60 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
   color: var(--mid);
   margin: 0;
 }
+
+/* =============================================================
+   BACKGROUND MOTIF PRIMITIVES — "underwriting paper" (B1)
+   Tokens only (css/tokens.css): --pattern-line(-strong),
+   --pattern-pitch(-dense), --rule-double-gap. See preview.html
+   "Background Motifs" for the catalog.
+   ============================================================= */
+
+/* Ruled paper: faint horizontal ledger lines behind section content,
+   fading out toward the section's bottom edge. */
+.bg-ruled { position: relative; }
+.bg-ruled::before {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+  pointer-events: none; z-index: 0;
+  background: repeating-linear-gradient(to bottom,
+    var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch));
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
+}
+.bg-ruled > * { position: relative; z-index: 1; }
+.bg-ruled--dense::before {
+  background: repeating-linear-gradient(to bottom,
+    var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch-dense));
+}
+
+/* Editorial double rule: 1px line + offset hairline echo. */
+.rule-double {
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-border-light);
+}
+
+/* Eye ring: 12px hairline ring with a 4px center dot — the marker that
+   replaced filled accent dots. Ring border shared with the legacy
+   timeline dot and case-study step circles (B0 interim styles). */
+.eye-ring {
+  display: inline-block; position: relative;
+  width: 12px; height: 12px;
+}
+.eye-ring,
+.how-timeline .how-step::before,
+.case-study-graphic .cs-num {
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: transparent;
+}
+.eye-ring::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  width: 4px; height: 4px; margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+/* Context overrides: the timeline dot occludes the line running behind
+   it; the dark case-study band needs its light hairline. */
+.how-timeline .how-step::before { background: var(--white); }
+.case-study-graphic .cs-num { border-color: var(--color-dark-text-muted); }

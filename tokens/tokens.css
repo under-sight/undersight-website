@@ -36,6 +36,13 @@
   --color-dark-text-muted: #D1D5DB;
   --color-dark-border: rgba(255, 255, 255, 0.1);
 
+  /* Background motif tokens — "underwriting paper" ruled lines */
+  --pattern-line: rgba(35, 38, 44, 0.05);
+  --pattern-line-strong: rgba(35, 38, 44, 0.10);
+  --pattern-pitch: 80px;
+  --pattern-pitch-dense: 32px;
+  --rule-double-gap: 3px;
+
   /* ========================================================================
      2. SEMANTIC COLOR ALIASES — Light mode (default)
      ======================================================================== */
@@ -229,6 +236,10 @@
     /* Accent colors remain unchanged in dark mode */
     /* --color-accent: var(--color-amber-rust); */
     /* --color-accent-hover: var(--color-amber-rust-hover); */
+
+    /* Pattern lines lighten in dark mode */
+    --pattern-line: rgba(255, 255, 255, 0.05);
+    --pattern-line-strong: rgba(255, 255, 255, 0.09);
 
     /* Shadows deepen in dark mode */
     --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.2);

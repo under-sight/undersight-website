@@ -42,3 +42,6 @@ out/
 
 # CMS->Staging mirror file transfer cache
 .mirror-file-cache/
+
+# Visual regression screenshots (kept locally, never committed)
+tests/visual-baselines/

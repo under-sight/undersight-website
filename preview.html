@@ -26,6 +26,8 @@
       --color-border-light: var(--color-dark-border);
       --color-surface: var(--color-dark-surface);
       --color-surface-elevated: var(--color-dark-elevated);
+      --pattern-line: rgba(255, 255, 255, 0.05);
+      --pattern-line-strong: rgba(255, 255, 255, 0.09);
       --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.2);
       --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.3);
       --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -1023,6 +1025,109 @@
     }
 
     /* =======================================================================
+       14. BACKGROUND MOTIFS — "underwriting paper"
+       Primitive rules mirror css/main.css (preview does not load main.css).
+       Toggle dark mode to see the --pattern-line dark overrides.
+       ======================================================================= */
+    .bg-ruled { position: relative; }
+    .bg-ruled::before {
+      content: '';
+      position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+      pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(to bottom,
+        var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch));
+      -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
+      mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
+    }
+    .bg-ruled > * { position: relative; z-index: 1; }
+    .bg-ruled--dense::before {
+      background: repeating-linear-gradient(to bottom,
+        var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch-dense));
+    }
+    .rule-double {
+      border-bottom: 1px solid var(--color-border);
+      box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-border-light);
+    }
+    .eye-ring {
+      display: inline-block; position: relative;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--color-border);
+      background: transparent;
+    }
+    .eye-ring::after {
+      content: '';
+      position: absolute; top: 50%; left: 50%;
+      width: 4px; height: 4px; margin: -2px 0 0 -2px;
+      border-radius: 50%;
+      background: var(--color-text-muted, var(--color-text-secondary));
+    }
+
+    /* Catalog scaffolding */
+    .motif-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--space-xxl);
+    }
+    .motif-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--rounded-lg);
+      background: var(--color-bg);
+      overflow: hidden;
+    }
+    .motif-demo {
+      height: 220px;
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .motif-demo .motif-demo-title {
+      font-family: var(--font-sans);
+      font-size: var(--text-title-md);
+      font-weight: var(--weight-semibold);
+      font-feature-settings: var(--font-feature-inter);
+      color: var(--color-text);
+    }
+    .motif-demo .motif-demo-body {
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      line-height: var(--leading-body-sm);
+      color: var(--color-text-secondary);
+      max-width: 360px;
+    }
+    .motif-info {
+      padding: var(--space-lg) var(--space-xl);
+      border-top: 1px solid var(--color-border);
+    }
+    .motif-name {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-text);
+      display: block;
+    }
+    .motif-desc {
+      font-family: var(--font-body);
+      font-size: var(--text-caption);
+      line-height: var(--leading-caption);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-xxs);
+      display: block;
+    }
+    .rule-double-demo-row { padding-bottom: var(--space-md); }
+    .eye-ring-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      margin-top: var(--space-md);
+    }
+    .eye-ring-row .eye-ring-label {
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      color: var(--color-text-secondary);
+    }
+
+    /* =======================================================================
        RESPONSIVE
        ======================================================================= */
     @media (max-width: 1024px) {
@@ -1061,6 +1166,7 @@
         <a href="#tags"><span class="nav-number">11</span>Tags / Badges</a>
         <a href="#data"><span class="nav-number">12</span>Data Display</a>
         <a href="#full-demo"><span class="nav-number">13</span>Full-Width Demo</a>
+        <a href="#motifs"><span class="nav-number">14</span>Background Motifs</a>
       </nav>
       <div class="sidebar-footer">
         <button class="dark-toggle" id="darkToggle" type="button">
@@ -1706,6 +1812,77 @@
             <div class="demo-stat-cell">
               <span class="demo-stat-number">14ms</span>
               <span class="demo-stat-label">Avg Decision Time</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================
+           14. BACKGROUND MOTIFS
+           ============================================================ -->
+      <section class="preview-section" id="motifs">
+        <div class="section-eyebrow">14 &mdash; Background Motifs</div>
+        <h2 class="section-title">Background Motifs</h2>
+        <p class="motif-desc" style="margin-bottom: var(--space-xl); max-width: 560px;">
+          The &ldquo;underwriting paper&rdquo; texture system: hairline ledger rules behind
+          section content, an editorial double rule, and the eye-ring marker.
+          All values come from the <code style="font-family: var(--font-mono); font-size: 12px;">--pattern-*</code>
+          and <code style="font-family: var(--font-mono); font-size: 12px;">--rule-double-gap</code> tokens.
+          Use the dark-mode toggle to preview both schemes.
+        </p>
+        <div class="motif-grid">
+
+          <div class="motif-card">
+            <div class="motif-demo bg-ruled">
+              <div class="motif-demo-title">Ruled section</div>
+              <div class="motif-demo-body">Faint ledger lines at the 80px section pitch, fading toward the bottom edge. Content sits above the pattern.</div>
+            </div>
+            <div class="motif-info">
+              <span class="motif-name">.bg-ruled</span>
+              <span class="motif-desc">repeating --pattern-line at --pattern-pitch, masked to fade out</span>
+            </div>
+          </div>
+
+          <div class="motif-card">
+            <div class="motif-demo bg-ruled bg-ruled--dense">
+              <div class="motif-demo-title">Dense ruling</div>
+              <div class="motif-demo-body">The same ruling at the 32px dense pitch for compact areas: sidebars, footers, data panels.</div>
+            </div>
+            <div class="motif-info">
+              <span class="motif-name">.bg-ruled--dense</span>
+              <span class="motif-desc">switches the pitch to --pattern-pitch-dense</span>
+            </div>
+          </div>
+
+          <div class="motif-card">
+            <div class="motif-demo">
+              <div class="motif-demo-title rule-double rule-double-demo-row">Section heading</div>
+              <div class="motif-demo-body" style="margin-top: var(--space-md);">An editorial double rule under headings and table headers: a 1px border with an offset hairline echo.</div>
+            </div>
+            <div class="motif-info">
+              <span class="motif-name">.rule-double</span>
+              <span class="motif-desc">1px --color-border + --rule-double-gap offset echo in --color-border-light</span>
+            </div>
+          </div>
+
+          <div class="motif-card">
+            <div class="motif-demo">
+              <div class="motif-demo-title">Eye rings</div>
+              <div class="eye-ring-row">
+                <span class="eye-ring"></span>
+                <span class="eye-ring-label">timeline step</span>
+              </div>
+              <div class="eye-ring-row">
+                <span class="eye-ring"></span>
+                <span class="eye-ring"></span>
+                <span class="eye-ring"></span>
+                <span class="eye-ring-label">sequence markers</span>
+              </div>
+            </div>
+            <div class="motif-info">
+              <span class="motif-name">.eye-ring</span>
+              <span class="motif-desc">12px hairline ring + 4px center dot &mdash; replaces filled accent dots</span>
             </div>
           </div>
 
