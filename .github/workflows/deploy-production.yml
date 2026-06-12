@@ -76,6 +76,9 @@ jobs:
         id: build
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
+          # Explicit pin (matches the default): production reads CMS.
+          # Dev reads "CMS Staging" — see deploy-dev.yml.
+          FIBERY_SPACE: "CMS"
         run: python3 build.py --verify --env production
         continue-on-error: true
 
