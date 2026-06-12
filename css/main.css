@@ -1009,7 +1009,29 @@ a.back:hover { color: var(--color-accent); }
 .contact-email a:hover { color: var(--color-accent); }
 
 /* ---- FOOTER (combined, no sub-footer) ---- */
-.site-footer { border-top: 1px solid var(--pale); background: var(--white); padding: 48px 0 40px; }
+.site-footer { border-top: 1px solid var(--pale); background: var(--white); padding: 48px 0 40px; position: relative; }
+/* Colophon double rule (B2): self-contained editorial double rule on the
+   footer's top edge — 1px border + 1px hairline echo drawn inside the
+   footer's own background, so it works over any preceding section. */
+.site-footer::before {
+  content: '';
+  position: absolute; top: var(--rule-double-gap); left: 0; right: 0;
+  height: 1px; background: var(--color-border-light);
+  pointer-events: none;
+}
+/* Colophon mark (B2): the favicon nib beside the copyright line. The SVG
+   self-inverts only on prefers-color-scheme, so the manual theme classes
+   counter-filter it to stay in sync. */
+.site-footer .footer-copy img {
+  width: 16px; height: 16px;
+  vertical-align: -4px; margin-right: 8px;
+  opacity: 0.4;
+}
+html.theme-dark .site-footer .footer-copy img { filter: invert(1); }
+@media (prefers-color-scheme: dark) {
+  html.theme-dark .site-footer .footer-copy img { filter: none; }
+  html.theme-light .site-footer .footer-copy img { filter: invert(1); }
+}
 .site-footer .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
 .site-footer .footer-brand { display: flex; flex-direction: column; gap: 12px; }
 .site-footer .footer-logo { display: inline-block; line-height: 0; }
