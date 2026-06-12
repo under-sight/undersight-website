@@ -411,6 +411,40 @@ else
   fail "Font feature settings cv01, ss03 present in main.css"
 fi
 
+# Test: dead_legacy_selectors_absent — V1 blocks replaced on the V2 site stay
+# deleted: .stats-bar (dark stats band), .testimonial-section (dark testimonial
+# band incl. its ::before quote glyph, which leaked into the live
+# .testimonial-band until a content:none scoping fix), and the legacy
+# .case-study/.case-study-inner/.case-study-graphic pattern (replaced by
+# .cs-tile). Verified zero rendered usages 2026-06-12: no markup carries these
+# classes and renderHomeCaseStudy only queries .case-study-graphic inside
+# containers that never contain one. Comments are stripped first so historical
+# mentions (e.g. the .cs-tile header) don't false-positive. Bare .stat-num /
+# .stat-label / .testimonial-quote / .testimonial-cite are NOT asserted — they
+# still cascade into live markup.
+# (grep reads a temp file, not a pipe — see the SIGPIPE/pipefail note above.)
+DECOMMENTED_CSS_TMP=$(mktemp)
+perl -0777 -pe 's{/\*.*?\*/}{}gs' "$SITE_ROOT/css/main.css" > "$DECOMMENTED_CSS_TMP"
+DEAD_FOUND=""
+for DEAD_SEL in '.stats-bar' '.testimonial-section' '.case-study-inner' \
+  '.case-study-graphic' '.case-study-text' '.case-study--alt' \
+  '.testimonial-quote::before'; do
+  if grep -qF -- "$DEAD_SEL" "$DECOMMENTED_CSS_TMP"; then
+    DEAD_FOUND="$DEAD_FOUND $DEAD_SEL"
+  fi
+done
+# Bare .case-study rules (`.case-study {`, `.case-study .container`) — the
+# hyphenated variants above don't match these.
+if grep -qE '\.case-study[^a-zA-Z0-9-]' "$DECOMMENTED_CSS_TMP"; then
+  DEAD_FOUND="$DEAD_FOUND .case-study(bare)"
+fi
+rm -f "$DECOMMENTED_CSS_TMP"
+if [ -z "$DEAD_FOUND" ]; then
+  pass "dead_legacy_selectors_absent: no legacy stats-bar/case-study/testimonial-section selectors in main.css"
+else
+  fail "dead_legacy_selectors_absent: no legacy stats-bar/case-study/testimonial-section selectors in main.css" "Found:$DEAD_FOUND"
+fi
+
 # =============================================================================
 section "Security Tests"
 # =============================================================================
