@@ -94,7 +94,15 @@ def api_post(path, body, token):
         headers=headers,
     )
     with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read())
+        data = json.loads(resp.read())
+    # Fibery returns HTTP 200 with success:false on command errors (e.g. a
+    # missing database). Raise so the under-construction fallback fires
+    # instead of building a content-empty "full" site.
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict) and item.get("success") is False:
+                raise RuntimeError(f"Fibery command failed: {item.get('result')}")
+    return data
 
 
 def _normalize_doc_markdown(text):

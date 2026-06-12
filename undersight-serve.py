@@ -134,7 +134,14 @@ def api_post(path, body):
         headers=HEADERS,
     )
     with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read())
+        data = json.loads(resp.read())
+    # Fibery returns HTTP 200 with success:false on command errors (e.g. a
+    # missing database). Raise instead of silently yielding zero entities.
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict) and item.get("success") is False:
+                raise RuntimeError(f"Fibery command failed: {item.get('result')}")
+    return data
 
 
 def _normalize_doc_markdown(text):
