@@ -2415,6 +2415,15 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 
 /* Filter buttons: Rust on active (action), neutral when off */
 .blog-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+/* Section-front rule (B2): newspaper double rule between the filter row
+   and the grid. Gap mask uses --bg (the page canvas behind the filters),
+   not --color-bg, because the blog container sits on the alt surface. */
+.blog-filters.rule-double {
+  padding-bottom: 24px;
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--bg),
+              0 calc(var(--rule-double-gap) + 1px) 0 0 var(--color-border-light);
+}
+.blog-filters:empty { display: none; }
 .blog-filter {
   border: 1px solid var(--pale);
   background: var(--white);
