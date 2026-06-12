@@ -3,7 +3,12 @@
 # Cutover smoke test — Fibery space rename Website -> CMS
 # =============================================================================
 # Usage:
-#   bash tests/cutover-smoke.sh <stage> [--space Website|CMS]
+#   bash tests/cutover-smoke.sh <stage> [--space Website|CMS|"CMS Staging"] [--baseline <path>]
+#
+#   --baseline defaults to tests/cutover-baseline.json; pass
+#   tests/cutover-baseline-staging.json with --space "CMS Staging" to smoke
+#   the mirrored staging space. A baseline may set "other_space" to override
+#   the opposite-prefix-absent check (default: Website<->CMS).
 #
 # Stages:
 #   fibery   entity counts per DB match tests/cutover-baseline.json under the
@@ -18,12 +23,20 @@
 # =============================================================================
 set -euo pipefail
 
-STAGE="${1:?usage: cutover-smoke.sh fibery|build|uc|prod [--space Website|CMS]}"
+STAGE="${1:?usage: cutover-smoke.sh fibery|build|uc|prod [--space <Space>] [--baseline <path>]}"
+shift
 SPACE="CMS"
-[ "${2:-}" = "--space" ] && SPACE="${3:?--space needs a value}"
+BASELINE_ARG=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --space)    SPACE="${2:?--space needs a value}"; shift 2;;
+    --baseline) BASELINE_ARG="${2:?--baseline needs a path}"; shift 2;;
+    *) echo "unknown arg: $1" >&2; exit 1;;
+  esac
+done
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BASELINE="$ROOT/tests/cutover-baseline.json"
+BASELINE="${BASELINE_ARG:-$ROOT/tests/cutover-baseline.json}"
 PROD_URL=$(python3 -c "import json;print(json.load(open('$BASELINE'))['prod_url'])")
 SLUG=$(python3 -c "import json;print(json.load(open('$BASELINE'))['blog_slug'])")
 UC_MARKER=$(python3 -c "import json;print(json.load(open('$BASELINE'))['uc_marker'])")
@@ -40,7 +53,8 @@ count_entities() { # count_entities "<Type>"
 
 case "$STAGE" in
   fibery)
-    OTHER=$([ "$SPACE" = "CMS" ] && echo "Website" || echo "CMS")
+    OTHER=$(python3 -c "import json;print(json.load(open('$BASELINE')).get('other_space',''))")
+    [ -n "$OTHER" ] || OTHER=$([ "$SPACE" = "CMS" ] && echo "Website" || echo "CMS")
     while IFS=$'\t' read -r db expected minbound; do
       got=$(count_entities "$SPACE/$db")
       if [ "$minbound" = "1" ]; then
