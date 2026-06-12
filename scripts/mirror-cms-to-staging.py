@@ -616,10 +616,11 @@ def verify(token, src, dst, src_docs, dst_docs):
     deploys = len(entity_query(token, {
         "q/from": f"{DST_SPACE}/Deployments",
         "q/select": {"id": ["fibery/id"]}, "q/limit": 300}))
-    # Mirror never writes Deployments; staging deploy-reports will populate
-    # this later — relax to informational at that point.
-    rows.append((f"{DST_SPACE}/Deployments untouched by mirror", "0", str(deploys),
-                 deploys == 0))
+    # Informational only: the mirror never writes Deployments, but staging
+    # deploy-reports legitimately populate it once the dev pipeline points
+    # at staging, so a non-zero count is not a parity failure.
+    print(f"  info: {DST_SPACE}/Deployments count = {deploys} "
+          "(not mirrored; populated by deploy-report)")
 
     bad = [r for r in rows if not r[3]]
     print(f"\nVERIFY: {len(rows)} checks, {len(rows) - len(bad)} ok, {len(bad)} mismatched")
