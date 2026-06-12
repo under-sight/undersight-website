@@ -39,3 +39,6 @@ out/
 
 # Local Fibery file download cache (speeds up incremental builds)
 .fibery-file-cache/
+
+# Visual regression screenshots (kept locally, never committed)
+tests/visual-baselines/
