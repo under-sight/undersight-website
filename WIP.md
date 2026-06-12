@@ -182,6 +182,26 @@ The contact page exists (`page-contact`) but no navigation link points to it. Th
 
 Polish items for future iterations.
 
+### Staged content, renderer pending
+
+These CMS/Pages entities exist with content but no renderer consumes them yet
+(index.html still hardcodes the corresponding sections, or the feature is
+unbuilt). Keep them — wiring each is its own task. Do NOT treat them as
+orphans to delete. CMS hygiene 2026-06-12 removed the 2 Blog test stubs and
+7 legacy `Blog -*` pages (backup: `tests/fixtures/cms-backup-2026-06-12.json`).
+
+| Public Id | Entity | Blocked on |
+|---|---|---|
+| 23 | Home - Who We Serve | renderer (cards hardcoded in index.html) |
+| 24 | Home - How It Works | renderer (timeline hardcoded) |
+| 25 | Home - Metrics | renderer (stats bar hardcoded) |
+| 27 | Home - Testimonial | renderer (quote hardcoded) |
+| 21 | Docs Page | Clerk auth integration |
+| 30 | Footer | renderer (footer hardcoded) |
+| 31 | SEO | renderer (meta tags hardcoded) |
+| 32 | Solutions - copilot - Scoring Engine | copilot page subsection renderer |
+| 33 | Copilot - Feature Matrix | copilot page subsection renderer |
+
 ### 17. Wire up analytics/tracking
 
 No analytics on the site. Cannot measure traffic, conversion (discovery call clicks), or engagement.

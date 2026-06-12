@@ -7,12 +7,15 @@
   "whitepaper_name": "Chat Advance Case Study",
   "entity_counts": {
     "Animations": 2,
-    "Blog": 9,
+    "Blog": 7,
     "Blog Leads": 34,
     "Deployments": 4,
     "Emails": 2,
     "Integrations": 12,
-    "Pages": 25
+    "Pages": 18
   },
-  "min_bound_dbs": ["Blog Leads", "Deployments"]
+  "min_bound_dbs": [
+    "Blog Leads",
+    "Deployments"
+  ]
 }
