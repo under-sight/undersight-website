@@ -2474,6 +2474,42 @@ else
   fail "email_single_source: renderContent patches .contact-email-link from Site Config" "Patch selector changed — update this test AND the anchor class together"
 fi
 
+# -- blog_images_webp --
+# Blog/solution images come from CMS file attachments (not hardcoded
+# images/... paths — the old BLOG_IMAGES/SOLUTION_IMAGES maps are gone), so
+# the JS templates must be webp-aware: when a `<base>.webp` sibling exists in
+# the entity's files, emit <picture> with <source type="image/webp"> and the
+# PNG <img> fallback; when no sibling exists, emit plain <img> (current CMS
+# state — attachment counts are locked by the Image Integrity tests above).
+if grep -q 'type="image/webp"' "$SITE_ROOT/index.html"; then
+  pass "blog_images_webp: picture template emits <source type=\"image/webp\">"
+else
+  fail "blog_images_webp: picture template emits <source type=\"image/webp\">" "Templates serve PNG only — no webp progressive enhancement"
+fi
+
+if grep -q 'webpVariant' "$SITE_ROOT/index.html"; then
+  pass "blog_images_webp: webp sibling lookup (webpVariant) exists"
+else
+  fail "blog_images_webp: webp sibling lookup (webpVariant) exists" "No sibling check — webp <source> can't be emitted conditionally"
+fi
+
+# Asset inventory: every PNG referenced from index.html under images/blog/ or
+# images/solutions/, and every PNG on disk in those dirs, must have a .webp
+# sibling so the webp path is guaranteed once assets are referenced/baked.
+WEBP_MISSING=""
+for P in $(grep -oE 'images/(blog|solutions)/[A-Za-z0-9_.-]+\.png' "$SITE_ROOT/index.html" | sort -u); do
+  [ -f "$SITE_ROOT/${P%.png}.webp" ] || WEBP_MISSING="$WEBP_MISSING $P"
+done
+for P in "$SITE_ROOT"/images/blog/*.png "$SITE_ROOT"/images/solutions/*.png; do
+  [ -f "$P" ] || continue
+  [ -f "${P%.png}.webp" ] || WEBP_MISSING="$WEBP_MISSING ${P#"$SITE_ROOT"/}"
+done
+if [ -z "$WEBP_MISSING" ]; then
+  pass "blog_images_webp: every blog/solution PNG has a .webp sibling"
+else
+  fail "blog_images_webp: every blog/solution PNG has a .webp sibling" "Missing webp for:$WEBP_MISSING"
+fi
+
 # =============================================================================
 section "Summary"
 # =============================================================================

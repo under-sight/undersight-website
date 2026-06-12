@@ -668,13 +668,25 @@
     const darkName = (m[1] + '-dark' + m[2]).toLowerCase();
     return (files || []).find(f => (f.name || '').toLowerCase() === darkName) || null;
   }
+  // Convention: foo.png -> foo.webp as a sibling attachment. When present,
+  // pictureTag() emits <source type="image/webp"> ahead of the PNG fallback.
+  // Returns null if no sibling exists (then plain <img> is emitted).
+  function webpVariant(files, file) {
+    if (!file || !file.name || /\.webp$/i.test(file.name)) return null;
+    const webpName = file.name.replace(/\.[^.]+$/, '.webp').toLowerCase();
+    return (files || []).find(f => (f.name || '').toLowerCase() === webpName) || null;
+  }
   function pictureTag(files, lightFile, alt, attrs) {
     if (!lightFile) return '';
     const a = attrs || 'loading="lazy"';
     const dark = darkVariant(files, lightFile);
-    if (!dark) return `<img src="${lightFile.url}" alt="${alt}" ${a}>`;
+    const lightWebp = webpVariant(files, lightFile);
+    const darkWebp = dark ? webpVariant(files, dark) : null;
+    if (!dark && !lightWebp) return `<img src="${lightFile.url}" alt="${alt}" ${a}>`;
     return `<picture>`
-      + `<source srcset="${dark.url}" media="(prefers-color-scheme: dark)">`
+      + (darkWebp ? `<source srcset="${darkWebp.url}" media="(prefers-color-scheme: dark)" type="image/webp">` : '')
+      + (dark ? `<source srcset="${dark.url}" media="(prefers-color-scheme: dark)">` : '')
+      + (lightWebp ? `<source srcset="${lightWebp.url}" type="image/webp">` : '')
       + `<img src="${lightFile.url}" alt="${alt}" ${a}>`
       + `</picture>`;
   }
@@ -2415,6 +2427,8 @@
       const files = blog.files || [];
       const heroFile = selectHero(files);
       const heroImg = heroFile ? heroFile.url : '';
+      const heroWebpFile = heroFile ? webpVariant(files, heroFile) : null;
+      const heroWebp = heroWebpFile ? heroWebpFile.url : '';
       const companionImgs = imageFiles(files).filter(f => f !== heroFile).map(f => f.url);
       // Body may still contain front-matter from legacy migration; strip it
       // out so the post page doesn't render the **Date:** / **Excerpt:** lines.
@@ -2430,6 +2444,7 @@
         excerpt: excerpt,
         body: body,
         heroImg,
+        heroWebp,
         companionImgs,
         tag: blog.type || meta.Tag || '',
         subtitle: blog.subtitle || meta.Subtitle || '',
@@ -2557,7 +2572,11 @@
     if (post.heroImg) {
       const showDl = post.tag === 'Research' || post.tag === 'Case Study';
       const imgDlBtn = showDl ? `<div style="margin-bottom:24px;">${dlBtn}</div>` : '';
-      heroHtml = `<img src="${post.heroImg}" alt="${post.title}" style="width:100%;border-radius:var(--radius);margin-bottom:${showDl ? '16' : '32'}px;">${imgDlBtn}`;
+      // webp <source> + PNG <img> fallback when a sibling attachment exists
+      const heroImgTag = `<img src="${post.heroImg}" alt="${post.title}" style="width:100%;border-radius:var(--radius);margin-bottom:${showDl ? '16' : '32'}px;">`;
+      heroHtml = (post.heroWebp
+        ? `<picture><source srcset="${post.heroWebp}" type="image/webp">${heroImgTag}</picture>`
+        : heroImgTag) + imgDlBtn;
     }
 
     let bodyHtml = mdToHtml(stripContents(post.body));
