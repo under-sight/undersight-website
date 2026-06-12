@@ -643,8 +643,11 @@
   function getFiles(data, key) { return (data[key] || {}).files || []; }
   // Filter to image files only, excluding logos (consistent with companion logic).
   function imageFiles(files) {
+    // .webp attachments are compression variants of their PNG siblings
+    // (served via pictureTag's <source>), never standalone images.
     return (files || []).filter(f =>
       (f.type || '').startsWith('image/') &&
+      !/\.webp$/i.test(f.name || '') &&
       !(f.name || '').toLowerCase().includes('logo'));
   }
   // Pick the hero file: prefer files with hero/primary/cover in the name,
@@ -2336,7 +2339,11 @@
       const desc = bodyParas[0] || '';
       const tag = meta.Tag || cfg.tag;
       const solFiles = getFiles(data, entityName);
-      const solFileList = (solFiles || []).filter(f => (f.type || '').startsWith('image/'));
+      const solImageFiles = (solFiles || []).filter(f => (f.type || '').startsWith('image/'));
+      // Narrative steps map files by index (solFileList[i]), so webp variants
+      // stay out of solFileList; pictureTag receives solImageFiles so its
+      // webpVariant lookup can still find the siblings.
+      const solFileList = solImageFiles.filter(f => !/\.webp$/i.test(f.name || ''));
       const solImgs = solFileList.map(f => f.url);
       const solImg = solImgs[0] || '';
 
@@ -2395,7 +2402,7 @@
         const narrative = narTitles.map((t, i) => ({ file: solFileList[i] || null, title: t, desc: narDescs[i] || '' }));
         const narrativeHtml = narrative.map((step, i) => `
           <div class="sol-row${i % 2 === 1 ? '' : ''}">
-            ${step.file ? `<div class="sol-row-img">${pictureTag(solFileList, step.file, step.title)}</div>` : ''}
+            ${step.file ? `<div class="sol-row-img">${pictureTag(solImageFiles, step.file, step.title)}</div>` : ''}
             <div class="sol-row-text">
               <h3>${step.title}</h3>
               <p>${step.desc}</p>
