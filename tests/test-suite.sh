@@ -2454,6 +2454,26 @@ else
   fail "preview_uses_theme_dark: preview.html themes via theme-dark" "No manual dark class found at all"
 fi
 
+# -- email_single_source --
+# Every mailto anchor (hardcoded contact@undersight.ai or templated
+# ${contactEmail}) must carry class contact-email-link: renderContent()
+# patches exactly that selector from Site Config, so an anchor without the
+# class silently drifts from the CMS value.
+EMAIL_ANCHOR_VIOLATIONS=$(grep -n 'mailto:' "$SITE_ROOT/index.html" | grep '<a ' | grep -v 'contact-email-link' || true)
+if [ -z "$EMAIL_ANCHOR_VIOLATIONS" ]; then
+  pass "email_single_source: all mailto anchors carry contact-email-link"
+else
+  V_COUNT=$(echo "$EMAIL_ANCHOR_VIOLATIONS" | wc -l | tr -d ' ')
+  fail "email_single_source: all mailto anchors carry contact-email-link" "$V_COUNT anchor(s) missing the class: $(echo "$EMAIL_ANCHOR_VIOLATIONS" | head -2 | tr '\n' '; ')"
+fi
+
+# The CMS patch mechanism itself must keep using that selector.
+if grep -q "querySelectorAll('.contact-email-link')" "$SITE_ROOT/index.html"; then
+  pass "email_single_source: renderContent patches .contact-email-link from Site Config"
+else
+  fail "email_single_source: renderContent patches .contact-email-link from Site Config" "Patch selector changed — update this test AND the anchor class together"
+fi
+
 # =============================================================================
 section "Summary"
 # =============================================================================
