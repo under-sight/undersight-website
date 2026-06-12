@@ -16,7 +16,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 WORKSPACE = "subscript.fibery.io"
-FIBERY_SPACE = "CMS"
+FIBERY_SPACE = os.environ.get("FIBERY_SPACE", "CMS")
 DB = f"{FIBERY_SPACE}/Deployments"
 
 

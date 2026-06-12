@@ -12,9 +12,6 @@
  *   FIBERY_TOKEN — Fibery API token for subscript.fibery.io
  */
 
-// Fibery space prefix for all type/field names.
-const FIBERY_SPACE = 'CMS';
-
 const ALLOWED_ORIGINS = [
   'https://undersight.ai',
   'https://www.undersight.ai',
@@ -183,6 +180,9 @@ export async function onRequestOptions(context) {
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+    // Space prefix for all Fibery type/field names; dev preview sets
+    // FIBERY_SPACE="CMS Staging", production defaults to "CMS".
+    const FIBERY_SPACE = env.FIBERY_SPACE || 'CMS';
 
   if (!env.FIBERY_TOKEN) {
     console.error('FIBERY_TOKEN not set');

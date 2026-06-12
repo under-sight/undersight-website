@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 # ---------------------------------------------------------------------------
 
 WORKSPACE = "subscript.fibery.io"
-FIBERY_SPACE = "CMS"
+FIBERY_SPACE = os.environ.get("FIBERY_SPACE", "CMS")
 DB = f"{FIBERY_SPACE}/Pages"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")

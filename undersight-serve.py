@@ -21,7 +21,7 @@ import urllib.request
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
 WORKSPACE = "subscript.fibery.io"
-FIBERY_SPACE = "CMS"
+FIBERY_SPACE = os.environ.get("FIBERY_SPACE", "CMS")
 DB = f"{FIBERY_SPACE}/Pages"
 CACHE_TTL = 5  # seconds - short for dev, increase for prod
 
