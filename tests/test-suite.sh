@@ -2510,6 +2510,30 @@ else
   fail "blog_images_webp: every blog/solution PNG has a .webp sibling" "Missing webp for:$WEBP_MISSING"
 fi
 
+# -- dead_assets_absent --
+# images/hero.png (991KB, never referenced), css/palette.css and css/fonts.css
+# (legacy token duplicates, never linked) must stay deleted and unreferenced.
+for DEAD in "images/hero.png" "css/palette.css" "css/fonts.css"; do
+  if [ -e "$SITE_ROOT/$DEAD" ]; then
+    fail "dead_assets_absent: $DEAD removed" "File still present in repo"
+  else
+    pass "dead_assets_absent: $DEAD removed"
+  fi
+done
+
+# Zero functional references repo-wide. Markdown docs (WIP.md, docs/,
+# .planning/) legitimately describe the removal itself and are excluded, as
+# are this test file, the gitignored dist/ build output, and .git.
+DEAD_ASSET_REFS=$(grep -rnE 'hero\.png|palette\.css|fonts\.css' "$SITE_ROOT" \
+  --exclude-dir=.git --exclude-dir=dist --exclude-dir=node_modules \
+  --exclude='*.md' --exclude='test-suite.sh' 2>/dev/null || true)
+if [ -z "$DEAD_ASSET_REFS" ]; then
+  pass "dead_assets_absent: zero functional references to dead assets"
+else
+  REF_COUNT=$(echo "$DEAD_ASSET_REFS" | wc -l | tr -d ' ')
+  fail "dead_assets_absent: zero functional references to dead assets" "$REF_COUNT reference(s): $(echo "$DEAD_ASSET_REFS" | head -3 | tr '\n' '; ')"
+fi
+
 # =============================================================================
 section "Summary"
 # =============================================================================
