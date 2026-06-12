@@ -2083,18 +2083,23 @@ else
 fi
 
 # Test 4: Blog entity image count is expected
-# Chat Advance = 3 images, others = 1-2. Flag 0 images or >5 (duplicates).
+# Chat Advance = 3 images, others = 1-3. Flag 0 images or >5 (duplicates).
+# Blogs live under data._blogs._data post-cutover. Counts are over canonical
+# images only — .webp attachments are compression variants of their PNG
+# siblings (served via <picture>), not additional images.
 IMAGE_COUNT_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
 issues = []
-for name, entity in sorted(data.items()):
-    if not name.startswith('Blog - '): continue
-    files = entity.get('files', [])
-    images = [f for f in files if f.get('type', '').startswith('image/')]
+blogs = ((data.get('_blogs') or {}).get('_data') or [])
+for b in blogs:
+    name = b.get('name') or '?'
+    files = b.get('files') or []
+    images = [f for f in files
+              if f.get('type', '').startswith('image/')
+              and not (f.get('name') or '').lower().endswith('.webp')]
     count = len(images)
-    short_name = name.replace('Blog - ', '')
-    if 'Chat Advance' in short_name:
+    if 'Chat Advance' in name:
         if count != 3:
             issues.append(f'{name}: expected 3 images, got {count}')
     else:
@@ -2143,20 +2148,24 @@ else
 fi
 
 # Test 6: Solution entities have expected image counts
-# underscore=1, RFI=3, Copilot=3
+# underscore=2, RFI=4, Copilot=4 (each card has a sanctioned -dark sibling).
+# .webp attachments are compression variants of their PNG siblings and are
+# excluded from the count — they are served via <picture>, never standalone.
 SOL_IMAGE_ISSUES=$(echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
 expected = {
-    'Solutions - underscore': 1,
-    'Solutions - underchat agent': 3,
-    'Solutions - AI Underwriting Copilot': 3,
+    'Solutions - underscore': 2,
+    'Solutions - underchat agent': 4,
+    'Solutions - AI Underwriting Copilot': 4,
 }
 issues = []
 for name, exp_count in expected.items():
     entity = data.get(name, {})
     files = entity.get('files', [])
-    images = [f for f in files if f.get('type', '').startswith('image/')]
+    images = [f for f in files
+              if f.get('type', '').startswith('image/')
+              and not (f.get('name') or '').lower().endswith('.webp')]
     actual = len(images)
     if actual != exp_count:
         issues.append(f'{name}: expected {exp_count} images, got {actual}')
@@ -2166,7 +2175,7 @@ else:
     print('ok')
 " 2>/dev/null)
 if [ "$SOL_IMAGE_ISSUES" = "ok" ]; then
-  pass "Solution entities have expected image counts (underscore=1, RFI=3, Copilot=3)"
+  pass "Solution entities have expected image counts (underscore=2, RFI=4, Copilot=4 incl. dark variants)"
 else
   fail "Solution entities have expected image counts" "Deviations: $SOL_IMAGE_ISSUES"
 fi
@@ -2521,6 +2530,63 @@ if [ -z "$WEBP_MISSING" ]; then
   pass "blog_images_webp: every blog/solution PNG has a .webp sibling"
 else
   fail "blog_images_webp: every blog/solution PNG has a .webp sibling" "Missing webp for:$WEBP_MISSING"
+fi
+
+# Templates must treat .webp attachments as variants, not standalone images.
+# imageFiles() feeds blog hero + companion selection: if it returns webp
+# siblings, every blog post body re-renders its images as duplicates.
+if sed -n '/function imageFiles/,/^  }/p' "$SITE_ROOT/index.html" | grep -q "webp"; then
+  pass "blog_images_webp: imageFiles() excludes webp variants (no duplicate companions)"
+else
+  fail "blog_images_webp: imageFiles() excludes webp variants" "webp siblings will duplicate as blog companion images"
+fi
+
+# The solution narrative maps files to steps BY INDEX (solFileList[i]), so
+# webp variants must stay out of that list — but stay IN the list passed to
+# pictureTag, which is where the webp <source> lookup happens.
+if grep -qE 'solFileList = solImageFiles\.filter\(.*webp' "$SITE_ROOT/index.html"; then
+  pass "blog_images_webp: solution narrative index-list excludes webp variants"
+else
+  fail "blog_images_webp: solution narrative index-list excludes webp variants" "webp in solFileList shifts index-mapped step images"
+fi
+
+# CMS attachment consistency: once any .webp attachment exists in the active
+# space, EVERY PNG image attachment must have a same-basename .webp sibling
+# (og-image.png exempt — OG/Twitter scrapers require PNG). Pre-cutover spaces
+# with zero webp attachments skip rather than fail.
+WEBP_SIBLINGS=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+def file_lists():
+    for name, ent in data.items():
+        if name.startswith('_'): continue
+        yield name, (ent.get('files') or [])
+    for b in ((data.get('_blogs') or {}).get('_data') or []):
+        yield 'Blog/' + (b.get('name') or '?'), (b.get('files') or [])
+total_webp, missing = 0, []
+for label, files in file_lists():
+    names = {(f.get('name') or '').lower() for f in files}
+    for f in files:
+        n = (f.get('name') or '').lower()
+        if n.endswith('.webp'):
+            total_webp += 1
+        if not n.endswith('.png') or n == 'og-image.png':
+            continue
+        if n[:-4] + '.webp' not in names:
+            missing.append(f'{label}: {n}')
+if total_webp == 0:
+    print('PRE-CUTOVER')
+elif missing:
+    print(';'.join(missing))
+else:
+    print('ok')
+" 2>/dev/null)
+if [ "$WEBP_SIBLINGS" = "ok" ]; then
+  pass "blog_images_webp: every CMS PNG attachment has a .webp sibling (og-image exempt)"
+elif [ "$WEBP_SIBLINGS" = "PRE-CUTOVER" ]; then
+  skip "blog_images_webp: CMS webp sibling consistency (space has no webp attachments yet)"
+else
+  fail "blog_images_webp: every CMS PNG attachment has a .webp sibling" "Missing: $WEBP_SIBLINGS"
 fi
 
 # -- dead_assets_absent --
