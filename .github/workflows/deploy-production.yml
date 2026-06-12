@@ -85,6 +85,12 @@ jobs:
         run: bash tests/build-validation.sh
         continue-on-error: true
 
+      - name: Link & content parity checks
+        id: linkcheck
+        if: steps.build.outcome == 'success'
+        run: bash tests/link-check.sh
+        continue-on-error: true
+
       - name: Fallback to under-construction on build failure
         if: steps.build.outcome == 'failure' || steps.validate.outcome == 'failure'
         run: |
@@ -107,7 +113,7 @@ jobs:
       - name: Report deployment to Fibery
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
-          BUILD_STATUS: ${{ (steps.build.outcome == 'success' && steps.validate.outcome == 'success') && 'success' || (steps.build.outcome == 'failure' && 'failed' || 'degraded') }}
+          BUILD_STATUS: ${{ (steps.build.outcome == 'success' && steps.validate.outcome == 'success' && steps.linkcheck.outcome == 'success') && 'success' || (steps.build.outcome == 'failure' && 'failed' || 'degraded') }}
         run: python3 deploy-report.py --env production --url "https://undersight.ai" --status "$BUILD_STATUS"
 
       - name: Verify deployment matches Fibery intent
