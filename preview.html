@@ -1032,7 +1032,7 @@
     .bg-ruled { position: relative; }
     .bg-ruled::before {
       content: '';
-      position: absolute; inset: 0;
+      position: absolute; top: 0; right: 0; bottom: 0; left: 0;
       pointer-events: none; z-index: 0;
       background: repeating-linear-gradient(to bottom,
         var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch));

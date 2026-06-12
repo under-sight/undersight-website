@@ -16,7 +16,8 @@
 
 set -euo pipefail
 
-BASE="http://localhost:8088"
+# Override with BASE=http://localhost:<port> for parallel worktrees
+BASE="${BASE:-http://localhost:8088}"
 PASS_COUNT=0
 FAIL_COUNT=0
 SKIP_COUNT=0
@@ -398,7 +399,9 @@ else
 fi
 
 # Test: Font feature settings cv01, ss03 present
-if echo "$MAIN_CSS" | grep -q "'cv01'" && echo "$MAIN_CSS" | grep -q "'ss03'"; then
+# (bash substring match — `echo "$MAIN_CSS" | grep -q` SIGPIPEs under
+#  pipefail once main.css exceeds the 64KB pipe buffer: false negative)
+if [[ "$MAIN_CSS" == *"'cv01'"* && "$MAIN_CSS" == *"'ss03'"* ]]; then
   pass "Font feature settings cv01, ss03 present in main.css"
 else
   fail "Font feature settings cv01, ss03 present in main.css"
