@@ -22,18 +22,18 @@ jobs:
       - name: Schema guard (block stale Fibery refs)
         run: |
           echo "Checking for old schema references..."
-          if grep -rn 'Website/Whitepapers\|Website/Whitepaper Leads\|Website/Whitepaper[^s]' \
+          if grep -rn 'CMS/Whitepapers\|CMS/Whitepaper Leads\|CMS/Whitepaper[^s]' \
             functions/ undersight-serve.py worker/index.js index.html; then
-            echo "::error::Old Fibery schema names detected. Correct schema is Website/Blog, Website/Blog Leads, Website/Blog Post."
+            echo "::error::Old Fibery schema names detected. Correct schema is CMS/Blog, CMS/Blog Leads, CMS/Blog Post."
             exit 1
           fi
           echo "Schema check passed."
 
-      - name: Schema guard (block 'Blog -*' regressions in Website/Pages)
+      - name: Schema guard (block 'Blog -*' regressions in CMS/Pages)
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
         run: |
-          echo "Querying Website/Pages for stale 'Blog -*' entities..."
+          echo "Querying CMS/Pages for stale 'Blog -*' entities..."
           python3 - <<'PY'
           import json, os, sys, urllib.request
           token = os.environ.get("FIBERY_TOKEN", "")
@@ -45,9 +45,9 @@ jobs:
               data=json.dumps([{
                   "command": "fibery.entity/query",
                   "args": {"query": {
-                      "q/from": "Website/Pages",
-                      "q/select": {"name": "Website/Name"},
-                      "q/where": ["q/contains", ["Website/Name"], "$prefix"],
+                      "q/from": "CMS/Pages",
+                      "q/select": {"name": "CMS/Name"},
+                      "q/where": ["q/contains", ["CMS/Name"], "$prefix"],
                       "q/limit": 50,
                   }, "params": {"$prefix": "Blog -"}},
               }]).encode(),
@@ -66,7 +66,7 @@ jobs:
               # entries at build time, so they are dormant — just clutter. Once
               # deleted, this guard can be promoted back to a hard fail by
               # changing the next line to sys.exit(1).
-              print("::warning::Stale 'Blog -*' entities detected in Website/Pages — content lives in Website/Blog now; delete these via Fibery UI to enable strict mode:")
+              print("::warning::Stale 'Blog -*' entities detected in CMS/Pages — content lives in CMS/Blog now; delete these via Fibery UI to enable strict mode:")
               for n in stale:
                   print(f"  - {n}")
           else:

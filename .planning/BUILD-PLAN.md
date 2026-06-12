@@ -19,7 +19,7 @@
 | Agent workspace | This repo | CLAUDE.md, empty tokens/, reference/, .planning/ |
 | Design system | Not created | No DESIGN.md, no tokens, no preview catalog |
 
-### Fibery CMS content (subscript.fibery.io / Website/Database 1)
+### Fibery CMS content (subscript.fibery.io / CMS/Database 1)
 
 | Entity | Content | Files |
 |--------|---------|-------|

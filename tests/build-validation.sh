@@ -27,8 +27,8 @@ for entity in "Home - Hero" "Site Config" "Solutions - underscore" "Solutions - 
 done
 
 # At least one Blog entity baked (look for the _blogs structured data with a slug).
-# Blog content moved from Website/Pages 'Blog -*' entries to the dedicated
-# Website/Blog database in May 2026, so legacy "Blog - " prefix is gone.
+# Blog content moved from CMS/Pages 'Blog -*' entries to the dedicated
+# CMS/Blog database in May 2026, so legacy "Blog - " prefix is gone.
 grep -q '"_blogs"' "$DIST/index.html" && grep -q '"slug":' "$DIST/index.html" && pass "Blog content baked" || fail "Blog content baked"
 
 # Migration-created JSON/markdown escaping should not surface in site copy.

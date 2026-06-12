@@ -237,9 +237,9 @@ export default {
           command: 'fibery.entity/query',
           args: {
             query: {
-              'q/from': 'Website/Blog',
+              'q/from': 'CMS/Blog',
               'q/select': ['fibery/id'],
-              'q/where': ['=', ['Website/name'], '$name'],
+              'q/where': ['=', ['CMS/name'], '$name'],
               'q/limit': 1,
             },
             params: { '$name': whitepaperName },
@@ -265,8 +265,8 @@ export default {
 
       // 2. Create the lead, linking to the blog post
       const leadEntity = {
-        'Website/Email': email,
-        'Website/Blog Post': { 'fibery/id': wpId },
+        'CMS/Email': email,
+        'CMS/Blog Post': { 'fibery/id': wpId },
       };
 
       const fiberyResp = await fetch('https://subscript.fibery.io/api/commands', {
@@ -274,7 +274,7 @@ export default {
         headers: fiberyHeaders,
         body: JSON.stringify([{
           command: 'fibery.entity/create',
-          args: { type: 'Website/Blog Leads', entity: leadEntity },
+          args: { type: 'CMS/Blog Leads', entity: leadEntity },
         }]),
       });
 

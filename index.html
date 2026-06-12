@@ -2160,8 +2160,8 @@
     }
 
     // ---- Blog ----
-    // Read structured blog list from Website/Blog DB (cutover from
-    // legacy 'Blog -*' Website/Pages entries in May 2026). Each entry
+    // Read structured blog list from CMS/Blog DB (cutover from
+    // legacy 'Blog -*' CMS/Pages entries in May 2026). Each entry
     // already has Slug, Tag, Subtitle, Author, Post Date, and Excerpt
     // as first-class fields — no front-matter parsing needed.
     const blogGrid = document.getElementById('blogGrid');
@@ -2191,7 +2191,7 @@
         subtitle: blog.subtitle || meta.Subtitle || '',
         author: blog.author || meta.Author || '',
         // PDF asset name matches the Blog entity name (whitepaper modal
-        // queries Website/Blog by name in the lead capture handler).
+        // queries CMS/Blog by name in the lead capture handler).
         pdf: blog.name,
       };
     });
