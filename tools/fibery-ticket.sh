@@ -3,7 +3,7 @@
 # tools/fibery-ticket.sh
 # =============================================================================
 # Given a branch name, mine its commit messages for tokens that point at a
-# Fibery entity (Website/Pages preferred, then Roadmap/Tasks), and emit a JSON
+# Fibery entity (CMS/Pages preferred, then Roadmap/Tasks), and emit a JSON
 # blob with public-id, name, URL, and confidence.
 #
 # Usage:
@@ -37,14 +37,14 @@ fi
 
 query_pages_by_name() {
   local needle="$1"
-  "$FIBERY" undersight query "Website/Pages" \
-    --select "Website/Name,fibery/public-id" \
+  "$FIBERY" undersight query "CMS/Pages" \
+    --select "CMS/Name,fibery/public-id" \
     --limit 50 2>/dev/null \
   | python3 -c "
 import json, sys, re
 needle = sys.argv[1].lower()
 data = json.load(sys.stdin)
-hits = [r for r in data if needle in r.get('Website/Name','').lower()]
+hits = [r for r in data if needle in r.get('CMS/Name','').lower()]
 print(json.dumps(hits))
 " "$needle"
 }
@@ -64,8 +64,8 @@ if [ -n "$FORCE_NAME" ]; then
   count="$(echo "$hits" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")"
   if [ "$count" = "1" ]; then
     pid="$(echo "$hits" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['fibery/public-id'])")"
-    name="$(echo "$hits" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['Website/Name'])")"
-    emit_match "$pid" "$name" "forced" "Website/Pages"
+    name="$(echo "$hits" | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['CMS/Name'])")"
+    emit_match "$pid" "$name" "forced" "CMS/Pages"
     exit 0
   fi
   echo "{\"match\":null,\"error\":\"forced name '$FORCE_NAME' matched $count Pages\",\"candidates\":$hits}" | tee "$CACHE_FILE"
@@ -110,12 +110,12 @@ try_tokens() {
       picked_name="$(echo "$hits" | python3 -c "
 import json, sys
 hits = json.load(sys.stdin)
-hits.sort(key=lambda h: (not h.get('Website/Name','').startswith('Solutions'), h.get('Website/Name','')))
-print(hits[0]['Website/Name'])")"
+hits.sort(key=lambda h: (not h.get('CMS/Name','').startswith('Solutions'), h.get('CMS/Name','')))
+print(hits[0]['CMS/Name'])")"
       picked_pid="$(echo "$hits" | python3 -c "
 import json, sys
 hits = json.load(sys.stdin)
-hits.sort(key=lambda h: (not h.get('Website/Name','').startswith('Solutions'), h.get('Website/Name','')))
+hits.sort(key=lambda h: (not h.get('CMS/Name','').startswith('Solutions'), h.get('CMS/Name','')))
 print(hits[0]['fibery/public-id'])")"
       BEST_COUNT="$n"
       BEST_NAME="$picked_name"
@@ -138,9 +138,9 @@ fi
 rm -f "$BRANCH_TOKENS_FILE" "$BODY_TOKENS_FILE"
 
 if [ -n "$BEST_PID" ] && [ "$BEST_COUNT" = "1" ]; then
-  emit_match "$BEST_PID" "$BEST_NAME" "auto" "Website/Pages"
+  emit_match "$BEST_PID" "$BEST_NAME" "auto" "CMS/Pages"
 elif [ -n "$BEST_PID" ]; then
-  emit_match "$BEST_PID" "$BEST_NAME" "auto-low (multi-match, took first)" "Website/Pages"
+  emit_match "$BEST_PID" "$BEST_NAME" "auto-low (multi-match, took first)" "CMS/Pages"
 else
   echo "{\"match\":null,\"confidence\":\"none\",\"candidates\":[]}" | tee "$CACHE_FILE"
 fi

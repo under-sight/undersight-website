@@ -1,0 +1,18 @@
+{
+  "space_id": "8ca89d10-4e40-11f1-8986-1bf5d7e9a055",
+  "site_config_doc_secret": "019e1de0-d5e7-71b6-bdb4-ec3df54120cb",
+  "prod_url": "https://undersight.ai",
+  "blog_slug": "chat-advance",
+  "uc_marker": "Coming Soon",
+  "whitepaper_name": "Chat Advance Case Study",
+  "entity_counts": {
+    "Animations": 2,
+    "Blog": 9,
+    "Blog Leads": 34,
+    "Deployments": 4,
+    "Emails": 2,
+    "Integrations": 12,
+    "Pages": 25
+  },
+  "min_bound_dbs": ["Blog Leads", "Deployments"]
+}

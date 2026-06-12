@@ -370,7 +370,7 @@ The SVG logo inline has no `<title>` element and no `aria-label`. The text "unde
 WORKSPACE = "subscript.fibery.io"
 ```
 
-The Fibery workspace domain `subscript.fibery.io` and the database name `Website/Database 1` are visible in the server source. While not directly accessible to site visitors (it's server-side), this is an information leak if the source is ever exposed.
+The Fibery workspace domain `subscript.fibery.io` and the database name `CMS/Database 1` are visible in the server source. While not directly accessible to site visitors (it's server-side), this is an information leak if the source is ever exposed.
 
 The token retrieval via macOS Keychain (`security find-generic-password`) is properly secured and not exposed to the client. The `/api/content` endpoint does not leak the Fibery token. The file proxy validates secrets against an allowlist.
 
