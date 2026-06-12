@@ -21,7 +21,8 @@ import urllib.request
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
 WORKSPACE = "subscript.fibery.io"
-DB = "CMS/Pages"
+FIBERY_SPACE = "CMS"
+DB = f"{FIBERY_SPACE}/Pages"
 CACHE_TTL = 5  # seconds - short for dev, increase for prod
 
 # Input validation constants (mirror production handlers)
@@ -204,13 +205,13 @@ def fetch_all():
             "query": {
                 "q/from": DB,
                 "q/select": {
-                    "Name": "CMS/Name",
+                    "Name": f"{FIBERY_SPACE}/Name",
                     "DocSecret": [
-                        "CMS/Description",
+                        f"{FIBERY_SPACE}/Description",
                         "Collaboration~Documents/secret",
                     ],
                     "Files": {
-                        "q/from": "CMS/Assets",
+                        "q/from": f"{FIBERY_SPACE}/Assets",
                         "q/select": {
                             "FileSecret": "fibery/secret",
                             "FileName": "fibery/name",
@@ -231,7 +232,7 @@ def fetch_all():
         if isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
     ]
     if stale_blog_pages:
-        print("WARNING: stale 'Blog -*' entities in CMS/Pages — ignoring:",
+        print(f"WARNING: stale 'Blog -*' entities in {DB} — ignoring:",
               ", ".join(stale_blog_pages), file=sys.stderr)
         entities = [e for e in entities if not (
             isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
@@ -242,22 +243,22 @@ def fetch_all():
         "command": "fibery.entity/query",
         "args": {
             "query": {
-                "q/from": "CMS/Blog",
+                "q/from": f"{FIBERY_SPACE}/Blog",
                 "q/select": {
-                    "Name": "CMS/name",
-                    "Slug": "CMS/Slug",
-                    "Subtitle": "CMS/Subtitle",
-                    "Author": "CMS/Author",
-                    "Excerpt": "CMS/Excerpt",
-                    "PostDate": "CMS/Post Date",
+                    "Name": f"{FIBERY_SPACE}/name",
+                    "Slug": f"{FIBERY_SPACE}/Slug",
+                    "Subtitle": f"{FIBERY_SPACE}/Subtitle",
+                    "Author": f"{FIBERY_SPACE}/Author",
+                    "Excerpt": f"{FIBERY_SPACE}/Excerpt",
+                    "PostDate": f"{FIBERY_SPACE}/Post Date",
                     "CreationDate": "fibery/creation-date",
-                    "Type": ["CMS/Type", "enum/name"],
+                    "Type": [f"{FIBERY_SPACE}/Type", "enum/name"],
                     "DocSecret": [
-                        "CMS/Description",
+                        f"{FIBERY_SPACE}/Description",
                         "Collaboration~Documents/secret",
                     ],
                     "Files": {
-                        "q/from": "CMS/Assets",
+                        "q/from": f"{FIBERY_SPACE}/Assets",
                         "q/select": {
                             "FileSecret": "fibery/secret",
                             "FileName": "fibery/name",
@@ -446,9 +447,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "command": "fibery.entity/query",
                 "args": {
                     "query": {
-                        "q/from": "CMS/Blog",
+                        "q/from": f"{FIBERY_SPACE}/Blog",
                         "q/select": ["fibery/id"],
-                        "q/where": ["=", ["CMS/name"], "$name"],
+                        "q/where": ["=", [f"{FIBERY_SPACE}/name"], "$name"],
                         "q/limit": 1,
                     },
                     "params": {"$name": whitepaper_name},
@@ -471,14 +472,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
             # 2. Create the lead entity, linked to the blog post
             lead_entity = {
-                "CMS/Email": email,
-                "CMS/Blog Post": {"fibery/id": wp_id},
+                f"{FIBERY_SPACE}/Email": email,
+                f"{FIBERY_SPACE}/Blog Post": {"fibery/id": wp_id},
             }
 
             api_post("/api/commands", [{
                 "command": "fibery.entity/create",
                 "args": {
-                    "type": "CMS/Blog Leads",
+                    "type": f"{FIBERY_SPACE}/Blog Leads",
                     "entity": lead_entity,
                 },
             }])
