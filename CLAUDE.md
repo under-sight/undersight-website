@@ -186,6 +186,26 @@ entity *first*, then wire the renderer in HTML via `data-content-entity` and
 `getContent()`. Do not ship hardcoded copy with a TODO to "move to Fibery
 later" — the contract is content-first.
 
+### Content spaces: CMS (prod) and CMS Staging (dev)
+
+Since 2026-06-12 the dev pipeline reads the **`CMS Staging`** space; production
+reads **`CMS`**. The space is selected by the `FIBERY_SPACE` env var
+(default `CMS`) in build.py, undersight-serve.py, deploy-report.py, and the
+lead-capture functions (deploy-dev.yml sets it; Cloudflare Pages Preview env
+must carry it for the Pages Function).
+
+- **Stage content**: edit entities in `CMS Staging` → dev rebuild shows them;
+  prod is untouched.
+- **Sync staging from prod**: `python3 scripts/mirror-cms-to-staging.py`
+  (idempotent; `--dry-run` to plan, `--update` to overwrite drifted staging
+  fields/docs, `--verify` for a parity report). Re-run the mirror before each
+  content-staging cycle so staging starts from prod truth.
+- **Promote staged content**: manual for now — apply the same edit in `CMS`
+  (or extend the mirror with a reverse mode; not built).
+- The mirror NEVER writes to `CMS` and never copies Blog Leads or Deployments.
+- Local dev against staging: `FIBERY_SPACE="CMS Staging" python3 undersight-serve.py`
+  (note the space in the name — always quote).
+
 ### Currently Fibery-driven
 
 - Hero (`Home - Hero`)
