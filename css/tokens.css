@@ -35,6 +35,13 @@
   --color-dark-text-muted: #D1D5DB;
   --color-dark-border: rgba(255, 255, 255, 0.1);
 
+  /* Background motif tokens — "underwriting paper" ruled lines */
+  --pattern-line: rgba(35, 38, 44, 0.05);
+  --pattern-line-strong: rgba(35, 38, 44, 0.10);
+  --pattern-pitch: 80px;
+  --pattern-pitch-dense: 32px;
+  --rule-double-gap: 3px;
+
   /* ========================================================================
      2. SEMANTIC COLOR ALIASES — Light mode (default)
      ======================================================================== */
@@ -222,6 +229,10 @@
     /* --color-accent: var(--color-amber-rust); */
     /* --color-accent-hover: var(--color-amber-rust-hover); */
 
+    /* Pattern lines lighten in dark mode */
+    --pattern-line: rgba(255, 255, 255, 0.05);
+    --pattern-line-strong: rgba(255, 255, 255, 0.09);
+
     /* Shadows deepen in dark mode */
     --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.2);
     --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.3);
@@ -243,6 +254,8 @@ html.theme-dark {
   --color-border-light: var(--color-dark-border);
   --color-surface: var(--color-dark-surface);
   --color-surface-elevated: var(--color-dark-elevated);
+  --pattern-line: rgba(255, 255, 255, 0.05);
+  --pattern-line-strong: rgba(255, 255, 255, 0.09);
   --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.3);
   --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -262,6 +275,8 @@ html.theme-light {
   --color-border-light: var(--color-cloud-zinc-light);
   --color-surface: var(--color-paper-white);
   --color-surface-elevated: var(--color-paper-white);
+  --pattern-line: rgba(35, 38, 44, 0.05);
+  --pattern-line-strong: rgba(35, 38, 44, 0.10);
   --shadow-subtle: 0 1px 3px rgba(35, 38, 44, 0.06);
   --shadow-medium: 0 4px 16px rgba(35, 38, 44, 0.08);
   --shadow-large: 0 8px 32px rgba(35, 38, 44, 0.12);

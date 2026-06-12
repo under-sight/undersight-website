@@ -1095,11 +1095,12 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
 }
 .how-step { position: relative; margin-bottom: 32px; }
 .how-step:last-child { margin-bottom: 0; }
-.how-step::before {
-  /* hairline ring, not a filled accent dot (B0; .eye-ring primitive in B1) */
+.how-timeline .how-step::before {
+  /* ring geometry/border shared with .eye-ring — see BACKGROUND MOTIF
+     PRIMITIVES at the end of this file. Scoped to .how-timeline so the
+     V2 .how bar stubs no longer inherit dot styling. */
   content: ''; position: absolute; left: -30px; top: 6px;
-  width: 12px; height: 12px; border-radius: 50%;
-  background: var(--white); border: 1px solid var(--pale);
+  width: 12px; height: 12px;
 }
 .how-step h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
 .how-step p { font-size: 15px; color: var(--mid); line-height: 1.6; }
@@ -1107,7 +1108,7 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
   .how-section { padding: 48px 16px; }
   .how-timeline { padding-left: 32px; }
   .how-step h3 { font-size: 16px; }
-  .how-step::before { left: -22px; }
+  .how-timeline .how-step::before { left: -22px; }
 }
 
 /* ---- WHO WE SERVE ---- */
@@ -1151,10 +1152,9 @@ html.theme-dark .theme-toggle-floating .theme-toggle-sun { display: block; }
   display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start;
 }
 .case-study-graphic .cs-num {
-  /* hairline ring on the dark band, not a filled accent circle (B0) */
-  width: 24px; height: 24px; border-radius: 50%;
-  background: transparent; color: var(--color-paper-white);
-  border: 1px solid var(--color-dark-text-muted);
+  /* hairline ring on the dark band — ring border shared with .eye-ring,
+     border-color overridden for the graphite band (see MOTIF PRIMITIVES) */
+  width: 24px; height: 24px; color: var(--color-paper-white);
   font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
@@ -2472,3 +2472,60 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
   color: var(--mid);
   margin: 0;
 }
+
+/* =============================================================
+   BACKGROUND MOTIF PRIMITIVES — "underwriting paper" (B1)
+   Tokens only (css/tokens.css): --pattern-line(-strong),
+   --pattern-pitch(-dense), --rule-double-gap. See preview.html
+   "Background Motifs" for the catalog.
+   ============================================================= */
+
+/* Ruled paper: faint horizontal ledger lines behind section content,
+   fading out toward the section's bottom edge. */
+.bg-ruled { position: relative; }
+.bg-ruled::before {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 0;
+  background: repeating-linear-gradient(to bottom,
+    var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch));
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
+}
+.bg-ruled > * { position: relative; z-index: 1; }
+.bg-ruled--dense::before {
+  background: repeating-linear-gradient(to bottom,
+    var(--pattern-line) 0 1px, transparent 1px var(--pattern-pitch-dense));
+}
+
+/* Editorial double rule: 1px line + offset hairline echo. */
+.rule-double {
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 var(--rule-double-gap) 0 0 var(--color-border-light);
+}
+
+/* Eye ring: 12px hairline ring with a 4px center dot — the marker that
+   replaced filled accent dots. Ring border shared with the legacy
+   timeline dot and case-study step circles (B0 interim styles). */
+.eye-ring {
+  display: inline-block; position: relative;
+  width: 12px; height: 12px;
+}
+.eye-ring,
+.how-timeline .how-step::before,
+.case-study-graphic .cs-num {
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: transparent;
+}
+.eye-ring::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  width: 4px; height: 4px; margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+/* Context overrides: the timeline dot occludes the line running behind
+   it; the dark case-study band needs its light hairline. */
+.how-timeline .how-step::before { background: var(--white); }
+.case-study-graphic .cs-num { border-color: var(--color-dark-text-muted); }
