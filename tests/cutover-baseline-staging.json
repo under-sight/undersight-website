@@ -1,0 +1,20 @@
+{
+  "comment": "Baseline for the mirrored CMS Staging space (scripts/mirror-cms-to-staging.py). Blog Leads is exact 0 (mirror never copies leads); Deployments is min-bound (self-populates once deploy-report runs against staging). other_space=Website: the legacy prefix must stay absent, while CMS itself legitimately coexists.",
+  "prod_url": "https://undersight.ai",
+  "blog_slug": "chat-advance",
+  "uc_marker": "Coming Soon",
+  "whitepaper_name": "Chat Advance Case Study",
+  "other_space": "Website",
+  "entity_counts": {
+    "Animations": 2,
+    "Blog": 7,
+    "Blog Leads": 0,
+    "Deployments": 0,
+    "Emails": 2,
+    "Integrations": 12,
+    "Pages": 18
+  },
+  "min_bound_dbs": [
+    "Deployments"
+  ]
+}

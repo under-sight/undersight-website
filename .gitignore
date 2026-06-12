@@ -39,3 +39,6 @@ out/
 
 # Local Fibery file download cache (speeds up incremental builds)
 .fibery-file-cache/
+
+# CMS->Staging mirror file transfer cache
+.mirror-file-cache/
