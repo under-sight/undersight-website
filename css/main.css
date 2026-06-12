@@ -652,6 +652,21 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
   padding: 96px 0;
   background: var(--white);
   border-top: 1px solid var(--pale);
+  position: relative;
+}
+/* Signature line (B2): the closing bookend mirrors the hero's written
+   baseline — a 48px pen-stroke resting on the section's existing 1px top
+   rule at the container's left edge. Static, no animation. Amber is
+   logo-derived and flagged for Kyle's ruling; graphite variant is a
+   one-line swap to background: var(--color-text). */
+.cta.cta-band::after {
+  content: '';
+  position: absolute; top: -2px;
+  left: calc(max(0px, 50% - var(--max-width) / 2) + 24px);
+  width: 48px; height: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  pointer-events: none;
 }
 .cta.cta-band .cta-inner {
   display: grid;
