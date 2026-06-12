@@ -905,7 +905,7 @@
   function renderUnderscorePage(pageEl, tag, title, desc, contactEmail) {
     const logoCards = renderIntegrationsStrip('Solutions - underscore');
     pageEl.innerHTML = `
-      <div class="sol-hero">
+      <div class="sol-hero bg-ruled">
         <span class="tag">${tag}</span>
         <h1>150+ SMB-specific metrics from a single API call</h1>
         <p>ML and agentic scoring models built for private credit. Send bank statements, QuickBooks exports, or Plaid connections &mdash; get back institutional-grade risk intelligence in seconds.</p>
@@ -1340,7 +1340,7 @@
         }
       </style>
 
-      <div class="sol-hero">
+      <div class="sol-hero bg-ruled">
         <div class="sol-hero-text">
           <span class="tag">${tag}</span>
           <h1>Brand-matched AI agents that engage your clients 24/7</h1>
@@ -1817,7 +1817,7 @@
         }
       </style>
 
-      <div class="sol-hero">
+      <div class="sol-hero bg-ruled">
         <div class="sol-hero-text">
           <span class="tag">${tag}</span>
           <h1>Hybrid <em>ML + agentic</em> risk scoring for every position you hold.</h1>
@@ -2402,7 +2402,7 @@
             </div>
           </div>`).join('');
         pageEl.innerHTML = `
-          <div class="sol-hero">
+          <div class="sol-hero bg-ruled">
             <span class="tag">${tag}</span>
             <h1>${title}</h1>
             <p>${desc}</p>
