@@ -80,6 +80,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/main.css">
+<script>
+  // Re-apply the persisted theme choice (written by toggleTheme()) before
+  // first paint so a reload doesn't flash the OS-default theme.
+  try {
+    var savedTheme = localStorage.getItem('undersight-theme');
+    if (savedTheme === 'dark') document.documentElement.classList.add('theme-dark');
+    else if (savedTheme === 'light') document.documentElement.classList.add('theme-light');
+  } catch (e) {}
+</script>
 <!-- Cloudflare Turnstile bot protection (whitepaper lead capture). Loaded async so it doesn't block render. -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
@@ -2829,18 +2838,29 @@
   });
 
   // ---- Theme toggle ----
+  // Cycles OS default → dark → light → OS default. The choice is persisted
+  // to localStorage ('undersight-theme') and re-applied by the early script
+  // in <head> so it survives reloads.
   function toggleTheme() {
     var el = document.documentElement;
+    var choice;
     if (el.classList.contains('theme-dark')) {
       el.classList.remove('theme-dark');
       el.classList.add('theme-light');
+      choice = 'light';
     } else if (el.classList.contains('theme-light')) {
       el.classList.remove('theme-light');
       // Back to OS default
+      choice = null;
     } else {
       // OS default → force dark
       el.classList.add('theme-dark');
+      choice = 'dark';
     }
+    try {
+      if (choice) localStorage.setItem('undersight-theme', choice);
+      else localStorage.removeItem('undersight-theme');
+    } catch (e) {}
   }
 
   // ---- Scroll reveal ----

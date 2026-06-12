@@ -2423,6 +2423,37 @@ else
   fail "no_raw_hex_in_main_css: white-alpha rgba count within baseline" "$RGBA_WHITE_COUNT literals (baseline $RGBA_WHITE_BASELINE) — use semantic tokens for new dark-panel styles"
 fi
 
+# -- theme_dark_class_defined --
+# Manual dark mode relies on toggleTheme() adding .theme-dark to <html>;
+# tokens.css must define the matching override block.
+if grep -q 'html\.theme-dark' "$SITE_ROOT/css/tokens.css"; then
+  pass "theme_dark_class_defined: css/tokens.css defines html.theme-dark"
+else
+  fail "theme_dark_class_defined: css/tokens.css defines html.theme-dark" "Manual toggle class has no token overrides"
+fi
+
+# -- toggle_persists_localStorage --
+# The chosen theme must survive reloads: toggleTheme() writes the state to
+# localStorage and an early script reads it back on load (before first paint).
+TOGGLE_FN_BODY=$(sed -n '/function toggleTheme()/,/^  }/p' "$SITE_ROOT/index.html")
+if echo "$TOGGLE_FN_BODY" | grep -q 'localStorage' \
+  && grep -q "localStorage.getItem('undersight-theme')" "$SITE_ROOT/index.html"; then
+  pass "toggle_persists_localStorage: toggleTheme writes + boot reads undersight-theme"
+else
+  fail "toggle_persists_localStorage: toggleTheme writes + boot reads undersight-theme" "Theme choice does not survive a reload"
+fi
+
+# -- preview_uses_theme_dark --
+# The component catalog must demo the same manual dark class as production
+# (theme-dark), not its own parallel dark-mode class.
+if grep -q 'dark-mode' "$SITE_ROOT/preview.html"; then
+  fail "preview_uses_theme_dark: preview.html does not use class dark-mode" "Catalog theming diverges from production toggleTheme()"
+elif grep -q 'theme-dark' "$SITE_ROOT/preview.html"; then
+  pass "preview_uses_theme_dark: preview.html themes via theme-dark"
+else
+  fail "preview_uses_theme_dark: preview.html themes via theme-dark" "No manual dark class found at all"
+fi
+
 # =============================================================================
 section "Summary"
 # =============================================================================

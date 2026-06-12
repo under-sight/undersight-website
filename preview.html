@@ -11,10 +11,10 @@
   <style>
     /* =======================================================================
        DARK MODE MANUAL TOGGLE
-       When .dark-mode is on <html>, override semantic tokens same as
+       When .theme-dark is on <html>, override semantic tokens same as
        @media (prefers-color-scheme: dark) in tokens.css
        ======================================================================= */
-    html.dark-mode {
+    html.theme-dark {
       --color-bg: var(--color-dark-bg);
       --color-bg-alt: var(--color-dark-surface);
       --color-bg-subtle: var(--color-dark-surface);
@@ -1726,8 +1726,8 @@
       var html = document.documentElement;
 
       toggle.addEventListener('click', function () {
-        html.classList.toggle('dark-mode');
-        var isDark = html.classList.contains('dark-mode');
+        html.classList.toggle('theme-dark');
+        var isDark = html.classList.contains('theme-dark');
         icon.innerHTML = isDark ? '&#9788;' : '&#9789;';
         label.textContent = isDark ? 'Toggle Light Mode' : 'Toggle Dark Mode';
       });
