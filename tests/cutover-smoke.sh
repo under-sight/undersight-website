@@ -90,8 +90,11 @@ for db, n in b['entity_counts'].items():
     echo "$BODY" | grep -q "$SLUG" && pass "blog slug $SLUG baked into /" \
                                    || fail "blog slug $SLUG missing from /"
     # Lead API alive: valid payload without a Turnstile token.
-    # 403 = function alive, Turnstile enforced (expected in prod).
-    # 200 = Turnstile unset; a real lead was created -> clean it up.
+    # 403 = function alive, Turnstile enforced (the only acceptable outcome).
+    # 200 = CF_TURNSTILE_SECRET_KEY missing from the Pages deployment, so bot
+    #       protection is silently off and a real lead was created -> clean it
+    #       up AND fail. Re-set the secret (Pages > Settings > Variables and
+    #       Secrets, Production + Preview) and redeploy.
     WP=$(python3 -c "import json;print(json.load(open('$BASELINE'))['whitepaper_name'])")
     TEST_EMAIL="cutover-test+$(date +%s)@undersight.ai"
     CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -X POST \
@@ -100,13 +103,13 @@ for db, n in b['entity_counts'].items():
       "$PROD_URL/api/whitepaper-lead")
     case "$CODE" in
       403) pass "lead API alive (403 Turnstile-enforced)";;
-      200) pass "lead API alive (200, Turnstile off)"
+      200) fail "tokenless lead POST returned 200 — Turnstile is OFF in prod"
            LEAD_ID=$(fibery undersight query "$SPACE/Blog Leads" \
              --where "$SPACE/Email=$TEST_EMAIL" --select "fibery/id" --limit 1 2>/dev/null \
              | python3 -c "import json,sys; r=json.load(sys.stdin); print(r[0]['fibery/id'] if r else '')")
            [ -n "$LEAD_ID" ] && fibery undersight delete "$LEAD_ID" --type "$SPACE/Blog Leads" --yes >/dev/null 2>&1 || true
            ;;
-      *)   fail "lead API returned $CODE (expected 403 or 200)";;
+      *)   fail "lead API returned $CODE (expected 403)";;
     esac
     # Fibery write path under the active prefix: create + delete a rank-only lead.
     EID=$(fibery undersight create "$SPACE/Blog Leads" --fields '{"fibery/rank":1}' 2>/dev/null \
