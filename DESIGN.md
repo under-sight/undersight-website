@@ -194,6 +194,19 @@ components:
     padding: 10px 20px
     height: 40px
     border: 1px solid {colors.graphite-900}
+  motif-ruled-field:
+    pattern: repeating-linear-gradient hard-stop 1px lines
+    color: "{colors.pattern-line}"
+    pitch: 80px (dense: 32px)
+    mask: alpha fade to 95% height
+  rule-double:
+    top: 1px solid {colors.cloud-zinc}
+    gap: 3px (bg-masked)
+    echo: 1px {colors.cloud-zinc-light}
+  eye-ring:
+    size: 12px
+    border: 1px solid {colors.cloud-zinc}
+    centerDot: 4px {colors.graphite-500}
   text-input:
     backgroundColor: "{colors.paper-white}"
     textColor: "{colors.graphite-900}"
@@ -531,6 +544,61 @@ Photography is minimal. When used (team photos, case studies), images are treate
 **`cta-section`** -- Pre-footer call-to-action band. Background `{colors.paper-white}`, text `{colors.graphite-900}`, centered layout. Headline in `{typography.display-md}` (Inter 28px / 600), sub-line in `{typography.body-lg}`, followed by a `{component.button-primary}`. Vertical padding `{spacing.section}` (80px). The CTA section stays on the white canvas -- the Amber Rust button is the sole color accent.
 
 **`footer`** -- Site-wide footer closing every page. Background `{colors.paper-white}`, 1px `{colors.cloud-zinc}` top border, text `{colors.graphite-700}`, type `{typography.body-sm}` (DM Sans 14px / 400). Padding `{spacing.xl}` (24px). Carries 3-4 columns of link groups in `{typography.nav-link}`, social icons, and a legal/copyright row. The footer stays light -- it does not invert to dark.
+
+## Background Motifs
+
+The "underwriting paper" motif system (added 2026-06-12). Two shapes carry
+every background treatment: **the written line** (1px hairline ledger rules,
+editorial double rules, the amber pen-stroke bookend — the line-logo geometry)
+and **the underwriter's eye** (a hairline ring with center dot — registration
+mark / scope reticle, the favicon's circular cutout). One weight (1px), one
+ink (graphite at 3–10% opacity via `--pattern-line` / `--pattern-line-strong`),
+one grid (8px pitches: 80px / 32px).
+
+**Pattern primitives are not gradients.** `repeating-linear-gradient` with
+hard stops drawing flat 1px lines, and alpha-only `mask-image` fades, are
+*line primitives* — there is no visible color transition. The "no gradient
+backdrops" rule refers to color-transition washes (radial glows, mesh
+gradients, duotones), which remain prohibited.
+
+**Usage rules.**
+- Backgrounds are monochrome graphite only. Amber never appears in background
+  graphics; the two pen-stroke bookends (`.hero-bar`, CTA signature stroke)
+  are logo-derived marks, capped at one non-interactive amber per viewport.
+- Strokes are always 1px. Field tint behind running body text caps at ~4%.
+- Max one large motif figure per viewport.
+- Treatments are pseudo-elements: `pointer-events: none`, absolutely
+  positioned, zero layout shift, content z-lifted (`.bg-ruled` handles this).
+- Every treatment must be tokens-only and dark-aware (the `--pattern-*`
+  tokens swap per scheme).
+
+**Pattern vocabulary** (all in `css/main.css` under MOTIF PRIMITIVES;
+demos in `preview.html` §14):
+- `.bg-ruled` / `.bg-ruled--dense` — ruled ledger field, masked fade
+  (80px / 32px pitch).
+- `.rule-double` — editorial double rule: a true 1px rule, 3px bg-masked gap,
+  1px lighter echo (`--rule-double-gap`). Masthead / totals-row / colophon
+  grammar.
+- `.eye-ring` — 12px hairline ring + 4px center dot. Timeline nodes, cite
+  bullets, step markers.
+- Exhibit crop marks — four corner ticks outside a card border
+  (`--pattern-line-strong`), framing case studies as pinned exhibits.
+- Ghost folio indices — SF Mono `01`–`04` CSS-counter numerals in
+  `--pattern-line-strong` behind process steps.
+- Signature strokes — the hero pen-stroke on a full-width baseline rule
+  opens the page; a mirrored static stroke signs the CTA.
+- Footer colophon — editorial double rule + the 16px favicon nib at 40%.
+
+**Decision log (2026-06-12).** Removed: the hero triple radial-gradient wash
+(violated no-gradients), non-interactive amber on stat numerals / timeline
+dots / case-study step circles / quote marks / cite avatar (accent rule),
+the case-study resting box-shadow (border-first rule). The V2 homepage had
+already re-lit the former dark stats/testimonial bands; their dark CSS is
+dead legacy code. Open rulings: (1) the two amber pen-strokes — amber vs
+graphite one-line variants exist; (2) solution-page contained dark blocks
+(`.convo-preview`, `.capacity-callout`, `.not-workflow`, `.chat-surface`,
+`.api-preview`, `.mca-callout`) — contained component panels today, not
+section bands; principle 5 untouched pending a ruling.
 
 ## Do's and Don'ts
 
