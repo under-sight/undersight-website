@@ -1819,19 +1819,31 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 .how {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
   position: relative;
+  counter-reset: how-step;
 }
 .how .how-step {
   padding: 32px 24px 32px 0;
   position: relative;
   display: flex; flex-direction: column; gap: 10px;
+  counter-increment: how-step;
 }
 .how .how-step + .how-step { padding-left: 24px; border-left: 1px solid var(--pale); }
 .how .how-step::before {
-  /* hairline stub, not an amber accent bar (B0: amber = interactive only) */
+  /* eye-ring step marker (B2) — ring border + center dot shared with the
+     .eye-ring primitive (see MOTIF PRIMITIVES at the end of this file) */
   content: ''; position: absolute; top: 0; left: 0;
-  width: 32px; height: 2px; background: var(--pale);
+  width: 12px; height: 12px;
 }
 .how .how-step + .how-step::before { left: 24px; }
+.how .how-step::after {
+  /* ghost folio index (B2): counter-driven 01–04 in pattern ink */
+  content: counter(how-step, decimal-leading-zero);
+  position: absolute; top: 8px; right: 24px;
+  font: 500 48px/1 var(--font-mono);
+  letter-spacing: -0.02em;
+  color: var(--pattern-line-strong);
+  pointer-events: none;
+}
 .how .step-n {
   font: 600 11px/1 'SF Mono', monospace;
   letter-spacing: 0.06em; color: var(--mid); margin-top: 18px;
@@ -2551,6 +2563,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 .eye-ring,
 .how-timeline .how-step::before,
+.how .how-step::before,
 .case-study-graphic .cs-num {
   border-radius: 50%;
   border: 1px solid var(--color-border);
@@ -2566,4 +2579,10 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 /* Context overrides: the timeline dot occludes the line running behind
    it; the dark case-study band needs its light hairline. */
 .how-timeline .how-step::before { background: var(--white); }
+/* Live .how grid markers are a single pseudo, so the 4px center dot is
+   painted as a token-colored gradient rather than .eye-ring's ::after. */
+.how .how-step::before {
+  background: radial-gradient(circle,
+    var(--color-text-muted) 0 2px, transparent 2px);
+}
 .case-study-graphic .cs-num { border-color: var(--color-dark-text-muted); }
