@@ -512,7 +512,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         esc_token = html_mod.escape(token)
         body = (
             "<h1>Unsubscribe</h1>"
-            f"<p>Stop receiving download emails at <span class='addr'>{esc_email}</span>?</p>"
+            f"<p>Stop receiving emails at <span class='addr'>{esc_email}</span>?</p>"
             "<form method=\"post\" action=\"/unsubscribe\">"
             f"<input type=\"hidden\" name=\"e\" value=\"{esc_email}\">"
             f"<input type=\"hidden\" name=\"t\" value=\"{esc_token}\">"
@@ -564,7 +564,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             print(f"  [UNSUB] {masked} ({count} lead(s) marked)")
             body = (
                 "<h1>You're unsubscribed</h1>"
-                f"<p><span class='addr'>{html_mod.escape(email)}</span> won't receive download emails from undersight anymore.</p>"
+                f"<p><span class='addr'>{html_mod.escape(email)}</span> won't receive emails from undersight anymore.</p>"
                 "<p>Unsubscribed by mistake? Just request a download again on <a href='https://undersight.ai'>undersight.ai</a>.</p>"
             )
             self._send_html(UNSUB_PAGE.format(title="Unsubscribed", body=body))
