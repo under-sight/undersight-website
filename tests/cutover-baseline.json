@@ -8,11 +8,11 @@
   "entity_counts": {
     "Animations": 2,
     "Blog": 9,
-    "Blog Leads": 34,
+    "Website Leads": 34,
     "Deployments": 4,
     "Emails": 2,
     "Integrations": 12,
     "Pages": 25
   },
-  "min_bound_dbs": ["Blog Leads", "Deployments"]
+  "min_bound_dbs": ["Website Leads", "Deployments"]
 }

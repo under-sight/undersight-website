@@ -24,7 +24,7 @@ jobs:
           echo "Checking for old schema references..."
           if grep -rn 'CMS/Whitepapers\|CMS/Whitepaper Leads\|CMS/Whitepaper[^s]' \
             functions/ undersight-serve.py worker/index.js index.html; then
-            echo "::error::Old Fibery schema names detected. Correct schema is CMS/Blog, CMS/Blog Leads, CMS/Blog Post."
+            echo "::error::Old Fibery schema names detected. Correct schema is CMS/Blog, CMS/Website Leads, CMS/Blog Post."
             exit 1
           fi
           echo "Schema check passed."

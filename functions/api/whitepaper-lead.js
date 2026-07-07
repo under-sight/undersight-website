@@ -4,7 +4,7 @@
  * Route: POST /api/whitepaper-lead
  * Deployed automatically with Cloudflare Pages (lives in functions/ dir).
  *
- * Accepts { email, whitepaper } and creates a Blog Leads entity in Fibery,
+ * Accepts { email, whitepaper } and creates a Website Leads entity in Fibery,
  * linked to the matching Blog entity. The Fibery automation
  * "undersight research dispatch" then sends the PDF via email.
  *
@@ -273,7 +273,7 @@ export async function onRequestPost(context) {
         command: 'fibery.entity/query',
         args: {
           query: {
-            'q/from': `${FIBERY_SPACE}/Blog Leads`,
+            'q/from': `${FIBERY_SPACE}/Website Leads`,
             'q/select': ['fibery/id'],
             'q/where': ['q/and',
               ['=', [`${FIBERY_SPACE}/Email`], '$email'],
@@ -343,7 +343,7 @@ export async function onRequestPost(context) {
       headers: fiberyHeaders,
       body: JSON.stringify([{
         command: 'fibery.entity/create',
-        args: { type: `${FIBERY_SPACE}/Blog Leads`, entity: leadEntity },
+        args: { type: `${FIBERY_SPACE}/Website Leads`, entity: leadEntity },
       }]),
     });
 
