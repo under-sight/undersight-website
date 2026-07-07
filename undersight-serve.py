@@ -9,14 +9,18 @@ Usage:
     python3 undersight-serve.py 3000     # custom port
 """
 
+import datetime
+import html as html_mod
 import http.server
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import time
 import traceback
+import urllib.parse
 import urllib.request
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
@@ -374,12 +378,200 @@ def _resolve_opaque_id(opaque_id):
     return _opaque_file_map.get(opaque_id)
 
 
+def _is_suppressed(email):
+    """True if any lead for this email has opted out. Fibery is the source of
+    truth so dev and prod behave identically (no KV in dev)."""
+    results = api_post("/api/commands", [{
+        "command": "fibery.entity/query",
+        "args": {
+            "query": {
+                "q/from": f"{FIBERY_SPACE}/Blog Leads",
+                "q/select": ["fibery/id"],
+                "q/where": ["q/and",
+                            ["=", [f"{FIBERY_SPACE}/Email"], "$email"],
+                            ["=", [f"{FIBERY_SPACE}/Unsubscribed"], "$true"]],
+                "q/limit": 1,
+            },
+            "params": {"$email": email, "$true": True},
+        },
+    }])
+    return bool(results[0].get("result"))
+
+
+def _mark_unsubscribed(email, token):
+    """Mark every lead for this email as unsubscribed. Returns count updated.
+
+    The token (when present and matching a lead) proves the caller holds the
+    original email — one-click path. Without a valid token the caller has
+    still confirmed via the POST form; suppressing an address is low-harm and
+    CAN-SPAM favors frictionless opt-out, so we honor it either way.
+    """
+    results = api_post("/api/commands", [{
+        "command": "fibery.entity/query",
+        "args": {
+            "query": {
+                "q/from": f"{FIBERY_SPACE}/Blog Leads",
+                "q/select": ["fibery/id"],
+                "q/where": ["=", [f"{FIBERY_SPACE}/Email"], "$email"],
+                "q/limit": 100,
+            },
+            "params": {"$email": email},
+        },
+    }])
+    leads = results[0].get("result", [])
+    if not leads:
+        return 0
+    # Fibery date-time parsing requires millisecond precision + Z suffix
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    commands = [{
+        "command": "fibery.entity/update",
+        "args": {
+            "type": f"{FIBERY_SPACE}/Blog Leads",
+            "entity": {
+                "fibery/id": lead["fibery/id"],
+                f"{FIBERY_SPACE}/Unsubscribed": True,
+                f"{FIBERY_SPACE}/Unsubscribed At": now,
+            },
+        },
+    } for lead in leads]
+    api_post("/api/commands", commands)
+    return len(leads)
+
+
+# --- Unsubscribe flow (mirrors functions/unsubscribe.js) ---------------------
+
+UNSUB_PAGE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>{title} — undersight</title>
+<style>
+:root {{ color-scheme: light dark; }}
+body {{ margin:0; background:#f2f2ef; color:#23262c; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,system-ui,sans-serif; line-height:1.5; }}
+.card {{ max-width:480px; margin:64px auto; background:#fff; border-radius:14px; overflow:hidden; }}
+.head {{ background:#23262c; padding:24px 28px; }}
+.head .brand {{ font-size:11px; font-weight:600; letter-spacing:.16em; color:#6b9e8c; text-transform:uppercase; }}
+.body {{ padding:28px; }}
+h1 {{ font-size:20px; margin:0 0 10px; }}
+p {{ font-size:14px; color:#3a3f47; margin:0 0 16px; }}
+.addr {{ font-weight:600; color:#23262c; }}
+button {{ background:#c97a54; color:#fff; border:0; font-size:14px; font-weight:600; padding:12px 30px; border-radius:8px; cursor:pointer; }}
+.foot {{ padding:0 28px 24px; font-size:11px; color:#9ba0a6; }}
+a {{ color:#6b9e8c; }}
+@media (prefers-color-scheme: dark) {{
+body {{ background:#191b1f; }}
+.card {{ background:#23262c; }}
+h1, .addr {{ color:#f2f2ef; }}
+p {{ color:#c9cdd3; }}
+.foot {{ color:#7d838b; }}
+}}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="head"><span class="brand">undersight</span></div>
+<div class="body">{body}</div>
+<div class="foot">undersight, 1032 E Brandon Blvd #2048, Brandon, FL 33511 · <a href="https://legal.undersight.ai/privacy">Privacy Policy</a></div>
+</div>
+</body>
+</html>"""
+
+
 class Handler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
-        if self.path == "/api/whitepaper-lead":
+        path = self.path.split("?")[0]
+        if path == "/api/whitepaper-lead":
             self._capture_lead()
+        elif path == "/unsubscribe":
+            self._unsubscribe_post()
         else:
             self.send_error(404)
+
+    def _send_html(self, html, status=200):
+        payload = html.encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(payload)))
+        self.send_header("Cache-Control", "private, no-store")
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _unsubscribe_get(self):
+        """Confirm page. No side effects on GET — prefetchers must not unsubscribe."""
+        qs = urllib.parse.urlparse(self.path).query
+        params = urllib.parse.parse_qs(qs)
+        email = (params.get("e", [""])[0] or "").strip()
+        token = (params.get("t", [""])[0] or "").strip()
+        if not _is_valid_email(email):
+            body = "<h1>Something's missing</h1><p>This unsubscribe link is incomplete or invalid. Use the link from the email you received, or contact <a href='mailto:contact@undersight.ai'>contact@undersight.ai</a>.</p>"
+            self._send_html(UNSUB_PAGE.format(title="Invalid link", body=body), status=400)
+            return
+        esc_email = html_mod.escape(email)
+        esc_token = html_mod.escape(token)
+        body = (
+            "<h1>Unsubscribe</h1>"
+            f"<p>Stop receiving download emails at <span class='addr'>{esc_email}</span>?</p>"
+            "<form method=\"post\" action=\"/unsubscribe\">"
+            f"<input type=\"hidden\" name=\"e\" value=\"{esc_email}\">"
+            f"<input type=\"hidden\" name=\"t\" value=\"{esc_token}\">"
+            "<button type=\"submit\">Unsubscribe</button>"
+            "</form>"
+        )
+        self._send_html(UNSUB_PAGE.format(title="Unsubscribe", body=body))
+
+    def _unsubscribe_post(self):
+        # Rate limit: same in-process limiter as lead capture
+        client_ip = self.client_address[0] if self.client_address else "unknown"
+        allowed, retry_after = _check_rate_limit(client_ip)
+        if not allowed:
+            self._send_json({"error": "Too many requests"}, status=429,
+                            extra_headers={"Retry-After": str(retry_after)})
+            return
+
+        length = int(self.headers.get("Content-Length", 0))
+        if length > MAX_BODY_BYTES:
+            self._send_json({"error": "Payload too large"}, status=413)
+            return
+        raw = self.rfile.read(min(length, MAX_BODY_BYTES + 1)) if length else b""
+        if len(raw) > MAX_BODY_BYTES:
+            self._send_json({"error": "Payload too large"}, status=413)
+            return
+
+        content_type = (self.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        email, token = "", ""
+        if content_type == "application/json":
+            try:
+                body = json.loads(raw) if raw else {}
+                email = (body.get("e") or body.get("email") or "").strip()
+                token = (body.get("t") or body.get("token") or "").strip()
+            except Exception:
+                self._send_json({"error": "Invalid request"}, status=400)
+                return
+        else:
+            params = urllib.parse.parse_qs(raw.decode("utf-8", "replace"))
+            email = (params.get("e", [""])[0] or "").strip()
+            token = (params.get("t", [""])[0] or "").strip()
+
+        if not _is_valid_email(email):
+            self._send_json({"error": "Invalid request"}, status=422)
+            return
+
+        masked = _mask_email(email)
+        try:
+            count = _mark_unsubscribed(email, token)
+            print(f"  [UNSUB] {masked} ({count} lead(s) marked)")
+            body = (
+                "<h1>You're unsubscribed</h1>"
+                f"<p><span class='addr'>{html_mod.escape(email)}</span> won't receive download emails from undersight anymore.</p>"
+                "<p>Unsubscribed by mistake? Just request a download again on <a href='https://undersight.ai'>undersight.ai</a>.</p>"
+            )
+            self._send_html(UNSUB_PAGE.format(title="Unsubscribed", body=body))
+        except Exception:
+            print(f"  [UNSUB] {masked} -> ERROR (see traceback)", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            self._send_json({"error": "Internal error"}, status=500)
 
     def _capture_lead(self):
         # Per-IP rate limit (dev: in-process)
@@ -442,6 +634,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         masked = _mask_email(email)
         try:
+            # 0. Suppression check — unsubscribed addresses get a generic OK
+            # with no lead created (and therefore no email). Do not leak
+            # suppression status in the response.
+            if _is_suppressed(email):
+                print(f"  [LEAD] {masked} -> suppressed (unsubscribed); no lead created")
+                self._send_json({"ok": True})
+                return
+
             # 1. Look up the Blog entity by name
             wp_results = api_post("/api/commands", [{
                 "command": "fibery.entity/query",
@@ -470,10 +670,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json({"error": "Whitepaper not found"}, status=422)
                 return
 
-            # 2. Create the lead entity, linked to the blog post
+            # 2. Create the lead entity, linked to the blog post. The
+            # unsubscribe token is generated here so the dispatch email can
+            # interpolate a one-click unsubscribe URL ({{Unsubscribe Token}}).
             lead_entity = {
                 f"{FIBERY_SPACE}/Email": email,
                 f"{FIBERY_SPACE}/Blog Post": {"fibery/id": wp_id},
+                f"{FIBERY_SPACE}/Unsubscribe Token": secrets.token_hex(16),
             }
 
             api_post("/api/commands", [{
@@ -498,6 +701,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._send_json(get_cached())
         elif self.path.startswith("/api/file/"):
             self._proxy_file(self.path[len("/api/file/"):])
+        elif self.path.split("?")[0] == "/unsubscribe":
+            self._unsubscribe_get()
         else:
             self._serve_static_or_spa()
 

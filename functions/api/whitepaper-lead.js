@@ -263,6 +263,34 @@ export async function onRequestPost(context) {
   };
 
   try {
+    // 0. Suppression check — unsubscribed addresses get a generic OK with no
+    // lead created (and therefore no dispatch email). Fibery is the source of
+    // truth (see functions/unsubscribe.js); do not leak suppression status.
+    const suppResp = await fetch('https://subscript.fibery.io/api/commands', {
+      method: 'POST',
+      headers: fiberyHeaders,
+      body: JSON.stringify([{
+        command: 'fibery.entity/query',
+        args: {
+          query: {
+            'q/from': `${FIBERY_SPACE}/Blog Leads`,
+            'q/select': ['fibery/id'],
+            'q/where': ['q/and',
+              ['=', [`${FIBERY_SPACE}/Email`], '$email'],
+              ['=', [`${FIBERY_SPACE}/Unsubscribed`], '$true']],
+            'q/limit': 1,
+          },
+          params: { '$email': email, '$true': true },
+        },
+      }]),
+    });
+    if (suppResp.ok) {
+      const suppData = await suppResp.json();
+      if ((suppData[0]?.result || []).length) {
+        return json({ ok: true }, 200, request);
+      }
+    }
+
     // 1. Look up the Blog entity by name
     const wpResp = await fetch('https://subscript.fibery.io/api/commands', {
       method: 'POST',
@@ -297,10 +325,17 @@ export async function onRequestPost(context) {
       return json({ error: 'Whitepaper not found' }, 422, request);
     }
 
-    // 2. Create the lead, linking to the blog post
+    // 2. Create the lead, linking to the blog post. The unsubscribe token is
+    // generated here so the dispatch email can interpolate a one-click
+    // unsubscribe URL ({{Unsubscribe Token}} in the automation template).
+    const tokenBytes = new Uint8Array(16);
+    crypto.getRandomValues(tokenBytes);
+    const unsubscribeToken = Array.from(tokenBytes, b => b.toString(16).padStart(2, '0')).join('');
+
     const leadEntity = {
       [`${FIBERY_SPACE}/Email`]: email,
       [`${FIBERY_SPACE}/Blog Post`]: { 'fibery/id': wpId },
+      [`${FIBERY_SPACE}/Unsubscribe Token`]: unsubscribeToken,
     };
 
     const fiberyResp = await fetch('https://subscript.fibery.io/api/commands', {
