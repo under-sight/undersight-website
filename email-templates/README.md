@@ -24,11 +24,18 @@ line 1, `{{Field}}` templates for direct fields.
 
 **Test gate:** `bash tests/test-email-template.sh` — run after any edit.
 
-**Unsubscribe status (2026-07-07):** the footer link renders
-`undersight.ai/unsubscribe?e={{Email}}&t={{Unsubscribe Token}}`. The
-`CMS/Unsubscribe Token`, `CMS/Unsubscribed`, `CMS/Unsubscribed At` fields exist
-on CMS/Blog Leads, but nothing populates the token yet and the `/unsubscribe`
-endpoint does not exist. Next phase: generate the token in
-`functions/api/whitepaper-lead.js` at lead creation, add
-`functions/api/unsubscribe.js` (KV suppression list + lookup), and suppress
-sends for unsubscribed emails.
+**Unsubscribe flow (implemented 2026-07-07):** the footer link renders
+`undersight.ai/unsubscribe?e={{Email}}&t={{Unsubscribe Token}}`.
+
+- Token: generated at lead creation (`functions/api/whitepaper-lead.js`,
+  `undersight-serve.py`, `worker/index.js`) into `CMS/Unsubscribe Token`.
+- Endpoint: `functions/unsubscribe.js` → GET confirm page (side-effect-free),
+  POST marks every lead for the address `Unsubscribed=true` + `Unsubscribed At`.
+- Suppression: `whitepaper-lead` checks the `Unsubscribed` flag in Fibery
+  before creating a lead — suppressed addresses get a generic OK and no email.
+  Fibery is the single source of truth (no KV suppression list; the KV
+  namespace is only used for rate limiting).
+- Tests: `bash tests/test-unsubscribe.sh` (dev server on :8088 with
+  `FIBERY_SPACE="CMS Staging"`).
+- Legacy emails sent before token generation have `t=` empty — the POST-form
+  confirm path still honors those unsubscribes.
