@@ -200,7 +200,7 @@ export async function onRequestPost(context) {
         command: 'fibery.entity/query',
         args: {
           query: {
-            'q/from': `${FIBERY_SPACE}/Blog Leads`,
+            'q/from': `${FIBERY_SPACE}/Website Leads`,
             'q/select': ['fibery/id'],
             'q/where': ['=', [`${FIBERY_SPACE}/Email`], '$email'],
             'q/limit': 100,
@@ -223,7 +223,7 @@ export async function onRequestPost(context) {
       const commands = leads.map(lead => ({
         command: 'fibery.entity/update',
         args: {
-          type: `${FIBERY_SPACE}/Blog Leads`,
+          type: `${FIBERY_SPACE}/Website Leads`,
           entity: {
             'fibery/id': lead['fibery/id'],
             [`${FIBERY_SPACE}/Unsubscribed`]: true,

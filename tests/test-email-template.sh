@@ -2,7 +2,7 @@
 # =============================================================================
 # Validates email-templates/download-dispatch.fibery.txt — the exact text
 # pasted into the "undersight research dispatch" Fibery automation
-# (CMS/Blog Leads → Send Email action). Rules from docs/ARCHITECTURE.md
+# (CMS/Website Leads → Send Email action). Rules from docs/ARCHITECTURE.md
 # "Critical formatting rules for Fibery email HTML".
 #
 # Usage: bash tests/test-email-template.sh

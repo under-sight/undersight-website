@@ -193,7 +193,7 @@ later" — the contract is content-first.
 - Blog grid, post bodies, post images
 - Contact page (`Contact Page`)
 - Site Config (contact email, Calendly, copyright, sign-in URL)
-- Whitepapers + lead capture (`CMS/Blog` + `CMS/Blog Leads`)
+- Whitepapers + lead capture (`CMS/Blog` + `CMS/Website Leads`)
 - Deployment tracking (`CMS/Deployments`)
 
 ### Migration backlog (currently hardcoded — should move to Fibery)
@@ -231,7 +231,7 @@ undetected.
 |------|------------|---------|
 | `CMS/Pages` | `CMS/Name`, `CMS/Description` (markdown doc), `CMS/Assets` (files) | `build.py:97-200`, `undersight-serve.py:53-123` |
 | `CMS/Blog` | `CMS/name`, `CMS/Slug`, `CMS/PDF`, `CMS/Assets`, `CMS/Post Date`, `CMS/Tag`, `CMS/Subtitle`, `CMS/Author`, `CMS/Excerpt` | `build.py:183-194`, `functions/api/whitepaper-lead.js:79`, `undersight-serve.py:164-166` |
-| `CMS/Blog Leads` | `CMS/Email`, `CMS/Blog Post`, `CMS/Sent` | `functions/api/whitepaper-lead.js:97-105` |
+| `CMS/Website Leads` | `CMS/Email`, `CMS/Blog Post`, `CMS/Sent` | `functions/api/whitepaper-lead.js:97-105` |
 | `CMS/Deployments` | `CMS/Commit`, `CMS/Site Mode`, `CMS/Content Hash`, `CMS/Build Status`, `CMS/URL`, `CMS/Deployed At` | `deploy-report.py:56-102` |
 | `Site Config` (entity in `CMS/Pages`) | contact email, Calendly URL, copyright, sign-in URL (markdown body keys) | `index.html:784-794` |
 
@@ -430,7 +430,7 @@ Website modal → submitWhitepaperEmail()
   → Prod: Cloudflare Worker (WORKER_URL — TODO: deploy)
   → Fibery API:
       1. Query CMS/Blog by name → get fibery/id
-      2. Create CMS/Blog Leads entity
+      2. Create CMS/Website Leads entity
          - CMS/Email: submitted email
          - CMS/Blog Post: linked to blog/case-study entity
   → Fibery Automation triggers on new lead
@@ -448,7 +448,7 @@ Website modal → submitWhitepaperEmail()
 | `CMS/PDF` | file | The PDF attachment sent to leads |
 | `CMS/Leads` | relation (1:M) | Back-reference to all leads for this asset |
 
-**CMS/Blog Leads** (captured submissions):
+**CMS/Website Leads** (captured submissions):
 
 | Field | Type | Purpose |
 |-------|------|---------|
@@ -492,7 +492,7 @@ curl -s -X POST http://localhost:8088/api/whitepaper-lead \
   -d '{"email":"test@example.com","whitepaper":"Chat Advance Case Study"}'
 ```
 
-Verify in Fibery: CMS/Blog Leads should show the new entity linked to
+Verify in Fibery: CMS/Website Leads should show the new entity linked to
 the correct blog/case-study asset, with `Sent` eventually set to true by the automation.
 
 ### Production Status

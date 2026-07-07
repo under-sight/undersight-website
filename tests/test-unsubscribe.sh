@@ -42,7 +42,7 @@ fibery_leads() {
   curl -s -X POST "https://subscript.fibery.io/api/commands" \
     -H "Authorization: Token $FIBERY_TOKEN" -H "Content-Type: application/json" \
     -d "[{\"command\":\"fibery.entity/query\",\"args\":{\"query\":{
-      \"q/from\":\"$SPACE/Blog Leads\",
+      \"q/from\":\"$SPACE/Website Leads\",
       \"q/select\":{\"id\":[\"fibery/id\"],\"token\":[\"$SPACE/Unsubscribe Token\"],\"unsub\":[\"$SPACE/Unsubscribed\"],\"unsubAt\":[\"$SPACE/Unsubscribed At\"]},
       \"q/where\":[\"=\",[\"$SPACE/Email\"],\"\$e\"],\"q/limit\":10},\"params\":{\"\$e\":\"$email\"}}}]"
 }

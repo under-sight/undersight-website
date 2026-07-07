@@ -234,7 +234,7 @@ Several objects map Fibery entity names to rendering configuration:
 
 ### Fibery CMS Structure
 
-Content lives in a Fibery workspace at `subscript.fibery.io` in the database `CMS/Pages`. Blog delivery assets live in `CMS/Blog`, and lead captures live in `CMS/Blog Leads`. Each page entity has:
+Content lives in a Fibery workspace at `subscript.fibery.io` in the database `CMS/Pages`. Blog delivery assets live in `CMS/Blog`, and lead captures live in `CMS/Website Leads`. Each page entity has:
 
 - **Name**: Entity identifier (e.g., `Home - Hero`, `Blog - The RFI bottleneck`)
 - **Description**: A rich text document (fetched separately via document secret)
@@ -496,7 +496,7 @@ Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automat
 ```
 [Website Modal] → [Dev Server / Cloudflare Worker] → [Fibery API]
                                                           ↓
-                                                  [Blog Leads DB]
+                                                  [Website Leads DB]
                                                           ↓
                                                   [Fibery Automation]
                                                           ↓
@@ -511,9 +511,9 @@ Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automat
 |-------|------|---------|
 | Name | text | Display name (used in email subject + template) |
 | PDF | file collection | Attached PDF file(s) |
-| Leads | relation (one-to-many) | Reverse relation to Blog Leads |
+| Leads | relation (one-to-many) | Reverse relation to Website Leads |
 
-**`CMS/Blog Leads`** — captured email entries
+**`CMS/Website Leads`** — captured email entries
 
 | Field | Type | Purpose |
 |-------|------|---------|
@@ -542,7 +542,7 @@ Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automat
 **Dev server** (`undersight-serve.py`):
 - `POST /api/whitepaper-lead` accepts `{ email, whitepaper }` JSON
 - Looks up blog entity by name via Fibery query (uses `$name` param syntax)
-- Creates `CMS/Blog Leads` entity with linked blog relation
+- Creates `CMS/Website Leads` entity with linked blog relation
 - Logs: `[LEAD] email -> post_name (linked)` or `(no match)`
 
 **Production** (Cloudflare Worker at `worker/index.js`):
@@ -560,7 +560,7 @@ const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '
 
 ### Fibery Email Automation
 
-**Rule:** "undersight research dispatch" — trigger: entity created on Blog Leads
+**Rule:** "undersight research dispatch" — trigger: entity created on Website Leads
 
 **Email template engine:** Fibery uses an EJS-like templating system for email bodies:
 

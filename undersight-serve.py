@@ -385,7 +385,7 @@ def _is_suppressed(email):
         "command": "fibery.entity/query",
         "args": {
             "query": {
-                "q/from": f"{FIBERY_SPACE}/Blog Leads",
+                "q/from": f"{FIBERY_SPACE}/Website Leads",
                 "q/select": ["fibery/id"],
                 "q/where": ["q/and",
                             ["=", [f"{FIBERY_SPACE}/Email"], "$email"],
@@ -410,7 +410,7 @@ def _mark_unsubscribed(email, token):
         "command": "fibery.entity/query",
         "args": {
             "query": {
-                "q/from": f"{FIBERY_SPACE}/Blog Leads",
+                "q/from": f"{FIBERY_SPACE}/Website Leads",
                 "q/select": ["fibery/id"],
                 "q/where": ["=", [f"{FIBERY_SPACE}/Email"], "$email"],
                 "q/limit": 100,
@@ -426,7 +426,7 @@ def _mark_unsubscribed(email, token):
     commands = [{
         "command": "fibery.entity/update",
         "args": {
-            "type": f"{FIBERY_SPACE}/Blog Leads",
+            "type": f"{FIBERY_SPACE}/Website Leads",
             "entity": {
                 "fibery/id": lead["fibery/id"],
                 f"{FIBERY_SPACE}/Unsubscribed": True,
@@ -682,7 +682,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             api_post("/api/commands", [{
                 "command": "fibery.entity/create",
                 "args": {
-                    "type": f"{FIBERY_SPACE}/Blog Leads",
+                    "type": f"{FIBERY_SPACE}/Website Leads",
                     "entity": lead_entity,
                 },
             }])

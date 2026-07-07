@@ -104,21 +104,21 @@ for db, n in b['entity_counts'].items():
     case "$CODE" in
       403) pass "lead API alive (403 Turnstile-enforced)";;
       200) fail "tokenless lead POST returned 200 — Turnstile is OFF in prod"
-           LEAD_ID=$(fibery undersight query "$SPACE/Blog Leads" \
+           LEAD_ID=$(fibery undersight query "$SPACE/Website Leads" \
              --where "$SPACE/Email=$TEST_EMAIL" --select "fibery/id" --limit 1 2>/dev/null \
              | python3 -c "import json,sys; r=json.load(sys.stdin); print(r[0]['fibery/id'] if r else '')")
-           [ -n "$LEAD_ID" ] && fibery undersight delete "$LEAD_ID" --type "$SPACE/Blog Leads" --yes >/dev/null 2>&1 || true
+           [ -n "$LEAD_ID" ] && fibery undersight delete "$LEAD_ID" --type "$SPACE/Website Leads" --yes >/dev/null 2>&1 || true
            ;;
       *)   fail "lead API returned $CODE (expected 403)";;
     esac
     # Fibery write path under the active prefix: create + delete a rank-only lead.
-    EID=$(fibery undersight create "$SPACE/Blog Leads" --fields '{"fibery/rank":1}' 2>/dev/null \
+    EID=$(fibery undersight create "$SPACE/Website Leads" --fields '{"fibery/rank":1}' 2>/dev/null \
       | python3 -c "import json,sys; print(json.load(sys.stdin)['fibery/id'])") || EID=""
     if [ -n "$EID" ]; then
-      fibery undersight delete "$EID" --type "$SPACE/Blog Leads" --yes >/dev/null 2>&1 || true
-      pass "Fibery write path OK ($SPACE/Blog Leads create+delete)"
+      fibery undersight delete "$EID" --type "$SPACE/Website Leads" --yes >/dev/null 2>&1 || true
+      pass "Fibery write path OK ($SPACE/Website Leads create+delete)"
     else
-      fail "Fibery create failed on $SPACE/Blog Leads"
+      fail "Fibery create failed on $SPACE/Website Leads"
     fi
     ;;
 
