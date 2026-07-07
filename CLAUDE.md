@@ -437,7 +437,7 @@ transplant as a model for how this pipeline works end-to-end.
 
 Research articles and case studies are gated behind an email capture modal.
 When a visitor submits their email, a lead entity is created in Fibery and linked
-to the corresponding blog/case-study asset. A Fibery automation ("undersight research dispatch")
+to the corresponding blog/case-study asset. A Fibery automation ("undersight download dispatch")
 sends the PDF to the visitor's email automatically. Public route/function names
 still say `whitepaper` for compatibility.
 
@@ -520,7 +520,7 @@ the correct blog/case-study asset, with `Sent` eventually set to true by the aut
 - **Dev server**: POST `/api/whitepaper-lead` handled by `undersight-serve.py`
 - **Production**: POST `/api/whitepaper-lead` handled by Cloudflare Pages Function
   (`functions/api/whitepaper-lead.js` — deploys automatically with the site)
-- **Fibery automation**: Active — "undersight research dispatch" triggers on new leads
+- **Fibery automation**: Active — "undersight download dispatch" triggers on new leads
 - **Setup required**: Set `FIBERY_TOKEN` in Cloudflare Pages dashboard →
   Settings → Environment variables (Production + Preview)
 

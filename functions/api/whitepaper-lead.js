@@ -6,7 +6,7 @@
  *
  * Accepts { email, whitepaper } and creates a Website Leads entity in Fibery,
  * linked to the matching Blog entity. The Fibery automation
- * "undersight research dispatch" then sends the PDF via email.
+ * "undersight download dispatch" then sends the PDF via email.
  *
  * Environment variable (set in Cloudflare Pages dashboard → Settings → Environment variables):
  *   FIBERY_TOKEN — Fibery API token for subscript.fibery.io
@@ -22,7 +22,7 @@ const ALLOWED_ORIGINS = [
 
 // Hardcoded whitelist of asset names that may be requested. Mirrors the
 // `CMS/Blog` entities in Fibery that have a PDF attached and a working
-// "undersight research dispatch" automation. Unknown names are rejected
+// "undersight download dispatch" automation. Unknown names are rejected
 // before doing any Fibery work — protects against probing/enumeration.
 const KNOWN_WHITEPAPERS = [
   'Chat Advance Case Study',

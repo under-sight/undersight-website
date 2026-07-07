@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 # Validates email-templates/download-dispatch.fibery.txt — the exact text
-# pasted into the "undersight research dispatch" Fibery automation
+# pasted into the "undersight download dispatch" Fibery automation
 # (CMS/Website Leads → Send Email action). Rules from docs/ARCHITECTURE.md
 # "Critical formatting rules for Fibery email HTML".
 #

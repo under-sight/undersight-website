@@ -2281,7 +2281,7 @@ section "Deliverable Lead Capture Tests (opt-in)"
 # and verifies that exactly ONE matching lead lands in Fibery for each.
 #
 # This is the only place in the suite that triggers real Fibery writes and
-# real outbound email (via the "undersight research dispatch" automation),
+# real outbound email (via the "undersight download dispatch" automation),
 # so it is gated behind RUN_DELIVERABLE_SEND_TESTS=1 and OFF by default.
 #
 #   Enable:   RUN_DELIVERABLE_SEND_TESTS=1 bash tests/test-suite.sh

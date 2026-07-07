@@ -560,7 +560,7 @@ const WORKER_URL = (location.hostname === 'localhost' || location.hostname === '
 
 ### Fibery Email Automation
 
-**Rule:** "undersight research dispatch" — trigger: entity created on Website Leads
+**Rule:** "undersight download dispatch" — trigger: entity created on Website Leads
 
 **Email template engine:** Fibery uses an EJS-like templating system for email bodies:
 
