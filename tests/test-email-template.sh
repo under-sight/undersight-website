@@ -59,7 +59,13 @@ check "single <html>...</html>" $r
 tail -1 "$T" | grep -q '</html>' && r=0 || r=1
 check "file ends at </html> (no trailing junk)" $r
 
-# 9. Voice: no 'Kyle reads' (company voice is 'we')
+# 9. Correct postal address (CAN-SPAM footer)
+grep -q '1032 E Brandon Blvd #2048, Brandon, FL 33511' "$T" && r=0 || r=1
+check "footer postal address is 1032 E Brandon Blvd #2048, Brandon, FL 33511" $r
+grep -qi 'Marina Blvd\|San Francisco' "$T" && r=1 || r=0
+check "old SF address removed" $r
+
+# 10. Voice: no 'Kyle reads' (company voice is 'we')
 grep -q 'Kyle reads' "$T" && r=1 || r=0
 check "company voice ('we'), not 'Kyle reads'" $r
 
