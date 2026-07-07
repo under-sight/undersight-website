@@ -8,7 +8,7 @@
 #   2. mirror_populates_staging   real run brings staging counts to parity
 #   3. mirror_idempotent          second run: 0 creates / 0 doc writes / 0 uploads
 #   4. mirror_content_hash_parity --verify exits 0 + chat-advance doc spot check
-#   5. staging_leads_empty        CMS Staging/Blog Leads stays at 0
+#   5. staging_leads_empty        CMS Staging/Website Leads stays at 0
 #   6. staging_build_full_site    build.py against staging produces the full site
 #
 # NOTE: runs the real mirror (writes to the CMS Staging space only).
@@ -117,9 +117,9 @@ else
   echo "$DRY_OUT" | tail -10
 fi
 
-echo "$DRY_OUT" | grep -q "EXCLUDED: CMS/Blog Leads" \
-  && pass "--dry-run prints Blog Leads as EXCLUDED" \
-  || fail "--dry-run prints Blog Leads as EXCLUDED"
+echo "$DRY_OUT" | grep -q "EXCLUDED: CMS/Website Leads" \
+  && pass "--dry-run prints Website Leads as EXCLUDED" \
+  || fail "--dry-run prints Website Leads as EXCLUDED"
 
 echo "$DRY_OUT" | grep -q "EXCLUDED: CMS/Deployments" \
   && pass "--dry-run prints Deployments as EXCLUDED" \
@@ -243,11 +243,11 @@ fi
 section "staging_leads_empty"
 # =============================================================================
 
-LEADS=$(count_entities "CMS Staging/Blog Leads")
+LEADS=$(count_entities "CMS Staging/Website Leads")
 if [ "$LEADS" = "0" ]; then
-  pass "CMS Staging/Blog Leads count is 0"
+  pass "CMS Staging/Website Leads count is 0"
 else
-  fail "CMS Staging/Blog Leads count is 0" "got $LEADS"
+  fail "CMS Staging/Website Leads count is 0" "got $LEADS"
 fi
 
 # =============================================================================

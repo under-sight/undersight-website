@@ -15,7 +15,7 @@
  * Keep the two implementations in sync until this is formally retired.
  *
  * Accepts POST { email, whitepaper } from undersight.ai,
- * creates a "Blog Leads" entity in Fibery, and returns JSON.
+ * creates a "Website Leads" entity in Fibery, and returns JSON.
  *
  * Secrets (set via `wrangler secret put`):
  *   FIBERY_TOKEN — Fibery API token for subscript.fibery.io
@@ -242,7 +242,7 @@ export default {
           command: 'fibery.entity/query',
           args: {
             query: {
-              'q/from': `${FIBERY_SPACE}/Blog Leads`,
+              'q/from': `${FIBERY_SPACE}/Website Leads`,
               'q/select': ['fibery/id'],
               'q/where': ['q/and',
                 ['=', [`${FIBERY_SPACE}/Email`], '$email'],
@@ -312,7 +312,7 @@ export default {
         headers: fiberyHeaders,
         body: JSON.stringify([{
           command: 'fibery.entity/create',
-          args: { type: `${FIBERY_SPACE}/Blog Leads`, entity: leadEntity },
+          args: { type: `${FIBERY_SPACE}/Website Leads`, entity: leadEntity },
         }]),
       });
 

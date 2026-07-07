@@ -8,7 +8,7 @@ directory is the version-controlled source of truth**; paste from here.
 
 | File | Purpose |
 |------|---------|
-| `download-dispatch.fibery.txt` | Exact text of the **Send Email → Message** field in the "undersight research dispatch" automation (CMS/Blog Leads → trigger: entity created). Zero-indentation Fibery/EJS format. |
+| `download-dispatch.fibery.txt` | Exact text of the **Send Email → Message** field in the "undersight research dispatch" automation (CMS/Website Leads → trigger: entity created). Zero-indentation Fibery/EJS format. |
 | `download-dispatch.preview.html` | Browser-viewable source (indented, with `{{DOWNLOAD_TITLE}}`/`{{UNSUBSCRIBE_URL}}` placeholders). Edit this, then regenerate the fibery.txt. |
 
 **Automation config (not in the template):**

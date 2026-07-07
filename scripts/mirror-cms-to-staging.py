@@ -7,7 +7,7 @@ call goes through guards that hard-fail unless the target type starts with
 "CMS Staging/" (and doc writes unless the secret belongs to a staging entity).
 
 Mirrored: Pages, Blog, Animations, Emails, Integrations.
-Excluded: Blog Leads (PII/operational), Deployments (self-populates when
+Excluded: Website Leads (PII/operational), Deployments (self-populates when
 deploy-report runs against staging).
 
 Usage:
@@ -37,7 +37,7 @@ SRC_SPACE = "CMS"
 DST_SPACE = "CMS Staging"
 
 EXCLUDED = [
-    ("Blog Leads", "PII/operational; never mirrored"),
+    ("Website Leads", "PII/operational; never mirrored"),
     ("Deployments", "self-populates when deploy-report runs against staging"),
 ]
 
@@ -610,9 +610,9 @@ def verify(token, src, dst, src_docs, dst_docs):
                 rel_names(d_ent, "rel_integrations"))
 
     leads = len(entity_query(token, {
-        "q/from": f"{DST_SPACE}/Blog Leads",
+        "q/from": f"{DST_SPACE}/Website Leads",
         "q/select": {"id": ["fibery/id"]}, "q/limit": 300}))
-    rows.append((f"{DST_SPACE}/Blog Leads count == 0", "0", str(leads), leads == 0))
+    rows.append((f"{DST_SPACE}/Website Leads count == 0", "0", str(leads), leads == 0))
     deploys = len(entity_query(token, {
         "q/from": f"{DST_SPACE}/Deployments",
         "q/select": {"id": ["fibery/id"]}, "q/limit": 300}))

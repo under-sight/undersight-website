@@ -2354,7 +2354,7 @@ else
       continue
     fi
 
-    LEAD_COUNT=$(/Users/kyle/bin/fibery -o json subscript query 'CMS/Blog Leads' \
+    LEAD_COUNT=$(/Users/kyle/bin/fibery -o json subscript query 'CMS/Website Leads' \
       --where "CMS/Email=$LEAD_RECIPIENT" \
       --where "CMS/Blog Post.CMS/name=$WP" \
       --where "fibery/creation-date>=$TEST_WINDOW_START" \
