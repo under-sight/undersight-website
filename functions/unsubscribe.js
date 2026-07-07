@@ -125,7 +125,7 @@ export async function onRequestGet(context) {
   // Confirm via POST — GET must stay side-effect-free (mail client prefetchers)
   const body =
     '<h1>Unsubscribe</h1>' +
-    `<p>Stop receiving download emails at <span class='addr'>${escEmail}</span>?</p>` +
+    `<p>Stop receiving emails at <span class='addr'>${escEmail}</span>?</p>` +
     '<form method="post" action="/unsubscribe">' +
     `<input type="hidden" name="e" value="${escEmail}">` +
     `<input type="hidden" name="t" value="${escToken}">` +
@@ -245,7 +245,7 @@ export async function onRequestPost(context) {
     // addresses are in the database.
     const body =
       "<h1>You're unsubscribed</h1>" +
-      `<p><span class='addr'>${escapeHtml(email)}</span> won't receive download emails from undersight anymore.</p>` +
+      `<p><span class='addr'>${escapeHtml(email)}</span> won't receive emails from undersight anymore.</p>` +
       "<p>Unsubscribed by mistake? Just request a download again on <a href='https://undersight.ai'>undersight.ai</a>.</p>";
     return htmlResponse(page('Unsubscribed', body));
   } catch (err) {
