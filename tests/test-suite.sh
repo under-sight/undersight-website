@@ -644,7 +644,8 @@ else
 fi
 
 # Test: All page sections exist for navigate() targets
-for PAGE in "home" "underscore" "rfi" "copilot" "docs" "blog" "post" "contact"; do
+# "docs" removed 2026-07: the Docs tab now links to documentation.underchat.ai
+for PAGE in "home" "underscore" "rfi" "copilot" "blog" "post" "contact"; do
   if grep -q "id=\"page-$PAGE\"" "$SRC_HTML"; then
     pass "Page section exists: page-$PAGE"
   else
@@ -660,7 +661,8 @@ else
 fi
 
 # Test: SPA routes return 200 from dev server
-for ROUTE in "/" "/blog" "/copilot" "/docs" "/underscore"; do
+# "/docs" removed 2026-07: it now redirects to documentation.underchat.ai
+for ROUTE in "/" "/blog" "/copilot" "/underscore"; do
   STATUS=$(fetch_status "$BASE$ROUTE")
   if [ "$STATUS" = "200" ]; then
     pass "SPA route serves 200: $ROUTE"
@@ -2708,6 +2710,243 @@ if [ "$BACKDROP_COUNT" = "2" ]; then
   pass "backdrop_filter_unchanged: backdrop-filter count pinned at 2"
 else
   fail "backdrop_filter_unchanged: backdrop-filter count pinned at 2" "Found $BACKDROP_COUNT"
+fi
+
+# =============================================================================
+section "Docs External Link"
+# =============================================================================
+# The Docs tab now points at the external documentation site. Same-tab plain
+# anchors (no preventDefault / JS routing) so the browser back button returns
+# to undersight.ai.
+
+DOCS_URL="https://documentation.underchat.ai/"
+
+# Test: all Docs nav links are plain same-tab anchors to the external docs site
+DOCS_LINK_COUNT=$(grep -c "href=\"$DOCS_URL\"" "$SRC_HTML" || true)
+if [ "$DOCS_LINK_COUNT" -ge 3 ]; then
+  pass "Docs links point at $DOCS_URL (found $DOCS_LINK_COUNT)"
+else
+  fail "Docs links point at $DOCS_URL" "Only $DOCS_LINK_COUNT found; expected >=3 (desktop nav, mobile menu, footer)"
+fi
+
+# Test: no target=_blank on docs links (same-tab is what makes back work)
+if grep "href=\"$DOCS_URL\"" "$SRC_HTML" | grep -q 'target="_blank"'; then
+  fail "Docs links are same-tab" "Found target=_blank on a docs link"
+else
+  pass "Docs links are same-tab (no target=_blank)"
+fi
+
+# Test: no JS routing to a docs page remains
+if grep -q "navigate('docs')" "$SRC_HTML"; then
+  fail "No navigate('docs') remains" "SPA routing to docs still present"
+else
+  pass "No navigate('docs') remains"
+fi
+
+# Test: dead #page-docs section removed
+if grep -q 'id="page-docs"' "$SRC_HTML"; then
+  fail "page-docs section removed" "Placeholder docs section still in markup"
+else
+  pass "page-docs section removed"
+fi
+
+# Test: bare /docs deep link redirects via location.replace (replace, not
+# assign, so back from the docs site skips the redirect hop)
+if grep -q "location.replace('$DOCS_URL')" "$SRC_HTML"; then
+  pass "/docs deep link redirects via window.location.replace"
+else
+  fail "/docs deep link redirects via window.location.replace" "Boot must location.replace('$DOCS_URL') for /docs paths"
+fi
+
+# Test: _redirects sends /docs to the external docs site at the edge
+if grep -qE "^/docs[[:space:]]+$DOCS_URL" "$SITE_ROOT/_redirects"; then
+  pass "_redirects has edge redirect for /docs"
+else
+  fail "_redirects has edge redirect for /docs" "Expected '/docs $DOCS_URL 302' before the SPA catch-all"
+fi
+
+# Test: dead .docs-gate CSS removed from main.css
+if grep -q 'docs-gate' "$SITE_ROOT/css/main.css"; then
+  fail "docs-gate CSS removed" "Dead .docs-gate rules still in css/main.css"
+else
+  pass "docs-gate CSS removed"
+fi
+
+# Test: sitemap.xml has no hash-fragment URLs (clean paths only)
+SITEMAP_SRC=$(cat "$SITE_ROOT/sitemap.xml")
+if echo "$SITEMAP_SRC" | grep -q '#'; then
+  fail "sitemap.xml has no hash-fragment URLs" "Fragment URLs found"
+else
+  pass "sitemap.xml has no hash-fragment URLs"
+fi
+
+# Test: sitemap.xml has no /docs entry (external URLs are not allowed in a
+# same-host sitemap; the docs site publishes its own)
+if echo "$SITEMAP_SRC" | grep -q '/docs'; then
+  fail "sitemap.xml has no /docs entry" "/docs belongs to documentation.underchat.ai now"
+else
+  pass "sitemap.xml has no /docs entry"
+fi
+
+# Test: llms.txt points at the external documentation site, no fragments
+LLMS_SRC=$(cat "$SITE_ROOT/llms.txt")
+if echo "$LLMS_SRC" | grep -q 'documentation.underchat.ai'; then
+  pass "llms.txt links documentation.underchat.ai"
+else
+  fail "llms.txt links documentation.underchat.ai"
+fi
+if echo "$LLMS_SRC" | grep -q 'undersight.ai/#'; then
+  fail "llms.txt has no hash-fragment URLs" "Fragment URLs found"
+else
+  pass "llms.txt has no hash-fragment URLs"
+fi
+
+# =============================================================================
+section "Agent Discoverability"
+# =============================================================================
+# Build-time artifacts that control what AI agents see: per-post BlogPosting
+# JSON-LD, per-post sitemap URLs, llms.txt / llms-full.txt, robots hints,
+# X-Robots-Tag headers. Content-dependent output is validated against dist/
+# in tests/build-validation.sh; here we unit-test the pure generators in
+# build.py with fixture data (no Fibery token needed).
+
+# Test: robots.txt hints at llms.txt and llms-full.txt
+ROBOTS_SRC=$(cat "$SITE_ROOT/robots.txt")
+if echo "$ROBOTS_SRC" | grep -q '/llms.txt' && echo "$ROBOTS_SRC" | grep -q '/llms-full.txt'; then
+  pass "robots.txt hints at /llms.txt and /llms-full.txt"
+else
+  fail "robots.txt hints at /llms.txt and /llms-full.txt"
+fi
+
+# Test: robots.txt still declares the sitemap
+if echo "$ROBOTS_SRC" | grep -q 'Sitemap: https://undersight.ai/sitemap.xml'; then
+  pass "robots.txt declares sitemap URL"
+else
+  fail "robots.txt declares sitemap URL"
+fi
+
+# Test: robots.txt keeps permissive AI-agent allows
+for BOT in "GPTBot" "ChatGPT-User" "Claude-Web" "Anthropic-AI" "PerplexityBot" "Google-Extended" "Amazonbot"; do
+  if echo "$ROBOTS_SRC" | grep -q "User-agent: $BOT"; then
+    pass "robots.txt allows $BOT"
+  else
+    fail "robots.txt allows $BOT"
+  fi
+done
+
+# Test: _headers sets X-Robots-Tag for llms.txt and llms-full.txt
+if [ -f "$SITE_ROOT/_headers" ] && grep -q '/llms.txt' "$SITE_ROOT/_headers" \
+   && grep -q '/llms-full.txt' "$SITE_ROOT/_headers" \
+   && grep -q 'X-Robots-Tag: all' "$SITE_ROOT/_headers"; then
+  pass "_headers sets X-Robots-Tag: all for llms.txt + llms-full.txt"
+else
+  fail "_headers sets X-Robots-Tag: all for llms.txt + llms-full.txt"
+fi
+
+# Test: build.py generator unit tests (pure functions, fixture data)
+if (cd "$SITE_ROOT" && python3 - <<'PY'
+import json, re, sys
+import build
+
+FIXTURE = [
+    {"name": "Post With Author", "slug": "post-with-author",
+     "post_date": "2026-07-08", "creation_date": "2026-07-01T10:00:00Z",
+     "author": "Jane Doe", "type": "Research",
+     "subtitle": "A subtitle", "excerpt": "An excerpt",
+     "body": "# Heading\n\nSome **bold** body text with a [link](https://example.com).", "files": []},
+    {"name": "Post No Author", "slug": "post-no-author",
+     "post_date": "", "creation_date": "2026-06-15T09:00:00Z",
+     "author": "", "type": "Insight", "subtitle": "", "excerpt": "",
+     "body": "Plain body.", "files": []},
+]
+
+failures = []
+
+# -- sitemap --
+sm = build.generate_sitemap(FIXTURE)
+if "<loc>https://undersight.ai/blog/post-with-author</loc>" not in sm:
+    failures.append("sitemap: per-post URL missing")
+if "<lastmod>2026-07-08</lastmod>" not in sm:
+    failures.append("sitemap: lastmod from Post Date missing")
+if "<lastmod>2026-06-15</lastmod>" not in sm:
+    failures.append("sitemap: lastmod fallback to creation date missing")
+if "#" in sm:
+    failures.append("sitemap: hash fragment present")
+if "<loc>https://undersight.ai/</loc>" not in sm:
+    failures.append("sitemap: homepage entry missing")
+if "/docs" in sm:
+    failures.append("sitemap: stale /docs entry")
+
+# -- BlogPosting JSON-LD --
+block = build.generate_blog_jsonld(FIXTURE)
+m = re.search(r"<script type=\"application/ld\+json\">(.*)</script>", block, re.DOTALL)
+if not m:
+    failures.append("jsonld: no script tag")
+else:
+    items = json.loads(m.group(1))
+    if len(items) != 2:
+        failures.append("jsonld: expected 2 BlogPosting items")
+    first, second = items[0], items[1]
+    if first.get("@type") != "BlogPosting":
+        failures.append("jsonld: @type is not BlogPosting")
+    if first.get("headline") != "Post With Author":
+        failures.append("jsonld: headline missing")
+    if first.get("datePublished") != "2026-07-08":
+        failures.append("jsonld: datePublished missing")
+    if first.get("url") != "https://undersight.ai/blog/post-with-author":
+        failures.append("jsonld: url missing")
+    if (first.get("author") or {}).get("name") != "Jane Doe":
+        failures.append("jsonld: author missing when present")
+    if "author" in second:
+        failures.append("jsonld: author emitted when absent")
+    if (first.get("publisher") or {}).get("@type") != "Organization":
+        failures.append("jsonld: publisher Organization missing")
+
+# -- llms.txt --
+llms = build.generate_llms_txt("# undersight\n\nBase copy.", FIXTURE)
+if "Base copy." not in llms:
+    failures.append("llms: base template dropped")
+if "Post With Author" not in llms or "https://undersight.ai/blog/post-with-author" not in llms:
+    failures.append("llms: blog title/url missing")
+if "2026-07-08" not in llms:
+    failures.append("llms: blog date missing")
+
+# -- llms-full.txt --
+content_map = {
+    "Home - Hero": {"content": "## Hero\n\nAI underwriting for private credit.", "files": []},
+    "Site Config": {"content": "**Sign In URL:** something-internal", "files": []},
+    "_blogs": {"content": "", "files": [], "_data": FIXTURE},
+}
+full = build.generate_llms_full_txt(content_map)
+if "AI underwriting for private credit." not in full:
+    failures.append("llms-full: page content missing")
+if "something-internal" in full:
+    failures.append("llms-full: Site Config leaked")
+if "Post With Author" not in full:
+    failures.append("llms-full: post title missing")
+if "2026-07-08" not in full:
+    failures.append("llms-full: post date missing")
+if "Jane Doe" not in full:
+    failures.append("llms-full: post author missing")
+if "Some bold body text" not in full:
+    failures.append("llms-full: body text not plain (markdown not stripped)")
+if "**bold**" in full:
+    failures.append("llms-full: raw markdown emphasis leaked")
+
+# -- JSON-LD injection --
+html = "<html><head><title>t</title></head><body></body></html>"
+injected = build.inject_blog_jsonld(html, FIXTURE)
+if "BlogPosting" not in injected or injected.index("BlogPosting") > injected.index("</head>"):
+    failures.append("inject: BlogPosting not injected into <head>")
+
+if failures:
+    print("; ".join(failures))
+    sys.exit(1)
+PY
+); then
+  pass "build.py generators (sitemap / JSON-LD / llms / llms-full) pass fixture unit tests"
+else
+  fail "build.py generators pass fixture unit tests" "See output above"
 fi
 
 # =============================================================================

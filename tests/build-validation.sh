@@ -70,6 +70,54 @@ fi
 # Favicon present
 [ -f "$DIST/favicon.svg" ] && pass "Favicon present" || fail "Favicon present"
 
+# --- Agent discoverability artifacts (generated at build time from CMS) ---
+
+# sitemap.xml: clean paths, per-post URLs with lastmod, no hash fragments
+if [ -f "$DIST/sitemap.xml" ]; then
+  pass "dist/sitemap.xml present"
+  ! grep -q '#' "$DIST/sitemap.xml" && pass "sitemap has no hash-fragment URLs" || fail "sitemap has no hash-fragment URLs"
+  BLOG_LOCS=$(grep -c '<loc>https://undersight.ai/blog/' "$DIST/sitemap.xml" || true)
+  [ "$BLOG_LOCS" -ge 1 ] && pass "sitemap has per-post blog URLs ($BLOG_LOCS)" || fail "sitemap has per-post blog URLs" "none found"
+  grep -q '<lastmod>' "$DIST/sitemap.xml" && pass "sitemap has <lastmod> from Post Date" || fail "sitemap has <lastmod> from Post Date"
+else
+  fail "dist/sitemap.xml present"
+  BLOG_LOCS=0
+fi
+
+# BlogPosting JSON-LD baked into index.html, one per post (same count as sitemap)
+JSONLD_POSTS=$(grep -o '"@type": "BlogPosting"' "$DIST/index.html" | wc -l | tr -d ' ')
+[ "$JSONLD_POSTS" -ge 1 ] && pass "BlogPosting JSON-LD baked ($JSONLD_POSTS posts)" || fail "BlogPosting JSON-LD baked" "none found"
+grep -q '"datePublished"' "$DIST/index.html" && pass "BlogPosting JSON-LD has datePublished" || fail "BlogPosting JSON-LD has datePublished"
+[ "$JSONLD_POSTS" = "$BLOG_LOCS" ] && pass "JSON-LD post count matches sitemap blog URLs ($JSONLD_POSTS)" || fail "JSON-LD post count matches sitemap blog URLs" "jsonld=$JSONLD_POSTS sitemap=$BLOG_LOCS"
+
+# llms.txt: agent summary with docs link + blog index (titles/dates/URLs from CMS)
+if [ -f "$DIST/llms.txt" ]; then
+  pass "dist/llms.txt present"
+  grep -q 'documentation.underchat.ai' "$DIST/llms.txt" && pass "llms.txt links documentation site" || fail "llms.txt links documentation site"
+  LLMS_POSTS=$(grep -c 'https://undersight.ai/blog/' "$DIST/llms.txt" || true)
+  [ "$LLMS_POSTS" = "$BLOG_LOCS" ] && pass "llms.txt blog index matches sitemap ($LLMS_POSTS posts)" || fail "llms.txt blog index matches sitemap" "llms=$LLMS_POSTS sitemap=$BLOG_LOCS"
+else
+  fail "dist/llms.txt present"
+fi
+
+# llms-full.txt: full plain-text content of pages + every blog post
+if [ -f "$DIST/llms-full.txt" ] && [ "$(wc -c < "$DIST/llms-full.txt")" -gt 2000 ]; then
+  pass "dist/llms-full.txt present and non-trivial"
+  FULL_POSTS=$(grep -c 'URL: https://undersight.ai/blog/' "$DIST/llms-full.txt" || true)
+  [ "$FULL_POSTS" = "$BLOG_LOCS" ] && pass "llms-full.txt covers every blog post ($FULL_POSTS)" || fail "llms-full.txt covers every blog post" "full=$FULL_POSTS sitemap=$BLOG_LOCS"
+  grep -q 'Published: ' "$DIST/llms-full.txt" && pass "llms-full.txt has post dates" || fail "llms-full.txt has post dates"
+else
+  fail "dist/llms-full.txt present and non-trivial"
+fi
+
+# robots.txt + _headers shipped with LLM hints
+grep -q '/llms-full.txt' "$DIST/robots.txt" 2>/dev/null && pass "dist/robots.txt hints at llms-full.txt" || fail "dist/robots.txt hints at llms-full.txt"
+[ -f "$DIST/_headers" ] && grep -q 'X-Robots-Tag: all' "$DIST/_headers" && pass "dist/_headers sets X-Robots-Tag" || fail "dist/_headers sets X-Robots-Tag"
+
+# Docs tab: external link baked, no SPA docs routing in dist
+grep -q 'https://documentation.underchat.ai/' "$DIST/index.html" && pass "dist docs links point at documentation.underchat.ai" || fail "dist docs links point at documentation.underchat.ai"
+! grep -q "navigate('docs')" "$DIST/index.html" && pass "No navigate('docs') in dist" || fail "No navigate('docs') in dist"
+
 # Design catalog: deployed on dev builds for review, never on production
 BUILD_ENV=$(python3 -c "import json;print(json.load(open('$DIST/.build-meta.json')).get('env',''))" 2>/dev/null)
 if [ "$BUILD_ENV" = "production" ]; then
