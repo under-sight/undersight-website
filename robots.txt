@@ -3,6 +3,11 @@ Allow: /
 
 Sitemap: https://undersight.ai/sitemap.xml
 
+# LLM / AI agent guidance
+# Machine-readable site summary: https://undersight.ai/llms.txt
+# Full plain-text site content:  https://undersight.ai/llms-full.txt
+# Product documentation:         https://documentation.underchat.ai/
+
 # AI agent access
 User-agent: GPTBot
 Allow: /

@@ -31,17 +31,22 @@ from concurrent.futures import ThreadPoolExecutor
 WORKSPACE = "subscript.fibery.io"
 FIBERY_SPACE = os.environ.get("FIBERY_SPACE", "CMS")
 DB = f"{FIBERY_SPACE}/Pages"
+SITE_URL = "https://undersight.ai"
+DOCS_URL = "https://documentation.underchat.ai/"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")
 CACHE_DIR = os.path.join(SRC_DIR, ".fibery-file-cache")
 
 # Static files and directories to copy into dist/
+# NOTE: sitemap.xml and llms.txt are copied as fallbacks and then REGENERATED
+# from CMS content (per-post URLs / blog index) later in the build.
 STATIC_DIRS = ["css", "images"]
 STATIC_FILES = [
     "robots.txt",
     "sitemap.xml",
     "manifest.json",
     "llms.txt",
+    "_headers",
     "favicon.svg",
     "favicon-16.png",
     "favicon-32.png",
@@ -808,6 +813,212 @@ def strip_serve_references(html):
 
 
 # ---------------------------------------------------------------------------
+# Agent discoverability artifacts (sitemap / JSON-LD / llms.txt / llms-full.txt)
+#
+# All generated at build time from the CMS content map so blog titles, dates,
+# and URLs always track Fibery. Pure functions — unit-tested with fixture data
+# in tests/test-suite.sh, validated against dist/ in tests/build-validation.sh.
+# ---------------------------------------------------------------------------
+
+# Static site pages: (path, changefreq, priority). Blog posts are appended
+# dynamically. /docs is deliberately absent — documentation lives on
+# documentation.underchat.ai, which publishes its own sitemap.
+SITEMAP_PAGES = [
+    ("/", "weekly", "1.0"),
+    ("/underscore", "monthly", "0.8"),
+    ("/underchat", "monthly", "0.8"),
+    ("/copilot", "monthly", "0.8"),
+    ("/blog", "weekly", "0.7"),
+    ("/contact", "monthly", "0.5"),
+]
+
+# CMS/Pages entities that are site configuration rather than content —
+# excluded from llms-full.txt.
+LLMS_FULL_EXCLUDE = {"Site Config", "SEO", "Docs Page"}
+
+
+def _post_url(post):
+    """Canonical deep-link URL for a blog post (SPA route /blog/<slug>)."""
+    return f"{SITE_URL}/blog/{post['slug']}"
+
+
+def _post_date(post):
+    """ISO date (YYYY-MM-DD) for a post: Post Date, else creation date."""
+    return (post.get("post_date") or post.get("creation_date") or "")[:10]
+
+
+def _xml_escape(text):
+    return (
+        (text or "")
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
+def md_to_text(md):
+    """Reduce markdown to readable plain text (for llms-full.txt)."""
+    text = md or ""
+    # Images -> alt text
+    text = re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    # Links -> "text (url)"
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1 (\2)", text)
+    # Heading / blockquote markers
+    text = re.sub(r"^#{1,6}\s*", "", text, flags=re.M)
+    text = re.sub(r"^>\s?", "", text, flags=re.M)
+    # Emphasis / inline code (run twice for nested markers like **_x_**)
+    for _ in range(2):
+        text = re.sub(r"(\*{1,3}|_{1,3}|`{1,3})(\S(?:.*?\S)?)\1", r"\2", text, flags=re.DOTALL)
+    # Horizontal rules and table pipes are left as-is (rare, harmless)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def generate_sitemap(blogs):
+    """Sitemap with clean page paths + one URL per blog post (lastmod = Post Date)."""
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for path, freq, prio in SITEMAP_PAGES:
+        loc = SITE_URL if path == "/" else f"{SITE_URL}{path}"
+        # Keep the homepage's canonical trailing slash
+        loc = f"{SITE_URL}/" if path == "/" else loc
+        lines.append(
+            f"  <url><loc>{loc}</loc><changefreq>{freq}</changefreq>"
+            f"<priority>{prio}</priority></url>"
+        )
+    for post in blogs:
+        date = _post_date(post)
+        lastmod = f"<lastmod>{date}</lastmod>" if date else ""
+        lines.append(
+            f"  <url><loc>{_xml_escape(_post_url(post))}</loc>{lastmod}"
+            f"<changefreq>yearly</changefreq><priority>0.6</priority></url>"
+        )
+    lines.append("</urlset>")
+    return "\n".join(lines) + "\n"
+
+
+def generate_blog_jsonld(blogs):
+    """One <script type="application/ld+json"> block with a BlogPosting per post."""
+    items = []
+    for post in blogs:
+        url = _post_url(post)
+        item = {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": post.get("name", ""),
+            "url": url,
+            "mainEntityOfPage": url,
+            "publisher": {
+                "@type": "Organization",
+                "name": "undersight",
+                "url": SITE_URL,
+            },
+        }
+        date = _post_date(post)
+        if date:
+            item["datePublished"] = date
+        if post.get("author"):
+            item["author"] = {"@type": "Person", "name": post["author"]}
+        desc = post.get("excerpt") or post.get("subtitle")
+        if desc:
+            item["description"] = desc
+        if post.get("type"):
+            item["articleSection"] = post["type"]
+        items.append(item)
+    payload = json.dumps(items, indent=2, ensure_ascii=False).replace("</", "<\\/")
+    return f'<script type="application/ld+json">\n{payload}\n</script>'
+
+
+def inject_blog_jsonld(html, blogs):
+    """Inject per-post BlogPosting JSON-LD into <head>, alongside the existing
+    Organization/WebSite blocks."""
+    if not blogs:
+        return html
+    block = (
+        "<!-- Per-post BlogPosting structured data (generated at build time from the CMS) -->\n"
+        + generate_blog_jsonld(blogs)
+        + "\n</head>"
+    )
+    return html.replace("</head>", block, 1)
+
+
+def generate_llms_txt(base_text, blogs):
+    """llms.txt = static base (source llms.txt) + current blog index from the CMS."""
+    lines = ["", "## Blog Posts", ""]
+    for post in blogs:
+        date = _post_date(post)
+        meta = [p for p in (date, post.get("author") or "", post.get("type") or "") if p]
+        suffix = f" ({', '.join(meta)})" if meta else ""
+        lines.append(f"- [{post.get('name', '')}]({_post_url(post)}){suffix}")
+    return base_text.rstrip() + "\n" + "\n".join(lines) + "\n"
+
+
+def generate_llms_full_txt(content_map):
+    """Full plain-text content of the site's pages and every blog post, so
+    agents that fetch it get everything without crawling the SPA."""
+    parts = [
+        "# undersight.ai — full site content",
+        "",
+        f"Plain-text export of every page and blog post on {SITE_URL},",
+        "generated at build time from the undersight CMS.",
+        f"Site summary: {SITE_URL}/llms.txt",
+        f"Product documentation: {DOCS_URL}",
+        "",
+        "# Pages",
+        "",
+    ]
+    for name, data in content_map.items():
+        if name.startswith("_") or name in LLMS_FULL_EXCLUDE:
+            continue
+        body = md_to_text(data.get("content") or "")
+        if not body:
+            continue
+        parts += [f"## {name}", "", body, ""]
+
+    blogs = (content_map.get("_blogs") or {}).get("_data") or []
+    parts += ["# Blog", ""]
+    for post in blogs:
+        meta = [f"URL: {_post_url(post)}"]
+        date = _post_date(post)
+        if date:
+            meta.append(f"Published: {date}")
+        if post.get("author"):
+            meta.append(f"Author: {post['author']}")
+        if post.get("type"):
+            meta.append(f"Category: {post['type']}")
+        parts += [f"## {post.get('name', '')}", "", " | ".join(meta)]
+        if post.get("subtitle"):
+            parts += ["", md_to_text(post["subtitle"])]
+        parts += ["", md_to_text(post.get("body") or ""), ""]
+    return "\n".join(parts).rstrip() + "\n"
+
+
+def write_discoverability_artifacts(content_map):
+    """Write dist/sitemap.xml, dist/llms.txt, dist/llms-full.txt from CMS content.
+    Overwrites the static fallbacks copied by copy_static_files()."""
+    blogs = (content_map.get("_blogs") or {}).get("_data") or []
+
+    sitemap = generate_sitemap(blogs)
+    with open(os.path.join(DIST_DIR, "sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write(sitemap)
+    print(f"  Written: dist/sitemap.xml ({len(SITEMAP_PAGES)} pages + {len(blogs)} posts)")
+
+    with open(os.path.join(SRC_DIR, "llms.txt"), "r", encoding="utf-8") as f:
+        llms_base = f.read()
+    llms = generate_llms_txt(llms_base, blogs)
+    with open(os.path.join(DIST_DIR, "llms.txt"), "w", encoding="utf-8") as f:
+        f.write(llms)
+    print(f"  Written: dist/llms.txt (blog index: {len(blogs)} posts)")
+
+    llms_full = generate_llms_full_txt(content_map)
+    with open(os.path.join(DIST_DIR, "llms-full.txt"), "w", encoding="utf-8") as f:
+        f.write(llms_full)
+    print(f"  Written: dist/llms-full.txt ({format_size(len(llms_full.encode('utf-8')))})")
+
+
+# ---------------------------------------------------------------------------
 # Static file copying
 # ---------------------------------------------------------------------------
 
@@ -1130,6 +1341,14 @@ def main():
 
     html = bake_content_into_html(html, content_map)
     html = strip_serve_references(html)
+
+    # Per-post BlogPosting JSON-LD (dates/URLs track the CMS)
+    blogs = (content_map.get("_blogs") or {}).get("_data") or []
+    html = inject_blog_jsonld(html, blogs)
+    print(f"  Injected BlogPosting JSON-LD for {len(blogs)} posts")
+
+    # Regenerate agent discoverability artifacts from CMS content
+    write_discoverability_artifacts(content_map)
 
     # Write the baked HTML
     dist_html_path = os.path.join(DIST_DIR, "index.html")
