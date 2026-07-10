@@ -856,6 +856,29 @@ def _xml_escape(text):
     )
 
 
+def strip_legacy_frontmatter(md):
+    """Drop legacy migration front-matter from a blog body, mirroring
+    index.html's parseMeta: `**Key:** value` lines, `# title` lines, and the
+    `---` separator are metadata; everything else is body. Post metadata is
+    emitted from first-class Fibery fields instead, so these stale lines
+    (notably the old **Date:**) must never leak into llms-full.txt."""
+    body_lines = []
+    past_separator = False
+    for line in (md or "").split("\n"):
+        clean = re.sub(r"\\$", "", line)
+        if re.match(r"^\*\*(.+?):\*\*\s*(.+)", clean):
+            continue  # meta line (Date/Excerpt/Tag/...)
+        if clean.startswith("# "):
+            continue  # h1 = title (rendered from the entity name instead)
+        if clean.strip() == "---":
+            past_separator = True
+            continue
+        if past_separator or not clean.startswith("#"):
+            body_lines.append(clean)
+        # else: sub-heading before the separator — front-matter noise, drop
+    return "\n".join(body_lines).strip()
+
+
 def md_to_text(md):
     """Reduce markdown to readable plain text (for llms-full.txt)."""
     text = md or ""
@@ -991,7 +1014,7 @@ def generate_llms_full_txt(content_map):
         parts += [f"## {post.get('name', '')}", "", " | ".join(meta)]
         if post.get("subtitle"):
             parts += ["", md_to_text(post["subtitle"])]
-        parts += ["", md_to_text(post.get("body") or ""), ""]
+        parts += ["", md_to_text(strip_legacy_frontmatter(post.get("body") or "")), ""]
     return "\n".join(parts).rstrip() + "\n"
 
 
