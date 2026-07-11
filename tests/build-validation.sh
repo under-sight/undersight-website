@@ -106,6 +106,16 @@ if [ -f "$DIST/llms-full.txt" ] && [ "$(wc -c < "$DIST/llms-full.txt")" -gt 2000
   FULL_POSTS=$(grep -c 'URL: https://undersight.ai/blog/' "$DIST/llms-full.txt" || true)
   [ "$FULL_POSTS" = "$BLOG_LOCS" ] && pass "llms-full.txt covers every blog post ($FULL_POSTS)" || fail "llms-full.txt covers every blog post" "full=$FULL_POSTS sitemap=$BLOG_LOCS"
   grep -q 'Published: ' "$DIST/llms-full.txt" && pass "llms-full.txt has post dates" || fail "llms-full.txt has post dates"
+  # Legacy migration front-matter (**Date:**/**Excerpt:**/**Tag:** lines) must
+  # be stripped from post bodies — the canonical date is the Published: line.
+  # Scoped to the "# Blog" section: page sections legitimately surface Tag:
+  # chips that the site renders as content.
+  BLOG_LEAKS=$(sed -n '/^# Blog$/,$p' "$DIST/llms-full.txt" | grep -cE '^(Date|Excerpt|Tag): ' || true)
+  if [ "$BLOG_LEAKS" -gt 0 ]; then
+    fail "llms-full.txt blog section free of legacy front-matter" "$BLOG_LEAKS leaked line(s)"
+  else
+    pass "llms-full.txt blog section free of legacy front-matter"
+  fi
 else
   fail "dist/llms-full.txt present and non-trivial"
 fi

@@ -2442,6 +2442,12 @@ FIXTURE = [
      "post_date": "", "creation_date": "2026-06-15T09:00:00Z",
      "author": "", "type": "Insight", "subtitle": "", "excerpt": "",
      "body": "Plain body.", "files": []},
+    {"name": "Legacy Front-Matter Post", "slug": "legacy-front-matter",
+     "post_date": "2026-05-18", "creation_date": "2026-05-01T08:00:00Z",
+     "author": "", "type": "Case Study", "subtitle": "", "excerpt": "",
+     # Migrated posts still carry **Date:**/**Excerpt:**/**Tag:** front-matter
+     # in the body; index.html strips it via parseMeta and llms-full must too.
+     "body": "**Date:** 2026-02-18\n**Excerpt:** Old excerpt copy\n**Tag:** Case Study\n\n---\n\n# Real Title\n\nActual body prose survives.", "files": []},
 ]
 
 failures = []
@@ -2468,8 +2474,8 @@ if not m:
     failures.append("jsonld: no script tag")
 else:
     items = json.loads(m.group(1))
-    if len(items) != 2:
-        failures.append("jsonld: expected 2 BlogPosting items")
+    if len(items) != len(FIXTURE):
+        failures.append("jsonld: expected one BlogPosting item per fixture post")
     first, second = items[0], items[1]
     if first.get("@type") != "BlogPosting":
         failures.append("jsonld: @type is not BlogPosting")
@@ -2516,6 +2522,17 @@ if "Some bold body text" not in full:
     failures.append("llms-full: body text not plain (markdown not stripped)")
 if "**bold**" in full:
     failures.append("llms-full: raw markdown emphasis leaked")
+# Legacy front-matter must be stripped like index.html's parseMeta does:
+# the stale Date/Excerpt/Tag lines and their --- separator never appear,
+# while the canonical Published: line and real prose do.
+if "2026-02-18" in full:
+    failures.append("llms-full: legacy front-matter Date leaked")
+if "Old excerpt copy" in full:
+    failures.append("llms-full: legacy front-matter Excerpt leaked")
+if "Published: 2026-05-18" not in full:
+    failures.append("llms-full: canonical Published line missing for legacy post")
+if "Actual body prose survives." not in full:
+    failures.append("llms-full: legacy post body prose dropped")
 
 # -- JSON-LD injection --
 html = "<html><head><title>t</title></head><body></body></html>"
