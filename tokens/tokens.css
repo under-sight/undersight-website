@@ -12,6 +12,7 @@
   --color-graphite-700: #3A3F47;
   --color-graphite-100: #F0F1F2;
   --color-graphite-50: #F7F8F8;
+  --color-graphite-500: #6B7280;
   --color-cloud-zinc: #D1D5DB;
   --color-cloud-zinc-light: #E8EAED;
   --color-amber-rust: #C97A54;
@@ -54,6 +55,7 @@
 
   --color-text: var(--color-graphite-900);
   --color-text-secondary: var(--color-graphite-700);
+  --color-text-muted: var(--color-graphite-500);
   --color-text-hover: var(--color-graphite-800);
 
   /* Primary accent — ACTION voice (CTAs, interactive, active states) */
@@ -72,6 +74,9 @@
 
   --color-border: var(--color-cloud-zinc);
   --color-border-light: var(--color-cloud-zinc-light);
+  /* In-content hairline rule (editorial ledger grammar) — decoupled from
+     the structural card border and from the background motif pattern ink */
+  --color-rule: var(--color-cloud-zinc-light);
 
   /* Success aliases — same primitive as Eucalyptus (positive-state subset of insight voice) */
   --color-success: var(--color-eucalyptus);
@@ -93,6 +98,7 @@
   --font-feature-inter: 'cv01', 'ss03';
 
   /* Font sizes */
+  --text-display-hero: 64px;
   --text-display-xl: 48px;
   --text-display-lg: 36px;
   --text-display-md: 28px;
@@ -118,6 +124,7 @@
   --weight-regular: 400;
 
   /* Line heights */
+  --leading-display-hero: 1.05;
   --leading-display-xl: 1.1;
   --leading-display-lg: 1.15;
   --leading-display-md: 1.2;
@@ -136,6 +143,7 @@
   --leading-code: 1.6;
 
   /* Letter spacing */
+  --tracking-display-hero: -0.035em;
   --tracking-display-xl: -0.03em;
   --tracking-display-lg: -0.02em;
   --tracking-display-md: -0.02em;
@@ -164,6 +172,7 @@
   --space-lg: 16px;
   --space-xl: 24px;
   --space-xxl: 32px;
+  --space-xxxl: 48px;
   --space-section: 80px;
   --space-section-mobile: 48px;
 
@@ -210,6 +219,8 @@
 
   --max-width: 1120px;
   --nav-height: 64px;
+  /* Prose measure for editorial text columns */
+  --measure: 68ch;
 }
 
 /* ==========================================================================
@@ -225,10 +236,12 @@
 
     --color-text: var(--color-dark-text);
     --color-text-secondary: var(--color-dark-text-muted);
+    --color-text-muted: rgba(255, 255, 255, 0.45);
     --color-text-hover: var(--color-dark-text);
 
     --color-border: var(--color-dark-border);
     --color-border-light: var(--color-dark-border);
+    --color-rule: var(--color-dark-border);
 
     --color-surface: var(--color-dark-surface);
     --color-surface-elevated: var(--color-dark-elevated);

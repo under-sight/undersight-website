@@ -13,6 +13,7 @@ colors:
   graphite-500: "#6B7280"
   cloud-zinc: "#D1D5DB"
   cloud-zinc-light: "#E8EAED"
+  rule: "#E8EAED"   # in-content hairline (semantic --color-rule; dark mode -> dark-border)
   amber-rust: "#C97A54"
   amber-rust-hover: "#B56A45"
   amber-rust-light: "rgba(201,122,84,0.08)"
@@ -36,6 +37,13 @@ colors:
   dark-border: "rgba(255,255,255,0.1)"
 
 typography:
+  display-hero:
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+    fontSize: 64px
+    fontWeight: 700
+    lineHeight: 1.05
+    letterSpacing: -0.035em
+    fontFeature: cv01, ss03
   display-xl:
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     fontSize: 48px
@@ -160,29 +168,31 @@ spacing:
   lg: 16px
   xl: 24px
   xxl: 32px
+  xxxl: 48px
   section: 80px
   section-mobile: 48px
+  measure: 68ch   # prose measure for editorial text columns (--measure)
 
 components:
   button-primary:
     backgroundColor: "{colors.amber-rust}"
     textColor: "{colors.on-accent}"
     typography: "{typography.ui-button}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.xs}"
     padding: 10px 20px
     height: 40px
   button-primary-hover:
     backgroundColor: "{colors.amber-rust-hover}"
     textColor: "{colors.on-accent}"
     typography: "{typography.ui-button}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.xs}"
     padding: 10px 20px
     height: 40px
   button-ghost:
     backgroundColor: transparent
     textColor: "{colors.graphite-700}"
     typography: "{typography.ui-button}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.xs}"
     padding: 10px 20px
     height: 40px
     border: 1px solid {colors.cloud-zinc}
@@ -190,7 +200,7 @@ components:
     backgroundColor: transparent
     textColor: "{colors.graphite-900}"
     typography: "{typography.ui-button}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.xs}"
     padding: 10px 20px
     height: 40px
     border: 1px solid {colors.graphite-900}
@@ -228,27 +238,27 @@ components:
     backgroundColor: "{colors.paper-white}"
     textColor: "{colors.graphite-900}"
     typography: "{typography.body-md}"
-    rounded: "{rounded.lg}"
+    rounded: "{rounded.xs}"
     padding: 32px
     border: 1px solid {colors.cloud-zinc}
   card-solution-hover:
     backgroundColor: "{colors.paper-white}"
     textColor: "{colors.graphite-900}"
-    rounded: "{rounded.lg}"
+    rounded: "{rounded.xs}"
     padding: 32px
-    border: 1px solid {colors.cloud-zinc-light}
+    border: 1px solid {colors.graphite-700}
   card-blog:
     backgroundColor: "{colors.paper-white}"
     textColor: "{colors.graphite-900}"
     typography: "{typography.body-md}"
-    rounded: "{rounded.sm}"
+    rounded: "{rounded.xs}"
     border: 1px solid {colors.cloud-zinc}
     overflow: hidden
   stat-card:
     backgroundColor: "{colors.paper-white}"
     textColor: "{colors.graphite-900}"
     typography: "{typography.data-display}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.xs}"
     border: 1px solid {colors.cloud-zinc}
     textAlign: center
   nav-bar:
@@ -266,7 +276,7 @@ components:
   section-label:
     backgroundColor: transparent
     textColor: "{colors.amber-rust}"
-    typography: "{typography.caption-uppercase}"
+    typography: mono 12px / 500, uppercase, 0.08em tracking (folio-numbered, e.g. "01 · Solutions")
   solution-tag:
     backgroundColor: "{colors.amber-rust-light}"
     textColor: "{colors.amber-rust}"
@@ -412,6 +422,7 @@ The headline/body split is structural:
 
 | Token | Size | Weight | Line Height | Letter Spacing | Font | Use |
 |---|---|---|---|---|---|---|
+| `{typography.display-hero}` | 64px | 700 | 1.05 | -0.035em | Inter | Homepage hero headline (Column-scale declarative cut; one per page) |
 | `{typography.display-xl}` | 48px | 700 | 1.1 | -0.03em | Inter | Hero headline |
 | `{typography.display-lg}` | 36px | 600 | 1.15 | -0.02em | Inter | Section opener |
 | `{typography.display-md}` | 28px | 600 | 1.2 | -0.02em | Inter | Sub-section head, CTA headline |
@@ -463,7 +474,8 @@ This tracking scale tightens proportionally with size, producing editorial densi
 - **Nav bar height:** 64px with sticky positioning and a 1px `{colors.cloud-zinc}` bottom border.
 
 ### Grid & Container
-- **Max content width:** ~1200px centered with horizontal padding.
+- **Max content width:** 1120px centered with horizontal padding (`--max-width`).
+- **Prose measure:** long-form text columns cap at `{spacing.measure}` (68ch).
 - **Hero layout:** Full-width with centered text or a 6/6 split (headline left, visual right).
 - **Solution cards:** 3-up at desktop, 2-up at tablet, 1-up at mobile.
 - **Stat cards:** 3-up or 4-up at desktop depending on content, stacking on mobile.
@@ -599,6 +611,55 @@ graphite one-line variants exist; (2) solution-page contained dark blocks
 (`.convo-preview`, `.capacity-callout`, `.not-workflow`, `.chat-surface`,
 `.api-preview`, `.mca-callout`) — contained component panels today, not
 section bands; principle 5 untouched pending a ruling.
+
+## Column Adaptation — Editorial Ledger (2026-07-10)
+
+The homepage design language was re-anchored on column.com's document-first
+structure ("the underwriting file"), explicitly bypassing the built-in Claude
+design template (`reference/claude.DESIGN.md`: cream #faf9f5 canvas, coral
+#cc785c accent, serif-400 display, cream-to-dark band alternation — none of
+those moves are used). Column contributes *structure*, not color: the brand
+palette, dual-accent semantics, and font stack are unchanged.
+
+**Keep (brand non-negotiables).** Dual chromatic accents under strict role
+separation (Rust = act, Eucalyptus = know); Inter cv01/ss03 + weight 510 UI
+chrome; DM Sans body; light-first uniform canvas; border-first depth; the
+underwriting-paper motif grammar (ruled fields, double rules, eye-rings,
+crop marks, ghost folios, signature strokes, colophon).
+
+**Amplify (motifs become the layout language).** Hairlines structure the
+page, not card boxes: Who-We-Serve is three ruled text columns with
+registration ticks (no boxes); the stats band stays a ledger totals row;
+case tiles keep exhibit crop marks. Metadata speaks mono: section eyebrows,
+stat labels, footer index headers, and the testimonial label are SF Mono
+12px/11px uppercase, and eyebrows are folio-numbered ("01 · Who we serve").
+
+**Swap.**
+- Hero visual: the 3-card collage is replaced by ONE product artifact — the
+  `.hv-ledger` decision ledger (file header, ruled rows with verified /
+  review / approve states, double-rule composite total, mono foot). The
+  product is the hero visual; Column's signature move.
+- Hero type: `{typography.display-hero}` 64px/1.05/-0.035em declarative cut.
+- Radius scale usage moves down: buttons, cards, tiles, frames, inputs use
+  `{rounded.xs}` (4px). Metadata chips and status pills stay `{rounded.pill}`.
+  Floating UI (modal, theme toggle) is exempt.
+- Hover sobriety: no translateY lifts, no hover shadows — hover is a
+  border-color shift to `{colors.graphite-700}` (or color change) only.
+
+**Extend (new tokens, synced across DESIGN.md + tokens/tokens.css +
+tokens/tokens.json + css/tokens.css).** `{typography.display-hero}`;
+`{spacing.measure}` (68ch prose measure, `--measure`); `{spacing.xxxl}`
+(48px); `{colors.rule}` (`--color-rule`, in-content hairline decoupled from
+structural borders and motif pattern ink; swaps to dark-border in dark mode).
+
+**Decision log (2026-07-10).** Deleted dead V1 blocks (dark stats bar, dark
+testimonial band, case-study split card, how-timeline, sol-visual-box, blog
+filters v1, placeholder markers) and pruned their eye-ring selector-group
+references; removed the hvTyping keyframe with the hero chat card (hvLiveDot
+survives on the ledger's live pill); reconciled the two-copy token drift
+(eucalyptus-light 0.08 both sides, accent-secondary family in css/tokens.css,
+graphite-500/text-muted in tokens/tokens.css, tokens.json max-content-width
+1120px). Invariants live in `tests/design-editorial.sh`.
 
 ## Do's and Don'ts
 
