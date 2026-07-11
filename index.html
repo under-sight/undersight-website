@@ -280,25 +280,21 @@
         </div>
         <div class="how">
           <div class="how-step">
-            <span class="step-n">STEP 01</span>
             <h3>An applicant or broker starts a conversation</h3>
             <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time.</p>
             <span class="step-meta"><b>~6 min</b> median intake</span>
           </div>
           <div class="how-step">
-            <span class="step-n">STEP 02</span>
             <h3>Documents are enriched and verified</h3>
             <p>Raw data becomes structured intelligence. Revenue patterns, existing positions, and anomalies surfaced automatically.</p>
             <span class="step-meta"><b>150+</b> metrics</span>
           </div>
           <div class="how-step">
-            <span class="step-n">STEP 03</span>
             <h3>Risk is scored in seconds</h3>
             <p>ML models trained on real deal outcomes deliver a composite score with full supporting analysis.</p>
             <span class="step-meta"><b>&lt; 3s</b> response</span>
           </div>
           <div class="how-step">
-            <span class="step-n">STEP 04</span>
             <h3>The underwriter makes the call</h3>
             <p>AI surfaces what matters; the human decides. Institutional consistency with 30% faster screening.</p>
             <span class="step-meta"><b>30%</b> faster</span>
@@ -2331,12 +2327,14 @@
       row.className = 'solrow' + (homeSolutions.children.length % 2 === 1 ? ' flip' : '');
       const pills = (SOLUTION_PILLS[cfg.page] || [])
         .map(p => `<span class="chip"><span class="dot"></span>${p}</span>`).join('');
-      const claim = meta._claim || title;
+      // No title fallback: a missing _claim renders nothing rather than
+      // duplicating the product name on the line below it.
+      const claim = (meta._claim && meta._claim !== title) ? meta._claim : '';
       row.innerHTML = `
         <div class="sol-copy">
           <span class="sol-tag">&mdash; ${tag}</span>
           <div class="sol-name">${title}</div>
-          <h3 class="sol-claim">${claim}</h3>
+          ${claim ? `<h3 class="sol-claim">${claim}</h3>` : ''}
           <p class="sol-body">${desc}</p>
           <div class="sol-pills">${pills}</div>
           <div class="sol-cta">

@@ -154,7 +154,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 }
 
 /* ---- MOBILE NAV ---- */
-.nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+.nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 10px; }
 .nav-toggle svg { width: 24px; height: 24px; stroke: var(--dark); }
 
 .mobile-menu {
@@ -353,7 +353,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   display: inline-flex; align-items: center; gap: 5px;
   font: 600 10px/1 'Inter', sans-serif;
   text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--color-eucalyptus);
+  color: var(--color-eucalyptus-hover);
   background: var(--color-eucalyptus-light);
   padding: 3px 8px; border-radius: var(--rounded-pill);
 }
@@ -385,10 +385,11 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   padding: 3px 7px; border-radius: var(--rounded-pill);
   margin-left: 4px; vertical-align: 1px;
 }
-/* INSIGHT voice: verified/approved states (B0) */
-.hv-check, .hv-verdict { color: var(--color-eucalyptus); background: var(--color-eucalyptus-light); }
+/* INSIGHT voice: verified/approved states (B0). Hover-dark variants on
+   sub-body text per the DESIGN.md contrast note. */
+.hv-check, .hv-verdict { color: var(--color-eucalyptus-hover); background: var(--color-eucalyptus-light); }
 /* flagged data point — the one amber allowance inside an illustration (B0) */
-.hv-flag { color: var(--color-accent); background: var(--color-accent-light); }
+.hv-flag { color: var(--color-accent-hover); background: var(--color-accent-light); }
 .hv-total {
   position: relative;
   display: flex; justify-content: space-between; align-items: baseline;
@@ -416,7 +417,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   display: flex; justify-content: space-between; gap: 16px;
   padding: 10px 20px;
   border-top: 1px solid var(--color-rule);
-  font: 500 10.5px/1.4 var(--font-mono); letter-spacing: 0.03em;
+  font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.03em;
   color: var(--mid);
 }
 
@@ -433,13 +434,11 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   border-radius: var(--rounded-xs);
   font: 600 13px/1 'Inter', sans-serif;
   text-decoration: none;
-  box-shadow: 0 8px 24px rgba(201, 122, 84, 0.32);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  /* flat, border-first: background swap on hover only — no glow, no lift */
+  transition: background 0.18s ease;
 }
 .hero-overlay-cta:hover {
   background: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgba(201, 122, 84, 0.4);
 }
 .hero-overlay-cta:focus-visible {
   outline: 2px solid var(--color-accent-focus);
@@ -713,9 +712,8 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
   margin: 0;
 }
 .cta.cta-band h2 em {
-  font-style: normal;
-  background: linear-gradient(to top, var(--color-amber-rust-light) 50%, transparent 50%);
-  padding: 0 2px;
+  /* emphasis without a decorative amber wash (B0: amber = action only) */
+  font-style: italic;
 }
 .cta.cta-band .lede {
   font: 400 17px/1.6 'DM Sans', sans-serif;
@@ -763,7 +761,7 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
   font: 500 11px/1.4 var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-eucalyptus);
+  color: var(--color-eucalyptus-hover);
   margin-bottom: 10px;
 }
 .cta-card .cc-title {
@@ -1503,27 +1501,18 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   position: relative;
 }
 .serve-grid .serve-card:first-child { border-left: none; padding-left: 0; }
-/* Registration tick (B2): a single 12px crop-mark at each column head —
-   exhibits pinned to the underwriting sheet. */
-.serve-grid .serve-card::before {
-  content: '';
-  position: absolute; top: -4px; left: -4px;
-  width: 12px; height: 12px;
-  border-top: 1px solid var(--color-border);
-  border-left: 1px solid var(--color-border);
-  pointer-events: none;
-}
-.serve-grid .serve-card:first-child::before { left: 0; border-left: none; }
+/* Crop marks are reserved for exhibits (hero ledger, case tiles); the
+   ruled columns carry structure through their hairlines alone. */
 .serve-grid .serve-card .serve-num {
   font: 500 11px/1 var(--font-mono);
   color: var(--mid); letter-spacing: 0.04em;
 }
 .serve-grid .serve-card .serve-cat,
 .serve-grid .serve-card .cat {
-  /* mono metadata voice — INSIGHT color (persona/category) */
+  /* mono metadata voice — INSIGHT color, hover-dark at caption size */
   font: 500 11px/1.4 var(--font-mono);
   text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--color-eucalyptus);
+  color: var(--color-eucalyptus-hover);
 }
 .serve-grid .serve-card h3 {
   font: 600 22px/1.3 'Inter', sans-serif;
@@ -1549,7 +1538,6 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
     border-left: none; border-top: 1px solid var(--pale);
     padding-left: 0; padding-right: 0;
   }
-  .serve-grid .serve-card::before { left: 0; border-left: none; }
 }
 
 /* ---- How It Works: 4-col timeline with Rust accent stub + Eucalyptus metric ---- */
@@ -1581,14 +1569,12 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   color: var(--pattern-line-strong);
   pointer-events: none;
 }
-.how .step-n {
-  font: 600 11px/1 'SF Mono', monospace;
-  letter-spacing: 0.06em; color: var(--mid); margin-top: 18px;
-}
 .how .how-step h3 {
   font: 600 18px/1.35 'Inter', sans-serif;
   font-feature-settings: 'cv01', 'ss03';
-  letter-spacing: -0.01em; color: var(--black); margin: 0;
+  letter-spacing: -0.01em; color: var(--black);
+  /* clears the eye-ring marker; the ghost folio is the single numbering voice */
+  margin: 24px 0 0;
 }
 .how .how-step p {
   font: 400 14px/1.6 'DM Sans', sans-serif;
@@ -1634,7 +1620,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   display: inline-block;
   font: 500 12px/1.4 var(--font-mono);
   text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--color-eucalyptus);
+  color: var(--color-eucalyptus-hover);
   margin-bottom: 20px;
 }
 .testimonial-band .testimonial-quote {
@@ -1646,9 +1632,9 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   border-bottom: 1px solid var(--color-border);
 }
 .testimonial-band .testimonial-quote em {
+  /* emphasis by weight only — body copy is never tinted with accents (B0) */
   font-style: normal;
-  background: linear-gradient(to top, var(--color-eucalyptus-light) 50%, transparent 50%);
-  padding: 0 2px;
+  font-weight: 600;
 }
 .testimonial-band .testimonial-cite {
   display: flex; align-items: center; gap: 14px;
@@ -1725,7 +1711,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 @media (max-width: 560px) {
   .cookie-banner-inner { padding: 14px 16px; gap: 14px; }
   .cookie-banner-actions { width: 100%; justify-content: flex-end; }
-  .cookie-banner-actions .btn { flex: 1; }
+  .cookie-banner-actions .btn { flex: 1; min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) { .cookie-banner { animation: none; /* cookieBannerIn */ } }
 
@@ -1775,7 +1761,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 .solrow .sol-tag {
   font: 500 12px/1 'SF Mono', monospace;
   letter-spacing: 0.02em;
-  color: var(--color-eucalyptus);
+  color: var(--color-eucalyptus-hover);
 }
 .solrow .sol-name {
   font: 600 clamp(34px, 3vw + 14px, 44px) / 1 'Inter', sans-serif;
@@ -1856,9 +1842,12 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 .solrow .sol-visual .frame > * { flex: 1; }
 
 @media (max-width: 880px) {
-  .solrow { grid-template-columns: 1fr; gap: 40px; padding: 48px 0; }
+  .solrow { grid-template-columns: 1fr; gap: 32px; padding: 48px 0; }
   .solrow.flip { direction: ltr; }
   .solrow.flip .sol-visual { order: -1; }
+  /* single column: let the exhibit hug its content instead of holding
+     the desktop min-height open as dead whitespace */
+  .solrow .sol-visual .frame { min-height: 0; }
 }
 
 /* =============================================================
