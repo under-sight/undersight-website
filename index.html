@@ -110,7 +110,7 @@
           </div>
         </div>
       </div>
-      <a href="/docs" onclick="event.preventDefault();navigate('docs')">Docs</a>
+      <a href="https://documentation.underchat.ai/">Docs</a>
       <a href="/blog" onclick="event.preventDefault();navigate('blog')">Blog</a>
     </nav>
     <div class="nav-actions" id="navActions">
@@ -121,7 +121,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <div><strong style="font-size:12px;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">Solutions</strong></div>
     <div class="mobile-sub" id="mobileSolutions"><!-- populated from Fibery --></div>
-    <a href="/docs" onclick="event.preventDefault();navigate('docs');closeMobile();">Docs</a>
+    <a href="https://documentation.underchat.ai/" onclick="closeMobile();">Docs</a>
     <a href="/blog" onclick="event.preventDefault();navigate('blog');closeMobile();">Blog</a>
     <div class="mobile-section">
       <a href="https://staging.app.underchat.ai/login" class="btn btn-ghost" target="_blank">Sign In</a>
@@ -293,35 +293,9 @@
 <section class="page" id="page-rfi"></section>
 <section class="page" id="page-copilot"></section>
 
-<!-- ============ DOCS (auth via staging app — see #307) ============ -->
-<!-- TODO(#307): replace this interim link with a real login gate.
-     Public docs must not advertise Clerk; until #307 lands, all auth entry
-     routes to the staging underchat login. -->
-<section class="page" id="page-docs">
-  <div class="docs-gate" id="docsGate">
-    <div class="lock-icon">&#128274;</div>
-    <h2>API Documentation</h2>
-    <p>Access our API reference, integration guides, and developer resources. Sign in with your undersight account to continue.</p>
-    <a class="btn btn-primary" href="https://staging.app.underchat.ai/login">Sign In to View Docs</a>
-    <div class="note">Only authorized undersight customers can access documentation.</div>
-  </div>
-  <div id="docsContent" style="display:none;">
-    <div class="section-header">
-      <h2>API Documentation</h2>
-      <p>Reference guides, SDKs, and integration resources for the undersight platform.</p>
-    </div>
-    <div class="container" style="padding-bottom: 80px;">
-      <div class="card-grid cols-3">
-        <div class="card"><h3>Getting Started</h3><p>Authentication, API keys, and your first API call.</p></div>
-        <div class="card"><h3>underscore API</h3><p>Submit accounts for scoring, retrieve results, and manage scoring models.</p></div>
-        <div class="card"><h3>RFI API</h3><p>Create intake sessions, manage submissions, and retrieve structured data.</p></div>
-        <div class="card"><h3>Copilot API</h3><p>Integrate underwriting assistance into your existing workflow tools.</p></div>
-        <div class="card"><h3>Webhooks</h3><p>Subscribe to events and receive real-time notifications.</p></div>
-        <div class="card"><h3>SDKs</h3><p>Client libraries for Python, Node.js, and REST.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- Docs moved to the external documentation site (documentation.underchat.ai).
+     Nav/footer links are plain same-tab anchors; bare /docs deep links are
+     redirected in the boot code below (and at the edge via _redirects). -->
 
 <!-- ============ BLOG ============ -->
 <section class="page" id="page-blog">
@@ -373,7 +347,7 @@
         </div>
         <div class="footer-col">
           <h4>Resources</h4>
-          <a href="/docs" onclick="event.preventDefault();navigate('docs')">API Docs</a>
+          <a href="https://documentation.underchat.ai/">API Docs</a>
           <a href="/blog" onclick="event.preventDefault();navigate('blog')">Blog</a>
           <a href="https://legal.undersight.ai" target="_blank" rel="noopener">Privacy Policy</a>
         </div>
@@ -2687,6 +2661,12 @@
   // the content data arrives, so we stash the slug and resolve it after
   // renderContent() populates _blogPostsBySlug.
   var _bootPath = location.pathname;
+  // /docs now lives on the external documentation site. Use replace (not
+  // assign) so the redirect hop is skipped by the back button — back from
+  // the docs site returns to whatever page preceded it.
+  if (/^\/docs\/?$/.test(_bootPath)) {
+    window.location.replace('https://documentation.underchat.ai/');
+  }
   var _bootSlugMatch = _bootPath.match(/^\/blog\/([a-z0-9-]+)\/?$/i);
   var _bootPage;
   if (_bootSlugMatch) {
