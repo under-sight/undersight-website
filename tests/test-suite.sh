@@ -458,8 +458,23 @@ if [ "$AUTH_FOUND" = false ]; then
   pass "No auth tokens in any served file"
 fi
 
-# Test: No staging URLs exposed (skip — Sign In intentionally uses staging until prod auth)
-skip "Staging URL check (Sign In link uses staging.app by design)"
+# Test: No staging URLs exposed. Sign In previously pointed at
+# staging.app.underchat.ai as an interim measure (TODO Fibery #307); fixed
+# 2026-07-10 to point straight at the production app.
+if echo "$HTML_SOURCE" | grep -q "staging.app.underchat.ai"; then
+  fail "No staging.app.underchat.ai reference in index.html" "found a staging sign-in reference"
+else
+  pass "No staging.app.underchat.ai reference in index.html"
+fi
+
+SIGNIN_HREFS=$(echo "$HTML_SOURCE" | grep -oE '<a[^>]*>Sign In</a>' | grep -oE 'href="[^"]*"' || true)
+SIGNIN_HREF_COUNT=$(echo "$SIGNIN_HREFS" | grep -c 'href=' || true)
+SIGNIN_HREF_CORRECT=$(echo "$SIGNIN_HREFS" | grep -c 'href="https://app.underchat.ai/login"' || true)
+if [ "$SIGNIN_HREF_COUNT" -ge 2 ] && [ "$SIGNIN_HREF_COUNT" = "$SIGNIN_HREF_CORRECT" ]; then
+  pass "All Sign In anchors point at https://app.underchat.ai/login ($SIGNIN_HREF_COUNT found)"
+else
+  fail "All Sign In anchors point at https://app.underchat.ai/login" "found $SIGNIN_HREF_COUNT Sign In anchor(s), $SIGNIN_HREF_CORRECT correct"
+fi
 
 # =============================================================================
 section "Accessibility Tests"
@@ -1398,8 +1413,14 @@ else
   pass "Success message is generic (says 'PDF' not 'case study')"
 fi
 
-# Test: No staging URLs (skip — Sign In intentionally uses staging until prod auth)
-skip "Staging URL source check (Sign In link uses staging.app by design)"
+# Test: No staging URLs in source. Sign In previously pointed at
+# staging.app.underchat.ai as an interim measure (TODO Fibery #307); fixed
+# 2026-07-10 to point straight at the production app.
+if grep -q "staging.app.underchat.ai" "$SITE_ROOT/index.html"; then
+  fail "No staging.app.underchat.ai reference in index.html source" "found a staging sign-in reference"
+else
+  pass "No staging.app.underchat.ai reference in index.html source"
+fi
 
 # Test: Dist modal has no hardcoded "Chat Advance" in static HTML
 # (catches the bug where baked dist still shows old hardcoded modal text)

@@ -22,12 +22,9 @@ The site is not live at undersight.ai. The dev server runs locally via `undersig
 
 ### 2. ~~Staging URL leak~~ RESOLVED 2026-07-10 -- Sign In now points to `app.underchat.ai/login` (both hrefs + CMS Site Config in both spaces)
 
-Both desktop and mobile "Sign In" buttons hardcode `https://staging.app.underchat.ai/login`. This exposes the staging environment and the internal `underchat` brand name to visitors.
+**Status: FIXED (2026-07-10).** Both desktop and mobile "Sign In" buttons hardcoded `https://staging.app.underchat.ai/login`, which exposed the staging environment and the internal `underchat` brand name to visitors. Both `href` values now point at `https://app.underchat.ai/login` (production); `tests/test-suite.sh` asserts no `staging.app.underchat.ai` reference remains in `index.html`.
 
-- **What to do:** Replace both Sign In `href` values with the production URL. Update JS to patch the mobile link from Fibery config too (currently only patches desktop). If no production sign-in exists yet, remove the Sign In button or link to a waitlist page.
-- **Effort:** Quick
-- **Files:** `index.html` (lines 112, 122), JS `renderContent` function
-- **Dependencies:** Production auth URL must exist (Clerk integration)
+- **Remaining gap:** the desktop link is also patched at runtime from Fibery's `Sign In URL` config (`renderContent`, `#signInLink`); the mobile link has no `id` and is never patched from that config, so it will silently drift from the desktop link if the Fibery value ever changes. Give the mobile link an id and patch it alongside the desktop one if/when that matters.
 - **Ref:** ADVERSARIAL-REVIEW P0-2
 
 ### 3. Blog content references wrong industry

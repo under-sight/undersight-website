@@ -2253,7 +2253,16 @@
   }
 
   // ---- Navigation ----
-  function navigate(page) {
+  // `opts.url`/`opts.state` let a caller (e.g. openPost) supply the final
+  // history URL/state directly instead of navigate() writing a generic
+  // "/<page>" entry that a caller then has to patch with a follow-up
+  // history.replaceState. Writing history exactly once, atomically, with
+  // the real target URL avoids racing the deferred pushState below (see
+  // the page-transition wrapper) against a caller's own history writes —
+  // that race used to clobber the blog listing's history entry and trap
+  // the back button on the post page (never reaching the blog list).
+  function navigate(page, opts) {
+    opts = opts || {};
     // Backwards-compat alias: /rfi -> /underchat
     if (page === 'rfi') page = 'underchat';
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2264,9 +2273,10 @@
     if (link) link.classList.add('active');
     closeMobileNav();
     window.scrollTo(0, 0);
-    var path = page === 'home' ? '/' : '/' + page;
+    var path = opts.url || (page === 'home' ? '/' : '/' + page);
+    var state = opts.state || { page: page };
     if (location.pathname !== path) {
-      history.pushState({ page: page }, '', path);
+      history.pushState(state, '', path);
     }
   }
 
@@ -2323,16 +2333,16 @@
     }
 
     document.getElementById('postBody').innerHTML = heroHtml + bodyHtml;
-    navigate('post');
-    // After navigate() has pushed /post, replace with /blog/<slug> for
-    // shareable deep links. navigate() handles page transitions; the URL
-    // rewrite is a cosmetic follow-up.
-    if (post.slug) {
-      var slugPath = '/blog/' + post.slug;
-      if (location.pathname !== slugPath) {
-        history.replaceState({ page: 'post', slug: post.slug }, '', slugPath);
-      }
-    }
+    // Write the final /blog/<slug> URL (when the post has a slug) in the
+    // same history entry navigate() creates, instead of pushing a generic
+    // /post entry and patching it afterward. A single atomic history write
+    // means a popstate-triggered re-render (e.g. the back button landing on
+    // this exact entry again) sees location.pathname already equal to the
+    // target path and skips writing history again — no duplicate/clobbered
+    // entries, so back/forward walk the real history chain.
+    navigate('post', post.slug
+      ? { url: '/blog/' + post.slug, state: { page: 'post', slug: post.slug } }
+      : undefined);
   }
 
   function filterBlog(tag) {
@@ -2544,29 +2554,51 @@
       body: JSON.stringify(payload),
     }).then(function (r) {
       if (r.ok) { showWhitepaperSuccess(); _resetWpSubmit(); return; }
+      if (r.status === 429) {
+        // Server includes { retryAfter } in the JSON body (seconds) \u2014 surface
+        // the actual wait instead of a hardcoded "in a minute" that's wrong
+        // whenever the day-level limit (not the per-minute one) is what tripped.
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          errorEl.textContent = 'Too many requests. ' + _formatRetryAfter(data && data.retryAfter);
+          _afterWpError(errorEl);
+        });
+      }
       if (r.status === 403) {
         errorEl.textContent = 'Verification failed. Please try again.';
-      } else if (r.status === 429) {
-        errorEl.textContent = 'Too many requests. Please try again in a minute.';
       } else if (r.status === 413 || r.status === 422) {
         errorEl.textContent = 'Couldn\u2019t send \u2014 please double-check your email.';
       } else {
         errorEl.textContent = 'Something went wrong. Please try again.';
       }
-      errorEl.classList.add('visible');
-      // Reset Turnstile so the user can retry
-      if (_wpTurnstileWidgetId !== null && window.turnstile) {
-        try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
-      }
-      _resetWpSubmit();
+      _afterWpError(errorEl);
     }).catch(function () {
       errorEl.textContent = 'Something went wrong. Please try again.';
-      errorEl.classList.add('visible');
-      if (_wpTurnstileWidgetId !== null && window.turnstile) {
-        try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
-      }
-      _resetWpSubmit();
+      _afterWpError(errorEl);
     });
+  }
+  // Turns a server-supplied retryAfter (seconds) into a friendly phrase.
+  // Mirrors the two rate-limit scopes in functions/api/whitepaper-lead.js
+  // (60s per-minute window, 86400s per-day window) without hardcoding
+  // either number in the message.
+  function _formatRetryAfter(seconds) {
+    var n = Number(seconds);
+    if (!n || n <= 0) return 'Please try again shortly.';
+    if (n < 90) return 'Please try again in about a minute.';
+    if (n < 3600) return 'Please try again in about ' + Math.ceil(n / 60) + ' minutes.';
+    if (n < 86400) {
+      var hours = Math.ceil(n / 3600);
+      return 'Please try again in about ' + hours + ' hour' + (hours === 1 ? '' : 's') + '.';
+    }
+    return 'Please try again tomorrow.';
+  }
+  // Shared cleanup after any error response: show the message, reset
+  // Turnstile so the next attempt gets a fresh token, and unlock the button.
+  function _afterWpError(errorEl) {
+    errorEl.classList.add('visible');
+    if (_wpTurnstileWidgetId !== null && window.turnstile) {
+      try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
+    }
+    _resetWpSubmit();
   }
   function showWhitepaperSuccess() {
     document.getElementById('wpForm').classList.add('hidden');
@@ -2623,18 +2655,18 @@
 
   // ---- Page transitions ----
   const _origNavigate = navigate;
-  navigate = function(page) {
+  navigate = function(page, opts) {
     const current = document.querySelector('.page.active');
     if (current) {
       current.classList.add('fade-out');
       setTimeout(() => {
         current.classList.remove('fade-out');
-        _origNavigate(page);
+        _origNavigate(page, opts);
         // Re-init reveals for new page content
         initReveals();
       }, 150);
     } else {
-      _origNavigate(page);
+      _origNavigate(page, opts);
     }
   };
 

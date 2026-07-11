@@ -622,7 +622,9 @@ a `DEPRECATED` header — production traffic flows through the Pages Function.
 - Cloudflare Pages needs `FIBERY_TOKEN` env var set in dashboard for whitepaper leads
 - Sign In links point to the production app `app.underchat.ai/login`
   (2026-07-10; CMS Site Config `Sign In URL` matches). Fibery #307 tracks
-  the full login-gate design.
+  the full login-gate design. The earlier interim staging routing is
+  superseded; `tests/test-suite.sh` asserts no `staging.app.underchat.ai`
+  reference remains in `index.html`.
   (The old `/docs` gate is gone — Docs now links to
   https://documentation.underchat.ai/ and bare `/docs` visits redirect there.)
 - Font stack validated (Inter) but display font TBD

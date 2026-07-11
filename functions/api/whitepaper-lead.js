@@ -90,28 +90,30 @@ function isValidWhitepaper(name) {
 }
 
 /**
- * Per-IP rate limit using Workers KV. Returns { ok, retryAfter }.
+ * Per-IP rate limit using Workers KV. Returns { ok, retryAfter, scope }.
  * - Requires a KV binding named `RATE_LIMIT_KV` in Cloudflare Pages dashboard.
  * - If the binding is missing, rate limiting no-ops (logs warning) so the site
  *   stays functional before the namespace is provisioned.
- * - Budgets: 3 requests / 60s and 20 requests / 24h per CF-Connecting-IP.
+ * - Budgets: 5 requests / 60s and 30 requests / 24h per CF-Connecting-IP.
+ * - Callers must only invoke this AFTER schema validation (valid email +
+ *   known whitepaper). Only accepted submissions consume the budget — a
+ *   typo'd email, a probing whitepaper name, an oversized body, or a CORS
+ *   preflight must never burn quota a real retry will need.
  *
  * Note: KV is eventually consistent. This is abuse mitigation, not a hard
  * counter — burst attackers may slip a few requests through, but sustained
  * abuse is throttled within seconds.
  */
-const RATE_LIMIT_MINUTE = 3;
-const RATE_LIMIT_MINUTE_WINDOW = 60; // seconds
-const RATE_LIMIT_DAY = 20;
-const RATE_LIMIT_DAY_WINDOW = 86400; // seconds
+export const RATE_LIMIT_MINUTE = 5;
+export const RATE_LIMIT_MINUTE_WINDOW = 60; // seconds
+export const RATE_LIMIT_DAY = 30;
+export const RATE_LIMIT_DAY_WINDOW = 86400; // seconds
 
-async function rateLimit(env, request) {
-  const kv = env.RATE_LIMIT_KV;
+export async function checkRateLimit(kv, ip) {
   if (!kv) {
     console.warn('RATE_LIMIT_KV binding missing; rate limiting disabled');
     return { ok: true };
   }
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   const minuteKey = `rl:minute:${ip}`;
   const dayKey = `rl:day:${ip}`;
   try {
@@ -122,13 +124,16 @@ async function rateLimit(env, request) {
     const minuteCount = parseInt(minuteRaw || '0', 10);
     const dayCount = parseInt(dayRaw || '0', 10);
     if (minuteCount >= RATE_LIMIT_MINUTE) {
-      return { ok: false, retryAfter: RATE_LIMIT_MINUTE_WINDOW };
+      return { ok: false, retryAfter: RATE_LIMIT_MINUTE_WINDOW, scope: 'minute' };
     }
     if (dayCount >= RATE_LIMIT_DAY) {
-      return { ok: false, retryAfter: RATE_LIMIT_DAY_WINDOW };
+      return { ok: false, retryAfter: RATE_LIMIT_DAY_WINDOW, scope: 'day' };
     }
     // Increment both counters. expirationTtl preserves a sliding-ish window:
-    // each new write resets the TTL, so a sustained attacker stays blocked.
+    // each new accepted write resets the TTL, so a sustained attacker stays
+    // blocked. Because we only get here for schema-valid, allowlisted
+    // submissions, legitimate users correcting a typo no longer feed this
+    // window at all.
     await Promise.all([
       kv.put(minuteKey, String(minuteCount + 1), { expirationTtl: RATE_LIMIT_MINUTE_WINDOW }),
       kv.put(dayKey, String(dayCount + 1), { expirationTtl: RATE_LIMIT_DAY_WINDOW }),
@@ -189,19 +194,6 @@ export async function onRequestPost(context) {
     return json({ error: 'Server misconfigured' }, 500, request);
   }
 
-  // Per-IP rate limit (no-op when RATE_LIMIT_KV binding is absent)
-  const rl = await rateLimit(env, request);
-  if (!rl.ok) {
-    return new Response(JSON.stringify({ error: 'Too many requests' }), {
-      status: 429,
-      headers: {
-        'Content-Type': 'application/json',
-        'Retry-After': String(rl.retryAfter || 60),
-        ...corsHeaders(request),
-      },
-    });
-  }
-
   // Content-Type guard — only accept JSON. Tolerate parameters like
   // `; charset=utf-8`. Reject early to avoid parsing form-encoded or
   // multipart bodies as JSON (defence vs. content-type confusion).
@@ -249,6 +241,23 @@ export async function onRequestPost(context) {
   }
   if (!KNOWN_WHITEPAPERS.includes(whitepaperName)) {
     return json({ error: 'Unknown content' }, 422, request);
+  }
+
+  // Per-IP rate limit — only ACCEPTED (schema-valid, allowlisted) submissions
+  // reach this point, so typo'd emails, unknown asset probes, oversized
+  // bodies, and CORS preflights never consume the budget. No-ops when
+  // RATE_LIMIT_KV binding is absent.
+  const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const rl = await checkRateLimit(env.RATE_LIMIT_KV, clientIp);
+  if (!rl.ok) {
+    return new Response(JSON.stringify({ error: 'Too many requests', retryAfter: rl.retryAfter }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(rl.retryAfter || 60),
+        ...corsHeaders(request),
+      },
+    });
   }
 
   // Verify Turnstile (skipped automatically when secret is unset — deploy-safe)

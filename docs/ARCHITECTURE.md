@@ -15,7 +15,7 @@ The site is design-system-first: all visual decisions flow from `DESIGN.md` thro
 |-----|---------|
 | `https://undersight.ai` | Production site |
 | `https://legal.undersight.ai` | Privacy policy |
-| `https://staging.app.underchat.ai` | Product app (staging) |
+| `https://app.underchat.ai` | Product app (production sign-in) |
 | `https://calendly.com/kyle-undersight/30min` | Discovery call booking |
 
 ---
@@ -398,7 +398,7 @@ The `--verify` flag confirms this with a full text scan.
 ### Known Exposure
 
 - The Fibery workspace domain `subscript.fibery.io` and database names appear in server/build source files. These are not deployed to production but are in the repository.
-- The staging app URL `https://staging.app.underchat.ai/login` appears in the HTML (known issue flagged in adversarial review).
+- ~~The staging app URL `https://staging.app.underchat.ai/login` appears in the HTML~~ — fixed 2026-07-10; Sign In now points at `https://app.underchat.ai/login` (production).
 
 ---
 
