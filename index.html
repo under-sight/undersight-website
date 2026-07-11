@@ -162,6 +162,7 @@
     <div class="hero hero-split bg-ruled">
       <div class="container hero-inner">
         <div class="hero-copy">
+          <span class="hero-kicker">ai underwriting &middot; private credit</span>
           <h1 id="heroTitle"></h1>
           <p id="heroSubtitle"></p>
           <div class="hero-bar"></div>
@@ -170,42 +171,28 @@
                onclick="event.preventDefault();navigate('underscore')">See the API</a>
           </div>
         </div>
-        <div class="hero-visual" aria-hidden="true">
-          <!-- Score panel -->
-          <div class="hv-card hv-card-score">
-            <div class="hv-score-head">
-              <div>
-                <div class="hv-name">Riverside Cafe LLC</div>
-                <div class="hv-meta">NAICS 722511 &middot; scored 11s ago</div>
-              </div>
-              <span class="hv-rating">R4</span>
+        <div class="hero-visual">
+          <!-- The decision ledger: one product artifact, pinned to the sheet -->
+          <div class="hv-ledger" aria-hidden="true">
+            <div class="hv-ledger-head">
+              <span class="hv-file">FILE 2214</span>
+              <span class="hv-name">Riverside Cafe LLC</span>
+              <span class="hv-live">live</span>
             </div>
-            <div class="hv-row"><span class="hv-k">Revenue quality</span><span class="hv-bar"><i style="width:62%"></i></span><span class="hv-v">56.0</span></div>
-            <div class="hv-row"><span class="hv-k">Existing debt</span><span class="hv-bar"><i class="warn" style="width:74%"></i></span><span class="hv-v">66.6</span></div>
-            <div class="hv-row"><span class="hv-k">Inflow quality</span><span class="hv-bar"><i style="width:34%"></i></span><span class="hv-v">33.5</span></div>
-            <div class="hv-row"><span class="hv-k">Outflow quality</span><span class="hv-bar"><i class="ok" style="width:68%"></i></span><span class="hv-v">61.8</span></div>
-          </div>
-          <!-- Chat thread card (third card per Claude Design 3-card stack) -->
-          <div class="hv-card hv-card-chat">
-            <div class="hv-chat-head">
-              <span class="hv-chat-avatar">M</span>
-              <div class="hv-chat-who">
-                <span class="hv-chat-name">Macy</span>
-                <span class="hv-chat-role">underchat &middot; intake</span>
-              </div>
-              <span class="hv-chat-live">live</span>
+            <div class="hv-rows">
+              <div class="hv-row"><span class="hv-k">Monthly revenue</span><span class="hv-v">$104,200 <em class="hv-check">verified</em></span></div>
+              <div class="hv-row"><span class="hv-k">Debt service coverage</span><span class="hv-v">1.31x</span></div>
+              <div class="hv-row"><span class="hv-k">Deposit trend, 90 day</span><span class="hv-v">+7.8%</span></div>
+              <div class="hv-row"><span class="hv-k">Inflow quality</span><span class="hv-v">33.5 <em class="hv-flag">review</em></span></div>
+              <div class="hv-row"><span class="hv-k">Time in business</span><span class="hv-v">6.2 yrs</span></div>
             </div>
-            <div class="hv-chat-thread">
-              <span class="hv-bubble hv-bubble-agent">Hi Maria &mdash; a few questions on Q1 deposits, excluding tax refunds?</span>
-              <span class="hv-bubble hv-bubble-client">$284k</span>
-              <span class="hv-typing"><i></i><i></i><i></i></span>
+            <div class="hv-total">
+              <span class="hv-total-k">Composite</span>
+              <span class="hv-total-v">742 <em class="hv-verdict">approve</em></span>
             </div>
-          </div>
-          <!-- Composite chip -->
-          <div class="hv-card hv-card-chip">
-            <div class="hv-grade">742</div>
-            <div class="hv-sub">composite</div>
-            <span class="hv-delta">&uarr; 12 wk/wk</span>
+            <div class="hv-foot">
+              <span>underwritten by underscore in 38s</span>
+            </div>
           </div>
           <!-- Overlay book-a-call CTA pinned to the visual -->
           <a class="hero-overlay-cta"
@@ -254,7 +241,7 @@
     <section class="bleed" data-content-entity="Home - Who We Serve">
       <div class="container">
         <div class="sect-head">
-          <span class="eyebrow">Who we serve</span>
+          <span class="eyebrow">01 &middot; Who we serve</span>
           <h2>Built for private credit teams serving the long tail.</h2>
           <p class="lede">Three personas, one underwriting fabric. Plug into whichever stage of the lifecycle you own.</p>
         </div>
@@ -288,7 +275,7 @@
     <section class="bleed alt" data-content-entity="Home - How It Works">
       <div class="container">
         <div class="sect-head">
-          <span class="eyebrow">How it works</span>
+          <span class="eyebrow">02 &middot; How it works</span>
           <h2>From application to funded deal &mdash; in one continuous loop.</h2>
         </div>
         <div class="how">
@@ -324,7 +311,7 @@
     <section class="bleed">
       <div class="container">
         <div class="sect-head">
-          <span class="eyebrow">Solutions</span>
+          <span class="eyebrow">03 &middot; Solutions</span>
           <h2>Three products. One underwriting fabric.</h2>
           <p class="lede">Pick the entry point that fits your team: programmatic risk scoring, an agent that engages your clients, or a co-pilot that grades your full deal book.</p>
         </div>
@@ -337,7 +324,7 @@
     <section class="bleed alt">
       <div class="container">
         <div class="sect-head">
-          <span class="eyebrow">Case studies</span>
+          <span class="eyebrow">04 &middot; Case studies</span>
           <h2>Operators running real books.</h2>
         </div>
         <div class="cs-grid">
@@ -402,7 +389,7 @@
     <section class="testimonial-band" data-content-entity="Home - Testimonial">
       <div class="container">
         <div class="testimonial-quote-wrap">
-          <span class="testimonial-mark" aria-hidden="true">&ldquo;</span>
+          <span class="testimonial-label">05 &middot; In their words</span>
           <blockquote class="testimonial-quote">
             We started 4D because business owners deserve a better deal. <em>undersight gives us the underwriting rigor of a large institution without the headcount</em> &mdash; every decision backed by data, cross-referenced across documents, and fully auditable.
           </blockquote>
@@ -424,7 +411,7 @@
     <section class="cta cta-band" data-content-entity="Home - CTA">
       <div class="container cta-inner">
         <div class="cta-copy">
-          <span class="eyebrow">Get started</span>
+          <span class="eyebrow">06 &middot; Get started</span>
           <h2 id="ctaTitle">See undersight against <em>your</em> deal book.</h2>
           <p id="ctaSubtitle" class="lede">Bring us a recent application or a portfolio sample. In 30 minutes we'll show what changes when underwriting becomes a continuous loop.</p>
           <div class="cta-row">
@@ -2873,7 +2860,7 @@
 
   // ---- Scroll reveal ----
   function initReveals() {
-    document.querySelectorAll('.home-section, .stats-bar, .cta-section, .testimonial-section, .case-study, .sol-hero, .sol-body').forEach(el => {
+    document.querySelectorAll('.home-section, .cta-section, .sol-hero, .sol-body').forEach(el => {
       el.classList.add('reveal');
     });
     document.querySelectorAll('#homeSolutions').forEach(el => {
