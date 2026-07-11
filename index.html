@@ -2554,29 +2554,51 @@
       body: JSON.stringify(payload),
     }).then(function (r) {
       if (r.ok) { showWhitepaperSuccess(); _resetWpSubmit(); return; }
+      if (r.status === 429) {
+        // Server includes { retryAfter } in the JSON body (seconds) \u2014 surface
+        // the actual wait instead of a hardcoded "in a minute" that's wrong
+        // whenever the day-level limit (not the per-minute one) is what tripped.
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          errorEl.textContent = 'Too many requests. ' + _formatRetryAfter(data && data.retryAfter);
+          _afterWpError(errorEl);
+        });
+      }
       if (r.status === 403) {
         errorEl.textContent = 'Verification failed. Please try again.';
-      } else if (r.status === 429) {
-        errorEl.textContent = 'Too many requests. Please try again in a minute.';
       } else if (r.status === 413 || r.status === 422) {
         errorEl.textContent = 'Couldn\u2019t send \u2014 please double-check your email.';
       } else {
         errorEl.textContent = 'Something went wrong. Please try again.';
       }
-      errorEl.classList.add('visible');
-      // Reset Turnstile so the user can retry
-      if (_wpTurnstileWidgetId !== null && window.turnstile) {
-        try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
-      }
-      _resetWpSubmit();
+      _afterWpError(errorEl);
     }).catch(function () {
       errorEl.textContent = 'Something went wrong. Please try again.';
-      errorEl.classList.add('visible');
-      if (_wpTurnstileWidgetId !== null && window.turnstile) {
-        try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
-      }
-      _resetWpSubmit();
+      _afterWpError(errorEl);
     });
+  }
+  // Turns a server-supplied retryAfter (seconds) into a friendly phrase.
+  // Mirrors the two rate-limit scopes in functions/api/whitepaper-lead.js
+  // (60s per-minute window, 86400s per-day window) without hardcoding
+  // either number in the message.
+  function _formatRetryAfter(seconds) {
+    var n = Number(seconds);
+    if (!n || n <= 0) return 'Please try again shortly.';
+    if (n < 90) return 'Please try again in about a minute.';
+    if (n < 3600) return 'Please try again in about ' + Math.ceil(n / 60) + ' minutes.';
+    if (n < 86400) {
+      var hours = Math.ceil(n / 3600);
+      return 'Please try again in about ' + hours + ' hour' + (hours === 1 ? '' : 's') + '.';
+    }
+    return 'Please try again tomorrow.';
+  }
+  // Shared cleanup after any error response: show the message, reset
+  // Turnstile so the next attempt gets a fresh token, and unlock the button.
+  function _afterWpError(errorEl) {
+    errorEl.classList.add('visible');
+    if (_wpTurnstileWidgetId !== null && window.turnstile) {
+      try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
+    }
+    _resetWpSubmit();
   }
   function showWhitepaperSuccess() {
     document.getElementById('wpForm').classList.add('hidden');
