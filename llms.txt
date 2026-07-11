@@ -4,16 +4,29 @@
 
 undersight builds agentic AI tools that automate intake, enrich data, score risk, and assist underwriters across every stage of small business lending. The platform serves private credit funds, brokers, and marketplaces in MCA, revenue-based financing, and factoring.
 
+This file is the machine-readable summary of undersight.ai. The deployed copy
+is regenerated at build time with a current blog index from the CMS. For the
+full plain-text content of every page and blog post, fetch
+https://undersight.ai/llms-full.txt — no SPA crawling needed.
+
 ## Products
 
 ### underscore
 API-first agentic and ML risk scoring for small business portfolios. Send a deal via API, get back enriched analysis and a risk score in seconds. Continuous portfolio monitoring flags pre-default signals automatically.
+https://undersight.ai/underscore
 
-### Agentic Client RFI
+### underchat agent (Agentic Client RFI)
 Conversational AI intake agent (Macy) that collects documents from applicants and brokers, answers questions, resolves gaps, and builds funder-ready submission packages. No manual follow-up required.
+https://undersight.ai/underchat
 
 ### AI Underwriting Copilot
 Single-pane underwriting workspace where underwriters can analyze transactions, score risk, and get AI-powered insights. 30% faster screening, 20-30% more approvals. The underwriter still makes the call.
+https://undersight.ai/copilot
+
+## Documentation
+
+Product and API documentation lives on a dedicated site:
+https://documentation.underchat.ai/
 
 ## Key Metrics
 - 71% reduction in deal time (based on active customer deployments)
@@ -31,7 +44,8 @@ Single-pane underwriting workspace where underwriters can analyze transactions, 
 - Book a call: https://calendly.com/kyle-undersight/30min
 
 ## Links
-- Solutions: https://undersight.ai/#underscore, https://undersight.ai/#rfi, https://undersight.ai/#copilot
-- Blog: https://undersight.ai/#blog
-- API Documentation: https://undersight.ai/#docs
+- Solutions: https://undersight.ai/underscore, https://undersight.ai/underchat, https://undersight.ai/copilot
+- Blog: https://undersight.ai/blog
+- Documentation: https://documentation.underchat.ai/
+- Full site content (plain text): https://undersight.ai/llms-full.txt
 - Privacy Policy: https://legal.undersight.ai
