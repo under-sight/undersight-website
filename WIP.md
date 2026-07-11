@@ -20,7 +20,7 @@ The site is not live at undersight.ai. The dev server runs locally via `undersig
 - **Dependencies:** All other P0 items should be fixed first so the deployed site is clean
 - **Ref:** Task #23 (completed planning but not execution)
 
-### 2. Staging URL leak -- "Sign In" links point to `staging.app.underchat.ai`
+### 2. ~~Staging URL leak~~ RESOLVED 2026-07-10 -- Sign In now points to `app.underchat.ai/login` (both hrefs + CMS Site Config in both spaces)
 
 Both desktop and mobile "Sign In" buttons hardcode `https://staging.app.underchat.ai/login`. This exposes the staging environment and the internal `underchat` brand name to visitors.
 

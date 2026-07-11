@@ -2334,6 +2334,15 @@ else
   pass "page-docs section removed"
 fi
 
+# Test: Sign In goes to the production app, never staging
+SIGNIN_URL="https://app.underchat.ai/login"
+SIGNIN_COUNT=$(grep -c "href=\"$SIGNIN_URL\"" "$SRC_HTML" || true)
+if [ "$SIGNIN_COUNT" -ge 2 ] && ! grep -q "staging.app.underchat.ai" "$SRC_HTML"; then
+  pass "Sign In links point at $SIGNIN_URL, no staging refs ($SIGNIN_COUNT found)"
+else
+  fail "Sign In links point at $SIGNIN_URL, no staging refs" "found=$SIGNIN_COUNT staging=$(grep -c 'staging.app.underchat.ai' "$SRC_HTML" || true)"
+fi
+
 # Test: bare /docs deep link redirects via location.replace (replace, not
 # assign, so back from the docs site skips the redirect hop)
 if grep -q "location.replace('$DOCS_URL')" "$SRC_HTML"; then
