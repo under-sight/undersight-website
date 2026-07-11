@@ -146,11 +146,11 @@ async function main() {
     );
   }
 
-  // Cloudflare Turnstile throws in local/dev because no real sitekey is
-  // configured (data-sitekey="" on the invisible lead-capture widget) —
-  // pre-existing, unrelated to routing, and present with or without this
-  // spec's fix. Filter it out so this stays a router regression test.
-  const routingErrors = pageErrors.filter((e) => !/TurnstileError/i.test(e));
+  // The lead-capture Turnstile mount (#wpTurnstile) is rendered explicitly on
+  // modal open and must never be auto-scanned at page load (no cf-turnstile
+  // class, no empty data-sitekey — see index.html). A load-time TurnstileError
+  // is therefore a real regression now and is NOT filtered out.
+  const routingErrors = pageErrors;
   assert(routingErrors.length === 0, `no uncaught page errors during navigation${routingErrors.length ? ': ' + routingErrors.join(' | ') : ''}`);
 
   await browser.close();

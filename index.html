@@ -382,8 +382,12 @@
       <p class="wp-desc" id="wpDesc">Enter your email and we'll send you the full article as a PDF.</p>
       <input type="email" class="wp-input" id="wpEmail" placeholder="you@company.com" autocomplete="email" required>
       <div class="wp-error-msg" id="wpError">Please enter a valid email address.</div>
-      <!-- Invisible Turnstile widget. data-sitekey is set in JS when the modal opens. -->
-      <div class="cf-turnstile" id="wpTurnstile" data-sitekey="" data-callback="onWpTurnstileToken" data-size="invisible"></div>
+      <!-- Invisible Turnstile mount point. No cf-turnstile class and no data-*
+           attrs: Cloudflare's api.js auto-scans .cf-turnstile divs at load and
+           throws TurnstileError on an empty sitekey. The widget is rendered
+           explicitly (turnstile.render with the baked key) when the modal
+           first opens — see openWhitepaperModal(). -->
+      <div id="wpTurnstile"></div>
       <button class="btn btn-primary wp-submit" onclick="submitWhitepaperEmail()">Send me the PDF</button>
     </div>
     <div class="wp-success" id="wpSuccess">

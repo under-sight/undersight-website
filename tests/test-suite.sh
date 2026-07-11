@@ -476,6 +476,22 @@ else
   fail "All Sign In anchors point at https://app.underchat.ai/login" "found $SIGNIN_HREF_COUNT Sign In anchor(s), $SIGNIN_HREF_CORRECT correct"
 fi
 
+# Test: the Turnstile mount must not invite Cloudflare's page-load auto-scan.
+# api.js auto-renders every .cf-turnstile div at load; the lead-capture mount
+# starts with no sitekey (it is rendered explicitly on modal open), so a
+# cf-turnstile class or an empty data-sitekey throws TurnstileError on every
+# page load and masks real Turnstile regressions.
+WP_TS_DIV=$(echo "$HTML_SOURCE" | grep -oE '<div[^>]*id="wpTurnstile"[^>]*>' || true)
+if [ -z "$WP_TS_DIV" ]; then
+  fail "Turnstile mount #wpTurnstile present" "div not found"
+elif echo "$WP_TS_DIV" | grep -q 'cf-turnstile'; then
+  fail "Turnstile mount is not auto-scanned at page load" "cf-turnstile class present on #wpTurnstile"
+elif echo "$WP_TS_DIV" | grep -q 'data-sitekey=""'; then
+  fail "Turnstile mount is not auto-scanned at page load" 'empty data-sitekey="" present on #wpTurnstile'
+else
+  pass "Turnstile mount #wpTurnstile is explicit-render only (no auto-scan)"
+fi
+
 # =============================================================================
 section "Accessibility Tests"
 # =============================================================================
