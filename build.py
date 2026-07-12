@@ -40,7 +40,7 @@ CACHE_DIR = os.path.join(SRC_DIR, ".fibery-file-cache")
 # Static files and directories to copy into dist/
 # NOTE: sitemap.xml and llms.txt are copied as fallbacks and then REGENERATED
 # from CMS content (per-post URLs / blog index) later in the build.
-STATIC_DIRS = ["css", "images"]
+STATIC_DIRS = ["css", "images", "resources"]
 STATIC_FILES = [
     "robots.txt",
     "sitemap.xml",
@@ -836,6 +836,8 @@ SITEMAP_PAGES = [
     ("/copilot", "monthly", "0.8"),
     ("/blog", "weekly", "0.7"),
     ("/contact", "monthly", "0.5"),
+    # Standalone GEO/SEO landing page (static file in resources/, not in nav)
+    ("/cash-flow-underwriting", "monthly", "0.7"),
 ]
 
 # CMS/Pages entities that are site configuration rather than content —
