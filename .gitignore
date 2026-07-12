@@ -45,3 +45,6 @@ out/
 
 # Visual regression screenshots (kept locally, never committed)
 tests/visual-baselines/
+
+# Wrangler local dev state
+.wrangler/

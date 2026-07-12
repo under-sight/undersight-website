@@ -1018,6 +1018,152 @@ def generate_llms_full_txt(content_map):
     return "\n".join(parts).rstrip() + "\n"
 
 
+# ---------------------------------------------------------------------------
+# Per-page Markdown for AI agents (free "Markdown for Agents")
+#
+# Emits one dist/<route>.md per page/post so functions/_middleware.js can serve
+# Markdown on `Accept: text/markdown` or a `.md` URL — replicating Cloudflare's
+# Pro "Markdown for Agents" on the free tier. The route -> content-entity map
+# mirrors the SPA page assembly in index.html (the pageMeta table). Pure
+# functions, unit-tested in tests/md-pages.test.py; dist output checked in
+# tests/build-validation.sh.
+# ---------------------------------------------------------------------------
+
+# Static (non-blog) routes -> the content entities that compose each page.
+# Config-only entities (Site Config, SEO, Footer, ContactPoint, Docs Page) have
+# no route and are omitted, same intent as LLMS_FULL_EXCLUDE.
+MD_PAGE_ROUTES = [
+    ("/underscore", ["Solutions - underscore"]),
+    ("/underchat", ["Solutions - underchat agent"]),
+    ("/copilot",
+     ["Solutions - AI Underwriting Copilot", "Solutions - copilot - Scoring Engine"]),
+    ("/contact", ["Contact Page"]),
+]
+
+# Preferred display order for the composed home page. Any other "Home - *"
+# entity is appended alphabetically so new CMS sections are never silently
+# dropped from /index.md.
+MD_HOME_ORDER = [
+    "Home - Hero",
+    "Home - Who We Serve",
+    "Home - How It Works",
+    "Home - Metrics",
+    "Home - Case Study: 4D Financing",
+    "Home - Case Study: Chat Advance",
+    "Home - Testimonial",
+    "Home - CTA",
+]
+
+
+def _home_entity_names(content_map):
+    ordered = [n for n in MD_HOME_ORDER if n in content_map]
+    extras = sorted(
+        n for n in content_map
+        if n.startswith("Home - ") and n not in MD_HOME_ORDER
+    )
+    return ordered + extras
+
+
+def _clean_entity_markdown(md):
+    """Prepare a CMS entity's markdown for a standalone page. The CMS stores
+    real content as `**Key:** value` lines (metrics, titles, quotes) that the
+    SPA renders as UI and that llms-full.txt already exposes — so those are kept
+    verbatim. Only the UI-only `**Icon:**` marker (a single display letter) is
+    dropped. The entity keeps its own leading heading as the page/section title
+    (no synthetic title is prepended, avoiding duplicate headings)."""
+    lines = [
+        line for line in (md or "").split("\n")
+        if not re.match(r"^\*\*Icon:\*\*", line.strip())
+    ]
+    return "\n".join(lines).strip()
+
+
+def compose_page_markdown(entity_names, content_map):
+    """Concatenate one or more content entities' Markdown into one page.
+    Returns "" if no entity has content (so empty pages aren't written)."""
+    bodies = []
+    for name in entity_names:
+        data = content_map.get(name)
+        if not data:
+            continue
+        body = _clean_entity_markdown(data.get("content") or "")
+        if body:
+            bodies.append(body)
+    if not bodies:
+        return ""
+    return "\n\n".join(bodies).strip() + "\n"
+
+
+def blog_markdown(post):
+    """Markdown for a single blog post: title, meta line, subtitle, body.
+    Reuses strip_legacy_frontmatter so stale migration front-matter never leaks
+    (mirrors generate_llms_full_txt)."""
+    lines = [f"# {post.get('name', '')}", ""]
+    meta = [p for p in (_post_date(post), post.get("author") or "",
+                        post.get("type") or "") if p]
+    if meta:
+        lines += ["*" + " · ".join(meta) + "*", ""]
+    subtitle = (post.get("subtitle") or "").strip()
+    if subtitle:
+        lines += [subtitle, ""]
+    body = strip_legacy_frontmatter(post.get("body") or "").strip()
+    if body:
+        lines += [body, ""]
+    return "\n".join(lines).strip() + "\n"
+
+
+def blog_index_markdown(blogs):
+    """Markdown index of all blog posts for /blog.md."""
+    lines = ["# Blog", ""]
+    for post in blogs:
+        date = _post_date(post)
+        suffix = f" — {date}" if date else ""
+        lines.append(f"- [{post.get('name', '')}]({_post_url(post)}){suffix}")
+    return "\n".join(lines).strip() + "\n"
+
+
+def markdown_targets(content_map):
+    """Map request route (no .md suffix) -> page Markdown, for every page/post.
+    Home is "/index" so it maps cleanly to dist/index.md."""
+    targets = {}
+
+    home = compose_page_markdown(_home_entity_names(content_map), content_map)
+    if home:
+        targets["/index"] = home
+
+    for route, entities in MD_PAGE_ROUTES:
+        md = compose_page_markdown(entities, content_map)
+        if md:
+            targets[route] = md
+
+    blogs = (content_map.get("_blogs") or {}).get("_data") or []
+    if blogs:
+        targets["/blog"] = blog_index_markdown(blogs)
+        for post in blogs:
+            slug = post.get("slug")
+            if slug:
+                targets[f"/blog/{slug}"] = blog_markdown(post)
+
+    return targets
+
+
+def write_markdown_pages(content_map):
+    """Write dist/<route>.md for every markdown target + dist/_md-manifest.json
+    (the list of available .md asset paths). Returns the manifest list."""
+    manifest = []
+    for route, md in markdown_targets(content_map).items():
+        rel = route.lstrip("/") + ".md"  # "/index" -> "index.md", "/blog/x" -> "blog/x.md"
+        dest = os.path.join(DIST_DIR, rel)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        with open(dest, "w", encoding="utf-8") as f:
+            f.write(md)
+        manifest.append("/" + rel)
+    manifest.sort()
+    with open(os.path.join(DIST_DIR, "_md-manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+    return manifest
+
+
 def write_discoverability_artifacts(content_map):
     """Write dist/sitemap.xml, dist/llms.txt, dist/llms-full.txt from CMS content.
     Overwrites the static fallbacks copied by copy_static_files()."""
@@ -1039,6 +1185,9 @@ def write_discoverability_artifacts(content_map):
     with open(os.path.join(DIST_DIR, "llms-full.txt"), "w", encoding="utf-8") as f:
         f.write(llms_full)
     print(f"  Written: dist/llms-full.txt ({format_size(len(llms_full.encode('utf-8')))})")
+
+    md_manifest = write_markdown_pages(content_map)
+    print(f"  Written: {len(md_manifest)} per-page .md files + dist/_md-manifest.json")
 
 
 # ---------------------------------------------------------------------------

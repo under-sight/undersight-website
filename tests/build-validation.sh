@@ -124,6 +124,23 @@ fi
 grep -q '/llms-full.txt' "$DIST/robots.txt" 2>/dev/null && pass "dist/robots.txt hints at llms-full.txt" || fail "dist/robots.txt hints at llms-full.txt"
 [ -f "$DIST/_headers" ] && grep -q 'X-Robots-Tag: all' "$DIST/_headers" && pass "dist/_headers sets X-Robots-Tag" || fail "dist/_headers sets X-Robots-Tag"
 
+# Per-page Markdown for agents (dist/<route>.md + manifest, served by
+# functions/_middleware.js on Accept: text/markdown or a .md URL)
+for md in index.md underscore.md underchat.md copilot.md contact.md; do
+  [ -s "$DIST/$md" ] && pass "dist/$md present and non-empty" || fail "dist/$md present and non-empty"
+done
+[ -s "$DIST/blog.md" ] && pass "dist/blog.md present" || fail "dist/blog.md present"
+MD_BLOG_POSTS=$(ls "$DIST"/blog/*.md 2>/dev/null | wc -l | tr -d ' ')
+[ "$MD_BLOG_POSTS" = "$BLOG_LOCS" ] && pass "per-post .md matches sitemap ($MD_BLOG_POSTS)" || fail "per-post .md matches sitemap" "md=$MD_BLOG_POSTS sitemap=$BLOG_LOCS"
+if [ -f "$DIST/_md-manifest.json" ]; then
+  pass "dist/_md-manifest.json present"
+  grep -q '"/index.md"' "$DIST/_md-manifest.json" && pass "manifest lists /index.md" || fail "manifest lists /index.md"
+else
+  fail "dist/_md-manifest.json present"
+fi
+grep -q '/\*.md' "$DIST/_headers" 2>/dev/null && pass "_headers covers /*.md" || fail "_headers covers /*.md"
+head -1 "$DIST/underscore.md" 2>/dev/null | grep -q '^# ' && pass "underscore.md starts with a heading" || fail "underscore.md starts with a heading"
+
 # Docs tab: external link baked, no SPA docs routing in dist
 grep -q 'https://documentation.underchat.ai/' "$DIST/index.html" && pass "dist docs links point at documentation.underchat.ai" || fail "dist docs links point at documentation.underchat.ai"
 ! grep -q "navigate('docs')" "$DIST/index.html" && pass "No navigate('docs') in dist" || fail "No navigate('docs') in dist"
