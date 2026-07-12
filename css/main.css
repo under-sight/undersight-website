@@ -540,89 +540,96 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 }
 .sol-row .explore:hover { gap: 10px; }
 
-/* === Mini-graphic: underscore mini scorecard === */
-.mini-score {
-  display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center;
+/* === Mini-graphics: ledger grammar ============================
+   Three facets of one underwriting file (FILE 2214), rebuilt in the
+   hero .hv-ledger language: hairline-separated rows, DM Sans labels
+   left, right-aligned mono figures, accounting total rules. No donut
+   gauges, no chat bubbles. Fully token-driven so light/dark need no
+   per-theme overrides. Outer hooks (.mini-score/.mini-chat/.mini-grade)
+   are preserved for JS + sibling CSS; the .sol-ledger modifier scopes
+   the shared frame layout without leaking onto reused .mini-chat. */
+.sol-ledger {
+  display: flex; flex-direction: column; justify-content: center; width: 100%;
 }
-.mini-score .rows { display: flex; flex-direction: column; gap: 7px; }
-.mini-score .row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; gap: 14px; }
-.mini-score .row .k { color: var(--mid); font-family: 'Inter', -apple-system, sans-serif; }
-.mini-score .row .v { color: var(--black); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-.mini-score .row .v.up { color: var(--color-eucalyptus); }
-.mini-score .chip {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 56px; height: 56px; border-radius: 50%;
-  background: conic-gradient(var(--color-eucalyptus) 0deg, var(--color-eucalyptus) 268deg, var(--light) 268deg);
-  position: relative;
+.mini-score .ms-head, .mini-chat .mc-head, .mini-grade .mg-head {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px;
+  font: 500 11px/1 var(--font-mono); letter-spacing: 0.04em;
+  color: var(--mid); text-transform: uppercase;
 }
-.mini-score .chip::after { content: ''; position: absolute; top: 5px; right: 5px; bottom: 5px; left: 5px; background: var(--white); border-radius: 50%; }
-.mini-score .chip .num { position: relative; z-index: 1; font-family: 'Inter', -apple-system, sans-serif; font-size: 14px; font-weight: 700; color: var(--color-eucalyptus); line-height: 1; }
-.mini-score .chip .lab { position: relative; z-index: 1; font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
+.mini-score .ms-cat, .mini-grade .mg-cat { margin-left: auto; }
 
-/* === Mini-graphic: underchat agent mini chat === */
-.mini-chat { display: flex; flex-direction: column; gap: 6px; }
-.mini-chat .pill-live {
-  align-self: flex-start;
-  font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
-  color: var(--color-eucalyptus);
-  display: flex; align-items: center; gap: 5px;
-  padding: 3px 8px; border-radius: 999px;
-  background: rgba(107, 158, 140, 0.1);
-  border: 1px solid rgba(107, 158, 140, 0.3);
-  text-transform: uppercase; letter-spacing: 0.06em;
+/* shared row + total primitives (mirror .hv-row / .hv-total) */
+.mini-score .ms-row, .mini-grade .mg-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--color-rule);
 }
-.mini-chat .pill-live::before {
-  content: ''; width: 5px; height: 5px; border-radius: 50%;
-  background: var(--color-eucalyptus); box-shadow: 0 0 6px var(--color-eucalyptus);
+.mini-score .ms-row:last-child, .mini-grade .mg-row:last-child { border-bottom: none; }
+.mini-score .ms-k, .mini-grade .mg-k { font: 400 12.5px/1.4 'DM Sans', -apple-system, sans-serif; color: var(--mid); }
+.mini-score .ms-v, .mini-grade .mg-v {
+  font: 500 12.5px/1.4 var(--font-mono); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em; color: var(--black); text-align: right; white-space: nowrap;
 }
-.mini-chat .bubble {
-  max-width: 88%; padding: 7px 11px; border-radius: 12px;
-  font-family: 'DM Sans', -apple-system, sans-serif;
-  font-size: 11.5px; line-height: 1.4;
-}
-.mini-chat .bubble.agent {
-  align-self: flex-start;
-  background: var(--color-accent-light); color: var(--color-text, var(--black));
-  border: 1px solid rgba(201, 122, 84, 0.2);
-  border-bottom-left-radius: 3px;
-}
-.mini-chat .bubble.client {
-  align-self: flex-end;
-  background: var(--white); color: var(--color-text, var(--black));
-  border: 1px solid var(--light);
-  border-bottom-right-radius: 3px;
+.mini-score .ms-total-k, .mini-grade .mg-total-k {
+  font: 600 11px/1.2 'Inter', -apple-system, sans-serif;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--dark);
 }
 
-/* === Mini-graphic: underchat co-pilot grade ring === */
-.mini-grade {
-  display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center;
+/* --- underscore: composite closed by a thin eucalyptus fill bar --- */
+.mini-score .ms-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; padding: 12px 0 8px; margin-top: 2px;
+  border-top: 1px solid var(--color-border);
 }
-.mini-grade .ring {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: conic-gradient(var(--color-accent) 0deg, var(--color-accent) 252deg, var(--light) 252deg);
-  display: flex; align-items: center; justify-content: center; position: relative;
+.mini-score .ms-total-v {
+  font: 500 24px/1 var(--font-mono); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em; color: var(--black);
 }
-.mini-grade .ring::after { content: ''; position: absolute; top: 6px; right: 6px; bottom: 6px; left: 6px; background: var(--white); border-radius: 50%; }
-.mini-grade .ring .stack { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
-.mini-grade .ring .grade { font-family: 'Inter', -apple-system, sans-serif; font-size: 22px; font-weight: 700; color: var(--color-accent); line-height: 1; }
-.mini-grade .ring .sub { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--mid); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
-.mini-grade .legend { display: flex; flex-direction: column; gap: 6px; font-family: 'Inter', -apple-system, sans-serif; font-size: 10.5px; color: var(--dark); }
-.mini-grade .legend .item { display: flex; align-items: center; gap: 7px; }
-.mini-grade .legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
-.mini-grade .legend .dot.ml { background: var(--black); }
-.mini-grade .legend .dot.ag { background: var(--color-accent); }
-.mini-grade .legend .val { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--mid); margin-left: 2px; }
-.mini-grade .legend .src { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--color-eucalyptus); margin-top: 2px; }
+.mini-score .ms-bar { height: 3px; background: var(--color-bg-muted); overflow: hidden; }
+.mini-score .ms-bar-fill { display: block; height: 100%; width: 87%; background: var(--color-eucalyptus); }
 
-/* === Dark mode tweaks for the mini-graphics === */
-@media (prefers-color-scheme: dark) {
-  .mini-chat .bubble.client { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); }
-  .mini-chat .bubble.agent { background: rgba(201, 122, 84, 0.18); border-color: rgba(201, 122, 84, 0.35); }
+/* --- underchat: intake transcript as a ruled log --- */
+.mini-chat .mc-live {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  color: var(--color-eucalyptus-hover);
 }
-html.theme-dark .mini-chat .bubble.client { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); }
-html.theme-dark .mini-chat .bubble.agent { background: rgba(201, 122, 84, 0.18); border-color: rgba(201, 122, 84, 0.35); }
-html.theme-light .mini-chat .bubble.client { background: var(--white); border-color: var(--light); }
-html.theme-light .mini-chat .bubble.agent { background: var(--color-accent-light); border-color: rgba(201, 122, 84, 0.2); }
+.mini-chat .mc-live::before { content: ''; width: 6px; height: 6px; background: var(--color-eucalyptus); }
+.mini-chat .mc-line {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  padding: 7px 0; border-bottom: 1px solid var(--color-rule);
+}
+.mini-chat .mc-line:last-child { border-bottom: none; }
+.mini-chat .mc-t {
+  font: 500 11px/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--mid);
+}
+.mini-chat .mc-who {
+  font: 500 11px/1.4 var(--font-mono); color: var(--color-accent-hover);
+  min-width: 42px; text-transform: lowercase;
+}
+.mini-chat .mc-who.is-client { color: var(--dark); }
+.mini-chat .mc-msg { flex: 1 1 auto; font: 400 12.5px/1.45 'DM Sans', -apple-system, sans-serif; color: var(--black); }
+
+/* --- co-pilot: grade-ledger with the double-rule total (mirror .hv-total) --- */
+.mini-grade .mg-total {
+  position: relative; display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; padding: 14px 0 6px; margin-top: 3px;
+  border-top: 1px solid var(--color-border);
+}
+.mini-grade .mg-total::before {
+  content: ''; position: absolute; top: var(--rule-double-gap); left: 0; right: 0;
+  height: 1px; background: var(--color-border-light); pointer-events: none;
+}
+.mini-grade .mg-total-v {
+  font: 500 26px/1 var(--font-mono); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em; color: var(--black);
+}
+.mini-grade .mg-foot {
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--color-rule);
+  font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.03em; color: var(--mid);
+}
+
+/* Mini-graphics + sol-row pills need zero per-theme overrides: pills are now
+   flat plain-mono labels (transparent bg, no border) and the mini-graphics are
+   fully token-driven, so light/dark resolve from tokens alone. */
 
 @media (max-width: 960px) {
   .sol-row { gap: 36px; }
