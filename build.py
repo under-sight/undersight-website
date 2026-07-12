@@ -244,6 +244,7 @@ def fetch_all(token):
                             "Excerpt": f"{FIBERY_SPACE}/Excerpt",
                             "PostDate": f"{FIBERY_SPACE}/Post Date",
                             "CreationDate": "fibery/creation-date",
+                            "Status": [f"{FIBERY_SPACE}/Status", "enum/name"],
                             "Type": [f"{FIBERY_SPACE}/Type", "enum/name"],
                             "DocSecret": [
                                 f"{FIBERY_SPACE}/Description",
@@ -354,6 +355,11 @@ def fetch_all(token):
         name = be.get("Name")
         slug = be.get("Slug")
         if not name or not slug:
+            continue
+        # Draft posts never reach the built site. Entries with no Status
+        # (everything created before the field existed) are published.
+        if be.get("Status") == "Draft":
+            print(f"  Skipping draft blog post: {name}")
             continue
         files = []
         for f in be.get("Files") or []:
