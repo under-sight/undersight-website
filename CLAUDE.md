@@ -139,7 +139,8 @@ Requires `FIBERY_TOKEN` env var or macOS Keychain entry
 | Build output | `dist/` (committed, deployed to Cloudflare Pages) |
 | Dev server | `undersight-serve.py` |
 | Build script | `build.py` |
-| Cloudflare Worker | `worker/index.js` + `worker/wrangler.toml` |
+| Cloudflare Worker (whitepaper backend) | `worker/index.js` + `worker/wrangler.toml` |
+| Markdown-for-Agents (edge) | `functions/_middleware.js` + `functions/_md-negotiation.mjs` (per-page `.md` emitted by `build.py`) |
 | Whitepapers | `whitepaper/` (PDFs + generation scripts) |
 
 ---
@@ -408,6 +409,60 @@ transplant as a model for how this pipeline works end-to-end.
 - Dark mode support via `prefers-color-scheme`
 - Design-system-first: DESIGN.md is source of truth, tokens are derived
 - Brand colors match `skills/png-export/png-export.md` defaults
+
+---
+
+## Markdown for Agents (free content negotiation)
+
+A self-hosted equivalent of Cloudflare's **Pro** "Markdown for Agents" feature,
+running for **$0** on the Pages/Workers free tier. AI agents that fetch the site
+get clean Markdown instead of the HTML SPA; browsers are unaffected. Shipped to
+production 2026-07-12 (PR #32).
+
+### How it works
+
+- **Edge:** `functions/_middleware.js` (a Pages Function that runs on every
+  request) serves the built Markdown when a request either sends
+  `Accept: text/markdown` **or** targets a `.md` URL. Everything else falls
+  through to the normal HTML response via `next()`.
+- **Pure helpers:** `functions/_md-negotiation.mjs` — `acceptsMarkdown()`,
+  `markdownAssetPath()` (route → `.md` asset), `isHtmlDocument()`. No
+  Workers-runtime APIs, so they're unit-tested with `node --test`.
+- **Build:** `build.py` emits one `dist/<route>.md` per page/post (home is
+  `dist/index.md`) plus `dist/_md-manifest.json` listing the available `.md`
+  assets. Markdown is generated from the Fibery CMS source at build time —
+  higher fidelity than edge HTML-scraping.
+- **Response headers on markdown:** `content-type: text/markdown; charset=utf-8`,
+  `vary: Accept` (so caches don't serve MD to browsers), `x-robots-tag: all`,
+  `cache-control: public, max-age=300`.
+
+### Gotcha: the SPA fallback lies about content-type
+
+`_redirects` has `/* /index.html 200`, so an unknown path — including an unknown
+`.md` — resolves to the HTML shell at **status 200**, and the asset server types
+that response `text/markdown` (it keys off the request path's `.md` extension).
+So the middleware detects a real miss by **body**, not content-type
+(`isHtmlDocument()` sniffs for `<!doctype html>`/`<html>`). On a miss: an
+explicit `.md` URL returns a genuine **404**; an `Accept`-negotiated request
+falls through to normal HTML.
+
+### Tests (TDD)
+
+- `tests/md-negotiation.test.mjs` — pure helpers (`node --test tests/md-negotiation.test.mjs`).
+- `tests/md-pages.test.py` — per-page `.md` + manifest generation (`python3 tests/md-pages.test.py`).
+- `tests/build-validation.sh` — `.md` asset presence checks against `dist/`.
+
+### Verify against production
+
+```bash
+curl -H "Accept: text/markdown" https://undersight.ai/          # → 200 text/markdown
+curl https://undersight.ai/underscore.md                        # → 200 text/markdown
+curl -o /dev/null -w '%{http_code}\n' https://undersight.ai/nope.md   # → 404 (real miss)
+curl -H "Accept: text/html" https://undersight.ai/              # → 200 text/html (SPA intact)
+```
+
+Do **not** re-enable Cloudflare's Pro "Markdown for Agents" toggle — it would
+double-convert. This function already provides the behavior.
 
 ---
 
