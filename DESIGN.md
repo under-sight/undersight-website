@@ -464,6 +464,12 @@ This tracking scale tightens proportionally with size, producing editorial densi
 - **Display is Inter, body is DM Sans.** Never use DM Sans for headlines. Never use Inter for body paragraphs. The split is structural (Inter) vs. narrative (DM Sans).
 - **Negative tracking on display only.** Body sizes stay at `0` letter-spacing. Tightening body text reduces readability.
 
+### Type exploration (2026-07 -- proposal, not yet ratified)
+
+The display/UI tier has always been Inter, which reads as the default AI-product face. Branch `agent/opus/...-type-explore` proposes replacing Inter's structural role with **Schibsted Grotesk** (a variable editorial grotesk, weights 400-900, commissioned by the Schibsted news group -- a pedigree that suits an underwriting-file brand). Three Google-Fonts candidates were compared (Schibsted Grotesk, Familjen Grotesk, Instrument Sans); full rationale, character notes, and screenshot evidence live in `docs/mockups/type-explore-notes.md`.
+
+What the branch changes: `--font-display` (new) and `--font-sans` both point at Schibsted Grotesk (Inter kept as a metric-close fallback); `h1`-`h4`, nav, buttons, and form labels resolve to it; **DM Sans body and SF Mono data are untouched**. Weight 510 is preserved (Schibsted's variable axis honors it). The `cv01`/`ss03` feature string is retained but inert -- Schibsted's default glyphs already carry distinctive forms, so the "OpenType features are non-negotiable" principle above applies only while Inter is the face. If ratified, the Type Scale table's `Font` column and `tokens/tokens.json` `fontFamily` strings should be swept from Inter to Schibsted Grotesk, and the "Display is Inter" principle reworded.
+
 ## Layout
 
 ### Spacing System
