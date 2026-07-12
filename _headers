@@ -6,3 +6,12 @@
 
 /llms-full.txt
   X-Robots-Tag: all
+
+# Per-page Markdown for AI agents (served by functions/_middleware.js on
+# `Accept: text/markdown`, or fetched directly as /<page>.md). Keep them
+# indexable. NOTE: do NOT force Content-Type here — the asset server applies
+# path-matched header rules to the SPA fallback too, which would mask the
+# HTML shell and break the middleware's fallback detection. The middleware
+# sets `text/markdown` on genuine markdown responses itself.
+/*.md
+  X-Robots-Tag: all

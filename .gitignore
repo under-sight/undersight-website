@@ -39,3 +39,6 @@ out/
 
 # Local Fibery file download cache (speeds up incremental builds)
 .fibery-file-cache/
+
+# Wrangler local dev state
+.wrangler/
