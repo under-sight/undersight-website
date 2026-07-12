@@ -29,14 +29,17 @@ body {
 }
 
 h1, h2, h3, h4 {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Display/heading tier -> Schibsted Grotesk via --font-display (type-explore).
+     cv01/ss03 retained for test-compat; inert on Schibsted (see tokens.css). */
+  font-family: var(--font-display);
   font-feature-settings: 'cv01', 'ss03';
   color: var(--black);
 }
 
 .nav-links > a, .nav-dropdown > .nav-dropdown-trigger,
 .btn, .form-group label {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Nav / button / label UI tier -> Schibsted Grotesk via --font-sans. */
+  font-family: var(--font-sans);
   font-feature-settings: 'cv01', 'ss03';
 }
 
@@ -261,7 +264,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   position: relative;
 }
 /* "Written baseline" (B2): the amber pen-stroke rests on a 1px ledger rule
-   extending across the section — the line-logo geometry. The overshoot is
+   extending across the section -- the line-logo geometry. The overshoot is
    clipped by .hero { overflow: hidden }; the stroke keeps its barDraw
    animation (covered by the reduced-motion block), the rule is static. */
 .hero-bar::after {
@@ -292,7 +295,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 .hero.hero-split .hero-copy { display: flex; flex-direction: column; align-items: flex-start; }
 .hero.hero-split .hero-copy h1 {
   text-align: left; max-width: none;
-  /* Column-scale declarative cut — display-hero tokens */
+  /* Column-scale declarative cut -- display-hero tokens */
   font-size: clamp(40px, 4.2vw + 10px, var(--text-display-hero));
   line-height: var(--leading-display-hero);
   letter-spacing: var(--tracking-display-hero);
@@ -310,7 +313,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 }
 .hero-cta-row .btn { display: inline-flex; align-items: center; gap: 8px; }
 
-/* Hero exhibit: the decision ledger — one product artifact, border-first,
+/* Hero exhibit: the decision ledger -- one product artifact, border-first,
    pinned to the sheet with exhibit crop marks (same grammar as .cs-tile).
    Column move: the product IS the hero visual; no floating card collage. */
 .hero-visual {
@@ -388,7 +391,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 /* INSIGHT voice: verified/approved states (B0). Hover-dark variants on
    sub-body text per the DESIGN.md contrast note. */
 .hv-check, .hv-verdict { color: var(--color-eucalyptus-hover); background: var(--color-eucalyptus-light); }
-/* flagged data point — the one amber allowance inside an illustration (B0) */
+/* flagged data point -- the one amber allowance inside an illustration (B0) */
 .hv-flag { color: var(--color-accent-hover); background: var(--color-accent-light); }
 .hv-total {
   position: relative;
@@ -434,7 +437,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
   border-radius: var(--rounded-xs);
   font: 600 13px/1 'Inter', sans-serif;
   text-decoration: none;
-  /* flat, border-first: background swap on hover only — no glow, no lift */
+  /* flat, border-first: background swap on hover only -- no glow, no lift */
   transition: background 0.18s ease;
 }
 .hero-overlay-cta:hover {
@@ -499,7 +502,7 @@ html.theme-dark .nav-logo-img { filter: invert(1); }
 .sol-row:first-child { padding-top: 16px; }
 .sol-row:nth-child(even) { flex-direction: row-reverse; }
 
-/* Mini-graphic tile — graphic floats, no card chrome */
+/* Mini-graphic tile -- graphic floats, no card chrome */
 .sol-mini-tile {
   flex: 0 0 320px; min-height: 170px;
   display: flex; flex-direction: column; justify-content: center;
@@ -676,7 +679,7 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
   position: relative;
 }
 /* Signature line (B2): the closing bookend mirrors the hero's written
-   baseline — a 48px pen-stroke resting on the section's existing 1px top
+   baseline -- a 48px pen-stroke resting on the section's existing 1px top
    rule at the container's left edge. Static, no animation. Amber is
    logo-derived and flagged for Kyle's ruling; graphite variant is a
    one-line swap to background: var(--color-text). */
@@ -738,7 +741,7 @@ html.theme-light .sol-row .pill { background: var(--color-bg-subtle, rgba(0,0,0,
   text-decoration: underline;
 }
 
-/* Static calendar mock (links through to Calendly) — border-first exhibit */
+/* Static calendar mock (links through to Calendly) -- border-first exhibit */
 .cta-card {
   display: block;
   text-decoration: none;
@@ -993,7 +996,7 @@ a.back:hover { color: var(--color-accent); }
 /* ---- FOOTER (combined, no sub-footer) ---- */
 .site-footer { border-top: 1px solid var(--pale); background: var(--white); padding: 48px 0 40px; position: relative; }
 /* Colophon double rule (B2): self-contained editorial double rule on the
-   footer's top edge — 1px border + 1px hairline echo drawn inside the
+   footer's top edge -- 1px border + 1px hairline echo drawn inside the
    footer's own background, so it works over any preceding section. */
 .site-footer::before {
   content: '';
@@ -1026,7 +1029,7 @@ html.theme-dark .site-footer .footer-copy img { filter: invert(1); }
 .site-footer .footer-tagline { font-size: 13px; color: var(--mid); max-width: 280px; margin: 0; line-height: 1.5; }
 .site-footer .footer-copy { font-size: 12px; color: var(--mid); margin: 0; margin-top: 4px; opacity: 0.85; }
 .site-footer .footer-col h4 {
-  /* mono index headers — the footer as colophon index (Column move) */
+  /* mono index headers -- the footer as colophon index (Column move) */
   font: 500 11px/1.4 var(--font-mono);
   text-transform: uppercase; letter-spacing: 0.08em;
   margin-bottom: 14px; color: var(--mid);
@@ -1247,7 +1250,7 @@ html.theme-light .integration-logo-card:hover img { filter: grayscale(0) opacity
 
 /* ---- REDUCED MOTION ---- */
 /* keyframes coverage manifest: skelPulse, barDraw, penWrite, hvLiveDot,
-   cookieBannerIn — every @keyframes in this file is disabled under
+   cookieBannerIn -- every @keyframes in this file is disabled under
    reduced motion (cookieBannerIn in its own component block below). */
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal-stagger > .sol-row { opacity: 1; transform: none; transition: none; }
@@ -1389,13 +1392,13 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 
 /* =============================================================
-   V2 EDITORIAL HOME PAGE — adopted from Claude Design handoff.
+   V2 EDITORIAL HOME PAGE -- adopted from Claude Design handoff.
    Dual-accent rules applied:
      Eucalyptus = INSIGHT (metric numerals, status pills, validated)
      Amber Rust = ACTION (CTAs, interactive, eyebrows on action sections)
    ============================================================= */
 
-/* (Hero visual is the decision-ledger exhibit — defined with the hero
+/* (Hero visual is the decision-ledger exhibit -- defined with the hero
    layout near the top of this file.) */
 
 /* ---- Section bands ---- */
@@ -1407,7 +1410,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 .bleed.alt { background: var(--color-bg-alt, #FAFAFA); }
 .bleed.tight {
   padding: 56px 0;
-  /* ledger re-rule (B2): heavy 2px ink dropped — one weight, 1px */
+  /* ledger re-rule (B2): heavy 2px ink dropped -- one weight, 1px */
   border-top: 1px solid var(--pale);
   border-bottom: 1px solid var(--pale);
 }
@@ -1419,7 +1422,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 /* ---- Section header (eyebrow + h2 + lede) ---- */
 .sect-head { max-width: 720px; margin-bottom: 56px; }
 .sect-head .eyebrow {
-  /* mono folio eyebrow — the ledger's marginalia voice (Column move) */
+  /* mono folio eyebrow -- the ledger's marginalia voice (Column move) */
   display: inline-block;
   font: 500 12px/1.4 var(--font-mono);
   text-transform: uppercase; letter-spacing: 0.08em;
@@ -1440,7 +1443,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 
 /* ---- Stats bar (editorial mono numerals + source attribution) ---- */
-/* Ledger totals row (B2): accounting grammar — single 1px rule above the
+/* Ledger totals row (B2): accounting grammar -- single 1px rule above the
    figures, double rule below (the universal "total" mark), hairline
    separators between items. */
 .stats {
@@ -1487,7 +1490,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 
 /* ---- Who We Serve: ruled editorial columns (Column move) ----
-   No card boxes — three text columns divided by hairlines, each headed
+   No card boxes -- three text columns divided by hairlines, each headed
    by a registration tick. The page IS the surface. */
 .serve-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
@@ -1509,7 +1512,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .serve-grid .serve-card .serve-cat,
 .serve-grid .serve-card .cat {
-  /* mono metadata voice — INSIGHT color, hover-dark at caption size */
+  /* mono metadata voice -- INSIGHT color, hover-dark at caption size */
   font: 500 11px/1.4 var(--font-mono);
   text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--color-eucalyptus-hover);
@@ -1554,7 +1557,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .how .how-step + .how-step { padding-left: 24px; border-left: 1px solid var(--pale); }
 .how .how-step::before {
-  /* eye-ring step marker (B2) — ring border + center dot shared with the
+  /* eye-ring step marker (B2) -- ring border + center dot shared with the
      .eye-ring primitive (see MOTIF PRIMITIVES at the end of this file) */
   content: ''; position: absolute; top: 0; left: 0;
   width: 12px; height: 12px;
@@ -1610,7 +1613,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
 }
 .testimonial-band .testimonial-quote-wrap {
   max-width: 880px; margin: 0 auto; position: relative;
-  /* pull-quote rule pair, top (B2) — pairs with the metrics totals row */
+  /* pull-quote rule pair, top (B2) -- pairs with the metrics totals row */
   border-top: 1px solid var(--color-border);
   padding-top: 24px;
 }
@@ -1632,7 +1635,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   border-bottom: 1px solid var(--color-border);
 }
 .testimonial-band .testimonial-quote em {
-  /* emphasis by weight only — body copy is never tinted with accents (B0) */
+  /* emphasis by weight only -- body copy is never tinted with accents (B0) */
   font-style: normal;
   font-weight: 600;
 }
@@ -1644,7 +1647,7 @@ a:focus:not(:focus-visible), button:focus:not(:focus-visible), .btn:focus:not(:f
   width: 40px; height: 40px;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 9999px;
-  /* cite marker joins the ring grammar (B2) — and drops a non-interactive
+  /* cite marker joins the ring grammar (B2) -- and drops a non-interactive
      amber instance per the B0 amber-is-action rule */
   background: transparent;
   border: 1px solid var(--color-border);
@@ -1722,7 +1725,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 
 /* =============================================================
-   STATS TRIM — quieter numerals than v1 of V2 (per Kyle: drim the stats)
+   STATS TRIM -- quieter numerals than v1 of V2 (per Kyle: drim the stats)
    ============================================================= */
 .stats .stat-num {
   /* was clamp(48px, 6vw+12px, 84px) / 500 -- now smaller + lighter */
@@ -1741,7 +1744,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 
 /* =============================================================
-   SOLUTIONS — editorial alternating rows (.solrow)
+   SOLUTIONS -- editorial alternating rows (.solrow)
    Adopted from the Claude Design handoff. The renderer emits
    .solrow.flip on every other row so they alternate.
    ============================================================= */
@@ -1826,7 +1829,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 .solrow .sol-cta .btn-link .arr { transition: transform 0.15s ease; }
 .solrow .sol-cta .btn-link:hover .arr { transform: translateX(3px); }
 
-/* Visual frame — border-first exhibit, no resting shadow (B0) */
+/* Visual frame -- border-first exhibit, no resting shadow (B0) */
 .solrow .sol-visual { position: relative; }
 .solrow .sol-visual .frame {
   background: var(--white);
@@ -1851,7 +1854,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 
 /* =============================================================
-   CASE STUDY TILES (.cs-tile) — 2-up grid with patterned thumb,
+   CASE STUDY TILES (.cs-tile) -- 2-up grid with patterned thumb,
    metric overlay, 3-up footer stats.
    ============================================================= */
 .cs-grid {
@@ -1870,7 +1873,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
   display: flex;
   flex-direction: column;
 }
-/* Exhibit framing (B2): four 12px corner ticks 8px outside the tile —
+/* Exhibit framing (B2): four 12px corner ticks 8px outside the tile --
    the case study pinned to the underwriting sheet. Pattern ink only. */
 .cs-tile::before {
   content: '';
@@ -2124,7 +2127,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 .blog-filter.active:hover { background: var(--color-amber-rust-hover); }
 
 /* =============================================================
-   PAGE COHESION POLISH — bring solution detail pages, contact, and
+   PAGE COHESION POLISH -- bring solution detail pages, contact, and
    docs into visual cohesion with the home page editorial language.
    No HTML rewrites: target existing renderer-emitted classes.
    ============================================================= */
@@ -2143,7 +2146,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 
 /* Insight-leaning sections on solution detail pages: API previews, MCA
-   detection, integrations — these describe DATA, not action. Eucalyptus. */
+   detection, integrations -- these describe DATA, not action. Eucalyptus. */
 #page-underscore .home-section-label,
 #page-copilot .home-section-label,
 #page-underchat .home-section-label {
@@ -2258,7 +2261,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
 }
 
 /* =============================================================
-   BACKGROUND MOTIF PRIMITIVES — "underwriting paper" (B1)
+   BACKGROUND MOTIF PRIMITIVES -- "underwriting paper" (B1)
    Tokens only (css/tokens.css): --pattern-line(-strong),
    --pattern-pitch(-dense), --rule-double-gap. See preview.html
    "Background Motifs" for the catalog.
@@ -2291,7 +2294,7 @@ body:has(.cookie-banner:not([hidden])) .theme-toggle-floating { bottom: 96px; }
               0 calc(var(--rule-double-gap) + 1px) 0 0 var(--color-border-light);
 }
 
-/* Eye ring: 12px hairline ring with a 4px center dot — the marker that
+/* Eye ring: 12px hairline ring with a 4px center dot -- the marker that
    replaced filled accent dots. Ring border shared with the legacy
    step markers on the live .how grid. */
 .eye-ring {

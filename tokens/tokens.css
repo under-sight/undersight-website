@@ -1,8 +1,8 @@
-/* undersight Design Tokens — generated from DESIGN.md */
+/* undersight Design Tokens -- generated from DESIGN.md */
 /* Keep in sync with DESIGN.md and tokens.json */
 
 /* ========================================================================
-   1. COLOR TOKENS — Primitive palette
+   1. COLOR TOKENS -- Primitive palette
    ======================================================================== */
 
 :root {
@@ -37,7 +37,7 @@
   --color-dark-text-muted: #D1D5DB;
   --color-dark-border: rgba(255, 255, 255, 0.1);
 
-  /* Background motif tokens — "underwriting paper" ruled lines */
+  /* Background motif tokens -- "underwriting paper" ruled lines */
   --pattern-line: rgba(35, 38, 44, 0.05);
   --pattern-line-strong: rgba(35, 38, 44, 0.10);
   --pattern-pitch: 80px;
@@ -45,7 +45,7 @@
   --rule-double-gap: 3px;
 
   /* ========================================================================
-     2. SEMANTIC COLOR ALIASES — Light mode (default)
+     2. SEMANTIC COLOR ALIASES -- Light mode (default)
      ======================================================================== */
 
   --color-bg: var(--color-paper-white);
@@ -58,14 +58,14 @@
   --color-text-muted: var(--color-graphite-500);
   --color-text-hover: var(--color-graphite-800);
 
-  /* Primary accent — ACTION voice (CTAs, interactive, active states) */
+  /* Primary accent -- ACTION voice (CTAs, interactive, active states) */
   --color-accent: var(--color-amber-rust);
   --color-accent-hover: var(--color-amber-rust-hover);
   --color-accent-light: var(--color-amber-rust-light);
   --color-accent-focus: var(--color-amber-rust-focus);
   --color-accent-text: var(--color-on-accent);
 
-  /* Secondary accent — INSIGHT voice (data, status, validated, metrics) */
+  /* Secondary accent -- INSIGHT voice (data, status, validated, metrics) */
   --color-accent-secondary: var(--color-eucalyptus);
   --color-accent-secondary-hover: var(--color-eucalyptus-hover);
   --color-accent-secondary-light: var(--color-eucalyptus-light);
@@ -74,11 +74,11 @@
 
   --color-border: var(--color-cloud-zinc);
   --color-border-light: var(--color-cloud-zinc-light);
-  /* In-content hairline rule (editorial ledger grammar) — decoupled from
+  /* In-content hairline rule (editorial ledger grammar) -- decoupled from
      the structural card border and from the background motif pattern ink */
   --color-rule: var(--color-cloud-zinc-light);
 
-  /* Success aliases — same primitive as Eucalyptus (positive-state subset of insight voice) */
+  /* Success aliases -- same primitive as Eucalyptus (positive-state subset of insight voice) */
   --color-success: var(--color-eucalyptus);
   --color-success-light: var(--color-eucalyptus-light);
 
@@ -90,11 +90,17 @@
      ======================================================================== */
 
   /* Font families */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Display/UI voice: Schibsted Grotesk (type-exploration pick, 2026-07 -- see
+     DESIGN.md "Type exploration"). Editorial grotesk from a news publisher;
+     replaces Inter's structural role. Inter retained as a metric-close fallback. */
+  --font-display: 'Schibsted Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Schibsted Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
 
-  /* OpenType features (Inter) */
+  /* OpenType features -- retained for test-compat + future faces. Schibsted
+     Grotesk does not expose Inter's cv01/ss03; its default glyphs already carry
+     the distinctive forms, so this declaration is inert (harmlessly ignored). */
   --font-feature-inter: 'cv01', 'ss03';
 
   /* Font sizes */
@@ -188,10 +194,10 @@
   --rounded-pill: 9999px;
 
   /* ========================================================================
-     7. SHADOW TOKENS — 3 elevation levels
+     7. SHADOW TOKENS -- 3 elevation levels
      ======================================================================== */
 
-  /* Level 0: flat — no shadow (cards use borders instead) */
+  /* Level 0: flat -- no shadow (cards use borders instead) */
   --shadow-subtle: 0 1px 3px rgba(35, 38, 44, 0.06);
   --shadow-medium: 0 4px 16px rgba(35, 38, 44, 0.08);
   --shadow-large: 0 8px 32px rgba(35, 38, 44, 0.12);
@@ -224,7 +230,7 @@
 }
 
 /* ==========================================================================
-   3. DARK MODE OVERRIDES — Semantic alias swap
+   3. DARK MODE OVERRIDES -- Semantic alias swap
    ========================================================================== */
 
 @media (prefers-color-scheme: dark) {
