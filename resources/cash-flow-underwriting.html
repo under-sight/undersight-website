@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cash-Flow Underwriting: How Modern Lenders Score Thin-File Small Businesses | undersight</title>
+<meta name="description" content="Cash-flow underwriting scores a small business on real bank-account cash flow instead of a thin credit file. How it works, how it compares to FICO/SBSS-based lending, the data it uses, and the fair-lending rules that govern it.">
+<link rel="canonical" href="https://undersight.ai/cash-flow-underwriting">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#23262C">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cash-Flow Underwriting: How Modern Lenders Score Thin-File Small Businesses">
+<meta property="og:description" content="Score small businesses on real cash flow, not a thin credit file. Definitions, a cash-flow vs. FICO SBSS comparison, the data used, and the compliance rules.">
+<meta property="og:url" content="https://undersight.ai/cash-flow-underwriting">
+<meta property="og:site_name" content="undersight">
+<meta property="og:image" content="https://undersight.ai/images/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cash-Flow Underwriting for Thin-File Small Businesses">
+<meta name="twitter:description" content="How modern lenders score small businesses on real cash flow instead of a thin credit file.">
+<meta name="twitter:image" content="https://undersight.ai/images/og-image.png">
+<meta property="article:published_time" content="2026-07-12">
+<meta property="article:modified_time" content="2026-07-12">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Article schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Cash-Flow Underwriting: How Modern Lenders Score Thin-File Small Businesses",
+  "description": "How cash-flow underwriting scores small businesses on bank-account cash flow instead of a thin credit file, how it compares to traditional FICO/SBSS-based lending, the data it uses, and the fair-lending rules that govern it.",
+  "datePublished": "2026-07-12",
+  "dateModified": "2026-07-12",
+  "author": { "@type": "Organization", "name": "undersight", "url": "https://undersight.ai" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "undersight",
+    "url": "https://undersight.ai",
+    "logo": { "@type": "ImageObject", "url": "https://undersight.ai/favicon-512.png" }
+  },
+  "about": ["Cash-flow underwriting", "SMB credit underwriting", "Alternative data underwriting", "Credit risk scoring"],
+  "mainEntityOfPage": "https://undersight.ai/cash-flow-underwriting"
+}
+</script>
+
+<!-- FAQ schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is cash-flow underwriting?", "acceptedAnswer": { "@type": "Answer", "text": "Cash-flow underwriting is a credit-decisioning method that evaluates a small business by analyzing the actual money moving through its bank and accounting accounts — deposits, revenue trends, balances, and expenses — rather than relying primarily on a personal or business credit score. Using consumer-permissioned bank-transaction data, often via open banking, a lender measures a borrower's real ability to repay, which lets creditworthy thin-file and credit-invisible businesses qualify that a traditional score would decline." } },
+    { "@type": "Question", "name": "How is cash-flow underwriting different from traditional credit-score lending?", "acceptedAnswer": { "@type": "Answer", "text": "Traditional lending scores a business mainly on backward-looking credit history (FICO, FICO SBSS, bureau data). Cash-flow underwriting adds forward-looking, near-real-time bank-transaction data — revenue, cash balances, and debt-service coverage — to measure current ability to repay. It approves more thin-file borrowers, updates continuously, and is especially relevant as the FICO SBSS score sunsets on March 1, 2026." } },
+    { "@type": "Question", "name": "What data does cash-flow underwriting use?", "acceptedAnswer": { "@type": "Answer", "text": "Primarily consumer-permissioned bank-transaction data connected through open banking: deposits and revenue, account balances, cash-flow volatility, non-sufficient-funds events, and existing debt service — combined with business and identity verification (KYB) and, where available, accounting-software feeds to compute metrics such as the debt-service coverage ratio (DSCR)." } },
+    { "@type": "Question", "name": "Is cash-flow underwriting compliant with fair-lending law?", "acceptedAnswer": { "@type": "Answer", "text": "It can be, and U.S. regulators have explicitly endorsed responsible use of alternative and cash-flow data. Lenders must still comply with the Equal Credit Opportunity Act (ECOA) and Regulation B — including issuing adverse-action notices with specific reasons (12 CFR 1002.9) — and monitor models for disparate impact. The CFPB has stated there is no exemption from these rules simply because a decision uses complex or AI models." } },
+    { "@type": "Question", "name": "Does cash-flow underwriting help thin-file or credit-invisible businesses?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. About 45 million U.S. adults are credit invisible or unscorable by traditional methods (CFPB). Because cash-flow underwriting reads real account activity rather than a sparse credit history, it can approve creditworthy owners — newer businesses, cash-heavy operators, and first-time borrowers — who would otherwise be declined for lack of a score." } },
+    { "@type": "Question", "name": "Can AI agents run cash-flow underwriting on their own?", "acceptedAnswer": { "@type": "Answer", "text": "AI can automate the extraction and scoring of cash-flow data, but responsible lenders keep a human in the loop for edge cases and adverse actions. An agentic underwriting system should route low-confidence or declinable cases to a human underwriter and preserve an explainable audit trail so every decision satisfies model-risk and fair-lending requirements." } }
+  ]
+}
+</script>
+
+<style>
+:root{
+  --color-graphite-900:#23262C; --color-graphite-800:#2E3138; --color-graphite-700:#3A3F47;
+  --color-graphite-100:#F0F1F2; --color-graphite-50:#F7F8F8;
+  --color-cloud-zinc:#D1D5DB; --color-cloud-zinc-light:#E8EAED;
+  --color-amber-rust:#C97A54; --color-amber-rust-hover:#B56A45; --color-amber-rust-light:rgba(201,122,84,.08);
+  --color-eucalyptus:#6B9E8C; --color-eucalyptus-light:rgba(107,158,140,.1);
+  --color-paper-white:#FFFFFF; --color-bg-surface:#FAFAFA;
+  --color-bg:var(--color-paper-white); --color-surface:#FFFFFF; --color-line:#E4E7EB;
+  --color-text:var(--color-graphite-900); --color-text-secondary:#5C636E;
+  --color-accent:var(--color-amber-rust); --color-success:var(--color-eucalyptus);
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --color-bg:#1A1C21; --color-surface:#23262C; --color-line:#31353D; --color-text:#EAECEF; --color-text-secondary:#9BA2AD; --color-bg-surface:#202329; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-sans);line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:var(--color-accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:820px;margin:0 auto;padding:0 22px}
+
+nav.top{border-bottom:1px solid var(--color-line);position:sticky;top:0;background:color-mix(in srgb,var(--color-bg) 88%,transparent);backdrop-filter:saturate(180%) blur(8px);z-index:5}
+nav.top .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+.brand{font-weight:800;font-size:19px;letter-spacing:-.02em;color:var(--color-text)}
+.brand .dot{color:var(--color-accent)}
+.nav-cta{font-size:14px;font-weight:600;border:1px solid var(--color-line);padding:7px 14px;border-radius:8px;color:var(--color-text)}
+.nav-cta:hover{border-color:var(--color-accent);text-decoration:none}
+
+header.hero{padding:44px 0 8px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--color-accent)}
+h1{font-size:44px;line-height:1.12;letter-spacing:-.025em;margin:12px 0 16px;font-weight:800}
+.byline{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:13px;color:var(--color-text-secondary);border-top:1px solid var(--color-line);border-bottom:1px solid var(--color-line);padding:12px 0;margin:20px 0 26px}
+.byline .who{color:var(--color-text);font-weight:600}
+.byline .pub{display:inline-flex;align-items:center;gap:5px}
+.byline .pub::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--color-success)}
+.updated{font-family:var(--mono);font-size:12px}
+
+.lead{font-size:19px;line-height:1.6}
+.tldr{background:var(--color-bg-surface);border:1px solid var(--color-line);border-left:3px solid var(--color-success);border-radius:0 10px 10px 0;padding:16px 20px;margin:24px 0}
+.tldr h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-secondary);margin:0 0 10px;border:none;padding:0}
+.tldr ul{margin:0;padding-left:18px}
+.tldr li{margin:5px 0;font-size:14.5px}
+
+section{padding:14px 0}
+h2{font-size:27px;letter-spacing:-.02em;line-height:1.2;margin:30px 0 8px;scroll-margin-top:70px}
+h3{font-size:19px;margin:22px 0 6px}
+p{margin:10px 0}
+.def{font-size:17px}
+.def b:first-child{color:var(--color-accent)}
+sup a{font-size:11px;font-weight:600;color:var(--color-accent);text-decoration:none;padding:0 1px}
+
+.tablewrap{overflow-x:auto;margin:16px 0;border:1px solid var(--color-line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+caption{text-align:left;font-size:12px;color:var(--color-text-secondary);padding:10px 14px;border-bottom:1px solid var(--color-line);font-weight:600}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--color-line);vertical-align:top}
+thead th{background:var(--color-bg-surface);font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--color-text-secondary)}
+tbody tr:last-child td{border-bottom:none}
+td.dim{color:var(--color-text-secondary)}
+.col-cf{color:var(--color-text);font-weight:500}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.stat{background:var(--color-surface);border:1px solid var(--color-line);border-radius:12px;padding:16px}
+.stat .n{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.stat .l{font-size:13px;color:var(--color-text-secondary);margin-top:4px}
+.stat .s{font-size:11px;color:var(--color-text-secondary);margin-top:8px;font-family:var(--mono)}
+
+.benchmark{border:1px solid var(--color-amber-rust);border-radius:12px;padding:18px 20px;margin:20px 0;background:var(--color-amber-rust-light)}
+.benchmark .tag{display:inline-block;background:var(--color-amber-rust);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:5px;text-transform:uppercase}
+.benchmark .n{font-size:34px;font-weight:800;margin:8px 0 2px}
+.benchmark .note{font-size:12.5px;color:var(--color-text-secondary)}
+
+.faq details{border:1px solid var(--color-line);border-radius:10px;margin:9px 0;background:var(--color-surface);overflow:hidden}
+.faq summary{cursor:pointer;padding:14px 16px;font-weight:600;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--color-accent);font-weight:700;font-size:20px;line-height:1}
+.faq details[open] summary::after{content:"\2013"}
+.faq .a{padding:0 16px 15px;font-size:14.5px}
+
+.cta{background:var(--color-graphite-900);color:#fff;border-radius:16px;padding:30px 26px;margin:34px 0;text-align:center}
+.cta h2{color:#fff;margin:0 0 8px;font-size:24px;border:none}
+.cta p{color:#C9CDD3;margin:0 auto 16px;max-width:480px;font-size:15px}
+.cta a.btn{display:inline-block;background:var(--color-amber-rust);color:#fff;font-weight:600;padding:11px 22px;border-radius:9px}
+.cta a.btn:hover{text-decoration:none;background:var(--color-amber-rust-hover)}
+.cta .sub{font-size:13px;margin-top:12px}
+.cta .sub a{color:#E8B79C}
+
+.sources{font-size:13px}
+.sources ol{padding-left:20px}
+.sources li{margin:7px 0;color:var(--color-text-secondary)}
+footer{border-top:1px solid var(--color-line);margin-top:36px;padding:22px 0 40px;font-size:12.5px;color:var(--color-text-secondary)}
+.disc{background:var(--color-bg-surface);border-radius:10px;padding:12px 16px;margin:12px 0}
+@media(max-width:640px){h1{font-size:33px}.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <a class="brand" href="/">undersight<span class="dot">.</span></a>
+  <a class="nav-cta" href="/contact">Book a demo</a>
+</div></nav>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">SMB Underwriting</div>
+  <h1>Cash-Flow Underwriting: How Modern Lenders Score Thin-File Small Businesses</h1>
+  <div class="byline">
+    <span class="who">undersight Research</span>
+    <span class="pub">Published by undersight</span>
+    <span class="updated">Last updated 2026-07-12</span>
+  </div>
+
+  <p class="lead"><strong>Cash-flow underwriting</strong> is a credit-decisioning method that scores a small business on the real money moving through its bank and accounting accounts — deposits, revenue trends, balances, and expenses — instead of relying primarily on a personal or business credit score. By reading consumer-permissioned bank-transaction data through open banking, a lender measures a borrower's actual <em>ability to repay</em>. That lets creditworthy <strong>thin-file</strong> and credit-invisible businesses qualify — the newer, cash-heavy, and first-time borrowers a backward-looking score would decline.</p>
+
+  <div class="tldr">
+    <h2>Key takeaways</h2>
+    <ul>
+      <li>Cash-flow underwriting uses live bank-transaction data (revenue, balances, debt-service coverage) to measure real ability to repay — not just credit history.</li>
+      <li>It expands access for the ~45M U.S. adults who are credit invisible or unscorable by traditional methods.<sup><a href="#s1">1</a></sup></li>
+      <li>U.S. regulators have explicitly endorsed responsible use of alternative and cash-flow data in underwriting.<sup><a href="#s2">2</a></sup></li>
+      <li>It's increasingly the default as the <strong>FICO SBSS</strong> small-business score sunsets on <strong>March 1, 2026</strong>.</li>
+      <li>It must still comply with ECOA / Regulation B — including adverse-action notices with specific reasons.<sup><a href="#s5">5</a></sup></li>
+    </ul>
+  </div>
+</header>
+
+<section id="what">
+  <h2>What is cash-flow underwriting?</h2>
+  <p class="def"><b>Cash-flow underwriting</b> is <b>alternative-data underwriting</b> that evaluates a borrower on the pattern and stability of cash moving through their accounts rather than on a static credit score. Where traditional credit scoring answers "how has this borrower handled debt in the past?", cash-flow underwriting answers "can this business afford this obligation now, given its real revenue and expenses?" It is forward-looking, updates continuously, and works even when a credit file is thin or absent.</p>
+  <p>Independent research has found that cash-flow variables are predictive of credit risk and, in several studies, performed comparably to or better than traditional credit scores at ranking default risk — while widening access for underserved borrowers.<sup><a href="#s3">3</a></sup> Fintech lenders using alternative data have been shown to identify creditworthy "invisible prime" borrowers that conventional scores miss.<sup><a href="#s4">4</a></sup></p>
+</section>
+
+<section id="compare">
+  <h2>Cash-flow underwriting vs. traditional credit-score lending</h2>
+  <div class="tablewrap">
+  <table>
+    <caption>How the two approaches differ across the decision</caption>
+    <thead><tr><th>Dimension</th><th>Traditional (FICO / SBSS-based)</th><th>Cash-flow underwriting</th></tr></thead>
+    <tbody>
+      <tr><td>Primary signal</td><td class="dim">Personal/business credit history &amp; score</td><td class="col-cf">Live bank-transaction cash flow</td></tr>
+      <tr><td>Time orientation</td><td class="dim">Backward-looking (past debt behavior)</td><td class="col-cf">Forward-looking (current ability to repay)</td></tr>
+      <tr><td>Data freshness</td><td class="dim">Bureau file, updated monthly</td><td class="col-cf">Near-real-time, continuously refreshed</td></tr>
+      <tr><td>Thin-file borrowers</td><td class="dim">Often declined for lack of a score</td><td class="col-cf">Can qualify on cash flow alone</td></tr>
+      <tr><td>Core metric</td><td class="dim">Credit score, delinquencies</td><td class="col-cf">Revenue trend, balances, DSCR, NSF events</td></tr>
+      <tr><td>Data source</td><td class="dim">Credit bureaus</td><td class="col-cf">Consumer-permissioned data via open banking</td></tr>
+      <tr><td>2026 status</td><td class="dim">FICO SBSS sunsets March 1, 2026</td><td class="col-cf">Emerging industry standard<sup><a href="#s6">6</a></sup></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="why">
+  <h2>Why it matters: the thin-file problem</h2>
+  <p>Many creditworthy small businesses have little or no traditional credit history — new formations, owner-operators who run on cash, and borrowers who have simply never taken on debt. A score-first process treats "no history" the same as "bad history," and declines them.</p>
+  <div class="stats">
+    <div class="stat"><div class="n">~45M</div><div class="l">U.S. adults credit invisible or unscorable</div><div class="s">CFPB, Data Point: Credit Invisibles</div></div>
+    <div class="stat"><div class="n">1 in 5</div><div class="l">U.S. adults lacking a usable credit score</div><div class="s">CFPB</div></div>
+    <div class="stat"><div class="n">Endorsed</div><div class="l">Alternative/cash-flow data by U.S. regulators</div><div class="s">Interagency Statement, 2019</div></div>
+  </div>
+  <p>Because cash-flow underwriting reads real account activity, it can extend credit to these borrowers responsibly — the "expand access without lowering the bar" case that regulators and researchers have repeatedly documented.<sup><a href="#s2">2</a></sup><sup><a href="#s3">3</a></sup></p>
+</section>
+
+<section id="data">
+  <h2>What data does cash-flow underwriting use?</h2>
+  <p class="def"><b>Consumer-permissioned data</b> is account data a borrower explicitly authorizes the lender to access, typically through an <b>open-banking</b> connection. Nothing is pulled without the owner's consent.</p>
+  <p>A cash-flow model typically reads:</p>
+  <ul>
+    <li><strong>Deposits &amp; revenue</strong> — size, trend, seasonality, and concentration of incoming cash.</li>
+    <li><strong>Balances &amp; buffers</strong> — average and minimum balances, days of runway.</li>
+    <li><strong>Volatility &amp; distress signals</strong> — non-sufficient-funds (NSF) events, overdrafts, negative-balance days.</li>
+    <li><strong>Existing debt service</strong> — recurring loan and financing outflows, used to compute the <strong>debt-service coverage ratio (DSCR)</strong>.</li>
+    <li><strong>Identity &amp; business verification (KYB)</strong> — confirming the business and its owner.</li>
+  </ul>
+
+  <div class="benchmark">
+    <span class="tag">undersight — active deployments</span>
+    <div class="n">71% less deal time</div>
+    <div class="note">undersight's agentic underwriting stack — automated intake, data enrichment, and cash-flow risk scoring — has cut deal-processing time by <strong>71%</strong> and improved loss ratios by ~650 basis points across active customer deployments. <a href="/underscore">See how underscore scores cash flow via API &rarr;</a></div>
+  </div>
+</section>
+
+<section id="compliance">
+  <h2>Is cash-flow underwriting fair-lending compliant?</h2>
+  <p>It can be — and regulators have said so — but the obligations of the <strong>Equal Credit Opportunity Act (ECOA)</strong> and <strong>Regulation B</strong> still apply in full. Lenders must issue <strong>adverse-action notices</strong> with specific, accurate reasons when they decline or offer less-favorable terms (12&nbsp;CFR&nbsp;1002.9), and must monitor models for <strong>disparate impact</strong>.<sup><a href="#s5">5</a></sup> The CFPB has been explicit that there is no exemption from these rules simply because a decision relies on complex or AI-driven models — which makes <em>explainability</em> (reason codes a regulator and a borrower can understand) a design requirement, not a nice-to-have. undersight's decisioning keeps a human in the loop for declinable cases and preserves an explainable audit trail for every score.</p>
+</section>
+
+<section id="faq" class="faq">
+  <h2>Frequently asked questions</h2>
+  <details open><summary>What is cash-flow underwriting?</summary><div class="a">Cash-flow underwriting is a credit-decisioning method that evaluates a small business by analyzing the actual money moving through its bank and accounting accounts — deposits, revenue trends, balances, and expenses — instead of relying primarily on a personal or business credit score. Using consumer-permissioned bank-transaction data (often via open banking), a lender measures real ability to repay, which lets creditworthy thin-file and credit-invisible businesses qualify that a traditional score would decline.</div></details>
+  <details><summary>How is it different from traditional credit-score lending?</summary><div class="a">Traditional lending scores a business mainly on backward-looking credit history (FICO, FICO SBSS, bureau data). Cash-flow underwriting adds forward-looking, near-real-time bank-transaction data — revenue, cash balances, and debt-service coverage — to measure current ability to repay. It approves more thin-file borrowers, updates continuously, and is especially relevant as the FICO SBSS score sunsets on March 1, 2026.</div></details>
+  <details><summary>What data does it use?</summary><div class="a">Primarily consumer-permissioned bank-transaction data connected through open banking: deposits and revenue, account balances, cash-flow volatility, NSF events, and existing debt service — combined with business/identity verification (KYB) and, where available, accounting-software feeds to compute metrics such as DSCR.</div></details>
+  <details><summary>Is it compliant with fair-lending law?</summary><div class="a">It can be, and U.S. regulators have endorsed responsible use of alternative and cash-flow data. Lenders must still comply with ECOA and Regulation B — including adverse-action notices with specific reasons (12 CFR 1002.9) — and monitor for disparate impact. There is no exemption simply because a model is complex or AI-driven.</div></details>
+  <details><summary>Does it help thin-file or credit-invisible businesses?</summary><div class="a">Yes. About 45 million U.S. adults are credit invisible or unscorable by traditional methods (CFPB). Because cash-flow underwriting reads real account activity rather than a sparse credit history, it can approve creditworthy owners who would otherwise be declined for lack of a score.</div></details>
+  <details><summary>Can AI agents run cash-flow underwriting on their own?</summary><div class="a">AI can automate extracting and scoring cash-flow data, but responsible lenders keep a human in the loop for edge cases and adverse actions. An agentic underwriting system should route low-confidence or declinable cases to a human underwriter and preserve an explainable audit trail so every decision satisfies model-risk and fair-lending requirements.</div></details>
+</section>
+
+<div class="cta">
+  <h2>See cash-flow underwriting in your loan book</h2>
+  <p>undersight is AI underwriting infrastructure for private credit — agentic intake, data enrichment, and cash-flow risk scoring with an explainable, fair-lending-ready decision layer. The underwriter still makes the call.</p>
+  <a class="btn" href="/contact">Book a demo</a>
+  <div class="sub"><a href="/underscore">underscore API risk scoring</a> &nbsp;·&nbsp; <a href="/copilot">AI Underwriting Copilot</a></div>
+</div>
+
+<section class="sources" id="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li id="s1">CFPB, <em>Data Point: Credit Invisibles</em> — ~26M credit-invisible + ~19M unscorable U.S. adults. <a href="https://www.consumerfinance.gov/data-research/research-reports/data-point-credit-invisibles/" rel="nofollow">consumerfinance.gov</a></li>
+    <li id="s2">OCC / Federal Reserve / FDIC / CFPB / NCUA, <em>Interagency Statement on the Use of Alternative Data in Credit Underwriting</em> (Dec 2019). <a href="https://www.occ.gov/news-issuances/news-releases/2019/nr-ia-2019-142a.pdf" rel="nofollow">occ.gov (PDF)</a></li>
+    <li id="s3">FinRegLab, <em>The Use of Cash-Flow Data in Underwriting Credit</em> — cash-flow metrics predictive of credit risk. <a href="https://finreglab.org/research/ai-faqs-explainability-in-credit-underwriting/" rel="nofollow">finreglab.org</a></li>
+    <li id="s4">Di Maggio, Ratnadiwakara &amp; Carmichael, <em>Invisible Primes: Fintech Lending with Alternative Data</em>, NBER Working Paper 29840. <a href="https://www.nber.org/system/files/working_papers/w29840/w29840.pdf" rel="nofollow">nber.org (PDF)</a></li>
+    <li id="s5">Electronic Code of Federal Regulations, <em>12 CFR Part 1002 (Regulation B), §1002.9 Notifications</em>. <a href="https://www.ecfr.gov/current/title-12/chapter-X/part-1002" rel="nofollow">ecfr.gov</a></li>
+    <li id="s6">Plaid, <em>Cash flow underwriting becomes industry standard</em>. <a href="https://plaid.com/blog/cash-flow-underwriting-industry-standard/" rel="nofollow">plaid.com</a></li>
+  </ol>
+</section>
+
+<footer>
+  <div class="disc"><strong>Editorial note.</strong> This page is educational and does not constitute legal, compliance, or lending advice; lenders should confirm their obligations with counsel. undersight metrics reflect active customer deployments and may vary by portfolio.</div>
+  <div>© 2026 undersight — AI underwriting infrastructure for private credit. &nbsp;<a href="/">Home</a> · <a href="/underscore">underscore</a> · <a href="/copilot">Copilot</a> · <a href="/contact">Contact</a></div>
+</footer>
+
+</div>
+</body>
+</html>
