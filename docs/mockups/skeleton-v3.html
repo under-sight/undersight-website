@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>undersight skeleton v3 · product-index-first (Option E)</title>
+<meta name="description" content="Proposal mockup: Column-grammar restructure of the undersight homepage. Hero ledger, product index, proof lines, compact CTA, footer-as-index.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   undersight skeleton v3 - self-contained proposal mockup
+   Tokens mirror the production system (css/tokens.css). Light-first, on-brand:
+   the page stays uniformly light; dual accents keep strict role separation
+   (amber = act, eucalyptus = know). SF Mono is system-first; Fira Code is the
+   web-hostable fallback for this mockup only.
+   ========================================================================== */
+:root{
+  /* primitive palette (real hex, single source) */
+  --paper:#FFFFFF;
+  --bg-surface:#FAFAFA;
+  --graphite-900:#23262C;
+  --graphite-700:#3A3F47;
+  --graphite-500:#6B7280;
+  --graphite-100:#F0F1F2;
+  --graphite-50:#F7F8F8;
+  --cloud-zinc:#D1D5DB;
+  --cloud-zinc-light:#E8EAED;
+  --amber:#C97A54;
+  --amber-hover:#B56A45;
+  --amber-light:rgba(201,122,84,0.08);
+  --eucalyptus:#6B9E8C;
+  --eucalyptus-hover:#588977;
+  --eucalyptus-light:rgba(107,158,140,0.08);
+  --pattern-line:rgba(35,38,44,0.05);
+  --pattern-line-strong:rgba(35,38,44,0.09);
+
+  /* semantic aliases */
+  --bg:var(--paper);
+  --bg-alt:var(--bg-surface);
+  --text:var(--graphite-900);
+  --text-2:var(--graphite-700);
+  --muted:var(--graphite-500);
+  --border:var(--cloud-zinc);
+  --rule:var(--cloud-zinc-light);
+  --accent:var(--amber);          /* ACT  */
+  --insight:var(--eucalyptus);    /* KNOW */
+
+  /* type */
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-body:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:'SF Mono','Fira Code','Consolas',monospace;
+  --feat:'cv01','ss03';
+
+  /* spacing */
+  --sp-xs:4px; --sp-sm:8px; --sp-md:12px; --sp-lg:16px;
+  --sp-xl:24px; --sp-2xl:32px; --sp-3xl:48px; --sp-section:80px;
+
+  --rounded-xs:4px; --rounded-pill:9999px;
+  --max-width:1120px; --nav-height:64px; --measure:68ch;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+h1,h2,h3,h4{font-family:var(--font-sans);font-feature-settings:var(--feat);margin:0;color:var(--text)}
+a{color:inherit;text-decoration:none}
+p{margin:0}
+
+.container{max-width:var(--max-width);margin:0 auto;padding:0 var(--sp-xl)}
+
+/* the underwriting-paper ruled motif */
+.bg-ruled{
+  background-image:repeating-linear-gradient(to bottom,
+    transparent 0, transparent 79px,
+    var(--pattern-line) 79px, var(--pattern-line) 80px);
+}
+
+/* mono metadata voice */
+.mono{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* ---- skip link ---- */
+.skip{position:absolute;left:-9999px;top:0;background:var(--text);color:var(--paper);
+  padding:var(--sp-sm) var(--sp-lg);z-index:400}
+.skip:focus{left:var(--sp-lg);top:var(--sp-lg)}
+
+/* ==========================================================================
+   NAV
+   ========================================================================== */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.92);
+  border-bottom:1px solid var(--rule)}
+.nav-inner{display:flex;align-items:center;gap:var(--sp-xl);height:var(--nav-height);
+  max-width:var(--max-width);margin:0 auto;padding:0 var(--sp-xl)}
+.brand{display:flex;align-items:center;gap:var(--sp-sm);font-family:var(--font-sans);
+  font-weight:510;font-feature-settings:var(--feat);font-size:18px;letter-spacing:-0.01em}
+.brand svg{display:block}
+.nav-links{display:flex;align-items:center;gap:var(--sp-xl);margin-left:var(--sp-lg)}
+.nav-links a{font-family:var(--font-sans);font-weight:510;font-size:14px;color:var(--text-2)}
+.nav-links a:hover{color:var(--text)}
+.nav-actions{display:flex;align-items:center;gap:var(--sp-md);margin-left:auto}
+
+/* buttons - squared to rounded-xs, amber primary keeps the contract shape */
+.btn{display:inline-flex;align-items:center;gap:var(--sp-sm);font-family:var(--font-sans);
+  font-weight:510;font-size:14px;line-height:1;padding:11px 18px;border-radius:var(--rounded-xs);
+  border:1px solid transparent;cursor:pointer;-webkit-appearance:none;appearance:none;
+  transition:border-color .2s ease,background-color .2s ease,color .2s ease}
+.btn-primary{background-color:#C97A54;background-color:var(--accent);color:var(--paper);
+  -webkit-appearance:none}
+.btn-primary:hover{background-color:var(--amber-hover)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--graphite-700)}
+.btn .arr{transition:transform .2s ease}
+.btn:hover .arr{transform:translateX(2px)}
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+.hero{border-bottom:1px solid var(--rule)}
+.hero-inner{display:grid;grid-template-columns:1.05fr 0.95fr;gap:var(--sp-3xl);
+  align-items:center;padding:calc(var(--sp-section) - 8px) 0 var(--sp-section)}
+.hero-kicker{display:inline-block;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--insight);margin-bottom:var(--sp-xl)}
+.hero h1{font-size:64px;line-height:1.05;letter-spacing:-0.035em;font-weight:700}
+.hero h1 .accent{color:var(--accent)}
+.hero-sub{margin-top:var(--sp-xl);max-width:46ch;font-size:18px;line-height:1.6;color:var(--text-2)}
+.hero-bar{width:44px;height:2px;background:var(--text);margin:var(--sp-xl) 0}
+.hero-cta-row{display:flex;gap:var(--sp-md);align-items:center;flex-wrap:wrap}
+
+/* the decision-ledger exhibit - one product artifact, pinned to the sheet */
+.hero-visual{position:relative}
+.hv-ledger{position:relative;background:var(--paper);border:1px solid var(--border);
+  border-radius:var(--rounded-xs);padding:var(--sp-xl);box-shadow:0 8px 32px rgba(35,38,44,0.08)}
+/* registration ticks (crop marks) */
+.hv-ledger::before,.hv-ledger::after{content:"";position:absolute;width:8px;height:8px;
+  border-color:var(--muted);border-style:solid}
+.hv-ledger::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.hv-ledger::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.hv-ledger-head{display:flex;align-items:center;gap:var(--sp-md);
+  padding-bottom:var(--sp-md);border-bottom:1px solid var(--rule)}
+.hv-file{font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;color:var(--muted)}
+.hv-name{font-family:var(--font-sans);font-weight:600;font-size:14px;color:var(--text)}
+.hv-live{margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--insight)}
+.hv-live::before{content:"";width:6px;height:6px;border-radius:var(--rounded-pill);
+  background:var(--insight);animation:hvPulse 2s ease-in-out infinite}
+.hv-rows{margin:var(--sp-md) 0}
+.hv-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:9px 0;border-bottom:1px solid var(--rule)}
+.hv-k{font-size:14px;color:var(--text-2)}
+.hv-v{font-family:var(--font-mono);font-size:14px;color:var(--text);letter-spacing:-0.01em}
+.hv-check{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--insight);font-style:normal;margin-left:6px}
+.hv-flag{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--accent);font-style:normal;margin-left:6px}
+.hv-total{display:flex;justify-content:space-between;align-items:baseline;
+  padding-top:var(--sp-md);border-top:2px solid var(--text)}
+.hv-total-k{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--muted)}
+.hv-total-v{font-family:var(--font-sans);font-weight:700;font-size:26px;letter-spacing:-0.02em}
+.hv-verdict{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--insight);font-style:normal;margin-left:var(--sp-sm)}
+.hv-foot{margin-top:var(--sp-md);font-family:var(--font-mono);font-size:11px;
+  letter-spacing:0.04em;color:var(--muted)}
+.hero-overlay-cta{position:absolute;left:var(--sp-xl);bottom:-18px;display:inline-flex;
+  align-items:center;gap:8px;background:var(--text);color:var(--paper);
+  font-family:var(--font-sans);font-weight:510;font-size:13px;padding:9px 14px;
+  border-radius:var(--rounded-xs);box-shadow:0 4px 16px rgba(35,38,44,0.18)}
+.hero-overlay-cta:hover{background:#000}
+
+/* hero ledger totals - product performance specs (mono, one line) */
+.hero-totals{border-top:1px solid var(--rule)}
+.hero-totals .container{display:flex;flex-wrap:wrap;gap:var(--sp-xl);
+  padding-top:var(--sp-lg);padding-bottom:var(--sp-lg)}
+.htot{display:flex;align-items:baseline;gap:var(--sp-sm)}
+.htot-n{font-family:var(--font-mono);font-size:15px;color:var(--text);letter-spacing:-0.01em;
+  font-weight:500}
+.htot-l{font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--muted)}
+.htot-sep{width:1px;align-self:stretch;background:var(--rule)}
+
+/* ==========================================================================
+   SECTION HEAD (shared)
+   ========================================================================== */
+.sect{padding:var(--sp-section) 0;border-bottom:1px solid var(--rule)}
+.sect.alt{background:var(--bg-alt)}
+.sect-head{max-width:var(--measure);margin-bottom:var(--sp-3xl)}
+.eyebrow{display:inline-block;font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;
+  text-transform:uppercase;margin-bottom:var(--sp-lg)}
+.eyebrow.act{color:var(--accent)}
+.eyebrow.know{color:var(--insight)}
+.sect-head h2{font-size:36px;line-height:1.15;letter-spacing:-0.02em;font-weight:700}
+.sect-head .lede{margin-top:var(--sp-lg);font-size:18px;line-height:1.6;color:var(--text-2);
+  max-width:60ch}
+
+/* ==========================================================================
+   01 · PRODUCT INDEX  (replaces persona cards + solution rows)
+   Column's Infrastructure/Lending tree, adapted: three products as a ruled
+   text-first taxonomy, each with a sub-capability tree that routes into detail.
+   ========================================================================== */
+.pindex{border-top:1px solid var(--text)}
+.pentry{display:grid;grid-template-columns:minmax(280px,0.9fr) 1.4fr;gap:var(--sp-3xl);
+  padding:var(--sp-3xl) 0;border-bottom:1px solid var(--rule);position:relative}
+.pentry:last-child{border-bottom:1px solid var(--text)}
+/* registration tick at the row origin */
+.pentry::before{content:"";position:absolute;left:0;top:-1px;width:10px;height:1px;background:var(--text)}
+.pentry-meta{position:relative}
+.pentry-folio{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;color:var(--muted);
+  display:block;margin-bottom:var(--sp-md)}
+.pentry-name{font-family:var(--font-sans);font-weight:700;font-size:32px;letter-spacing:-0.025em;
+  line-height:1;color:var(--text)}
+.pentry-for{font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--insight);margin-top:var(--sp-md);display:block}
+.pentry-claim{margin-top:var(--sp-lg);font-size:16px;line-height:1.55;color:var(--text-2);
+  max-width:34ch}
+.pentry-link{display:inline-flex;align-items:center;gap:6px;margin-top:var(--sp-lg);
+  font-family:var(--font-sans);font-weight:510;font-size:14px;color:var(--accent)}
+.pentry-link .arr{transition:transform .2s ease}
+.pentry-link:hover .arr{transform:translateX(3px)}
+
+/* the sub-capability tree */
+.subtree{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--sp-3xl)}
+.subcap{display:block;padding:var(--sp-lg) 0;border-top:1px solid var(--rule);position:relative}
+.subcap:hover .subcap-name{color:var(--accent)}
+.subcap-idx{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--muted)}
+.subcap-name{font-family:var(--font-sans);font-weight:600;font-size:16px;color:var(--text);
+  margin:4px 0 4px;display:block;transition:color .2s ease}
+.subcap-desc{font-size:13px;line-height:1.5;color:var(--muted)}
+.subcap-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:0.05em;color:var(--insight);
+  display:inline-block;margin-top:6px}
+
+/* ==========================================================================
+   02 · PROOF  (replaces testimonial band + case tiles + stats)
+   One-line customer statements woven with real outcome numbers, each routing
+   to a case file. Eucalyptus numerals = measured; amber link = act.
+   ========================================================================== */
+.proof-list{border-top:1px solid var(--text)}
+.proof{display:grid;grid-template-columns:132px 1fr auto;gap:var(--sp-xl);align-items:center;
+  padding:var(--sp-2xl) 0;border-bottom:1px solid var(--rule)}
+.proof:last-child{border-bottom:1px solid var(--text)}
+.proof-num{font-family:var(--font-sans);font-weight:700;font-size:30px;letter-spacing:-0.02em;
+  color:var(--insight);line-height:1}
+.proof-num .u{font-size:15px;font-weight:600;letter-spacing:0}
+.proof-num-lab{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;
+  text-transform:uppercase;color:var(--muted);margin-top:6px}
+.proof-body{max-width:52ch}
+.proof-stmt{font-family:var(--font-sans);font-weight:510;font-size:19px;line-height:1.4;
+  letter-spacing:-0.01em;color:var(--text)}
+.proof-cite{font-family:var(--font-mono);font-size:11px;letter-spacing:0.05em;color:var(--muted);
+  margin-top:var(--sp-sm);display:block}
+.proof-cite b{color:var(--text-2);font-weight:500}
+.proof-file{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  font-family:var(--font-sans);font-weight:510;font-size:13px;color:var(--accent)}
+.proof-file svg{flex:none}
+.proof-file:hover{color:var(--amber-hover)}
+.proof-file .arr{transition:transform .2s ease}
+.proof-file:hover .arr{transform:translateX(2px)}
+
+/* ==========================================================================
+   03 · CTA (compact)
+   ========================================================================== */
+.cta{padding:var(--sp-section) 0;border-bottom:1px solid var(--rule)}
+.cta-inner{display:grid;grid-template-columns:1.2fr 0.8fr;gap:var(--sp-3xl);align-items:center}
+.cta h2{font-size:36px;line-height:1.15;letter-spacing:-0.02em;font-weight:700}
+.cta h2 em{font-style:italic;color:var(--accent)}
+.cta .lede{margin-top:var(--sp-lg);font-size:18px;line-height:1.6;color:var(--text-2);max-width:48ch}
+.cta-row{display:flex;gap:var(--sp-md);flex-wrap:wrap;margin-top:var(--sp-xl)}
+.cta-contact{margin-top:var(--sp-lg);font-size:14px;color:var(--muted)}
+.cta-contact a{color:var(--accent)}
+.cta-aside{border:1px solid var(--border);border-radius:var(--rounded-xs);padding:var(--sp-xl);
+  background:var(--paper)}
+.cta-aside .mono{margin-bottom:var(--sp-md);display:block}
+.cta-aside h3{font-size:18px;letter-spacing:-0.01em;font-weight:600;margin-bottom:var(--sp-sm)}
+.cta-aside p{font-size:14px;line-height:1.55;color:var(--text-2)}
+.cta-aside .row{display:flex;justify-content:space-between;padding:var(--sp-sm) 0;
+  border-top:1px solid var(--rule);font-family:var(--font-mono);font-size:12px}
+.cta-aside .row:first-of-type{margin-top:var(--sp-lg)}
+.cta-aside .row .k{color:var(--muted)}
+.cta-aside .row .v{color:var(--text)}
+
+/* ==========================================================================
+   FOOTER-AS-FULL-INDEX  (every route enumerated)
+   ========================================================================== */
+.foot{background:var(--bg-alt);padding:var(--sp-section) 0 var(--sp-2xl)}
+.foot-top{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:var(--sp-3xl);
+  padding-bottom:var(--sp-3xl);border-bottom:1px solid var(--rule)}
+.foot-brand .brand{margin-bottom:var(--sp-lg)}
+.foot-tag{font-size:14px;color:var(--text-2);max-width:30ch;line-height:1.5}
+.foot-col h4{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--muted);font-weight:400;margin-bottom:var(--sp-lg)}
+.foot-col a{display:block;font-family:var(--font-sans);font-size:14px;font-weight:510;
+  color:var(--text-2);padding:5px 0}
+.foot-col a:hover{color:var(--accent)}
+.foot-col a .ext{font-family:var(--font-mono);font-size:9px;color:var(--muted);
+  vertical-align:super;margin-left:3px;letter-spacing:0.04em}
+.foot-col a .sub{display:block;font-family:var(--font-mono);font-size:10px;color:var(--muted);
+  font-weight:400;letter-spacing:0.03em}
+.foot-legal{display:flex;flex-wrap:wrap;gap:var(--sp-lg);align-items:center;
+  padding-top:var(--sp-xl);font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;
+  color:var(--muted)}
+.foot-legal a{color:var(--muted)}
+.foot-legal a:hover{color:var(--text-2)}
+.foot-legal .spacer{margin-left:auto}
+
+/* proposal ribbon */
+.ribbon{background:var(--graphite-900);color:var(--paper);font-family:var(--font-mono);
+  font-size:11px;letter-spacing:0.06em;text-transform:uppercase;text-align:center;
+  padding:7px var(--sp-lg)}
+.ribbon b{color:var(--eucalyptus);font-weight:500}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:var(--sp-2xl)}
+  .hero h1{font-size:48px}
+  .cta-inner{grid-template-columns:1fr;gap:var(--sp-2xl)}
+  .foot-top{grid-template-columns:1fr 1fr;gap:var(--sp-2xl)}
+  .foot-brand{grid-column:1 / -1}
+}
+@media(max-width:760px){
+  .nav-links{display:none}
+  .pentry{grid-template-columns:1fr;gap:var(--sp-xl)}
+  .subtree{grid-template-columns:1fr;gap:0}
+  .proof{grid-template-columns:1fr;gap:var(--sp-md);align-items:start}
+  .proof-file{margin-top:var(--sp-sm)}
+  .sect-head h2,.cta h2{font-size:28px}
+}
+@media(max-width:420px){
+  .container,.nav-inner{padding-left:var(--sp-lg);padding-right:var(--sp-lg)}
+  .hero h1{font-size:36px}
+  .pentry-name{font-size:26px}
+  .hero-totals .container{gap:var(--sp-md)}
+  .htot-sep{display:none}
+  .foot-top{grid-template-columns:1fr}
+  .nav-actions .btn-ghost{display:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+  .hv-live::before{animation:none}
+}
+@keyframes hvPulse{0%,100%{opacity:1}50%{opacity:0.35}}
+</style>
+</head>
+<body>
+<a class="skip" href="#product-index">Skip to product index</a>
+
+<div class="ribbon">Proposal mockup &middot; <b>Option E</b> &middot; product-index-first skeleton (skeleton-v3) &middot; not the live site</div>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="undersight home">
+      <svg width="20" height="20" viewBox="0 0 64 64" aria-hidden="true">
+        <g fill="var(--graphite-900)"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g>
+        <rect x="31" y="21" width="2" height="35" fill="var(--paper)"/>
+        <circle cx="32" cy="32" r="5" fill="var(--paper)"/>
+      </svg>
+      undersight
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#product-index">Products</a>
+      <a href="#proof">Proof</a>
+      <a href="https://documentation.underchat.ai/">Docs</a>
+      <a href="#footer">Blog</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-ghost" href="https://staging.app.underchat.ai/login">Sign in</a>
+      <a class="btn btn-primary" href="https://calendly.com/d/cym7-q65-cht/discovery">Book a demo</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============ HERO (keeps the decision-ledger exhibit) ============ -->
+<section class="hero bg-ruled">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="hero-kicker">ai underwriting &middot; private credit</span>
+        <h1>Manual underwriting can't scale.<br><span class="accent">Agentic underwriting can.</span></h1>
+        <p class="hero-sub">One underwriting fabric for private credit: score any deal by API, engage every applicant, and grade the whole book, with audit-grade reasoning behind each call.</p>
+        <div class="hero-bar"></div>
+        <div class="hero-cta-row">
+          <a class="btn btn-primary" href="https://calendly.com/d/cym7-q65-cht/discovery">Book a demo</a>
+          <a class="btn btn-ghost" href="#product-index">See the products <span class="arr">&rarr;</span></a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hv-ledger" aria-hidden="true">
+          <div class="hv-ledger-head">
+            <span class="hv-file">FILE 2214</span>
+            <span class="hv-name">Riverside Cafe LLC</span>
+            <span class="hv-live">live</span>
+          </div>
+          <div class="hv-rows">
+            <div class="hv-row"><span class="hv-k">Monthly revenue</span><span class="hv-v">$104,200 <em class="hv-check">verified</em></span></div>
+            <div class="hv-row"><span class="hv-k">Debt service coverage</span><span class="hv-v">1.31x</span></div>
+            <div class="hv-row"><span class="hv-k">Deposit trend, 90 day</span><span class="hv-v">+7.8%</span></div>
+            <div class="hv-row"><span class="hv-k">Inflow quality</span><span class="hv-v">33.5 <em class="hv-flag">review</em></span></div>
+            <div class="hv-row"><span class="hv-k">Time in business</span><span class="hv-v">6.2 yrs</span></div>
+          </div>
+          <div class="hv-total">
+            <span class="hv-total-k">Composite</span>
+            <span class="hv-total-v">742 <em class="hv-verdict">approve</em></span>
+          </div>
+          <div class="hv-foot">underwritten by underscore in 38s</div>
+        </div>
+        <a class="hero-overlay-cta" href="https://calendly.com/d/cym7-q65-cht/discovery" aria-label="Book a 30 minute discovery call">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Book 30 min
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ledger totals: product performance specs (mono, one line) -->
+<section class="hero-totals" aria-label="Platform performance">
+  <div class="container">
+    <div class="htot"><span class="htot-n">38s</span><span class="htot-l">median decision</span></div>
+    <div class="htot-sep" aria-hidden="true"></div>
+    <div class="htot"><span class="htot-n">150+</span><span class="htot-l">metrics per file</span></div>
+    <div class="htot-sep" aria-hidden="true"></div>
+    <div class="htot"><span class="htot-n">&lt; 3s</span><span class="htot-l">api response</span></div>
+    <div class="htot-sep" aria-hidden="true"></div>
+    <div class="htot"><span class="htot-n">~6 min</span><span class="htot-l">median intake</span></div>
+  </div>
+</section>
+
+<!-- ============ 01 · PRODUCT INDEX ============ -->
+<section class="sect" id="product-index">
+  <div class="container">
+    <div class="sect-head">
+      <span class="eyebrow know">01 &middot; The platform</span>
+      <h2>One underwriting fabric. Three ways in.</h2>
+      <p class="lede">Plug into whichever stage of the lifecycle you own. Each product stands alone or composes with the others, over the same data and the same reasoning trail.</p>
+    </div>
+
+    <div class="pindex">
+
+      <!-- underscore -->
+      <div class="pentry">
+        <div class="pentry-meta">
+          <span class="pentry-folio">01 / 03 &middot; risk scoring</span>
+          <div class="pentry-name">underscore</div>
+          <span class="pentry-for">for funds</span>
+          <p class="pentry-claim">Programmatic risk scoring. Send a deal, get a composite score with full supporting analysis in 38 seconds.</p>
+          <a class="pentry-link" href="#footer">Explore underscore <span class="arr">&rarr;</span></a>
+        </div>
+        <div class="subtree">
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">a.</span>
+            <span class="subcap-name">API + batch scoring</span>
+            <span class="subcap-desc">Score one deal or a whole book. REST endpoint, or upload a batch.</span>
+            <span class="subcap-tag">rest &middot; csv</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">b.</span>
+            <span class="subcap-name">Bank statement parsing</span>
+            <span class="subcap-desc">Raw PDFs become structured cash-flow: revenue, positions, anomalies.</span>
+            <span class="subcap-tag">pdf ingest</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">c.</span>
+            <span class="subcap-name">Scorecards</span>
+            <span class="subcap-desc">150+ metrics per file, rolled into a composite with its reasoning.</span>
+            <span class="subcap-tag">150+ metrics</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">d.</span>
+            <span class="subcap-name">Portfolio monitoring</span>
+            <span class="subcap-desc">Watch funded books for pre-default signals before collections.</span>
+            <span class="subcap-tag">continuous</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- underchat -->
+      <div class="pentry">
+        <div class="pentry-meta">
+          <span class="pentry-folio">02 / 03 &middot; client engagement</span>
+          <div class="pentry-name">underchat</div>
+          <span class="pentry-for">for brokerages</span>
+          <p class="pentry-claim">Agentic intake. Macy engages applicants around the clock and assembles funder-ready packages on her own.</p>
+          <a class="pentry-link" href="#footer">Explore underchat <span class="arr">&rarr;</span></a>
+        </div>
+        <div class="subtree">
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">a.</span>
+            <span class="subcap-name">Multi-channel intake</span>
+            <span class="subcap-desc">One agent across web, email, SMS, and Slack. Always answering.</span>
+            <span class="subcap-tag">web &middot; email &middot; sms &middot; slack</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">b.</span>
+            <span class="subcap-name">Document collection</span>
+            <span class="subcap-desc">Bank statements gathered, gaps resolved in real time, no back-and-forth.</span>
+            <span class="subcap-tag">~6 min median</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">c.</span>
+            <span class="subcap-name">Guardrailed conversations</span>
+            <span class="subcap-desc">On-policy, audit-grade dialogue. Nothing promised the desk can't honor.</span>
+            <span class="subcap-tag">on-policy</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">d.</span>
+            <span class="subcap-name">Package assembly</span>
+            <span class="subcap-desc">Submissions built automatically from raw inputs and enriched data.</span>
+            <span class="subcap-tag">funder-ready</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- copilot -->
+      <div class="pentry">
+        <div class="pentry-meta">
+          <span class="pentry-folio">03 / 03 &middot; copilot</span>
+          <div class="pentry-name">copilot</div>
+          <span class="pentry-for">for marketplaces</span>
+          <p class="pentry-claim">Grade the whole deal book. An ML baseline plus agentic adjustment, every call cited back to its source.</p>
+          <a class="pentry-link" href="#footer">Explore copilot <span class="arr">&rarr;</span></a>
+        </div>
+        <div class="subtree">
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">a.</span>
+            <span class="subcap-name">Hybrid scoring</span>
+            <span class="subcap-desc">ML baseline of 0.62, agentic adjustment of +0.22, shown side by side.</span>
+            <span class="subcap-tag">ml + agentic</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">b.</span>
+            <span class="subcap-name">Deal triage</span>
+            <span class="subcap-desc">Clear declines flagged instantly. Queue prioritized by risk signal.</span>
+            <span class="subcap-tag">prioritized</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">c.</span>
+            <span class="subcap-name">Transaction analysis</span>
+            <span class="subcap-desc">Revenue patterns and anomalies in one viewer, every deal, no exceptions.</span>
+            <span class="subcap-tag">unified viewer</span>
+          </a>
+          <a class="subcap" href="#footer">
+            <span class="subcap-idx">d.</span>
+            <span class="subcap-name">Human-in-the-loop</span>
+            <span class="subcap-desc">AI surfaces what matters with 12 sources cited; the underwriter decides.</span>
+            <span class="subcap-tag">12 sources cited</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 · PROOF ============ -->
+<section class="sect alt" id="proof">
+  <div class="container">
+    <div class="sect-head">
+      <span class="eyebrow know">02 &middot; In production</span>
+      <h2>Operators running real books.</h2>
+      <p class="lede">Not a lab result. Each line is a live customer outcome, with the file behind it.</p>
+    </div>
+
+    <div class="proof-list">
+
+      <div class="proof">
+        <div class="proof-num">650<span class="u"> bps</span><span class="proof-num-lab">loss reduction</span></div>
+        <div class="proof-body">
+          <p class="proof-stmt">4D Financing underwrites institutional-grade with a four-person team, cutting its 90-day default rate at constant approval volume.</p>
+          <span class="proof-cite">underscore + copilot &middot; <b>Josh James, Director, 4D Financing</b> &middot; production</span>
+        </div>
+        <a class="proof-file" href="#footer" aria-label="Read the 4D Financing case file, PDF, 6 minute read">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+          Read the file <span class="arr">&rarr;</span>
+        </a>
+      </div>
+
+      <div class="proof">
+        <div class="proof-num">71<span class="u">%</span><span class="proof-num-lab">deal-cycle cut</span></div>
+        <div class="proof-body">
+          <p class="proof-stmt">Chat Advance went from three-day turnaround to same-day decisions without growing the underwriting bench, freeing three FTEs of capacity in a quarter.</p>
+          <span class="proof-cite">underchat &middot; <b>Chat Advance</b> &middot; pilot &middot; 60s screening, $0 acquisition cost</span>
+        </div>
+        <a class="proof-file" href="#footer" aria-label="Read the Chat Advance case file, PDF, 8 minute read">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+          Read the file <span class="arr">&rarr;</span>
+        </a>
+      </div>
+
+      <div class="proof">
+        <div class="proof-num">22<span class="u">%</span><span class="proof-num-lab">more booked</span></div>
+        <div class="proof-body">
+          <p class="proof-stmt">Across active deployments, teams book more receivables against the same underwriting baseline, screening 30% faster while a human still makes the call.</p>
+          <span class="proof-cite">across the fabric &middot; active customer deployments, Nov 2025</span>
+        </div>
+        <a class="proof-file" href="#footer" aria-label="See the platform metrics">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 2v8M4 7l4 4 4-4M2 14h12"/></svg>
+          See the numbers <span class="arr">&rarr;</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 · CTA (compact) ============ -->
+<section class="cta bg-ruled" id="cta">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-copy">
+        <span class="eyebrow act">03 &middot; Get started</span>
+        <h2>See undersight against <em>your</em> deal book.</h2>
+        <p class="lede">Bring a recent application or a portfolio sample. In 30 minutes we'll show what changes when underwriting becomes a continuous loop.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://calendly.com/d/cym7-q65-cht/discovery">Book a demo
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h6M7 3l3 3-3 3"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#product-index">See the products <span class="arr">&rarr;</span></a>
+        </div>
+        <p class="cta-contact">Or email us at <a href="mailto:contact@undersight.ai">contact@undersight.ai</a></p>
+      </div>
+      <aside class="cta-aside">
+        <span class="mono">Next available &middot; this week</span>
+        <h3>30-minute product demo</h3>
+        <p>A live walkthrough of agentic intake, ML-graded risk, and continuous portfolio monitoring, tailored to your book.</p>
+        <div class="row"><span class="k">format</span><span class="v">video call</span></div>
+        <div class="row"><span class="k">bring</span><span class="v">one live file</span></div>
+        <div class="row"><span class="k">timezone</span><span class="v">your local zone</span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER-AS-FULL-INDEX ============ -->
+<footer class="foot" id="footer">
+  <div class="container">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a class="brand" href="#top" aria-label="undersight home">
+          <svg width="20" height="20" viewBox="0 0 64 64" aria-hidden="true">
+            <g fill="var(--graphite-900)"><rect x="22" y="8" width="20" height="10" rx="1"/><path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/></g>
+            <rect x="31" y="21" width="2" height="35" fill="var(--bg-alt)"/>
+            <circle cx="32" cy="32" r="5" fill="var(--bg-alt)"/>
+          </svg>
+          undersight
+        </a>
+        <p class="foot-tag">AI underwriting infrastructure for private credit.</p>
+      </div>
+
+      <div class="foot-col">
+        <h4>Products</h4>
+        <a href="#product-index">underscore<span class="sub">risk scoring &middot; /underscore</span></a>
+        <a href="#product-index">underchat<span class="sub">client engagement &middot; /underchat</span></a>
+        <a href="#product-index">copilot<span class="sub">deal-book grading &middot; /copilot</span></a>
+      </div>
+
+      <div class="foot-col">
+        <h4>Proof</h4>
+        <a href="#proof">4D Financing<span class="sub">case file &middot; pdf</span></a>
+        <a href="#proof">Chat Advance<span class="sub">case file &middot; pdf</span></a>
+        <a href="#proof">Platform metrics<span class="sub">/#proof</span></a>
+        <a href="#footer">Blog<span class="sub">/blog</span></a>
+      </div>
+
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <a href="https://documentation.underchat.ai/">API docs<span class="ext">ext</span></a>
+        <a href="#footer">Blog &amp; posts<span class="sub">/blog</span></a>
+        <a href="#cta">Contact<span class="sub">/contact</span></a>
+        <a href="https://calendly.com/d/cym7-q65-cht/discovery">Book a demo<span class="ext">ext</span></a>
+      </div>
+
+      <div class="foot-col">
+        <h4>Account</h4>
+        <a href="https://staging.app.underchat.ai/login">Sign in<span class="ext">ext</span></a>
+        <a href="https://legal.undersight.ai">Privacy policy<span class="ext">ext</span></a>
+        <a href="mailto:contact@undersight.ai">contact@undersight.ai</a>
+        <a href="https://www.linkedin.com/company/undersight-ai/">LinkedIn<span class="ext">ext</span></a>
+      </div>
+    </div>
+
+    <div class="foot-legal">
+      <span>&copy; 2026 undersight. All rights reserved.</span>
+      <a href="https://legal.undersight.ai">Privacy</a>
+      <a href="https://legal.undersight.ai">Terms</a>
+      <a href="#footer">Cookie preferences</a>
+      <span class="spacer" aria-hidden="true"></span>
+      <span>skeleton-v3 &middot; proposal</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
