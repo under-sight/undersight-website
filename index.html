@@ -798,43 +798,61 @@
   // Fibery image on the homepage solution rows).
   function solutionMiniGraphic(page) {
     if (page === 'underscore') {
+      // Flat score-table: dimension sub-scores laddering to a composite,
+      // closed by a thin eucalyptus fill bar. Ledger grammar, no gauges.
       return `
-        <div class="mini-score">
-          <div class="rows">
-            <div class="row"><span class="k">Avg revenue</span><span class="v">$84K/mo</span></div>
-            <div class="row"><span class="k">Deposits</span><span class="v up">+12%</span></div>
-            <div class="row"><span class="k">Existing pos.</span><span class="v">2</span></div>
-            <div class="row"><span class="k">Risk class</span><span class="v">B+</span></div>
+        <div class="mini-score sol-ledger">
+          <div class="ms-head">
+            <span class="ms-file">FILE 2214</span>
+            <span class="ms-cat">scorecard</span>
           </div>
-          <div class="chip">
-            <div class="num">742</div>
-            <div class="lab">score</div>
+          <div class="ms-rows">
+            <div class="ms-row"><span class="ms-k">Revenue quality</span><span class="ms-v">56.0</span></div>
+            <div class="ms-row"><span class="ms-k">Existing debt</span><span class="ms-v">66.6</span></div>
+            <div class="ms-row"><span class="ms-k">Net cashflow</span><span class="ms-v">20.8</span></div>
           </div>
+          <div class="ms-total">
+            <span class="ms-total-k">Composite</span>
+            <span class="ms-total-v">742</span>
+          </div>
+          <div class="ms-bar"><span class="ms-bar-fill"></span></div>
         </div>`;
     }
     if (page === 'underchat') {
+      // Intake transcript as a ruled log: mono timestamp + speaker prefix,
+      // hairline-separated rows, square corners, plain live marker.
       return `
-        <div class="mini-chat">
-          <span class="pill-live">live</span>
-          <div class="bubble agent">Hi Maria &mdash; I have a few questions on your application.</div>
-          <div class="bubble client">go ahead</div>
-          <div class="bubble agent">What were your Q1 deposits, excluding tax refunds?</div>
+        <div class="mini-chat sol-ledger">
+          <div class="mc-head">
+            <span class="mc-file">INTAKE 2214</span>
+            <span class="mc-live">live</span>
+          </div>
+          <div class="mc-log">
+            <div class="mc-line"><span class="mc-t">14:02</span><span class="mc-who">macy</span><span class="mc-msg">Q1 deposits, excluding tax refunds?</span></div>
+            <div class="mc-line"><span class="mc-t">14:03</span><span class="mc-who is-client">client</span><span class="mc-msg">$284k</span></div>
+            <div class="mc-line"><span class="mc-t">14:03</span><span class="mc-who">macy</span><span class="mc-msg">Any owner draws in that figure?</span></div>
+            <div class="mc-line"><span class="mc-t">14:04</span><span class="mc-who is-client">client</span><span class="mc-msg">no, separate account</span></div>
+          </div>
         </div>`;
     }
     if (page === 'copilot') {
+      // Grade-ledger: model score plus agentic adjustment resolving to a
+      // grade, closed by the double-rule total treatment from .hv-total.
       return `
-        <div class="mini-grade">
-          <div class="ring">
-            <div class="stack">
-              <div class="grade">B+</div>
-              <div class="sub">grade</div>
-            </div>
+        <div class="mini-grade sol-ledger">
+          <div class="mg-head">
+            <span class="mg-file">FILE 2214</span>
+            <span class="mg-cat">grade</span>
           </div>
-          <div class="legend">
-            <div class="item"><span class="dot ml"></span>ML baseline<span class="val">0.62</span></div>
-            <div class="item"><span class="dot ag"></span>Agentic adj.<span class="val">+0.22</span></div>
-            <div class="item src">12 sources cited</div>
+          <div class="mg-rows">
+            <div class="mg-row"><span class="mg-k">ML score</span><span class="mg-v">0.62</span></div>
+            <div class="mg-row"><span class="mg-k">Agentic adj.</span><span class="mg-v">+0.22</span></div>
           </div>
+          <div class="mg-total">
+            <span class="mg-total-k">Grade</span>
+            <span class="mg-total-v">B+</span>
+          </div>
+          <div class="mg-foot"><span>12 sources cited</span></div>
         </div>`;
     }
     return '';
