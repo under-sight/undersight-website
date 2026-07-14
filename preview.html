@@ -450,7 +450,7 @@
       justify-content: center;
       height: 40px;
       padding: 10px 20px;
-      border-radius: var(--rounded-md);
+      border-radius: var(--rounded-xs);
       font-family: var(--font-sans);
       font-size: var(--text-ui-button);
       font-weight: var(--weight-semibold);
@@ -802,12 +802,12 @@
     }
 
     .section-label-text {
-      font-family: var(--font-sans);
-      font-size: var(--text-caption-uppercase);
-      font-weight: var(--weight-semibold);
+      /* mono folio eyebrow — editorial ledger grammar (Column adaptation) */
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: var(--weight-medium);
       line-height: var(--leading-caption-uppercase);
       letter-spacing: var(--tracking-caption-uppercase);
-      font-feature-settings: var(--font-feature-inter);
       text-transform: uppercase;
       color: var(--color-accent);
     }
@@ -1337,6 +1337,13 @@
             </thead>
             <tbody>
               <tr>
+                <td><span class="type-role">display-hero</span></td>
+                <td style="font-family: var(--font-sans); font-size: var(--text-display-hero); font-weight: var(--weight-bold); line-height: var(--leading-display-hero); letter-spacing: var(--tracking-display-hero); font-feature-settings: var(--font-feature-inter); color: var(--color-text);">Underwrite smarter</td>
+                <td><span class="type-meta">64px</span></td>
+                <td><span class="type-meta">700</span></td>
+                <td><span class="type-meta">1.05</span></td>
+              </tr>
+              <tr>
                 <td><span class="type-role">display-xl</span></td>
                 <td style="font-family: var(--font-sans); font-size: var(--text-display-xl); font-weight: var(--weight-bold); line-height: var(--leading-display-xl); letter-spacing: var(--tracking-display-xl); font-feature-settings: var(--font-feature-inter); color: var(--color-text);">Underwrite smarter</td>
                 <td><span class="type-meta">48px</span></td>
@@ -1691,15 +1698,15 @@
         <h2 class="section-title">Section Labels</h2>
         <div class="section-label-demo">
           <div class="section-label-example">
-            <span class="section-label-text">Solutions</span>
+            <span class="section-label-text">03 &middot; Solutions</span>
             <span class="section-label-title">Underwriting for every asset class</span>
           </div>
           <div class="section-label-example">
-            <span class="section-label-text">How It Works</span>
+            <span class="section-label-text">02 &middot; How It Works</span>
             <span class="section-label-title">Three steps to smarter decisions</span>
           </div>
           <div class="section-label-example">
-            <span class="section-label-text">Trusted By</span>
+            <span class="section-label-text">05 &middot; Trusted By</span>
             <span class="section-label-title">Leading alternative lenders</span>
           </div>
         </div>
@@ -1829,7 +1836,7 @@
           section content, an editorial double rule, and the eye-ring marker.
           All values come from the <code style="font-family: var(--font-mono); font-size: 12px;">--pattern-*</code>
           and <code style="font-family: var(--font-mono); font-size: 12px;">--rule-double-gap</code> tokens.
-          Use the dark-mode toggle to preview both schemes.
+          Use the theme toggle to preview both schemes.
         </p>
         <div class="motif-grid">
 
