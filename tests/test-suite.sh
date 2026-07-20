@@ -267,7 +267,7 @@ fi
 
 # Test: All CSS link tags present
 for CSS_FILE in "tokens.css" "main.css"; do
-  if grep -q "href=\"css/$CSS_FILE\"" <<< "$HTML_SOURCE"; then
+  if grep -q "href=\"/css/$CSS_FILE\"" <<< "$HTML_SOURCE"; then
     pass "CSS link tag present: $CSS_FILE"
   else
     fail "CSS link tag present: $CSS_FILE"
@@ -584,6 +584,18 @@ if [ -f "$SITE_ROOT/_redirects" ]; then
   pass "_redirects file exists for production SPA fallback"
 else
   fail "_redirects file exists" "Direct URL navigation will 404 in production"
+fi
+
+# Test: Static asset refs are root-relative. On a deep path like
+# /blog/<slug>, a document-relative href="css/..." resolves to
+# /blog/css/... — the _redirects catch-all serves index.html for it,
+# and nosniff makes the browser reject that HTML as CSS → unstyled page.
+REL_ASSETS=$(grep -E '(href|src)="(css/|images/|js/|favicon|apple-touch|manifest)' "$SRC_HTML" || true)
+if [ -z "$REL_ASSETS" ]; then
+  pass "Asset refs are root-relative (deep-link safe)"
+else
+  COUNT=$(echo "$REL_ASSETS" | wc -l | tr -d ' ')
+  fail "Asset refs are root-relative" "$COUNT document-relative ref(s) break /blog/<slug> deep links"
 fi
 
 # Test: Dev server has SPA fallback
