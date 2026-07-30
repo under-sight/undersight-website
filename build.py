@@ -137,22 +137,27 @@ def _unwrap_doc_content(raw):
         "content": "<escaped markdown>"
         }
     Returns the inner markdown if a wrapper is detected, else the raw string.
+
+    Fibery's md export has rendered the envelope's soft line breaks two ways
+    over time: backslash-newline continuations (legacy) and literal <br> tags
+    (2026-07-28+). Both must normalize to newlines before parsing.
     """
     if not raw or not isinstance(raw, str):
         return raw or ""
     s = raw.lstrip()
     if not s.startswith("{"):
         return raw
-    # Try strict JSON parse first (after stripping the trailing-backslash continuations).
-    candidate = s.replace("\\\n", "\n")
+    candidate = s.replace("\\\n", "\n").replace("<br>", "\n")
     try:
-        obj = json.loads(candidate)
+        # strict=False: the <br>-era export puts real newlines inside the
+        # "content" string literal once <br> is normalized.
+        obj = json.loads(candidate, strict=False)
         if isinstance(obj, dict) and "content" in obj:
             inner = obj.get("content", "")
             if isinstance(inner, str):
-                # Inner content uses \\n for newlines; unescape one level.
+                # Inner content uses \\n (sometimes doubly escaped) for newlines.
                 return _normalize_doc_markdown(
-                    inner.replace("\\n", "\n").replace("\\\"", '"')
+                    re.sub(r"\\+n", "\n", inner).replace("\\\"", '"')
                 )
     except Exception:
         pass
@@ -161,7 +166,7 @@ def _unwrap_doc_content(raw):
     if m:
         inner = m.group(1)
         return _normalize_doc_markdown(
-            inner.replace("\\\\n", "\n").replace("\\n", "\n").replace('\\"', '"')
+            re.sub(r"\\+n", "\n", inner).replace('\\"', '"')
         )
     return _normalize_doc_markdown(raw)
 
