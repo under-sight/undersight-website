@@ -166,38 +166,6 @@ def _normalize_doc_markdown(text):
     return text
 
 
-def _unwrap_doc_content(raw):
-    """
-    Defensive unwrap for CMS/Blog Description docs written by the
-    migration script wrapped in a JSON envelope `{"secret":..., "content":"..."}`.
-    Returns the inner markdown if a wrapper is detected, else the raw string.
-    Mirrors build.py:_unwrap_doc_content.
-    """
-    if not raw or not isinstance(raw, str):
-        return raw or ""
-    s = raw.lstrip()
-    if not s.startswith("{"):
-        return raw
-    candidate = s.replace("\\\n", "\n")
-    try:
-        obj = json.loads(candidate)
-        if isinstance(obj, dict) and "content" in obj:
-            inner = obj.get("content", "")
-            if isinstance(inner, str):
-                return _normalize_doc_markdown(
-                    inner.replace("\\n", "\n").replace("\\\"", '"')
-                )
-    except Exception:
-        pass
-    m = re.search(r'"content"\s*:\s*"(.*)"\s*\\?\s*\}\s*$', candidate, re.DOTALL)
-    if m:
-        inner = m.group(1)
-        return _normalize_doc_markdown(
-            inner.replace("\\\\n", "\n").replace("\\n", "\n").replace('\\"', '"')
-        )
-    return _normalize_doc_markdown(raw)
-
-
 def fetch_all():
     """Fetch all entities (Pages + Blog) + docs."""
     import hashlib
@@ -330,7 +298,7 @@ def fetch_all():
                     "type": f.get("ContentType", ""),
                     "url": f"/api/file/{opaque}",
                 })
-        body = _unwrap_doc_content(docs.get(be.get("DocSecret", ""), ""))
+        body = _normalize_doc_markdown(docs.get(be.get("DocSecret", ""), ""))
         tag = ""
         if isinstance(be.get("Type"), list) and be["Type"]:
             tag = be["Type"][0] or ""

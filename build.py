@@ -128,49 +128,6 @@ def _normalize_doc_markdown(text):
     return text
 
 
-def _unwrap_doc_content(raw):
-    """
-    Defensive unwrap for CMS/Blog Description docs that were written
-    by the migration script wrapped in a JSON envelope:
-        {\
-        "secret": "...",
-        "content": "<escaped markdown>"
-        }
-    Returns the inner markdown if a wrapper is detected, else the raw string.
-
-    Fibery's md export has rendered the envelope's soft line breaks two ways
-    over time: backslash-newline continuations (legacy) and literal <br> tags
-    (2026-07-28+). Both must normalize to newlines before parsing.
-    """
-    if not raw or not isinstance(raw, str):
-        return raw or ""
-    s = raw.lstrip()
-    if not s.startswith("{"):
-        return raw
-    candidate = s.replace("\\\n", "\n").replace("<br>", "\n")
-    try:
-        # strict=False: the <br>-era export puts real newlines inside the
-        # "content" string literal once <br> is normalized.
-        obj = json.loads(candidate, strict=False)
-        if isinstance(obj, dict) and "content" in obj:
-            inner = obj.get("content", "")
-            if isinstance(inner, str):
-                # Inner content uses \\n (sometimes doubly escaped) for newlines.
-                return _normalize_doc_markdown(
-                    re.sub(r"\\+n", "\n", inner).replace("\\\"", '"')
-                )
-    except Exception:
-        pass
-    # Fallback regex: locate "content": "..." (greedy until last quote before closing brace).
-    m = re.search(r'"content"\s*:\s*"(.*)"\s*\\?\s*\}\s*$', candidate, re.DOTALL)
-    if m:
-        inner = m.group(1)
-        return _normalize_doc_markdown(
-            re.sub(r"\\+n", "\n", inner).replace('\\"', '"')
-        )
-    return _normalize_doc_markdown(raw)
-
-
 def fetch_all(token):
     """
     Fetch all entities + docs from Fibery.
@@ -380,7 +337,10 @@ def fetch_all(token):
                     }
                 )
         body_raw = docs.get(be.get("DocSecret", ""), "")
-        body = _unwrap_doc_content(body_raw)
+        # Blog Description docs hold plain markdown (the migration-era JSON
+        # envelopes were repaired at rest, Fibery #408). Fibery's md export
+        # still escapes literal * and ~ (e.g. "\~8"), so normalize here.
+        body = _normalize_doc_markdown(body_raw)
         tag = ""
         if isinstance(be.get("Type"), list) and be["Type"]:
             tag = be["Type"][0] or ""
