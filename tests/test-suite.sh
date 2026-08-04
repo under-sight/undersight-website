@@ -571,7 +571,7 @@ else
 fi
 
 # Test: Nav links use clean paths (not hash fragments)
-HASH_NAV=$(grep -E 'href="#(blog|docs|underscore|rfi|copilot|home|contact)"' "$SRC_HTML" | grep 'onclick.*navigate' || true)
+HASH_NAV=$(grep -E 'href="#(blog|docs|underscore|copilot|home|contact)"' "$SRC_HTML" | grep 'onclick.*navigate' || true)
 if [ -z "$HASH_NAV" ]; then
   pass "Nav links use clean paths (no hash fragment hrefs)"
 else
@@ -607,13 +607,35 @@ fi
 
 # Test: All page sections exist for navigate() targets
 # "docs" removed 2026-07: the Docs tab now links to documentation.underchat.ai
-for PAGE in "home" "underscore" "rfi" "copilot" "blog" "post" "contact"; do
+# "rfi" removed 2026-08 (redesign phase 0): dead page — no SOLUTION_MAP entry;
+# navigate() aliases /rfi -> /underchat for backwards compat.
+for PAGE in "home" "underscore" "copilot" "blog" "post" "contact"; do
   if grep -q "id=\"page-$PAGE\"" "$SRC_HTML"; then
     pass "Page section exists: page-$PAGE"
   else
     fail "Page section exists: page-$PAGE" "navigate('$PAGE') would find no target"
   fi
 done
+
+# Test: dead page-rfi stays removed, but its alias survives
+if grep -q 'id="page-rfi"' "$SRC_HTML"; then
+  fail "Dead page-rfi removed" "page-rfi shell reappeared (no SOLUTION_MAP entry renders into it)"
+else
+  pass "Dead page-rfi removed"
+fi
+if grep -q "if (page === 'rfi') page = 'underchat'" "$SRC_HTML"; then
+  pass "/rfi -> /underchat alias preserved in navigate()"
+else
+  fail "/rfi -> /underchat alias preserved in navigate()" "old /rfi links would land on a blank page"
+fi
+# Boot resolution checks the page-<path> shell BEFORE navigate() can alias, so
+# without page-rfi in the DOM the alias must also run in boot path resolution —
+# otherwise a direct /rfi deep link silently falls back to home.
+if grep -q "if (_bootPage === 'rfi') _bootPage = 'underchat'" "$SRC_HTML"; then
+  pass "/rfi alias applied in boot path resolution (deep links)"
+else
+  fail "/rfi alias applied in boot path resolution (deep links)" "direct /rfi loads fall back to home"
+fi
 
 # Test: Logo links back to home
 if grep -q 'class="nav-logo"' <<< "$HTML_SOURCE" && grep -q "navigate('home')" <<< "$HTML_SOURCE"; then

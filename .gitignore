@@ -42,3 +42,12 @@ out/
 
 # Wrangler local dev state
 .wrangler/
+
+# Local AI tooling (impeccable installer output) — not part of the site
+.claude/
+.github/agents/
+.github/hooks/
+.github/skills/
+
+# Redesign screenshot archive (large PNGs, local review only)
+versions/
