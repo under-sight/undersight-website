@@ -290,7 +290,6 @@
 <!-- ============ SOLUTION PAGES (generated dynamically) ============ -->
 <section class="page" id="page-underscore"></section>
 <section class="page" id="page-underchat"></section>
-<section class="page" id="page-rfi"></section>
 <section class="page" id="page-copilot"></section>
 
 <!-- Docs moved to the external documentation site (documentation.underchat.ai).
@@ -636,15 +635,9 @@
   // Solution images and narratives are driven by Fibery file attachments
   // First image = hero/card, remaining images = narrative steps
   const SOLUTION_NARRATIVE_TITLES = {
-    'rfi': ['AI agent collects documents', 'Data is enriched and verified', 'Funder-ready package delivered'],
     'copilot': ['Screen deals in minutes', 'Analyze transactions with AI', 'Ask questions, get answers'],
   };
   const SOLUTION_NARRATIVE_DESCS = {
-    'rfi': [
-      'Macy conducts an intelligent conversation with the applicant or broker, collecting bank statements and resolving gaps automatically.',
-      'Raw documents are parsed into structured transaction intelligence. Revenue patterns, existing positions, and anomalies identified.',
-      'Complete submission packages are assembled from raw inputs, including RFI responses, enriched data, and preliminary risk signals.',
-    ],
     'copilot': [
       'AI identifies clear declines instantly. Deal queues are prioritized by risk signal strength, freeing capacity for complex deals.',
       'Revenue patterns, anomalies, and risk factors surfaced in a unified transaction viewer. Every deal gets institutional-grade analysis.',
@@ -2710,6 +2703,9 @@
     _bootPage = 'blog';  // show blog index until the post resolves
   } else {
     _bootPage = _bootPath.replace(/^\//, '') || 'home';
+    // Backwards-compat alias must run before the shell-existence check now
+    // that page-rfi has no DOM shell (removed 2026-08, redesign phase 0).
+    if (_bootPage === 'rfi') _bootPage = 'underchat';
     if (!document.getElementById('page-' + _bootPage)) _bootPage = 'home';
   }
   _origNavigate(_bootPage);
