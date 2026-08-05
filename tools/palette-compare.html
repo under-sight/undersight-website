@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Palette compare — undersight vs Claude vs Stripe</title>
+<style>
+  :root {
+    --ink: #23262C;
+    --muted: #6B7280;
+    --hairline: #E8EAED;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+  body { margin: 0; padding: 48px 32px; background: #FAFAFA; color: var(--ink); }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+  h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px; }
+  h2 { font-size: 20px; font-weight: 600; margin: 48px 0 16px; }
+  h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 32px 0 12px; }
+  .lede { color: var(--muted); max-width: 720px; margin: 0 0 40px; line-height: 1.6; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .swatch { border: 1px solid var(--hairline); border-radius: 8px; overflow: hidden; background: #fff; }
+  .chip { height: 96px; }
+  .meta { padding: 10px 12px; font-size: 12px; line-height: 1.4; }
+  .meta .name { font-weight: 600; }
+  .meta .hex { color: var(--muted); font-family: 'SF Mono', monospace; font-size: 11px; margin-top: 2px; }
+  .meta .role { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .row { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: center; margin: 0 0 10px; }
+  .row > .label { font-size: 12px; font-weight: 600; color: var(--ink); }
+  .row > .strip { display: flex; height: 56px; border-radius: 6px; overflow: hidden; border: 1px solid var(--hairline); }
+  .row > .strip > div { flex: 1; display: flex; align-items: flex-end; justify-content: center; padding: 4px; font: 10px 'SF Mono', monospace; color: rgba(255,255,255,0.85); }
+  .row > .strip > div.dark-text { color: rgba(0,0,0,0.6); }
+  details { background: #fff; border: 1px solid var(--hairline); border-radius: 8px; padding: 0; margin: 12px 0; }
+  summary { padding: 16px 20px; font-weight: 600; cursor: pointer; }
+  details[open] summary { border-bottom: 1px solid var(--hairline); }
+  details > .body { padding: 20px; }
+  .note { background: #FFF7ED; border-left: 3px solid #C97A54; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-size: 13px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Palette compare</h1>
+<p class="lede">Current undersight tokens vs Claude (warm cream + 3 chromatic accents) vs Stripe (cool + indigo scale + gradient stops). Use this to decide where to expand.</p>
+
+<h2>undersight — current (dual chromatic accent)</h2>
+
+<div class="note"><strong>Dual-accent system:</strong> Amber Rust = ACTION voice (CTAs, interactive, active). Eucalyptus = INSIGHT voice (data, status, validated, measured). The two never overlap in role — Rust never decorates, Eucalyptus never calls to action.</div>
+
+<h3>Amber Rust — ACTION voice</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#C97A54"></div><div class="meta"><div class="name">Amber Rust</div><div class="hex">#C97A54</div><div class="role">Primary CTA, action-section eyebrows, inline links</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#B56A45"></div><div class="meta"><div class="name">Amber Rust Hover</div><div class="hex">#B56A45</div><div class="role">Pressed state</div></div></div>
+  <div class="swatch"><div class="chip" style="background:rgba(201,122,84,0.08);"></div><div class="meta"><div class="name">Amber Rust Light</div><div class="hex">rgba(201,122,84,.08)</div><div class="role">Interactive tag/pill backgrounds</div></div></div>
+  <div class="swatch"><div class="chip" style="background:rgba(201,122,84,0.2)"></div><div class="meta"><div class="name">Amber Rust Focus</div><div class="hex">rgba(201,122,84,.2)</div><div class="role">Focus rings on inputs</div></div></div>
+</div>
+
+<h3>Eucalyptus — INSIGHT voice <span style="font-weight:400;color:var(--muted);">(new scale)</span></h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#6B9E8C"></div><div class="meta"><div class="name">Eucalyptus</div><div class="hex">#6B9E8C</div><div class="role">Data eyebrows, metric numerals, status text, insight icons</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#588977"></div><div class="meta"><div class="name">Eucalyptus Hover</div><div class="hex">#588977</div><div class="role">Pressed; fill behind white text (contrast)</div></div></div>
+  <div class="swatch"><div class="chip" style="background:rgba(107,158,140,0.08)"></div><div class="meta"><div class="name">Eucalyptus Light</div><div class="hex">rgba(107,158,140,.08)</div><div class="role">Status pills, metric badges, metadata tags</div></div></div>
+  <div class="swatch"><div class="chip" style="background:rgba(107,158,140,0.2)"></div><div class="meta"><div class="name">Eucalyptus Focus</div><div class="hex">rgba(107,158,140,.2)</div><div class="role">Validated-state input ring</div></div></div>
+</div>
+
+<h3>Backgrounds — light (all neutral-cool)</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#FFFFFF; border-bottom:1px solid #eee"></div><div class="meta"><div class="name">Paper White</div><div class="hex">#FFFFFF</div><div class="role">Default page</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#FAFAFA"></div><div class="meta"><div class="name">BG Surface</div><div class="hex">#FAFAFA</div><div class="role">Alternating bands</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#F7F8F8"></div><div class="meta"><div class="name">Graphite 50</div><div class="hex">#F7F8F8</div><div class="role">Surface alt</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#F0F1F2"></div><div class="meta"><div class="name">Graphite 100</div><div class="hex">#F0F1F2</div><div class="role">Subtle band</div></div></div>
+</div>
+
+<h3>Dark surfaces (3 levels)</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#1A1D21"></div><div class="meta"><div class="name">Dark BG</div><div class="hex">#1A1D21</div><div class="role">Page in dark</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#23262C"></div><div class="meta"><div class="name">Dark Surface</div><div class="hex">#23262C</div><div class="role">Cards in dark</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#3A3F47"></div><div class="meta"><div class="name">Dark Elevated</div><div class="hex">#3A3F47</div><div class="role">Dropdowns/modals</div></div></div>
+</div>
+
+<h3>Semantic (utility only)</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#D05454"></div><div class="meta"><div class="name">Error</div><div class="hex">#D05454</div><div class="role">Validation, destructive</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#5B8DEF"></div><div class="meta"><div class="name">Info</div><div class="hex">#5B8DEF</div><div class="role">Neutral callouts (rare; prefer Eucalyptus for positive states)</div></div></div>
+</div>
+
+<h3>Pairing demo — action vs insight</h3>
+<p style="color:var(--muted); font-size:13px; max-width:680px; line-height:1.5;">The two accents live on the same page but never in the same component. Below: the same card pattern rendered twice — once as an "action" card (Rust) and once as an "insight" card (Eucalyptus).</p>
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:16px;">
+
+  <!-- ACTION card -->
+  <div style="background:#fff; border:1px solid #D1D5DB; border-radius:12px; padding:24px;">
+    <div style="font:600 11px/1.4 'Inter',sans-serif; letter-spacing:0.08em; text-transform:uppercase; color:#C97A54; margin-bottom:8px;">Solutions</div>
+    <div style="font:600 20px/1.3 'Inter',sans-serif; color:#23262C; margin-bottom:8px;">AI Underwriting Copilot</div>
+    <div style="font:400 14px/1.6 'Inter',sans-serif; color:#6B7280; margin-bottom:16px;">Augment your credit team with agentic decisioning across the full memo lifecycle.</div>
+    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(201,122,84,0.08); color:#C97A54; font:600 12px/1 'Inter',sans-serif; padding:6px 10px; border-radius:9999px; margin-bottom:16px;">Interactive tag</div>
+    <div></div>
+    <button style="background:#C97A54; color:#fff; border:none; padding:10px 18px; border-radius:8px; font:600 14px/1 'Inter',sans-serif; cursor:pointer;">Book a demo →</button>
+    <div style="font:500 11px/1.4 'SF Mono',monospace; color:var(--muted); margin-top:14px;">Rust eyebrow + Rust tag + Rust CTA. All ACTION.</div>
+  </div>
+
+  <!-- INSIGHT card -->
+  <div style="background:#fff; border:1px solid #D1D5DB; border-radius:12px; padding:24px;">
+    <div style="font:600 11px/1.4 'Inter',sans-serif; letter-spacing:0.08em; text-transform:uppercase; color:#6B9E8C; margin-bottom:8px;">Results</div>
+    <div style="font:600 20px/1.3 'Inter',sans-serif; color:#23262C; margin-bottom:8px;">71% time saved on credit memos</div>
+    <div style="font:400 14px/1.6 'Inter',sans-serif; color:#6B7280; margin-bottom:16px;">Measured across <span style="color:#6B9E8C; font-weight:600;">650 bps</span> spread improvement and <span style="color:#6B9E8C; font-weight:600;">22% portfolio coverage</span> uplift.</div>
+    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(107,158,140,0.08); color:#6B9E8C; font:600 12px/1 'Inter',sans-serif; padding:6px 10px; border-radius:9999px; margin-bottom:16px;">
+      <span style="width:6px; height:6px; border-radius:50%; background:#6B9E8C;"></span> Verified
+    </div>
+    <div></div>
+    <button style="background:#C97A54; color:#fff; border:none; padding:10px 18px; border-radius:8px; font:600 14px/1 'Inter',sans-serif; cursor:pointer;">Read the case study →</button>
+    <div style="font:500 11px/1.4 'SF Mono',monospace; color:var(--muted); margin-top:14px;">Eucalyptus eyebrow + metric callouts + status pill. CTA stays Rust — action color does not yield.</div>
+  </div>
+
+  <!-- VALIDATED INPUT -->
+  <div style="background:#fff; border:1px solid #D1D5DB; border-radius:12px; padding:24px;">
+    <div style="font:510 14px/1 'Inter',sans-serif; letter-spacing:0.02em; color:#23262C; margin-bottom:8px;">Email</div>
+    <div style="display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid #6B9E8C; border-radius:8px; box-shadow:0 0 0 4px rgba(107,158,140,0.2); margin-bottom:14px;">
+      <span style="font:400 14px/1.5 'Inter',sans-serif; color:#23262C; flex:1;">contact@undersight.ai</span>
+      <span style="color:#6B9E8C; font:600 14px/1 'Inter',sans-serif;">✓</span>
+    </div>
+    <div style="font:500 11px/1.4 'SF Mono',monospace; color:var(--muted);">Eucalyptus focus ring = "this input is validated." Distinct from Rust focus which signals "interactive, not yet validated."</div>
+  </div>
+
+  <!-- INTERACTIVE INPUT -->
+  <div style="background:#fff; border:1px solid #D1D5DB; border-radius:12px; padding:24px;">
+    <div style="font:510 14px/1 'Inter',sans-serif; letter-spacing:0.02em; color:#23262C; margin-bottom:8px;">Search</div>
+    <div style="display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid #C97A54; border-radius:8px; box-shadow:0 0 0 4px rgba(201,122,84,0.2); margin-bottom:14px;">
+      <span style="font:400 14px/1.5 'Inter',sans-serif; color:#6B7280; flex:1;">Search portfolio…</span>
+    </div>
+    <div style="font:500 11px/1.4 'SF Mono',monospace; color:var(--muted);">Rust focus ring = "you are interacting here." No validation has occurred yet.</div>
+  </div>
+
+</div>
+
+<div class="note" style="background:#F0F7F4; border-left-color:#6B9E8C;"><strong>Pairing rule cheat-sheet:</strong>
+  <ul style="margin:8px 0 0; padding-left:20px; line-height:1.7;">
+    <li><strong>CTAs &amp; links:</strong> Amber Rust only.</li>
+    <li><strong>Metric numerals &amp; "verified"/"live" labels:</strong> Eucalyptus only.</li>
+    <li><strong>Section eyebrows:</strong> one voice per section — Rust for action-led, Eucalyptus for insight-led.</li>
+    <li><strong>Outlines:</strong> Cloud Zinc by default; Rust = active/focused; Eucalyptus = validated.</li>
+    <li><strong>Tags:</strong> Rust-light = interactive category; Eucalyptus-light = metadata / status.</li>
+    <li><strong>Icons:</strong> Rust = action (arrow, plus, link); Eucalyptus = insight (check, shield, trend).</li>
+    <li><strong>Never mix both accents inside a single component.</strong> Voltage comes from separation.</li>
+  </ul>
+</div>
+
+<h2>Claude — reference (warm cream system)</h2>
+
+<h3>Backgrounds — warm cream cascade</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#faf9f5"></div><div class="meta"><div class="name">Canvas</div><div class="hex">#faf9f5</div><div class="role">Tinted cream page</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#f5f0e8"></div><div class="meta"><div class="name">Surface Soft</div><div class="hex">#f5f0e8</div><div class="role">Section dividers</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#efe9de"></div><div class="meta"><div class="name">Surface Card</div><div class="hex">#efe9de</div><div class="role">Feature cards</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#e8e0d2"></div><div class="meta"><div class="name">Cream Strong</div><div class="hex">#e8e0d2</div><div class="role">Selected tabs, emphasis</div></div></div>
+</div>
+
+<h3>Chromatic accents (3 — primary + 2 supporting)</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#cc785c"></div><div class="meta"><div class="name">Coral / Primary</div><div class="hex">#cc785c</div><div class="role">CTA — nearly identical to our Amber Rust</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#a9583e"></div><div class="meta"><div class="name">Coral Active</div><div class="hex">#a9583e</div><div class="role">Pressed</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#5db8a6"></div><div class="meta"><div class="name">Accent Teal</div><div class="hex">#5db8a6</div><div class="role">Status dots, connectors</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#e8a55a"></div><div class="meta"><div class="name">Accent Amber</div><div class="hex">#e8a55a</div><div class="role">Category badges, highlights</div></div></div>
+</div>
+
+<h3>Dark surfaces</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#181715"></div><div class="meta"><div class="name">Surface Dark</div><div class="hex">#181715</div><div class="role">Mockups, footer</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#1f1e1b"></div><div class="meta"><div class="name">Dark Soft</div><div class="hex">#1f1e1b</div><div class="role">Code blocks</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#252320"></div><div class="meta"><div class="name">Dark Elevated</div><div class="hex">#252320</div><div class="role">Settings panels</div></div></div>
+</div>
+
+<h2>Stripe — reference (cool + indigo + chromatic interlude)</h2>
+
+<h3>Backgrounds (3-tier including a warm cream interlude)</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#ffffff; border-bottom:1px solid #eee"></div><div class="meta"><div class="name">Canvas</div><div class="hex">#ffffff</div><div class="role">Default</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#f6f9fc"></div><div class="meta"><div class="name">Canvas Soft</div><div class="hex">#f6f9fc</div><div class="role">Cool-tinted feature bands</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#f5e9d4"></div><div class="meta"><div class="name">Canvas Cream</div><div class="hex">#f5e9d4</div><div class="role">The brand's "chromatic interlude"</div></div></div>
+</div>
+
+<h3>Indigo — full scale (5 steps, not just hover/light)</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#b9b9f9"></div><div class="meta"><div class="name">Indigo Subdued</div><div class="hex">#b9b9f9</div><div class="role">Soft tag background</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#665efd"></div><div class="meta"><div class="name">Indigo Soft</div><div class="hex">#665efd</div><div class="role">Product UI, chart highlights</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#533afd"></div><div class="meta"><div class="name">Indigo (Primary)</div><div class="hex">#533afd</div><div class="role">CTA, brand</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#4434d4"></div><div class="meta"><div class="name">Indigo Deep</div><div class="hex">#4434d4</div><div class="role">Gradient mid-stop, warm press</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#2e2b8c"></div><div class="meta"><div class="name">Indigo Press</div><div class="hex">#2e2b8c</div><div class="role">Pressed</div></div></div>
+</div>
+
+<h3>Gradient stops (never buttons — visual texture only)</h3>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#ea2261"></div><div class="meta"><div class="name">Ruby</div><div class="hex">#ea2261</div><div class="role">Mesh accent, chart</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#f96bee"></div><div class="meta"><div class="name">Magenta</div><div class="hex">#f96bee</div><div class="role">Gradient mesh</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#9b6829"></div><div class="meta"><div class="name">Lemon</div><div class="hex">#9b6829</div><div class="role">Warm gradient stop</div></div></div>
+  <div class="swatch"><div class="chip" style="background:#1c1e54"></div><div class="meta"><div class="name">Brand Dark 900</div><div class="hex">#1c1e54</div><div class="role">Featured pricing tier, dashboard chrome</div></div></div>
+</div>
+
+<h2>Side-by-side: backgrounds</h2>
+<div class="row"><div class="label">undersight (light)</div><div class="strip">
+  <div style="background:#FFFFFF" class="dark-text">#FFFFFF</div>
+  <div style="background:#FAFAFA" class="dark-text">#FAFAFA</div>
+  <div style="background:#F7F8F8" class="dark-text">#F7F8F8</div>
+  <div style="background:#F0F1F2" class="dark-text">#F0F1F2</div>
+</div></div>
+<div class="row"><div class="label">Claude (cream cascade)</div><div class="strip">
+  <div style="background:#faf9f5" class="dark-text">#faf9f5</div>
+  <div style="background:#f5f0e8" class="dark-text">#f5f0e8</div>
+  <div style="background:#efe9de" class="dark-text">#efe9de</div>
+  <div style="background:#e8e0d2" class="dark-text">#e8e0d2</div>
+</div></div>
+<div class="row"><div class="label">Stripe (cool + interlude)</div><div class="strip">
+  <div style="background:#ffffff" class="dark-text">#ffffff</div>
+  <div style="background:#f6f9fc" class="dark-text">#f6f9fc</div>
+  <div style="background:#f5e9d4" class="dark-text">#f5e9d4</div>
+</div></div>
+
+<h2>Side-by-side: accent scales</h2>
+<div class="row"><div class="label">undersight</div><div class="strip">
+  <div style="background:rgba(201,122,84,0.08)" class="dark-text">rust-light</div>
+  <div style="background:#C97A54">#C97A54</div>
+  <div style="background:#B56A45">#B56A45 hover</div>
+</div></div>
+<div class="row"><div class="label">Claude</div><div class="strip">
+  <div style="background:#e6dfd8" class="dark-text">disabled</div>
+  <div style="background:#cc785c">#cc785c</div>
+  <div style="background:#a9583e">#a9583e active</div>
+  <div style="background:#5db8a6">teal</div>
+  <div style="background:#e8a55a" class="dark-text">amber</div>
+</div></div>
+<div class="row"><div class="label">Stripe (5-step scale)</div><div class="strip">
+  <div style="background:#b9b9f9" class="dark-text">#b9b9f9</div>
+  <div style="background:#665efd">#665efd</div>
+  <div style="background:#533afd">#533afd</div>
+  <div style="background:#4434d4">#4434d4</div>
+  <div style="background:#2e2b8c">#2e2b8c</div>
+</div></div>
+
+</div>
+</body>
+</html>

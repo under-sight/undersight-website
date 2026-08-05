@@ -13,12 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: dev
           fetch-depth: 0
 
-      - name: Merge main into dev
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git merge origin/main --no-edit
-          git push origin dev
+      # dev is a MIRROR of main (since 2026-08-05): the old merge-based sync
+      # failed with conflicts on every push once the branches diverged,
+      # emailing a failure per commit. Dev-only work goes through PRs to
+      # main, never direct commits to dev — a mirror push cannot conflict,
+      # so this workflow cannot fail-and-email. Dev-only utilities were
+      # salvaged onto main before the first mirror reset.
+      - name: Mirror main to dev
+        run: git push origin main:dev --force
