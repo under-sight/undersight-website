@@ -51,3 +51,6 @@ out/
 
 # Redesign screenshot archive (large PNGs, local review only)
 versions/
+
+# impeccable local state (decision pages, sketches)
+.impeccable/

@@ -84,6 +84,25 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
+<!--
+THESIS: undersight sits alongside Plaid, Stripe, Heron, and Ocrolus — the fintech
+category standard played straight at their craft level — and refuses the metaphor-
+driven concept world; the mechanism (statement in, decision out) is shown, not styled.
+OWN-WORLD: paper-white ground, graphite ink, one amber-rust accent carrying CTAs and
+emphasis, eucalyptus reserved for cleared/after states; Inter display with cv01/ss03,
+DM Sans body, mono strictly for figures; contour-engraving line texture as the only
+ornament; depth from soft offset shadows on floating product UI.
+STORY: an MCA/RBF decision-maker recognizes their bottleneck in one line, watches a
+statement become a scored deal, sees real deployment numbers with named sources, and
+books a discovery call.
+FIRST VIEWPORT: split hero — headline + subtitle + two CTAs left, a floating bank-
+statement card parsing into a scorecard card right, evidence strip with four real
+metrics directly beneath.
+FORM: category canon via standing exit (user-pinned 2026-08-05, seed 144699bf declined);
+craft bar = plaid.com / stripe.com / herondata.io / ocrolus.com.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish
+review, the verdict, and DESIGN.md.
+-->
 
 <!-- ============ HEADER ============ -->
 <header>
@@ -150,76 +169,111 @@
   </div>
   <!-- Live content (hidden until loaded) -->
   <div class="live-content">
+
+    <!-- HERO: split — copy left, live underwrite demo right -->
     <div class="hero">
-      <h1 id="heroTitle"></h1>
-      <p id="heroSubtitle"></p>
-      <div class="hero-bar"></div>
-    </div>
-
-    <!-- 1. WHO WE SERVE -->
-    <div class="home-section">
-      <div class="container">
-        <div class="home-section-label">Who we serve</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;">Built for private credit</h2>
-        <p style="font-size:15px;color:var(--mid);margin-bottom:32px;">Servicing the long tail of US small businesses</p>
-        <div class="serve-grid">
-          <div class="serve-card">
-            <div class="cat">Funds</div>
-            <h3>Underwrite faster</h3>
-            <p>Score deals via API, monitor portfolios continuously, flag pre-default signals before collections. Stop sticking to known industries — model risk across diverse small businesses.</p>
+      <div class="hero-grid container">
+        <div class="hero-copy">
+          <h1 id="heroTitle"></h1>
+          <p id="heroSubtitle"></p>
+          <div class="hero-actions">
+            <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+            <a href="#pipeline" class="btn btn-ghost" onclick="event.preventDefault();document.getElementById('pipeline').scrollIntoView({behavior:'smooth'});">See how it works</a>
           </div>
-          <div class="serve-card">
-            <div class="cat">Brokerages</div>
-            <h3>Convert more</h3>
-            <p>AI intake agent handles applicants 24/7, builds funder-ready submission packages automatically. No more siloed data or incomplete submissions — everything structured and verified.</p>
+        </div>
+        <div class="hero-demo" aria-hidden="true">
+          <div class="demo-doc">
+            <div class="demo-doc-head"><span class="demo-doc-title">Operating &middot; June</span><span class="demo-chip">Sample</span></div>
+            <div class="demo-rows">
+              <div class="demo-row"><span>CARD SETTLEMENT</span><em class="pos">+$18,240.00</em></div>
+              <div class="demo-row"><span>REMOTE DEPOSIT</span><em class="pos">+$6,410.50</em></div>
+              <div class="demo-row"><span>MCA PAYMENT 1</span><em>&minus;$1,150.00</em></div>
+              <div class="demo-row"><span>PAYROLL RUN</span><em>&minus;$12,830.75</em></div>
+              <div class="demo-row"><span>CARD SETTLEMENT</span><em class="pos">+$17,905.25</em></div>
+              <div class="demo-row demo-row-dim"><span>NSF RETURN</span><em>&minus;$34.00</em></div>
+            </div>
           </div>
-          <div class="serve-card">
-            <div class="cat">Marketplaces</div>
-            <h3>Scale the workflow</h3>
-            <p>End-to-end from application to funded deal. Fully agentic intake, scoring, and matching. Replace manual document review that kills good deals with seconds-fast analysis.</p>
+          <div class="demo-link" role="presentation">
+            <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12h38"/><path d="M34 5l7 7-7 7"/></svg>
+          </div>
+          <div class="demo-score">
+            <div class="demo-score-head"><span class="demo-doc-title">Deal score</span><span class="demo-chip">Sample &middot; 41s</span></div>
+            <div class="demo-score-body">
+              <div class="demo-ring"><div class="demo-ring-inner"><strong>82</strong><small>B+</small></div></div>
+              <div class="demo-score-meta"><strong>Recommend</strong><span>with full supporting analysis</span></div>
+            </div>
+            <div class="demo-factors">
+              <div class="demo-factor"><span>Revenue stability</span><i class="demo-meter"><b style="width:86%"></b></i></div>
+              <div class="demo-factor"><span>Deposit trend</span><i class="demo-meter"><b style="width:74%"></b></i></div>
+              <div class="demo-factor"><span>Existing positions</span><i class="demo-meter"><b style="width:58%"></b></i></div>
+              <div class="demo-factor"><span>NSF frequency</span><i class="demo-meter"><b style="width:91%"></b></i></div>
+            </div>
+            <div class="demo-verdict"><span class="demo-verdict-dot"></span>Same-day decision</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- METRICS -->
-    <div class="stats-bar stats-bar--compact">
-      <div class="stat-item"><div class="stat-num">71%</div><div class="stat-label">Reduction in deal time</div></div>
-      <div class="stat-item"><div class="stat-num">22%</div><div class="stat-label">More booked receivables</div></div>
-      <div class="stat-item"><div class="stat-num">650<span> bps</span></div><div class="stat-label">Loss ratio reduction</div></div>
+    <!-- EVIDENCE STRIP: real deployment outcomes, named sources -->
+    <div class="evidence-strip">
+      <div class="container evidence-inner">
+        <div class="ev-item"><span class="ev-num">71%</span><span class="ev-label">faster deal cycles</span></div>
+        <div class="ev-item"><span class="ev-num">3.1&times;</span><span class="ev-label">underwriter throughput</span></div>
+        <div class="ev-item"><span class="ev-num">22%</span><span class="ev-label">more booked receivables</span></div>
+        <div class="ev-item"><span class="ev-num">$0</span><span class="ev-label">added headcount</span></div>
+        <div class="ev-src">Measured across the Chat Advance and 4D Financing deployments</div>
+      </div>
     </div>
 
-    <!-- 2. HOW IT WORKS -->
-    <div class="how-section">
+    <!-- PIPELINE: the mechanism, application to funded deal -->
+    <div class="pipeline-section" id="pipeline">
       <div class="container">
-        <div class="home-section-label">How it works</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;">From application to funded deal</h2>
-        <div class="how-timeline">
-          <div class="how-step">
-            <h3>An applicant or broker starts a conversation</h3>
-            <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time.</p>
+        <div class="home-section-head">
+          <h2>From application to funded deal</h2>
+          <p class="home-section-lede">Four stages, agents on every one of them &mdash; and the underwriter still makes the call.</p>
+        </div>
+        <div class="pipeline">
+          <div class="pipe-stage">
+            <div class="pipe-vis pipe-vis-chat">
+              <span class="pv-bubble pv-agent">Hi &mdash; I can take your June statements whenever you're ready.</span>
+              <span class="pv-bubble pv-client">june-operating.pdf &nbsp;&#10003;</span>
+            </div>
+            <h3>Intake runs itself</h3>
+            <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time &mdash; 24/7.</p>
           </div>
-          <div class="how-step">
-            <h3>Documents are enriched and verified</h3>
-            <p>Raw data becomes structured intelligence. Revenue patterns, existing positions, and anomalies surfaced automatically.</p>
+          <div class="pipe-stage">
+            <div class="pipe-vis pipe-vis-enrich">
+              <span class="pv-line"><span>Monthly revenue</span><em>$213,480</em><i class="pv-tick">&#10003;</i></span>
+              <span class="pv-line"><span>Existing positions</span><em>2</em><i class="pv-tick">&#10003;</i></span>
+              <span class="pv-line"><span>NSF days</span><em>3</em><i class="pv-tick">&#10003;</i></span>
+            </div>
+            <h3>Documents become data</h3>
+            <p>Raw statements are parsed and verified. Revenue patterns, existing positions, and anomalies surfaced automatically.</p>
           </div>
-          <div class="how-step">
-            <h3>Risk is scored in seconds</h3>
-            <p>ML models trained on deal outcomes deliver a risk score with full supporting analysis.</p>
+          <div class="pipe-stage">
+            <div class="pipe-vis pipe-vis-score">
+              <span class="pv-score">82</span>
+              <span class="pv-score-meta">Deal score<br>with full supporting analysis</span>
+            </div>
+            <h3>Risk scored in seconds</h3>
+            <p>Deterministic scorecards trained on deal outcomes deliver a risk score your credit committee can audit line by line.</p>
           </div>
-          <div class="how-step">
-            <h3>The underwriter makes the call</h3>
-            <p>AI surfaces what matters. The human decides. 30% faster screening, institutional-grade consistency.</p>
+          <div class="pipe-stage">
+            <div class="pipe-vis pipe-vis-decide">
+              <span class="pv-decision"><span class="pv-check">&#10003;</span>Approved with terms</span>
+              <span class="pv-sign">Reviewed by your underwriter</span>
+            </div>
+            <h3>The underwriter decides</h3>
+            <p>AI surfaces what matters; the human makes the call. Institutional-grade consistency without the headcount.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 3. SOLUTIONS -->
+    <!-- SOLUTIONS -->
     <div class="home-section">
       <div class="container">
         <div class="home-section-head">
-          <div class="home-section-label">Solutions</div>
           <h2>Three solutions, one underwriting fabric.</h2>
           <p class="home-section-lede">Pick the entry point that fits your team: programmatic risk scoring, an agent that engages your clients, or a co-pilot that grades your full deal book.</p>
         </div>
@@ -227,12 +281,38 @@
       </div>
     </div>
 
+    <!-- WHO WE SERVE -->
+    <div class="home-section serve-section">
+      <div class="container">
+        <div class="home-section-head">
+          <h2>Built for private credit</h2>
+          <p class="home-section-lede">Servicing the long tail of US small businesses.</p>
+        </div>
+        <div class="serve-cols">
+          <div class="serve-col">
+            <h3>Funds</h3>
+            <p class="serve-verb">Underwrite faster</p>
+            <p>Score deals via API, monitor portfolios continuously, flag pre-default signals before collections. Stop sticking to known industries &mdash; model risk across diverse small businesses.</p>
+          </div>
+          <div class="serve-col">
+            <h3>Brokerages</h3>
+            <p class="serve-verb">Convert more</p>
+            <p>AI intake agent handles applicants 24/7, builds funder-ready submission packages automatically. No more siloed data or incomplete submissions &mdash; everything structured and verified.</p>
+          </div>
+          <div class="serve-col">
+            <h3>Marketplaces</h3>
+            <p class="serve-verb">Scale the workflow</p>
+            <p>End-to-end from application to funded deal. Fully agentic intake, scoring, and matching. Replace manual document review that kills good deals with seconds-fast analysis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- 5. CASE STUDY -->
     <div class="case-study" data-content-entity="Home - Case Study: Chat Advance">
       <div class="container">
-        <div class="home-section-label">Case study</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">See it in action</h2>
+        <h2 class="cs-h2">See it in action</h2>
         <div class="case-study-inner" id="caseStudyChatAdvanceInner">
           <div class="case-study-graphic"></div>
           <div class="case-study-text">
@@ -262,8 +342,7 @@
     <!-- 7. CASE STUDY: 4D FINANCING -->
     <div class="case-study case-study--alt" data-content-entity="Home - Case Study: 4D Financing">
       <div class="container">
-        <div class="home-section-label">Case study</div>
-        <h2 style="font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px;">Institutional-grade underwriting, lean team</h2>
+        <h2 class="cs-h2">Institutional-grade underwriting, lean team</h2>
         <div class="case-study-inner" id="caseStudy4DFinancingInner">
           <div class="case-study-graphic"></div>
           <div class="case-study-text">
@@ -1973,8 +2052,8 @@
         `<div class="cs-stat"><div class="num">${escapeHtml(s.num)}</div><div class="label">${escapeHtml(s.label)}</div></div>`
       ).join('');
       graphic.innerHTML =
-        (cs.label ? `<div class="cs-label">${escapeHtml(cs.label)}</div>` : '') +
         (cs.heading ? `<h3>${escapeHtml(cs.heading)}</h3>` : '') +
+        (cs.label ? `<div class="cs-label">${escapeHtml(cs.label)}</div>` : '') +
         (stepsHtml ? `<div class="cs-steps">${stepsHtml}</div>` : '') +
         (statsHtml ? `<div class="cs-stats">${statsHtml}</div>` : '');
     }
@@ -1983,8 +2062,8 @@
         ? cs.body.split(/\n{2,}/).map(p => `<p>${escapeHtml(p).replace(/\n/g, ' ')}</p>`).join('')
         : '';
       const prefix =
-        (cs.tag ? `<div class="cs-tag">${escapeHtml(cs.tag)}</div>` : '') +
         (cs.title ? `<h3>${escapeHtml(cs.title)}</h3>` : '') +
+        (cs.tag ? `<div class="cs-tag">${escapeHtml(cs.tag)}</div>` : '') +
         bodyHtml;
       // Prepend Fibery-rendered content before the scaffolding CTAs (cs-link + button)
       // by inserting before the first child.
@@ -2089,8 +2168,7 @@
       row.innerHTML = `
         <div class="sol-mini-tile">${solutionMiniGraphic(cfg.page)}</div>
         <div class="sol-row-text">
-          <div class="sol-row-head"><span class="tag">${tag}</span></div>
-          <h3>${title}</h3>
+          <h3>${title} <span class="tag">${tag}</span></h3>
           <p class="oneliner">${desc}</p>
           <div class="row-meta">
             <div class="pills">${pills}</div>
@@ -2624,7 +2702,7 @@
 
   // ---- Scroll reveal ----
   function initReveals() {
-    document.querySelectorAll('.home-section, .stats-bar, .cta-section, .testimonial-section, .case-study, .sol-hero, .sol-body').forEach(el => {
+    document.querySelectorAll('.home-section, .stats-bar, .evidence-strip, .pipeline-section, .cta-section, .testimonial-section, .case-study, .sol-hero, .sol-body').forEach(el => {
       el.classList.add('reveal');
     });
     document.querySelectorAll('#homeSolutions').forEach(el => {
