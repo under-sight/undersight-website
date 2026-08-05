@@ -2,7 +2,11 @@ name: Deploy Production (Fibery → undersight.ai)
 
 on:
   schedule:
-    - cron: '* * * * *'
+    # Every 2 hours at :07. Was '* * * * *' (every minute) — GitHub's scheduler
+    # throttling silently reduced that to ~2h anyway; this makes the cadence
+    # explicit and keeps Cloudflare Pages deploys (~12/day) safely under the
+    # 500/month quota. Use workflow_dispatch for an immediate publish.
+    - cron: '7 */2 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -105,7 +109,11 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name undersight-website --branch main --commit-dirty=true
 
+      # The two Fibery steps below are telemetry/advisory: a flake here must
+      # not fail a run whose deploy succeeded (that noise is what emailed Kyle
+      # on 2026-08-05). Site-down alerting lives in health-check.yml instead.
       - name: Report deployment to Fibery
+        continue-on-error: true
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
           BUILD_STATUS: ${{ (steps.build.outcome == 'success' && steps.validate.outcome == 'success') && 'success' || (steps.build.outcome == 'failure' && 'failed' || 'degraded') }}
@@ -113,6 +121,7 @@ jobs:
 
       - name: Verify deployment matches Fibery intent
         if: steps.build.outcome == 'success' && steps.validate.outcome == 'success'
+        continue-on-error: true
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
         run: python3 deploy-report.py --verify --env production

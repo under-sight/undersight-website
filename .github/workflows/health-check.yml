@@ -1,0 +1,97 @@
+name: Health Check (undersight.ai up?)
+
+# Alerts ONLY on real downtime: unreachable, non-200, empty/foreign content,
+# or the under-construction fallback being live. Alert channel is a GitHub
+# issue @mentioning kyle-undersight (reliable email regardless of Actions
+# notification settings), auto-closed on recovery. Deploy-pipeline failures
+# deliberately do NOT alert — the site keeps serving the previous deploy.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: health-check
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe production
+        id: probe
+        run: |
+          set +e
+          STATUS="down"
+          REASON=""
+          # 3 attempts, 60s apart: a single blip never alerts.
+          for i in 1 2 3; do
+            BODY=$(curl -sL --max-time 25 "https://undersight.ai/?hc=$(date +%s)")
+            CODE=$(curl -sL -o /dev/null -w '%{http_code}' --max-time 25 "https://undersight.ai/")
+            if [ "$CODE" = "200" ] && echo "$BODY" | grep -q 'id="page-home"'; then
+              if echo "$BODY" | grep -qi 'Coming Soon'; then
+                REASON="under-construction fallback is live (build pipeline broke and the fallback deployed)"
+              else
+                STATUS="up"; break
+              fi
+            elif [ "$CODE" != "200" ]; then
+              REASON="HTTP $CODE from https://undersight.ai/"
+            else
+              REASON="HTTP 200 but page content is missing its home markup (wrong or empty content served)"
+            fi
+            [ $i -lt 3 ] && sleep 60
+          done
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          echo "Probe result: $STATUS ${REASON:+($REASON)}"
+
+      - name: Ensure alert label exists
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh label create site-down --color B60205 --description "undersight.ai is down" 2>/dev/null || true
+
+      - name: Open alert issue (site is down)
+        if: steps.probe.outputs.status == 'down'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          REASON: ${{ steps.probe.outputs.reason }}
+        run: |
+          OPEN=$(gh issue list --label site-down --state open --json number -q 'length')
+          if [ "$OPEN" = "0" ]; then
+            gh issue create \
+              --title "undersight.ai is DOWN" \
+              --label site-down \
+              --body "@kyle-undersight the production site failed 3 consecutive health probes over ~2 minutes.
+
+**Reason:** $REASON
+**Checked:** https://undersight.ai/ (expects HTTP 200 + live home markup, not the under-construction fallback)
+**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+This issue auto-closes when the site recovers. Useful first moves: check the latest [deploy runs](${{ github.server_url }}/${{ github.repository }}/actions/workflows/deploy-production.yml) and the Cloudflare Pages dashboard."
+          else
+            echo "Alert issue already open; not duplicating."
+          fi
+
+      - name: Close alert issue (site recovered)
+        if: steps.probe.outputs.status == 'up'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          for N in $(gh issue list --label site-down --state open --json number -q '.[].number'); do
+            gh issue close "$N" --comment "Recovered: https://undersight.ai/ is serving live content again (verified by health probe)."
+          done
+
+      - name: Fail run on downtime (backup email channel)
+        if: steps.probe.outputs.status == 'down'
+        run: |
+          echo "::error::undersight.ai is down — ${{ steps.probe.outputs.reason }}"
+          exit 1
