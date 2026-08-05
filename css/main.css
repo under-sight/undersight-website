@@ -1148,10 +1148,11 @@ footer { border-top: 1px solid var(--pale); background: var(--white); }
 .prod-card {
   border-radius: var(--rounded-lg);
   border: 1px solid var(--light);
-  padding: 32px;
-  display: flex; flex-direction: column; gap: 24px;
+  padding: 28px;
+  display: flex; flex-direction: column; gap: 22px;
   min-width: 0;
 }
+.prod-card .prod-vis { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .prod-underscore { grid-column: span 7; background: var(--white);
   box-shadow: 0 10px 28px rgba(35, 38, 44, 0.06), 0 2px 6px rgba(35, 38, 44, 0.04); }
 .prod-underchat { grid-column: span 5; background: var(--color-graphite-900); border-color: transparent; }
@@ -1192,34 +1193,45 @@ footer { border-top: 1px solid var(--pale); background: var(--white); }
 .prod-underchat .prod-desc { color: rgba(255, 255, 255, 0.65); }
 .prod-underchat .pill { background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.85); }
 
-/* Vignette: underscore API call */
-.sv-api { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;
-  background: var(--bg-surface, var(--pale)); border: 1px solid var(--pale);
-  border-radius: var(--rounded-md); padding: 18px 20px; }
+/* Vignette: underscore API call (dark code panel) */
+.sv-api { display: grid; grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto; gap: 18px; align-items: center;
+  align-self: stretch; height: 100%;
+  background: var(--color-graphite-900);
+  border-radius: var(--rounded-md); padding: 22px 24px; }
 .sv-req {
-  grid-column: 1 / -1;
+  grid-column: 1 / -1; align-self: start;
   font-family: 'JetBrains Mono', 'SF Mono', monospace;
-  font-size: 12px; color: var(--black); font-weight: 600;
-  display: flex; align-items: center; gap: 8px;
-  padding-bottom: 10px; border-bottom: 1px solid var(--light);
+  font-size: 12.5px; color: #fff; font-weight: 600;
+  display: flex; align-items: center; gap: 9px;
+  padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
+.sv-resp {
+  grid-column: 1 / -1; align-self: end;
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 10.5px; color: rgba(255, 255, 255, 0.45);
+  display: flex; align-items: center; gap: 10px;
+  padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sv-resp em { font-style: normal; font-weight: 600; color: var(--color-eucalyptus); }
 .sv-verb {
   font-size: 10px; padding: 2px 7px; border-radius: 4px;
-  background: rgba(107, 158, 140, 0.14); color: var(--color-eucalyptus);
+  background: rgba(107, 158, 140, 0.22); color: var(--color-eucalyptus);
 }
-.sv-rows { display: flex; flex-direction: column; gap: 7px; }
+.sv-rows { display: flex; flex-direction: column; gap: 8px; }
 .sv-row { display: flex; justify-content: space-between; gap: 16px;
-  font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 11px; color: var(--mid); }
-.sv-row em { font-style: normal; font-weight: 600; color: var(--black); }
+  font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 11px;
+  color: rgba(255, 255, 255, 0.55); }
+.sv-row em { font-style: normal; font-weight: 600; color: #fff; }
 .sv-row em.up { color: var(--color-eucalyptus); }
 .sv-chip {
-  width: 74px; height: 74px; border-radius: 50%;
-  background: conic-gradient(var(--color-eucalyptus) 0deg, var(--color-eucalyptus) 268deg, var(--light) 268deg);
+  width: 76px; height: 76px; border-radius: 50%;
+  background: conic-gradient(var(--color-eucalyptus) 0deg, var(--color-eucalyptus) 268deg, rgba(255, 255, 255, 0.14) 268deg);
   display: flex; align-items: center; justify-content: center; position: relative;
 }
-.sv-chip::after { content: ''; position: absolute; top: 5px; right: 5px; bottom: 5px; left: 5px; background: var(--white); border-radius: 50%; }
+.sv-chip::after { content: ''; position: absolute; top: 5px; right: 5px; bottom: 5px; left: 5px; background: var(--color-graphite-900); border-radius: 50%; }
 .sv-chip strong, .sv-chip small { position: relative; z-index: 1; }
-.sv-chip strong { font-family: 'Inter', -apple-system, sans-serif; font-size: 21px; font-weight: 700; color: var(--black); }
+.sv-chip strong { font-family: 'Inter', -apple-system, sans-serif; font-size: 21px; font-weight: 700; color: #fff; }
 .sv-chip small { display: none; }
 
 /* Vignette: underchat live chat (dark card) */
