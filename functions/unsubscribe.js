@@ -13,10 +13,24 @@
  * suppression is low-harm and CAN-SPAM favors frictionless opt-out, so we
  * honor it either way.
  *
+ * POST additionally flags matching rows in the Macy campaign tracker
+ * (ChatAdvance feedback-email recipients) — best-effort, never blocks the
+ * unsubscribe response. See flagMacyTracker() below.
+ *
  * Mirrors undersight-serve.py (dev). Keep both in sync.
  */
 
 const MAX_BODY_BYTES = 4096;
+
+// Macy campaign tracker. DB name verified against the live schema API
+// 2026-08-05 (rename Macy Outreach -> Macy Feedback complete). The CRM space
+// name is fixed — never derived from FIBERY_SPACE. Default applies in prod
+// (FIBERY_SPACE === 'CMS') only; any other space skips the step unless
+// MACY_TRACKER_TYPE is set explicitly (tests point it at the
+// "CMS Staging/Macy Feedback" fixture). Empty MACY_TRACKER_TYPE disables the
+// step everywhere.
+const DEFAULT_MACY_TRACKER_TYPE = 'CRM/Macy Feedback';
+const MACY_STATUS_UNSUBSCRIBED = 'Unsubscribed';
 const EMAIL_MIN = 5;
 const EMAIL_MAX = 254;
 const EMAIL_REGEX = /^(?![.])[A-Za-z0-9._%+\-]{1,64}(?<![.])@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
@@ -105,6 +119,104 @@ async function rateLimit(env, request) {
   } catch (err) {
     console.error('Rate limit KV error:', err);
     return { ok: true };
+  }
+}
+
+function macyTrackerType(env, fiberySpace) {
+  if (env.MACY_TRACKER_TYPE !== undefined) {
+    return (env.MACY_TRACKER_TYPE || '').trim() || null;
+  }
+  return fiberySpace === 'CMS' ? DEFAULT_MACY_TRACKER_TYPE : null;
+}
+
+/**
+ * Best-effort: mark Macy tracker rows for this email unsubscribed.
+ *
+ * Returns count updated. NEVER throws — the unsubscribe response must not
+ * depend on the tracker DB existing or the update succeeding (Website Leads
+ * flagging is the contractual part; this is additive suppression). Fibery
+ * reports missing-DB errors as HTTP 200 + success:false, so both layers are
+ * checked.
+ */
+async function flagMacyTracker(env, fiberySpace, email, fiberyHeaders) {
+  const tracker = macyTrackerType(env, fiberySpace);
+  if (!tracker) return 0;
+  try {
+    const space = tracker.split('/')[0];
+    const queryResp = await fetch('https://subscript.fibery.io/api/commands', {
+      method: 'POST',
+      headers: fiberyHeaders,
+      body: JSON.stringify([{
+        command: 'fibery.entity/query',
+        args: {
+          query: {
+            'q/from': tracker,
+            'q/select': ['fibery/id'],
+            'q/where': ['=', [`${space}/Email`], '$email'],
+            'q/limit': 100,
+          },
+          params: { '$email': email },
+        },
+      }]),
+    });
+    if (!queryResp.ok) throw new Error('tracker query status=' + queryResp.status);
+    const queryData = await queryResp.json();
+    if (queryData[0]?.success === false) throw new Error('tracker query rejected');
+    const rows = queryData[0]?.result || [];
+    if (!rows.length) return 0;
+
+    // Single-selects need the enum entity ref, not a plain string — resolve
+    // the "Unsubscribed" option id by name. Enum type name follows Fibery's
+    // convention: "<Space>/Status_<full type name>". If the lookup fails,
+    // flag + timestamp alone still suppress; Status is best-effort.
+    let statusId = null;
+    try {
+      const optResp = await fetch('https://subscript.fibery.io/api/commands', {
+        method: 'POST',
+        headers: fiberyHeaders,
+        body: JSON.stringify([{
+          command: 'fibery.entity/query',
+          args: {
+            query: {
+              'q/from': `${space}/Status_${tracker}`,
+              'q/select': ['fibery/id'],
+              'q/where': ['=', ['enum/name'], '$name'],
+              'q/limit': 1,
+            },
+            params: { '$name': MACY_STATUS_UNSUBSCRIBED },
+          },
+        }]),
+      });
+      if (optResp.ok) {
+        const optData = await optResp.json();
+        if (optData[0]?.success !== false && optData[0]?.result?.length) {
+          statusId = optData[0].result[0]['fibery/id'];
+        }
+      }
+    } catch { /* Status stays best-effort */ }
+
+    const now = new Date().toISOString();
+    const commands = rows.map(row => {
+      const entity = {
+        'fibery/id': row['fibery/id'],
+        [`${space}/Unsubscribed`]: true,
+        [`${space}/Unsubscribed At`]: now,
+      };
+      if (statusId) entity[`${space}/Status`] = { 'fibery/id': statusId };
+      return { command: 'fibery.entity/update', args: { type: tracker, entity } };
+    });
+    const updateResp = await fetch('https://subscript.fibery.io/api/commands', {
+      method: 'POST',
+      headers: fiberyHeaders,
+      body: JSON.stringify(commands),
+    });
+    if (!updateResp.ok) throw new Error('tracker update status=' + updateResp.status);
+    const updateData = await updateResp.json();
+    if (updateData.some?.(r => r?.success === false)) throw new Error('tracker update rejected');
+    return rows.length;
+  } catch (err) {
+    console.warn('Macy tracker flagging failed (non-blocking):', err && err.message ? err.message : err);
+    return 0;
   }
 }
 
@@ -241,6 +353,11 @@ export async function onRequestPost(context) {
         return htmlResponse(page('Error', '<h1>Something went wrong</h1><p>Please try again later.</p>'), 502);
       }
     }
+
+    // 3. Flag Macy campaign tracker rows (ChatAdvance feedback recipients).
+    // Best-effort: never throws, never blocks the response.
+    await flagMacyTracker(env, FIBERY_SPACE, email, fiberyHeaders);
+
     // Same confirmation whether or not leads existed — do not leak which
     // addresses are in the database.
     const body =
