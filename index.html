@@ -688,41 +688,38 @@ review, the verdict, and DESIGN.md.
   function solutionMiniGraphic(page) {
     if (page === 'underscore') {
       return `
-        <div class="mini-score">
-          <div class="rows">
-            <div class="row"><span class="k">Avg revenue</span><span class="v">$84K/mo</span></div>
-            <div class="row"><span class="k">Deposits</span><span class="v up">+12%</span></div>
-            <div class="row"><span class="k">Existing pos.</span><span class="v">2</span></div>
-            <div class="row"><span class="k">Risk class</span><span class="v">B+</span></div>
+        <div class="sv-api">
+          <div class="sv-req"><span class="sv-verb">POST</span>/v1/score</div>
+          <div class="sv-rows">
+            <div class="sv-row"><span>avg_monthly_revenue</span><em>$84,300</em></div>
+            <div class="sv-row"><span>deposit_trend</span><em class="up">+12%</em></div>
+            <div class="sv-row"><span>existing_positions</span><em>2</em></div>
+            <div class="sv-row"><span>nsf_days_90d</span><em>3</em></div>
           </div>
-          <div class="chip">
-            <div class="num">742</div>
-            <div class="lab">score</div>
-          </div>
+          <div class="sv-chip"><strong>742</strong><small>score</small></div>
         </div>`;
     }
     if (page === 'underchat') {
       return `
-        <div class="mini-chat">
-          <span class="pill-live">live</span>
-          <div class="bubble agent">Hi Maria &mdash; I have a few questions on your application.</div>
-          <div class="bubble client">go ahead</div>
-          <div class="bubble agent">What were your Q1 deposits, excluding tax refunds?</div>
+        <div class="sv-chat">
+          <div class="sv-chat-head">
+            <span class="sv-avatar">M</span>
+            <span class="sv-name"><strong>Macy</strong><em>intake agent</em></span>
+            <span class="sv-live"><i></i>Online</span>
+          </div>
+          <div class="sv-msg agent">Hi Maria! What were your Q1 deposits, excluding tax refunds?</div>
+          <div class="sv-msg client">around $210k total</div>
+          <div class="sv-msg agent sv-typing"><span></span><span></span><span></span></div>
         </div>`;
     }
     if (page === 'copilot') {
       return `
-        <div class="mini-grade">
-          <div class="ring">
-            <div class="stack">
-              <div class="grade">B+</div>
-              <div class="sub">grade</div>
-            </div>
-          </div>
-          <div class="legend">
-            <div class="item"><span class="dot ml"></span>ML baseline<span class="val">0.62</span></div>
-            <div class="item"><span class="dot ag"></span>Agentic adj.<span class="val">+0.22</span></div>
-            <div class="item src">12 sources cited</div>
+        <div class="sv-grade">
+          <div class="sv-ring"><div class="sv-ring-inner"><strong>B+</strong><small>grade</small></div></div>
+          <div class="sv-facts">
+            <div class="sv-fact"><span>ML baseline</span><i><b style="width:62%"></b></i></div>
+            <div class="sv-fact"><span>Agentic adjustment</span><i><b style="width:84%"></b></i></div>
+            <div class="sv-fact-src">12 sources cited per grade</div>
           </div>
         </div>`;
     }
@@ -2065,26 +2062,24 @@ review, the verdict, and DESIGN.md.
       return;
     }
     if (graphic) {
-      const stepsHtml = cs.steps.map((s, i) =>
-        `<div class="cs-step"><div class="cs-num">${i + 1}</div><p>${escapeHtml(s.text)}</p></div>`
-      ).join('');
+      // Outcome column: the result as a display statement + counting metrics.
       const statsHtml = cs.stats.map(s =>
         `<div class="cs-stat"><div class="num">${escapeHtml(s.num)}</div><div class="label">${escapeHtml(s.label)}</div></div>`
       ).join('');
       graphic.innerHTML =
         (cs.heading ? `<h3>${escapeHtml(cs.heading)}</h3>` : '') +
-        (cs.label ? `<div class="cs-label">${escapeHtml(cs.label)}</div>` : '') +
-        (stepsHtml ? `<div class="cs-steps">${stepsHtml}</div>` : '') +
-        (statsHtml ? `<div class="cs-stats">${statsHtml}</div>` : '');
+        (statsHtml ? `<div class="cs-metrics">${statsHtml}</div>` : '');
     }
     if (text) {
       const bodyHtml = cs.body
         ? cs.body.split(/\n{2,}/).map(p => `<p>${escapeHtml(p).replace(/\n/g, ' ')}</p>`).join('')
         : '';
+      const railHtml = cs.steps.length
+        ? `<ol class="cs-rail">` + cs.steps.map(s => `<li>${escapeHtml(s.text)}</li>`).join('') + `</ol>`
+        : '';
       const prefix =
-        (cs.title ? `<h3>${escapeHtml(cs.title)}</h3>` : '') +
-        (cs.tag ? `<div class="cs-tag">${escapeHtml(cs.tag)}</div>` : '') +
-        bodyHtml;
+        (cs.title ? `<p class="cs-title">${escapeHtml(cs.title)}</p>` : '') +
+        bodyHtml + railHtml;
       // Prepend Fibery-rendered content before the scaffolding CTAs (cs-link + button)
       // by inserting before the first child.
       // First remove any previously injected nodes (re-render safe).
@@ -2178,22 +2173,20 @@ review, the verdict, and DESIGN.md.
       mobItem.textContent = title;
       mobileSol.appendChild(mobItem);
 
-      // Home horizontal solution row — flat layout with signature
-      // mini-graphic per product (scorecard / chat / grade ring) and
-      // feature pills. Editable copy (tag/title/desc) flows from Fibery.
-      const row = document.createElement('div');
-      row.className = 'sol-row';
+      // Home product panel — asymmetric grid card per product, each with a
+      // rich UI vignette (API call / live chat / grade). Editable copy
+      // (title/desc) flows from Fibery.
+      const row = document.createElement('article');
+      row.className = 'prod-card prod-' + cfg.page;
       const pills = (SOLUTION_PILLS[cfg.page] || [])
         .map(p => `<span class="pill">${p}</span>`).join('');
       row.innerHTML = `
-        <div class="sol-mini-tile">${solutionMiniGraphic(cfg.page)}</div>
-        <div class="sol-row-text">
-          <h3>${title} <span class="tag">${tag}</span></h3>
-          <p class="oneliner">${desc}</p>
-          <div class="row-meta">
-            <div class="pills">${pills}</div>
-            <a class="explore" href="/${cfg.page}" onclick="event.preventDefault();navigate('${cfg.page}')">Explore ${title} &rarr;</a>
-          </div>
+        <div class="prod-vis">${solutionMiniGraphic(cfg.page)}</div>
+        <div class="prod-info">
+          <h3>${title}</h3>
+          <p class="prod-desc">${desc}</p>
+          <div class="pills">${pills}</div>
+          <a class="explore" href="/${cfg.page}" onclick="event.preventDefault();navigate('${cfg.page}')">Explore ${title} &rarr;</a>
         </div>`;
       homeSolutions.appendChild(row);
 
