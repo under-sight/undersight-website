@@ -66,16 +66,15 @@ jobs:
         run: |
           OPEN=$(gh issue list --label site-down --state open --json number -q 'length')
           if [ "$OPEN" = "0" ]; then
+            BODY="@kyle-undersight the production site failed 3 consecutive health probes over ~2 minutes."
+            BODY="$BODY"$'\n\n'"**Reason:** $REASON"
+            BODY="$BODY"$'\n'"**Checked:** https://undersight.ai/ (expects HTTP 200 + live home markup, not the under-construction fallback)"
+            BODY="$BODY"$'\n'"**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            BODY="$BODY"$'\n\n'"This issue auto-closes when the site recovers. Useful first moves: check the latest [deploy runs](${{ github.server_url }}/${{ github.repository }}/actions/workflows/deploy-production.yml) and the Cloudflare Pages dashboard."
             gh issue create \
               --title "undersight.ai is DOWN" \
               --label site-down \
-              --body "@kyle-undersight the production site failed 3 consecutive health probes over ~2 minutes.
-
-**Reason:** $REASON
-**Checked:** https://undersight.ai/ (expects HTTP 200 + live home markup, not the under-construction fallback)
-**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-This issue auto-closes when the site recovers. Useful first moves: check the latest [deploy runs](${{ github.server_url }}/${{ github.repository }}/actions/workflows/deploy-production.yml) and the Cloudflare Pages dashboard."
+              --body "$BODY"
           else
             echo "Alert issue already open; not duplicating."
           fi
