@@ -10,6 +10,7 @@ Usage:
 
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
@@ -141,6 +142,11 @@ def get_site_mode_from_fibery(token):
         token,
     )
     content = docs[0].get("content", "") if docs else ""
+    # Fibery exports soft breaks as literal <br> (2026-08): without this,
+    # "live<br>**Dev Mode:** live" reads as one line and the parsed mode
+    # carries the junk, tripping the drift check. Keep in sync with
+    # _normalize_doc_markdown in build.py / undersight-serve.py.
+    content = re.sub(r"<br\s*/?>", "\n", content, flags=re.IGNORECASE)
 
     # Check per-env mode first, then fallback to generic Site Mode
     for key in ["**Production Mode:**", "**Dev Mode:**", "**Site Mode:**"]:
