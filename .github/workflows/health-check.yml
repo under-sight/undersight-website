@@ -8,7 +8,7 @@ name: Health Check (undersight.ai up?)
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: "*/15 * * * *"  # authored by kyle-undersight: scheduled-failure emails route to the cron author
   workflow_dispatch:
 
 permissions:

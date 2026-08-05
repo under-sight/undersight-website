@@ -6,7 +6,7 @@ on:
     # throttling silently reduced that to ~2h anyway; this makes the cadence
     # explicit and keeps Cloudflare Pages deploys (~12/day) safely under the
     # 500/month quota. Use workflow_dispatch for an immediate publish.
-    - cron: '7 */2 * * *'
+    - cron: "7 */2 * * *"  # authored by kyle-undersight: scheduled-failure emails route to the cron author
   workflow_dispatch:
 
 concurrency:
