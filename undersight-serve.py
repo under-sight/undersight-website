@@ -163,6 +163,10 @@ def _normalize_doc_markdown(text):
     )
     text = re.sub(r"\\+([*~])", r"\1", text)
     text = re.sub(r"\\+\s*(?=\n|$)", "", text)
+    # Fibery exports soft breaks as literal <br> (2026-08); parseMeta and the
+    # case-study parser split on newlines, so a <br>-joined meta line leaks
+    # the next key into the rendered value. Keep in sync with build.py.
+    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
     return text
 
 

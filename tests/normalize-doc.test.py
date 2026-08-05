@@ -51,6 +51,16 @@ check(norm("em\\u2014dash") == "em—dash", "unicode escape decoded")
 check(norm("line one\\\nline two") == "line one\nline two",
       "trailing backslash before newline dropped")
 
+# Fibery <br> soft-break export becomes a newline (2026-08: Fibery joins
+# consecutive meta lines with <br>, which leaks literally into parseMeta
+# values — e.g. "**Label:** X<br>**Heading:** Y" rendered the heading junk
+# inside the label on the home case studies)
+check(norm("**Label:** X<br>**Heading:** Y") == "**Label:** X\n**Heading:** Y",
+      "<br> between meta lines becomes newline")
+check(norm("**Tag:** Risk Scoring<br>**Icon:** S") == "**Tag:** Risk Scoring\n**Icon:** S",
+      "<br> in solution meta becomes newline")
+check(norm("a<br/>b<BR />c") == "a\nb\nc", "self-closing and uppercase br variants")
+
 print()
 if failures:
     print(f"{len(failures)} failure(s)")

@@ -39,6 +39,7 @@ Agentic underwriting with determinism and human control as the trust mechanism �
 ## Brand Commitments
 
 - Brand kit v2.0: graphite neutrals + amber-rust accent (+ eucalyptus for positive/after states), Inter (headlines/UI) + DM Sans (body), OpenType `cv01, ss03` on Inter, light-first editorial with dark mode. Status per Kyle 2026-08-04: **evolvable within reason** for the redesign — extensions (new accents, type-scale changes) are allowed where the design earns them; this is not a rebrand and the identity stays recognizable.
+- **Visual language (standing preference, Kyle 2026-08-05): the site sits alongside top fintech sites — Plaid, Stripe, Heron Data, Ocrolus — and mirrors that category's design language, executed at their craft level.** Concept-world directions (submission-file, prospectus, etc.) were declined in favor of the category standard played straight; do not re-open metaphor-driven visual worlds for this site.
 - Voice: precise, evidence-led, no hype; "client" not "merchant" in AFB-adjacent contexts.
 
 ## Evidence on Hand
