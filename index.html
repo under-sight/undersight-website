@@ -170,45 +170,65 @@ review, the verdict, and DESIGN.md.
   <!-- Live content (hidden until loaded) -->
   <div class="live-content">
 
-    <!-- HERO: split — copy left, live underwrite demo right -->
+    <!-- HERO: committed amber field; agentic intake beside copy, full-width agent run below -->
     <div class="hero">
-      <div class="hero-grid container">
-        <div class="hero-copy">
-          <h1 id="heroTitle"></h1>
-          <p id="heroSubtitle"></p>
-          <div class="hero-actions">
-            <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
-            <a href="#pipeline" class="btn btn-ghost" onclick="event.preventDefault();document.getElementById('pipeline').scrollIntoView({behavior:'smooth'});">See how it works</a>
+      <div class="container">
+        <div class="hero-top">
+          <div class="hero-copy">
+            <h1 id="heroTitle"></h1>
+            <p id="heroSubtitle"></p>
+            <div class="hero-actions">
+              <a href="https://calendly.com/kyle-undersight/30min" target="_blank" rel="noopener" class="btn btn-primary">Book a Discovery Call</a>
+              <a href="#pipeline" class="btn btn-ghost" onclick="event.preventDefault();document.getElementById('pipeline').scrollIntoView({behavior:'smooth'});">See how it works</a>
+            </div>
+          </div>
+          <div class="chat-card" aria-hidden="true">
+            <div class="chat-head">
+              <span class="chat-avatar">M</span>
+              <span class="chat-id"><strong>Macy</strong><em>undersight intake agent</em></span>
+              <span class="chat-status"><i></i>Online</span>
+            </div>
+            <div class="chat-body">
+              <div class="msg agent"><p>Morning! I can start on Riverside Auto Spa's file. Could you send over the June operating statement?</p><time>9:41 AM</time></div>
+              <div class="msg client">
+                <span class="file-chip">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13"/></svg>
+                  <span class="file-meta"><strong>june-operating.pdf</strong><small>1.2 MB</small></span>
+                </span>
+                <time>9:44 AM</time>
+              </div>
+              <div class="msg agent"><p>Got it. Parsing now, scorecard in under a minute. I'll flag anything missing.</p><time>9:44 AM</time></div>
+              <div class="msg agent typing"><span></span><span></span><span></span></div>
+            </div>
           </div>
         </div>
-        <div class="hero-demo" aria-hidden="true">
+        <div class="hero-run" aria-hidden="true">
           <div class="demo-doc">
-            <div class="demo-doc-head"><span class="demo-doc-title">Operating &middot; June</span><span class="demo-chip">Sample</span></div>
+            <div class="demo-doc-head"><span class="demo-doc-title">Riverside Auto Spa &middot; Operating &middot; June</span><span class="demo-chip">Sample</span></div>
             <div class="demo-rows">
-              <div class="demo-row"><span>CARD SETTLEMENT</span><em class="pos">+$18,240.00</em></div>
+              <div class="demo-row"><span>ACH CARD SETTLEMENT</span><em class="pos">+$18,240.00</em></div>
               <div class="demo-row"><span>REMOTE DEPOSIT</span><em class="pos">+$6,410.50</em></div>
-              <div class="demo-row"><span>MCA PAYMENT 1</span><em>&minus;$1,150.00</em></div>
+              <div class="demo-row"><span>MCA PAYMENT &middot; POSITION 1</span><em>&minus;$1,150.00</em></div>
               <div class="demo-row"><span>PAYROLL RUN</span><em>&minus;$12,830.75</em></div>
-              <div class="demo-row"><span>CARD SETTLEMENT</span><em class="pos">+$17,905.25</em></div>
-              <div class="demo-row demo-row-dim"><span>NSF RETURN</span><em>&minus;$34.00</em></div>
+              <div class="demo-row"><span>ACH CARD SETTLEMENT</span><em class="pos">+$17,905.25</em></div>
+              <div class="demo-row demo-row-dim"><span>NSF RETURNED ITEM</span><em>&minus;$34.00</em></div>
             </div>
           </div>
           <div class="demo-link" role="presentation">
             <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12h38"/><path d="M34 5l7 7-7 7"/></svg>
           </div>
           <div class="demo-score">
-            <div class="demo-score-head"><span class="demo-doc-title">Deal score</span><span class="demo-chip">Sample &middot; 41s</span></div>
-            <div class="demo-score-body">
-              <div class="demo-ring"><div class="demo-ring-inner"><strong>82</strong><small>B+</small></div></div>
-              <div class="demo-score-meta"><strong>Recommend</strong><span>with full supporting analysis</span></div>
+            <div class="demo-score-head"><span class="demo-doc-title">Deal score</span><span class="demo-chip">Sample &middot; scored in 41s</span></div>
+            <div class="demo-score-grid">
+              <div class="demo-ring"><div class="demo-ring-inner"><strong data-count="82">82</strong><small>B+</small></div></div>
+              <div class="demo-factors">
+                <div class="demo-factor"><span>Revenue stability</span><i class="demo-meter"><b style="width:86%"></b></i></div>
+                <div class="demo-factor"><span>Deposit trend</span><i class="demo-meter"><b style="width:74%"></b></i></div>
+                <div class="demo-factor"><span>Existing positions</span><i class="demo-meter"><b style="width:58%"></b></i></div>
+                <div class="demo-factor"><span>NSF frequency</span><i class="demo-meter"><b style="width:91%"></b></i></div>
+              </div>
             </div>
-            <div class="demo-factors">
-              <div class="demo-factor"><span>Revenue stability</span><i class="demo-meter"><b style="width:86%"></b></i></div>
-              <div class="demo-factor"><span>Deposit trend</span><i class="demo-meter"><b style="width:74%"></b></i></div>
-              <div class="demo-factor"><span>Existing positions</span><i class="demo-meter"><b style="width:58%"></b></i></div>
-              <div class="demo-factor"><span>NSF frequency</span><i class="demo-meter"><b style="width:91%"></b></i></div>
-            </div>
-            <div class="demo-verdict"><span class="demo-verdict-dot"></span>Same-day decision</div>
+            <div class="demo-verdict"><span class="demo-verdict-dot"></span>Recommend. Same-day decision.</div>
           </div>
         </div>
       </div>
@@ -221,7 +241,7 @@ review, the verdict, and DESIGN.md.
         <div class="ev-item"><span class="ev-num">3.1&times;</span><span class="ev-label">underwriter throughput</span></div>
         <div class="ev-item"><span class="ev-num">22%</span><span class="ev-label">more booked receivables</span></div>
         <div class="ev-item"><span class="ev-num">$0</span><span class="ev-label">added headcount</span></div>
-        <div class="ev-src">Measured across the Chat Advance and 4D Financing deployments</div>
+        <div class="ev-src">Measured across participating funder deployments</div>
       </div>
     </div>
 
@@ -230,16 +250,16 @@ review, the verdict, and DESIGN.md.
       <div class="container">
         <div class="home-section-head">
           <h2>From application to funded deal</h2>
-          <p class="home-section-lede">Four stages, agents on every one of them &mdash; and the underwriter still makes the call.</p>
+          <p class="home-section-lede">Four stages, agents on every one. The underwriter still makes the call.</p>
         </div>
         <div class="pipeline">
           <div class="pipe-stage">
             <div class="pipe-vis pipe-vis-chat">
-              <span class="pv-bubble pv-agent">Hi &mdash; I can take your June statements whenever you're ready.</span>
+              <span class="pv-bubble pv-agent">Hi! I can take your June statements whenever you're ready.</span>
               <span class="pv-bubble pv-client">june-operating.pdf &nbsp;&#10003;</span>
             </div>
             <h3>Intake runs itself</h3>
-            <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time &mdash; 24/7.</p>
+            <p>Macy, the AI intake agent, collects bank statements, answers questions, and resolves gaps in real time, 24/7.</p>
           </div>
           <div class="pipe-stage">
             <div class="pipe-vis pipe-vis-enrich">
@@ -274,8 +294,8 @@ review, the verdict, and DESIGN.md.
     <div class="home-section">
       <div class="container">
         <div class="home-section-head">
-          <h2>Three solutions, one underwriting fabric.</h2>
-          <p class="home-section-lede">Pick the entry point that fits your team: programmatic risk scoring, an agent that engages your clients, or a co-pilot that grades your full deal book.</p>
+          <h2>Three products, one pipeline.</h2>
+          <p class="home-section-lede">Start with programmatic scoring, an intake agent that talks to your clients, or a co-pilot that grades your whole book.</p>
         </div>
         <div id="homeSolutions"></div>
       </div>
@@ -292,12 +312,12 @@ review, the verdict, and DESIGN.md.
           <div class="serve-col">
             <h3>Funds</h3>
             <p class="serve-verb">Underwrite faster</p>
-            <p>Score deals via API, monitor portfolios continuously, flag pre-default signals before collections. Stop sticking to known industries &mdash; model risk across diverse small businesses.</p>
+            <p>Score deals via API, monitor portfolios continuously, flag pre-default signals before collections. Stop sticking to known industries: model risk across diverse small businesses.</p>
           </div>
           <div class="serve-col">
             <h3>Brokerages</h3>
             <p class="serve-verb">Convert more</p>
-            <p>AI intake agent handles applicants 24/7, builds funder-ready submission packages automatically. No more siloed data or incomplete submissions &mdash; everything structured and verified.</p>
+            <p>AI intake agent handles applicants 24/7, builds funder-ready submission packages automatically. No more siloed data or incomplete submissions. Everything structured and verified.</p>
           </div>
           <div class="serve-col">
             <h3>Marketplaces</h3>
@@ -2701,6 +2721,31 @@ review, the verdict, and DESIGN.md.
   }
 
   // ---- Scroll reveal ----
+  // Animate numeric stats (evidence strip, case-study stats) counting up when
+  // their section reveals. Only strings shaped like "$71%", "3.1×", "60s" are
+  // animated; anything else ("24/7", "3-way", "Minutes") stays static.
+  function runCountUps(section) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    section.querySelectorAll('.ev-num, .cs-stat .num').forEach(el => {
+      if (el.dataset.counted) return;
+      const raw = el.textContent.trim();
+      const m = raw.match(/^([^0-9]?)(\d+(?:\.\d)?)([^0-9]{0,3})$/);
+      if (!m) return;
+      el.dataset.counted = '1';
+      const prefix = m[1], target = parseFloat(m[2]), suffix = m[3];
+      const decimals = m[2].includes('.') ? 1 : 0;
+      const dur = 900, t0 = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = prefix + (target * eased).toFixed(decimals) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+        else el.textContent = raw;
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
   function initReveals() {
     document.querySelectorAll('.home-section, .stats-bar, .evidence-strip, .pipeline-section, .cta-section, .testimonial-section, .case-study, .sol-hero, .sol-body').forEach(el => {
       el.classList.add('reveal');
@@ -2713,6 +2758,7 @@ review, the verdict, and DESIGN.md.
         entries.forEach(e => {
           if (e.isIntersecting) {
             e.target.classList.add('visible');
+            runCountUps(e.target);
             observer.unobserve(e.target);
           }
         });
