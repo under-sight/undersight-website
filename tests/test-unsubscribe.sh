@@ -8,6 +8,10 @@
 # FIBERY_SPACE="CMS Staging"). State assertions query Fibery directly and
 # SKIP if no token is available (env FIBERY_TOKEN or Keychain).
 #
+# The Macy tracker section spawns its own dev servers on :8089-:8091 with
+# different MACY_TRACKER_TYPE configurations, pointed at the staging fixture
+# DB "CMS Staging/Macy Feedback" — real CRM rows are never touched.
+#
 # Usage:
 #   python3 undersight-serve.py &   # dev server on :8088
 #   bash tests/test-unsubscribe.sh
@@ -124,6 +128,144 @@ else
   sleep 1
   after=$(fibery_leads "$ADDR" | python3 -c "import json,sys; print(len(json.load(sys.stdin)[0]['result']))")
   [ "$before" = "$after" ] && pass "no new lead created for unsubscribed address ($before -> $after)" || fail "no new lead created for unsubscribed address" "$before -> $after"
+fi
+
+section "Macy tracker flagging (staging fixture, never real CRM)"
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+TRACKER_TYPE="CMS Staging/Macy Feedback"
+TSPACE="CMS Staging"
+
+SERVER_PIDS=()
+cleanup_servers() {
+  for p in "${SERVER_PIDS[@]:-}"; do [ -n "$p" ] && kill "$p" 2>/dev/null; done
+}
+trap cleanup_servers EXIT
+
+# spawn_server <port> [ENV=VAL ...] — dev server against staging, wait ready
+spawn_server() {
+  local port="$1"; shift
+  env FIBERY_SPACE="CMS Staging" FIBERY_TOKEN="$FIBERY_TOKEN" "$@" \
+    python3 "$ROOT/undersight-serve.py" "$port" >/dev/null 2>&1 &
+  SERVER_PIDS+=($!)
+  local i
+  for i in $(seq 1 30); do
+    curl -s -o /dev/null --max-time 2 "http://localhost:$port/unsubscribe?e=ping%40example.com" && return 0
+    sleep 0.5
+  done
+  return 1
+}
+
+# Query staging tracker rows for an email; prints JSON result array.
+fibery_tracker() {
+  local email="$1"
+  curl -s -X POST "https://subscript.fibery.io/api/commands" \
+    -H "Authorization: Token $FIBERY_TOKEN" -H "Content-Type: application/json" \
+    -d "[{\"command\":\"fibery.entity/query\",\"args\":{\"query\":{
+      \"q/from\":\"$TRACKER_TYPE\",
+      \"q/select\":{\"id\":[\"fibery/id\"],\"unsub\":[\"$TSPACE/Unsubscribed\"],\"unsubAt\":[\"$TSPACE/Unsubscribed At\"],\"status\":[\"$TSPACE/Status\",\"enum/name\"]},
+      \"q/where\":[\"=\",[\"$TSPACE/Email\"],\"\$e\"],\"q/limit\":10},\"params\":{\"\$e\":\"$email\"}}}]"
+}
+
+# Create a staging tracker fixture row for an email.
+tracker_create() {
+  local email="$1"
+  curl -s -X POST "https://subscript.fibery.io/api/commands" \
+    -H "Authorization: Token $FIBERY_TOKEN" -H "Content-Type: application/json" \
+    -d "[{\"command\":\"fibery.entity/create\",\"args\":{\"type\":\"$TRACKER_TYPE\",\"entity\":{
+      \"$TSPACE/name\":\"unsub-test $email\",\"$TSPACE/Email\":\"$email\"}}}]"
+}
+
+if [ -z "$FIBERY_TOKEN" ]; then
+  skip "no FIBERY_TOKEN — Macy tracker tests skipped"
+else
+  ADDR2="unsub-macy-${RUN_ID}@example.com"       # tracker row + lead, tracker on
+  ADDR3="unsub-nomacy-${RUN_ID}@example.com"     # no tracker row, tracker on
+  ADDR4="unsub-macyskip-${RUN_ID}@example.com"   # tracker row, tracker default-skipped
+  ADDR5="unsub-macybroken-${RUN_ID}@example.com" # lead, tracker type nonexistent
+
+  # Three server configs; separate processes also give each a fresh rate limiter.
+  spawn_server 8089 MACY_TRACKER_TYPE="$TRACKER_TYPE" \
+    && pass "tracker-enabled dev server up (:8089)" || fail "tracker-enabled dev server up (:8089)"
+  spawn_server 8090 \
+    && pass "default (staging-skip) dev server up (:8090)" || fail "default (staging-skip) dev server up (:8090)"
+  spawn_server 8091 MACY_TRACKER_TYPE="CMS Staging/Nonexistent Tracker" \
+    && pass "broken-tracker dev server up (:8091)" || fail "broken-tracker dev server up (:8091)"
+
+  # --- Happy path: tracker row + lead both flagged --------------------------
+  out=$(tracker_create "$ADDR2")
+  echo "$out" | grep -q '"success"[: ]*true' \
+    && pass "tracker fixture row created" || fail "tracker fixture row created" "$out"
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:8089/api/whitepaper-lead" \
+    -H "Content-Type: application/json" \
+    -d "{\"email\":\"$ADDR2\",\"whitepaper\":\"Chat Advance Case Study\"}")
+  [ "$code" = "200" ] && pass "lead created for tracker address" || fail "lead created for tracker address" "got $code"
+  sleep 1
+
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:8089/unsubscribe" \
+    -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "e=$ADDR2")
+  [ "$code" = "200" ] && pass "POST unsubscribe (tracker on) returns 200" || fail "POST unsubscribe (tracker on) returns 200" "got $code"
+  sleep 1
+
+  fibery_leads "$ADDR2" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)[0]['result']
+assert r and all(x['unsub'] for x in r), 'leads not unsubscribed'
+" 2>/dev/null && pass "Website Leads still flagged with tracker step active" \
+    || fail "Website Leads still flagged with tracker step active"
+
+  tr_json=$(fibery_tracker "$ADDR2")
+  echo "$tr_json" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)[0]['result']
+assert r, 'tracker row missing'
+assert all(x['unsub'] for x in r), 'tracker not unsubscribed'
+assert all(x['unsubAt'] for x in r), 'missing Unsubscribed At'
+" 2>/dev/null && pass "tracker row marked Unsubscribed + timestamp" \
+    || fail "tracker row marked Unsubscribed + timestamp" "$tr_json"
+  echo "$tr_json" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)[0]['result']
+assert r and all(x['status'] == 'Unsubscribed' for x in r), 'Status not Unsubscribed'
+" 2>/dev/null && pass "tracker row Status set to Unsubscribed" \
+    || fail "tracker row Status set to Unsubscribed" "$tr_json"
+
+  # --- Address with no tracker row: still succeeds --------------------------
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:8089/unsubscribe" \
+    -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "e=$ADDR3")
+  [ "$code" = "200" ] && pass "no tracker row for address: POST still 200" || fail "no tracker row for address: POST still 200" "got $code"
+
+  # --- Default skip: staging space + no MACY_TRACKER_TYPE = no CRM writes ---
+  tracker_create "$ADDR4" >/dev/null
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:8090/unsubscribe" \
+    -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "e=$ADDR4")
+  [ "$code" = "200" ] && pass "staging default skips tracker: POST returns 200" || fail "staging default skips tracker: POST returns 200" "got $code"
+  sleep 1
+  fibery_tracker "$ADDR4" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)[0]['result']
+assert r, 'tracker fixture row missing'
+assert all(not x['unsub'] for x in r), 'tracker row was flagged despite skip'
+assert all(not x['unsubAt'] for x in r), 'timestamp set despite skip'
+" 2>/dev/null && pass "tracker row untouched when step is skipped" \
+    || fail "tracker row untouched when step is skipped"
+
+  # --- Broken tracker DB: unsubscribe must not 500, leads still flagged -----
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:8091/api/whitepaper-lead" \
+    -H "Content-Type: application/json" \
+    -d "{\"email\":\"$ADDR5\",\"whitepaper\":\"Chat Advance Case Study\"}")
+  [ "$code" = "200" ] && pass "lead created (broken-tracker server)" || fail "lead created (broken-tracker server)" "got $code"
+  sleep 1
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost:8091/unsubscribe" \
+    -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "e=$ADDR5")
+  [ "$code" = "200" ] && pass "nonexistent tracker DB: unsubscribe still 200" || fail "nonexistent tracker DB: unsubscribe still 200" "got $code"
+  sleep 1
+  fibery_leads "$ADDR5" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)[0]['result']
+assert r and all(x['unsub'] for x in r), 'leads not unsubscribed'
+" 2>/dev/null && pass "Website Leads flagged despite tracker failure" \
+    || fail "Website Leads flagged despite tracker failure"
 fi
 
 echo ""

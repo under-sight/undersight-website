@@ -27,6 +27,17 @@ PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
 WORKSPACE = "subscript.fibery.io"
 FIBERY_SPACE = os.environ.get("FIBERY_SPACE", "CMS")
 DB = f"{FIBERY_SPACE}/Pages"
+
+# Macy campaign tracker (ChatAdvance feedback-email recipients). Unsubscribes
+# flag matching tracker rows in addition to Website Leads. DB name verified
+# against the live schema API 2026-08-05 (rename Macy Outreach -> Macy
+# Feedback complete). The CRM space name is fixed — never derived from
+# FIBERY_SPACE. Default applies in prod (FIBERY_SPACE == "CMS") only; any
+# other space skips the step unless MACY_TRACKER_TYPE is set explicitly
+# (tests point it at the "CMS Staging/Macy Feedback" fixture). Setting
+# MACY_TRACKER_TYPE to an empty string disables the step everywhere.
+DEFAULT_MACY_TRACKER_TYPE = "CRM/Macy Feedback"
+MACY_STATUS_UNSUBSCRIBED = "Unsubscribed"
 CACHE_TTL = 5  # seconds - short for dev, increase for prod
 
 # Input validation constants (mirror production handlers)
@@ -410,6 +421,83 @@ def _mark_unsubscribed(email, token):
     return len(leads)
 
 
+def _macy_tracker_type():
+    """Resolve the Macy tracker DB to flag, or None to skip the step."""
+    if "MACY_TRACKER_TYPE" in os.environ:
+        return os.environ["MACY_TRACKER_TYPE"].strip() or None
+    return DEFAULT_MACY_TRACKER_TYPE if FIBERY_SPACE == "CMS" else None
+
+
+def _flag_macy_tracker(email):
+    """Best-effort: mark Macy tracker rows for this email unsubscribed.
+
+    Returns count updated. NEVER raises — the unsubscribe response must not
+    depend on the tracker DB existing or the update succeeding (Website Leads
+    flagging is the contractual part; this is additive suppression).
+    """
+    tracker = _macy_tracker_type()
+    if not tracker:
+        return 0
+    try:
+        space = tracker.split("/", 1)[0]
+        rows = api_post("/api/commands", [{
+            "command": "fibery.entity/query",
+            "args": {
+                "query": {
+                    "q/from": tracker,
+                    "q/select": ["fibery/id"],
+                    "q/where": ["=", [f"{space}/Email"], "$email"],
+                    "q/limit": 100,
+                },
+                "params": {"$email": email},
+            },
+        }])[0].get("result", [])
+        if not rows:
+            return 0
+        # Single-selects need the enum entity ref, not a plain string — resolve
+        # the "Unsubscribed" option id by name. Enum type name follows Fibery's
+        # convention: "<Space>/Status_<full type name>". If the lookup fails,
+        # flag + timestamp alone still suppress; Status is best-effort.
+        status_id = None
+        try:
+            opts = api_post("/api/commands", [{
+                "command": "fibery.entity/query",
+                "args": {
+                    "query": {
+                        "q/from": f"{space}/Status_{tracker}",
+                        "q/select": ["fibery/id"],
+                        "q/where": ["=", ["enum/name"], "$name"],
+                        "q/limit": 1,
+                    },
+                    "params": {"$name": MACY_STATUS_UNSUBSCRIBED},
+                },
+            }])[0].get("result", [])
+            if opts:
+                status_id = opts[0]["fibery/id"]
+        except Exception:
+            pass
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat(
+            timespec="milliseconds").replace("+00:00", "Z")
+        entity_fields = {
+            f"{space}/Unsubscribed": True,
+            f"{space}/Unsubscribed At": now,
+        }
+        if status_id:
+            entity_fields[f"{space}/Status"] = {"fibery/id": status_id}
+        api_post("/api/commands", [{
+            "command": "fibery.entity/update",
+            "args": {
+                "type": tracker,
+                "entity": {"fibery/id": row["fibery/id"], **entity_fields},
+            },
+        } for row in rows])
+        return len(rows)
+    except Exception:
+        print("  [UNSUB] Macy tracker flagging failed (non-blocking)", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        return 0
+
+
 # --- Unsubscribe flow (mirrors functions/unsubscribe.js) ---------------------
 
 UNSUB_PAGE = """<!DOCTYPE html>
@@ -533,7 +621,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         masked = _mask_email(email)
         try:
             count = _mark_unsubscribed(email, token)
-            print(f"  [UNSUB] {masked} ({count} lead(s) marked)")
+            tracker_count = _flag_macy_tracker(email)  # best-effort, never raises
+            print(f"  [UNSUB] {masked} ({count} lead(s), {tracker_count} tracker row(s) marked)")
             body = (
                 "<h1>You're unsubscribed</h1>"
                 f"<p><span class='addr'>{html_mod.escape(email)}</span> won't receive emails from undersight anymore.</p>"
