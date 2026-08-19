@@ -409,6 +409,25 @@ def fetch_all(token):
     return result, file_map
 
 
+def fetch_all_with_retry(token, attempts=3, base_delay=15):
+    """fetch_all with exponential backoff for transient failures (429/5xx).
+
+    Re-raises the last error after exhausting attempts — the caller must
+    fail the build, never fall back to the under-construction page (that
+    path is reserved for a deliberate Site Mode switch or a missing token).
+    """
+    for attempt in range(1, attempts + 1):
+        try:
+            return fetch_all(token)
+        except Exception as e:
+            if attempt == attempts:
+                raise
+            delay = base_delay * (2 ** (attempt - 1))
+            print(f"  Fetch attempt {attempt}/{attempts} failed ({e}); "
+                  f"retrying in {delay}s...")
+            time.sleep(delay)
+
+
 def download_file(secret, token, return_headers=False, max_retries=4):
     """
     Download a file from Fibery by its secret. Retries on 429 / transient errors
@@ -1356,7 +1375,7 @@ def main():
     if token:
         print("\n[2/6] Fetching content from Fibery...")
         try:
-            content_map, file_map = fetch_all(token)
+            content_map, file_map = fetch_all_with_retry(token)
             entity_names = list(content_map.keys())
             print(f"  Entities: {', '.join(entity_names)}")
             print(f"  File attachments: {len(file_map)}")
@@ -1380,8 +1399,13 @@ def main():
                 file_map = {}
 
         except Exception as e:
-            print(f"WARNING: Failed to fetch content from Fibery: {e}")
-            print("  Building under-construction fallback page...")
+            # Fail closed: a fetch error (e.g. a transient Fibery 429) must
+            # never ship the under-construction fallback over a live site.
+            # The fallback is only for a deliberate Site Mode switch or a
+            # missing token. Exiting non-zero keeps the previous deploy live.
+            print(f"::error::Failed to fetch content from Fibery after "
+                  f"retries: {e} — failing build (2026-08-19 outage guard)")
+            sys.exit(1)
     else:
         print("\n[2/6] Skipping Fibery fetch (no token)")
 
