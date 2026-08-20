@@ -77,30 +77,22 @@ jobs:
               print("Pages 'Blog -*' guard passed (no regressions).")
           PY
 
+      # Fail closed (2026-07-30 and 2026-08-19 outages): if the build or
+      # validation fails, the RUN fails, no deploy happens, and the previous
+      # deploy stays live. There is deliberately NO fallback-to-placeholder
+      # step here — the only way to ship under-construction.html is the Site
+      # Mode switch in Fibery Site Config, which build.py honors and
+      # build-validation.sh recognizes via dist/.build-meta.json. The failed
+      # run emails the cron author; health-check.yml is the backup channel.
       - name: Build site from Fibery (respects Site Mode)
         id: build
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
         run: python3 build.py --verify --env production
-        continue-on-error: true
 
       - name: Validate build output
         id: validate
-        if: steps.build.outcome == 'success'
         run: bash tests/build-validation.sh
-        continue-on-error: true
-
-      - name: Fallback to under-construction on build failure
-        if: steps.build.outcome == 'failure' || steps.validate.outcome == 'failure'
-        run: |
-          echo "::warning::Build or validation failed — deploying under-construction page"
-          mkdir -p dist/css dist/images/brand
-          cp under-construction.html dist/index.html
-          cp favicon.svg dist/ 2>/dev/null || true
-          cp favicon-32.png dist/ 2>/dev/null || true
-          cp favicon-16.png dist/ 2>/dev/null || true
-          cp -r images/brand/ dist/images/brand/ 2>/dev/null || true
-          cp css/tokens.css dist/css/ 2>/dev/null || true
 
       - name: Deploy to Cloudflare Pages (production)
         uses: cloudflare/wrangler-action@v3
@@ -116,11 +108,12 @@ jobs:
         continue-on-error: true
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
-          BUILD_STATUS: ${{ (steps.build.outcome == 'success' && steps.validate.outcome == 'success') && 'success' || (steps.build.outcome == 'failure' && 'failed' || 'degraded') }}
+          # Fail-closed workflow: this step is only reached when build,
+          # validate, and deploy all succeeded.
+          BUILD_STATUS: success
         run: python3 deploy-report.py --env production --url "https://undersight.ai" --status "$BUILD_STATUS"
 
       - name: Verify deployment matches Fibery intent
-        if: steps.build.outcome == 'success' && steps.validate.outcome == 'success'
         continue-on-error: true
         env:
           FIBERY_TOKEN: ${{ secrets.FIBERY_TOKEN }}
