@@ -11,6 +11,24 @@ fail() { FAIL=$((FAIL+1)); echo "  FAIL  $1 -> ${2:-}"; }
 echo "=== Build Validation ==="
 echo ""
 
+# Deliberate placeholder builds (Fibery Site Config: Site Mode =
+# under-construction) produce a minimal dist/ that would fail every
+# full-content check below. build.py stamps the mode into
+# dist/.build-meta.json — validate the placeholder shape and stop there.
+# NOTE: build.py only builds this fallback on the deliberate paths (Site
+# Mode switch or no token); a Fibery fetch error fails the build instead
+# (2026-08-19 outage guard), so this branch cannot mask an outage.
+SITE_MODE=$(python3 -c "import json;print(json.load(open('$DIST/.build-meta.json')).get('site_mode',''))" 2>/dev/null || echo "")
+if [ "$SITE_MODE" = "under-construction" ]; then
+  echo "  Site Mode: under-construction (deliberate placeholder build)"
+  [ -f "$DIST/index.html" ] && [ "$(wc -c < "$DIST/index.html")" -gt 500 ] && pass "placeholder index.html present" || fail "placeholder index.html present"
+  ! grep -qE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' "$DIST/index.html" && pass "No Fibery UUIDs in dist" || fail "No Fibery UUIDs in dist"
+  ! grep -qiE 'Authorization.*Token [a-zA-Z0-9]' "$DIST/index.html" && pass "No auth tokens in dist" || fail "No auth tokens in dist"
+  echo ""
+  echo "Results: $((PASS+FAIL)) tests — PASS: $PASS, FAIL: $FAIL"
+  [ $FAIL -eq 0 ] && echo "ALL PASSED" && exit 0 || { echo "FAILED"; exit 1; }
+fi
+
 # dist/index.html exists and is non-trivial
 [ -f "$DIST/index.html" ] && [ $(wc -c < "$DIST/index.html") -gt 10000 ] && pass "dist/index.html exists and >10KB" || fail "dist/index.html exists and >10KB"
 
