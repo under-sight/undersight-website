@@ -2404,18 +2404,24 @@ review, the verdict, and DESIGN.md.
     // Auto-inject companion images from Fibery file attachments
     // Hero = first image (shown above), remaining images distributed through body
     // Only inject if there are 2+ companions (skip single extras which are usually alternate hero versions)
-    if (post.companionImgs && post.companionImgs.length >= 2) {
+    // Skip companions the author already placed via markdown (match by basename),
+    // and root-relativize the rest so they resolve at /blog/<slug>/ deep links
+    // (same class of bug as the PR #35 root-relative fix).
+    const unplacedCompanions = (post.companionImgs || [])
+      .filter(url => !post.body.includes(url.split('/').pop()))
+      .map(url => url.startsWith('/') || /^https?:/.test(url) ? url : '/' + url);
+    if (unplacedCompanions.length >= 2) {
       const paragraphs = bodyHtml.split('</p>');
       if (paragraphs.length > 2) {
-        const interval = Math.max(2, Math.floor(paragraphs.length / (post.companionImgs.length + 1)));
-        post.companionImgs.forEach((url, i) => {
+        const interval = Math.max(2, Math.floor(paragraphs.length / (unplacedCompanions.length + 1)));
+        unplacedCompanions.forEach((url, i) => {
           const insertAt = Math.min((i + 1) * interval, paragraphs.length - 1);
           const imgHtml = `<figure style="margin:32px 0;"><img src="${url}" alt="" style="width:100%;border-radius:var(--rounded-md);border:1px solid var(--pale);" loading="lazy"></figure>`;
           paragraphs.splice(insertAt + i, 0, imgHtml);
         });
         bodyHtml = paragraphs.join('</p>');
       } else {
-        post.companionImgs.forEach(url => {
+        unplacedCompanions.forEach(url => {
           bodyHtml += `<figure style="margin:32px 0;"><img src="${url}" alt="" style="width:100%;border-radius:var(--rounded-md);border:1px solid var(--pale);" loading="lazy"></figure>`;
         });
       }
