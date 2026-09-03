@@ -54,3 +54,6 @@ versions/
 
 # impeccable local state (decision pages, sketches)
 .impeccable/
+
+# Local secrets for `wrangler pages dev` and editor/agent state
+.dev.vars

@@ -94,6 +94,29 @@ jobs:
         id: validate
         run: bash tests/build-validation.sh
 
+      # Booking API secrets (functions/api/booking/). Sourced from GitHub
+      # Actions secrets so nobody has to visit the Pages dashboard; skipped
+      # until GOOGLE_REFRESH_TOKEN exists. `pages secret put` overwrites in
+      # place, so re-running on every deploy is idempotent. Runs before the
+      # deploy because Pages applies env changes on the next deployment.
+      - name: Sync booking secrets to the Pages project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          BOOKING_CALENDAR_ID: ${{ vars.BOOKING_CALENDAR_ID }}
+          BOOKING_BUSY_CALENDARS: ${{ vars.BOOKING_BUSY_CALENDARS }}
+        run: |
+          if [ -z "$GOOGLE_REFRESH_TOKEN" ]; then
+            echo "GOOGLE_REFRESH_TOKEN not set in GitHub secrets — booking API stays in its 503/email-fallback state"
+            exit 0
+          fi
+          for name in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REFRESH_TOKEN BOOKING_CALENDAR_ID BOOKING_BUSY_CALENDARS; do
+            [ -n "${!name}" ] || continue
+            printf '%s' "${!name}" | npx -y wrangler@4 pages secret put "$name" --project-name undersight-website
+          done
       - name: Deploy to Cloudflare Pages (production)
         uses: cloudflare/wrangler-action@v3
         with:

@@ -8,3 +8,11 @@ pages_build_output_dir = "dist"
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
 id = "83b9dd6298074ec3ad80c36a85be6058"
+
+# Booking API (functions/api/booking/). Secrets are set on the Pages project
+# (`wrangler pages secret put <NAME> --project-name undersight-website`), never here:
+#   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN
+# Plain vars (dashboard → Settings → Environment variables, or .dev.vars locally):
+#   BOOKING_CALENDAR_ID     calendar that owns the events (default: primary)
+#   BOOKING_BUSY_CALENDARS  comma-separated calendars whose busy time blocks a slot
+#   BOOKING_*               optional rule overrides, see rulesFromEnv() in _slots.mjs

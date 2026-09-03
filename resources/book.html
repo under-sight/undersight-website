@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Discovery Call | undersight</title>
+<meta name="description" content="Thirty minutes, one live file. Pick a time with Kyle Adriany. We parse a real submission on the call and hand back the risk read: bank analysis, stips, and the questions your team should have asked.">
+<link rel="canonical" href="https://undersight.ai/book">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#23262C">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Book a Discovery Call | undersight">
+<meta property="og:description" content="Thirty minutes, one live file. We parse a real submission on the call and hand back the risk read.">
+<meta property="og:url" content="https://undersight.ai/book">
+<meta property="og:site_name" content="undersight">
+<meta property="og:image" content="https://undersight.ai/images/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Book a Discovery Call | undersight">
+<meta name="twitter:description" content="Thirty minutes, one live file. We parse a real submission on the call and hand back the risk read.">
+<meta name="twitter:image" content="https://undersight.ai/images/og-image.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/main.css">
+<style>
+  .book-main { max-width: var(--max-w); margin: 0 auto; padding: 56px 24px 72px; }
+  .book-hero { max-width: 720px; margin-bottom: 40px; }
+  .book-pill { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent); background: var(--color-accent-light); border-radius: 999px; padding: 5px 12px; margin-bottom: 18px; }
+  .book-hero h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.1; letter-spacing: -.028em; margin-bottom: 14px; }
+  .book-hero p { font-size: 17px; line-height: 1.6; color: var(--dark); max-width: 620px; }
+  .book-section h2 { font-size: 22px; letter-spacing: -.02em; margin-bottom: 4px; }
+  .book-section .sub { font-size: 14px; color: var(--mid); margin-bottom: 18px; }
+  .book-fallback { margin-top: 16px; font-size: 13.5px; color: var(--mid); }
+  .book-fallback a { color: var(--color-accent); }
+  .book-foot { border-top: 1px solid var(--pale); }
+  .book-foot .inner { max-width: var(--max-w); margin: 0 auto; padding: 22px 24px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--mid); }
+  .book-foot a { color: var(--dark); }
+  .book-foot .grow { flex: 1; }
+  @media (max-width: 640px) { .book-main { padding: 32px 16px 56px; } }
+</style>
+<script type="module" src="/resources/booking-widget.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/">
+      <img src="/images/brand/logo-horizontal-line-primary.svg" alt="undersight" class="nav-logo-img" width="160" height="40">
+    </a>
+    <nav class="nav-links">
+      <a href="https://documentation.underchat.ai/">Docs</a>
+      <a href="/blog">Blog</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="https://app.underchat.ai/login" class="btn btn-ghost" target="_blank" rel="noopener">Sign In</a>
+    </div>
+  </div>
+</header>
+
+<main class="book-main">
+  <section class="book-hero">
+    <span class="book-pill">AI Underwriting for Alternative Finance</span>
+    <h1>See your book the way an underwriter would</h1>
+    <p>Thirty minutes, one live file. We parse a real submission on the call and hand back the risk read: bank analysis, stips, and the questions your team should have asked.</p>
+  </section>
+
+  <section class="book-section" id="book">
+    <h2>Pick a time</h2>
+    <p class="sub">30 minutes · Google Meet · times shown in your time zone</p>
+    <undersight-booking api="/api/booking" host="Kyle Adriany" initials="KA" org="undersight" title="Discovery Call" duration="30" contact="contact@undersight.ai"></undersight-booking>
+    <noscript><p class="book-fallback">Booking needs JavaScript. Email <a href="mailto:contact@undersight.ai">contact@undersight.ai</a> and we will find a time.</p></noscript>
+    <p class="book-fallback">Prefer email? <a href="mailto:contact@undersight.ai">contact@undersight.ai</a></p>
+  </section>
+</main>
+
+<footer class="book-foot">
+  <div class="inner">
+    <span>© 2026 undersight. All rights reserved.</span>
+    <span class="grow"></span>
+    <a href="/">Home</a>
+    <a href="/blog">Blog</a>
+    <a href="https://legal.undersight.ai">Privacy</a>
+  </div>
+</footer>
+
+</body>
+</html>
