@@ -826,6 +826,8 @@ SITEMAP_PAGES = [
     ("/contact", "monthly", "0.5"),
     # Standalone GEO/SEO landing page (static file in resources/, not in nav)
     ("/cash-flow-underwriting", "monthly", "0.7"),
+    # Booking page (static file in resources/, served at /book via _redirects)
+    ("/book", "monthly", "0.7"),
 ]
 
 # CMS/Pages entities that are site configuration rather than content —

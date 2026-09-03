@@ -141,6 +141,8 @@ Requires `FIBERY_TOKEN` env var or macOS Keychain entry
 | Build script | `build.py` |
 | Cloudflare Worker (whitepaper backend) | `worker/index.js` + `worker/wrangler.toml` |
 | Markdown-for-Agents (edge) | `functions/_middleware.js` + `functions/_md-negotiation.mjs` (per-page `.md` emitted by `build.py`) |
+| Booking page (`/book`) | `resources/book.html` + `resources/booking-widget.js` (`<undersight-booking>` web component); route via `_redirects` |
+| Booking API (edge) | `functions/api/booking/{slots,book}.js` + `_slots.mjs` (slot engine) + `_google.mjs` (Calendar client); tests `tests/booking-*.test.mjs` |
 | Whitepapers | `whitepaper/` (PDFs + generation scripts) |
 
 ---
@@ -629,6 +631,37 @@ redacted to `status + body_len` in Cloudflare logs; the email regex enforces
 local-part 1-64 chars with no leading/trailing dot; all handlers reject
 non-`application/json` Content-Type with `415`; and `worker/index.js` carries
 a `DEPRECATED` header — production traffic flows through the Pages Function.
+
+---
+
+## Booking Page (`/book`)
+
+Replaces the Calendly link with a first-party booking flow: a static page
+(`resources/book.html`) hosts the `<undersight-booking>` Shadow-DOM widget
+(`resources/booking-widget.js`), which talks to two Pages Functions:
+
+- `GET /api/booking/slots?from&to` — open 30-minute starts (Mon–Fri, 09:00–17:00
+  Pacific, 4h notice, 45-day horizon) minus Google Calendar free/busy across the
+  host's calendars. Rules live in `functions/api/booking/_slots.mjs`
+  (`rulesFromEnv` reads optional `BOOKING_*` overrides).
+- `POST /api/booking/book` — validates, re-checks free/busy, inserts the event on
+  the host calendar with a Google Meet link and emails the guest the invite.
+  Honeypot + `RATE_LIMIT_KV` (shared with lead capture) guard the endpoint.
+
+**Required environment (Cloudflare Pages → Settings → Environment variables,
+Production + Preview; locally `.dev.vars`, gitignored):**
+
+| Setting | Type | Purpose |
+|---|---|---|
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REFRESH_TOKEN` | Secret env vars | OAuth refresh-token grant for the host's Workspace account (`calendar` + `calendar.events` scopes) |
+| `BOOKING_CALENDAR_ID` | Env var | Calendar that owns the events (default `primary`) |
+| `BOOKING_BUSY_CALENDARS` | Env var | Comma-separated calendars whose busy time also blocks a slot |
+
+Without the Google secrets the API answers `503 booking_not_configured` and the
+widget shows the email fallback, so the page is safe to deploy first and wire up
+second. Tests: `node --test tests/booking-*.test.mjs` (slot engine incl. DST,
+validation, both handlers with Google stubbed, widget helpers). Local end-to-end:
+`python3 build.py && npx wrangler pages dev dist --port 8788` then open `/book`.
 
 ---
 
