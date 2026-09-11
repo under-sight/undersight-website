@@ -958,6 +958,7 @@ consumed_exact = {'Home - Hero', 'Home - Who We Serve', 'Home - Metrics',
                   'Footer', 'SEO', 'Solutions - underscore',
                   'Solutions - underchat agent',
                   'Solutions - AI Underwriting Copilot',
+                  'Offer - AI Implementation Workshop',  # resources/workshop.html
                   '_blogs', '_whitepapers'}
 consumed_prefixes = ['Blog - ']
 orphans = []
@@ -2631,6 +2632,30 @@ else
 fi
 
 # =============================================================================
+section "Workshop Offer Page"
+
+# Test: /workshop is served from resources/ ahead of the SPA catch-all
+if grep -qE "^/workshop[[:space:]]+/resources/workshop\.html[[:space:]]+200" "$SITE_ROOT/_redirects"; then
+  pass "_redirects serves /workshop from resources/workshop.html"
+else
+  fail "_redirects serves /workshop from resources/workshop.html" "Add '/workshop  /resources/workshop.html  200' before the catch-all"
+fi
+
+# Test: static page gates + live CMS copy gates (every data-cms slot has a value
+# in the "Offer - AI Implementation Workshop" Pages entity; house style holds)
+if CONTENT_URL="$BASE/api/content" node --test tests/workshop-page.test.mjs >/tmp/workshop-page.log 2>&1; then
+  pass "workshop page: static gates + CMS copy gates (node --test)"
+else
+  fail "workshop page: static gates + CMS copy gates (node --test)" "$(grep -E "^not ok|error:|AssertionError" /tmp/workshop-page.log | head -5 | tr '\n' ' ')"
+fi
+
+# Test: the form endpoint unit tests
+if node --test tests/workshop-apply.test.mjs >/tmp/workshop-apply.log 2>&1; then
+  pass "workshop apply function: validation, entity shape, Fibery round trip (node --test)"
+else
+  fail "workshop apply function (node --test)" "$(grep -E "^not ok|error:" /tmp/workshop-apply.log | head -5 | tr '\n' ' ')"
+fi
+
 section "Summary"
 # =============================================================================
 
