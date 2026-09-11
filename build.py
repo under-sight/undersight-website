@@ -1036,6 +1036,8 @@ MD_PAGE_ROUTES = [
     ("/copilot",
      ["Solutions - AI Underwriting Copilot", "Solutions - copilot - Scoring Engine"]),
     ("/contact", ["Contact Page"]),
+    # Offer page (static file in resources/, served at /workshop via _redirects)
+    ("/workshop", ["Offer - AI Implementation Workshop"]),
 ]
 
 # Preferred display order for the composed home page. Any other "Home - *"
@@ -1517,6 +1519,20 @@ def main():
 
     # Regenerate agent discoverability artifacts from CMS content
     write_discoverability_artifacts(content_map)
+
+    # Workshop offer page: resources/workshop.html renders one Pages entity via
+    # the same loadContent()/renderContent() shape as index.html, so it bakes the
+    # same way — with only its own entity, not the whole content map.
+    ws_name = "Offer - AI Implementation Workshop"
+    ws_src = os.path.join(SRC_DIR, "resources", "workshop.html")
+    if os.path.isfile(ws_src):
+        with open(ws_src, "r", encoding="utf-8") as f:
+            ws_html = f.read()
+        ws_html = bake_content_into_html(ws_html, {ws_name: content_map.get(ws_name, {})})
+        ws_html = strip_serve_references(ws_html)
+        with open(os.path.join(DIST_DIR, "resources", "workshop.html"), "w", encoding="utf-8") as f:
+            f.write(ws_html)
+        print(f"  Written: dist/resources/workshop.html ({'baked' if ws_name in content_map else 'ENTITY MISSING'})")
 
     # Write the baked HTML
     dist_html_path = os.path.join(DIST_DIR, "index.html")
