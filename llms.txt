@@ -41,7 +41,7 @@ https://documentation.underchat.ai/
 ## Contact
 - Website: https://undersight.ai
 - Email: contact@undersight.ai
-- Book a call: https://calendly.com/kyle-undersight/30min
+- Book a call: https://undersight.ai/book
 
 ## Links
 - Solutions: https://undersight.ai/underscore, https://undersight.ai/underchat, https://undersight.ai/copilot

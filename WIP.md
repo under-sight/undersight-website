@@ -167,7 +167,7 @@ The SPA uses hash-based routing. Browser back/forward behavior may be inconsiste
 
 The contact page exists (`page-contact`) but no navigation link points to it. The only way to reach it is `navigate('contact')` in the console.
 
-- **What to do:** Either add "Contact" to the nav bar, or remove the page entirely and rely on the CTA sections and Calendly links throughout the site
+- **What to do:** Either add "Contact" to the nav bar, or remove the page entirely and rely on the CTA sections and `/book` links throughout the site
 - **Effort:** Quick
 - **Files:** `index.html` (nav section, or remove `page-contact`)
 - **Dependencies:** None

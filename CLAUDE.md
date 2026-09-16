@@ -195,7 +195,7 @@ later" — the contract is content-first.
 - Solutions dropdown + cards + detail pages
 - Blog grid, post bodies, post images
 - Contact page (`Contact Page`)
-- Site Config (contact email, Calendly, copyright, sign-in URL)
+- Site Config (contact email, optional Booking URL override, copyright, sign-in URL)
 - Whitepapers + lead capture (`CMS/Blog` + `CMS/Website Leads`)
 - Deployment tracking (`CMS/Deployments`)
 
@@ -223,8 +223,9 @@ undetected.
 - Design tokens (`tokens/tokens.css`, `tokens/tokens.json`)
 - Layout scaffolding (grid wrappers, section containers, semantic structure)
 - Brand identity strings ("undersight")
-- Calendly / auth URLs — but these *do* live in the `Site Config` entity and
-  should be read from there, not duplicated in markup
+- Booking / auth URLs — booking CTAs default to `/book` in markup (tagged
+  `a.booking-link`); a `Site Config` **Booking URL** field overrides them at
+  render time. The old **Calendly URL** field is ignored.
 
 ---
 
@@ -236,7 +237,7 @@ undetected.
 | `CMS/Blog` | `CMS/name`, `CMS/Slug`, `CMS/PDF`, `CMS/Assets`, `CMS/Post Date`, `CMS/Tag`, `CMS/Subtitle`, `CMS/Author`, `CMS/Excerpt` | `build.py:183-194`, `functions/api/whitepaper-lead.js:79`, `undersight-serve.py:164-166` |
 | `CMS/Website Leads` | `CMS/Email`, `CMS/Blog Post`, `CMS/Sent` | `functions/api/whitepaper-lead.js:97-105` |
 | `CMS/Deployments` | `CMS/Commit`, `CMS/Site Mode`, `CMS/Content Hash`, `CMS/Build Status`, `CMS/URL`, `CMS/Deployed At` | `deploy-report.py:56-102` |
-| `Site Config` (entity in `CMS/Pages`) | contact email, Calendly URL, copyright, sign-in URL (markdown body keys) | `index.html:784-794` |
+| `Site Config` (entity in `CMS/Pages`) | contact email, Booking URL (optional override), copyright, sign-in URL (markdown body keys) | `index.html` "Site Config" block in `renderContent` |
 
 **Markdown front-matter convention** used inside `CMS/Description` documents:
 `_title`, `_body` for primary copy; `Date`, `Excerpt`, `Tag`, `Subtitle`,
@@ -636,7 +637,8 @@ a `DEPRECATED` header — production traffic flows through the Pages Function.
 
 ## Booking Page (`/book`)
 
-Replaces the Calendly link with a first-party booking flow: a static page
+Replaces Calendly (retired 2026-09; every "Book a Discovery Call" CTA now
+links to `/book`) with a first-party booking flow: a static page
 (`resources/book.html`) hosts the `<undersight-booking>` Shadow-DOM widget
 (`resources/booking-widget.js`), which talks to two Pages Functions:
 

@@ -322,7 +322,7 @@ npx vercel dist/
 2. Check dark mode (toggle OS setting)
 3. Check mobile layout (resize or use device)
 4. Verify all images load (solutions, blog, OG image)
-5. Test "Book a Discovery Call" links (should open Calendly)
+5. Test "Book a Discovery Call" links (should open the first-party `/book` page with live slots)
 6. Test "Sign In" links (should go to the correct app URL)
 7. Check `https://undersight.ai/robots.txt` returns correct content
 8. Check `https://undersight.ai/llms.txt` returns correct content

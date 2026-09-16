@@ -16,7 +16,7 @@ The site is design-system-first: all visual decisions flow from `DESIGN.md` thro
 | `https://undersight.ai` | Production site |
 | `https://legal.undersight.ai` | Privacy policy |
 | `https://app.underchat.ai` | Product app (production sign-in) |
-| `https://calendly.com/kyle-undersight/30min` | Discovery call booking |
+| `/book` (first-party, `resources/book.html` + `/api/booking/*`) | Discovery call booking |
 
 ---
 
