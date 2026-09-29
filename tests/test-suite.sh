@@ -1419,6 +1419,21 @@ else
   fail "openWhitepaperModal() function defined"
 fi
 
+# Test: typing clears a stale email error (it used to stay red mid-entry)
+if grep -q "getElementById('wpEmail').addEventListener('input'" "$SITE_ROOT/index.html"; then
+  pass "Email input clears its error on input"
+else
+  fail "Email input clears its error on input"
+fi
+
+# Test: PDF button gated on an attached PDF, never on a hardcoded list
+if grep -q "const showDl = post.hasPdf;" "$SITE_ROOT/index.html" && grep -q '"has_pdf": bool(be.get("Pdf"))' "$SITE_ROOT/build.py" \
+   && ! grep -q "KNOWN_WHITEPAPERS" "$SITE_ROOT/functions/api/whitepaper-lead.js" "$SITE_ROOT/undersight-serve.py"; then
+  pass "PDF download follows the Fibery PDF field"
+else
+  fail "PDF download follows the Fibery PDF field"
+fi
+
 # Test: Download button in Chat Advance case study section
 if grep -q "Home - Case Study: Chat Advance" "$SITE_ROOT/index.html" && grep -q "openWhitepaperModal" "$SITE_ROOT/index.html"; then
   pass "Download button present in Chat Advance case study"
@@ -1658,11 +1673,11 @@ else
   fail "Dev server uses Fibery param syntax for whitepaper lookup"
 fi
 
-# Test: Research blog posts get download button
-if grep -q "wpName" "$SITE_ROOT/index.html" && grep -q "tag === 'Research'" "$SITE_ROOT/index.html"; then
-  pass "Research blog posts include download button with dynamic whitepaper name"
+# Test: blog posts with a PDF get the download button
+if grep -q "wpName" "$SITE_ROOT/index.html" && grep -q "const showDl = post.hasPdf;" "$SITE_ROOT/index.html"; then
+  pass "Blog posts with a PDF include download button with dynamic whitepaper name"
 else
-  fail "Research blog posts include download button"
+  fail "Blog posts with a PDF include download button"
 fi
 
 # =============================================================================

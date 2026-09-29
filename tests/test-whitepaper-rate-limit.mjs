@@ -79,7 +79,7 @@ function makeRequest({ ip = '203.0.113.1', origin = 'https://undersight.ai', bod
 // ---- Mock fetch for the downstream Fibery calls a schema-valid, accepted --
 // submission triggers (suppression check, blog lookup, lead create). Only
 // installed for tests that need a request to actually complete end-to-end.
-function installFetchStub({ blogFound = true, suppressed = false } = {}) {
+function installFetchStub({ blogFound = true, hasPdf = true, suppressed = false } = {}) {
   const original = globalThis.fetch;
   globalThis.fetch = async (_url, init) => {
     const parsed = JSON.parse(init.body)[0];
@@ -89,7 +89,8 @@ function installFetchStub({ blogFound = true, suppressed = false } = {}) {
         return { ok: true, json: async () => [{ result: suppressed ? [{ 'fibery/id': 'lead-1' }] : [] }] };
       }
       if (from.endsWith('/Blog')) {
-        return { ok: true, json: async () => [{ result: blogFound ? [{ 'fibery/id': 'blog-1' }] : [] }] };
+        const blog = { 'fibery/id': 'blog-1', pdf: hasPdf ? [{ 'fibery/id': 'file-1' }] : [] };
+        return { ok: true, json: async () => [{ result: blogFound ? [blog] : [] }] };
       }
     }
     if (parsed.command === 'fibery.entity/create') {
@@ -223,12 +224,47 @@ await test('validation failures (unknown whitepaper) do not increment the counte
   const kv = new MockKV();
   const env = { FIBERY_TOKEN: 'test-token', RATE_LIMIT_KV: kv };
   const ip = 'unknown-wp-ip';
-  for (let i = 0; i < RATE_LIMIT_MINUTE + 3; i++) {
-    const resp = await onRequestPost({ request: makeRequest({ ip, body: validBody({ whitepaper: 'Not A Real Asset' }) }), env });
-    assert.equal(resp.status, 422);
+  const restoreFetch = installFetchStub({ blogFound: false });
+  try {
+    for (let i = 0; i < RATE_LIMIT_MINUTE + 3; i++) {
+      const resp = await onRequestPost({ request: makeRequest({ ip, body: validBody({ whitepaper: 'Not A Real Asset' }) }), env });
+      assert.equal(resp.status, 422);
+    }
+  } finally {
+    restoreFetch();
   }
   const minuteKey = await kv.get(`rl:minute:${ip}`);
   assert.equal(minuteKey, null, 'unknown-whitepaper probes must never appear in the rate-limit bucket');
+});
+
+// ---------------------------------------------------------------------------
+// Regression: the handler used to gate on a hardcoded title list, so every
+// post published after it (use-of-funds, runtime scorecard) answered 422 and
+// the modal blamed the visitor's email. Any Blog row with a PDF is valid.
+await test('any Blog post with a PDF attached is accepted, no hardcoded list', async () => {
+  const env = { FIBERY_TOKEN: 'test-token', RATE_LIMIT_KV: new MockKV() };
+  const restoreFetch = installFetchStub();
+  try {
+    const resp = await onRequestPost({ request: makeRequest({ ip: 'new-post-ip', body: validBody({ whitepaper: 'Follow the advance to the last dollar' }) }), env });
+    assert.equal(resp.status, 200);
+  } finally {
+    restoreFetch();
+  }
+});
+
+// ---------------------------------------------------------------------------
+await test('Blog post without a PDF is rejected as unknown content, no counter', async () => {
+  const kv = new MockKV();
+  const env = { FIBERY_TOKEN: 'test-token', RATE_LIMIT_KV: kv };
+  const restoreFetch = installFetchStub({ hasPdf: false });
+  try {
+    const resp = await onRequestPost({ request: makeRequest({ ip: 'no-pdf-ip', body: validBody({ whitepaper: 'The RFI bottleneck' }) }), env });
+    assert.equal(resp.status, 422);
+    assert.equal((await resp.json()).error, 'Unknown content');
+  } finally {
+    restoreFetch();
+  }
+  assert.equal(await kv.get('rl:minute:no-pdf-ip'), null);
 });
 
 // ---------------------------------------------------------------------------

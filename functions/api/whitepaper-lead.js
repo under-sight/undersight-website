@@ -23,17 +23,6 @@ const ALLOWED_ORIGINS = [
   'http://localhost:8088',
 ];
 
-// Hardcoded whitelist of asset names that may be requested. Mirrors the
-// `CMS/Blog` entities in Fibery that have a PDF attached and a working
-// "undersight research dispatch" automation. Unknown names are rejected
-// before doing any Fibery work — protects against probing/enumeration.
-const KNOWN_WHITEPAPERS = [
-  'Chat Advance Case Study',
-  '4D Financing Case Study',
-  'From Deterministic Scorecards to Agentic Credit Assessments',
-  'Unlocking Institutional Capital for Mid-Tier MCA Funds',
-];
-
 // Input validation constants
 const MAX_BODY_BYTES = 4096;
 const EMAIL_MIN = 5;
@@ -239,7 +228,49 @@ export async function onRequestPost(context) {
   if (!isValidWhitepaper(whitepaperName)) {
     return json({ error: 'Invalid request' }, 422, request);
   }
-  if (!KNOWN_WHITEPAPERS.includes(whitepaperName)) {
+  const fiberyHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': `Token ${env.FIBERY_TOKEN}`,
+  };
+
+  // Look up the Blog entity by name. Any post with a PDF attached is a valid
+  // request: the "undersight download dispatch" automation mails whatever sits
+  // in its PDF field. This replaced a hardcoded title list that silently
+  // rejected every post published after it. Unknown names and posts without
+  // a PDF answer 422 before the rate limit, so a probe never burns a real
+  // visitor's budget.
+  // ponytail: probes cost one Fibery read each; add a probe budget if Fibery
+  // rate limits ever bite.
+  let wpId = null;
+  try {
+    const wpResp = await fetch('https://subscript.fibery.io/api/commands', {
+      method: 'POST',
+      headers: fiberyHeaders,
+      body: JSON.stringify([{
+        command: 'fibery.entity/query',
+        args: {
+          query: {
+            'q/from': `${FIBERY_SPACE}/Blog`,
+            'q/select': {
+              'fibery/id': 'fibery/id',
+              pdf: { 'q/from': `${FIBERY_SPACE}/PDF`, 'q/select': ['fibery/id'], 'q/limit': 1 },
+            },
+            'q/where': ['=', [`${FIBERY_SPACE}/name`], '$name'],
+            'q/limit': 1,
+          },
+          params: { '$name': whitepaperName },
+        },
+      }]),
+    });
+    if (wpResp.ok) {
+      const match = ((await wpResp.json())[0]?.result || [])[0];
+      if (match && (match.pdf || []).length) wpId = match['fibery/id'];
+    }
+  } catch (err) {
+    console.error('Blog lookup failed:', err && err.name ? err.name : 'Error');
+    return json({ error: 'Internal error' }, 500, request);
+  }
+  if (!wpId) {
     return json({ error: 'Unknown content' }, 422, request);
   }
 
@@ -265,11 +296,6 @@ export async function onRequestPost(context) {
   if (!turnstileResult.ok) {
     return json({ error: 'Verification failed' }, 403, request);
   }
-
-  const fiberyHeaders = {
-    'Content-Type': 'application/json',
-    'Authorization': `Token ${env.FIBERY_TOKEN}`,
-  };
 
   try {
     // 0. Suppression check — unsubscribed addresses get a generic OK with no
@@ -300,41 +326,7 @@ export async function onRequestPost(context) {
       }
     }
 
-    // 1. Look up the Blog entity by name
-    const wpResp = await fetch('https://subscript.fibery.io/api/commands', {
-      method: 'POST',
-      headers: fiberyHeaders,
-      body: JSON.stringify([{
-        command: 'fibery.entity/query',
-        args: {
-          query: {
-            'q/from': `${FIBERY_SPACE}/Blog`,
-            'q/select': ['fibery/id'],
-            'q/where': ['=', [`${FIBERY_SPACE}/name`], '$name'],
-            'q/limit': 1,
-          },
-          params: { '$name': whitepaperName },
-        },
-      }]),
-    });
-
-    let wpId = null;
-    if (wpResp.ok) {
-      const wpData = await wpResp.json();
-      const matches = wpData[0]?.result || [];
-      if (matches.length) wpId = matches[0]['fibery/id'];
-    }
-
-    // Reject if the asset name passed the allowlist but no matching Fibery
-    // entity exists. Creating an unlinked lead causes the dispatch automation
-    // to build a malformed `To` header — fail fast instead of producing an
-    // orphan record that will silently break delivery.
-    if (!wpId) {
-      console.error('Whitepaper not found in Fibery:', whitepaperName);
-      return json({ error: 'Whitepaper not found' }, 422, request);
-    }
-
-    // 2. Create the lead, linking to the blog post. The unsubscribe token is
+    // 1. Create the lead, linking to the blog post. The unsubscribe token is
     // generated here so the dispatch email can interpolate a one-click
     // unsubscribe URL ({{Unsubscribe Token}} in the automation template).
     const tokenBytes = new Uint8Array(16);

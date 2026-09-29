@@ -216,6 +216,11 @@ def fetch_all(token):
                                 f"{FIBERY_SPACE}/Description",
                                 "Collaboration~Documents/secret",
                             ],
+                            "Pdf": {
+                                "q/from": f"{FIBERY_SPACE}/PDF",
+                                "q/select": ["fibery/id"],
+                                "q/limit": 1,
+                            },
                             "Files": {
                                 "q/from": f"{FIBERY_SPACE}/Assets",
                                 "q/select": {
@@ -361,6 +366,8 @@ def fetch_all(token):
             "type": tag,
             "body": body,
             "files": files,
+            # The PDF download button renders only when a PDF is attached.
+            "has_pdf": bool(be.get("Pdf")),
         })
         whitepapers.append({"name": name, "slug": slug})
 
