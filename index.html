@@ -2266,6 +2266,7 @@ review, the verdict, and DESIGN.md.
         // PDF asset name matches the Blog entity name (whitepaper modal
         // queries CMS/Blog by name in the lead capture handler).
         pdf: blog.name,
+        hasPdf: !!blog.has_pdf,
       };
     });
     // Sort: Post Date desc, tie-break by creation date desc (matches build.py).
@@ -2394,7 +2395,9 @@ review, the verdict, and DESIGN.md.
 
     let heroHtml = '';
     if (post.heroImg) {
-      const showDl = post.tag === 'Research' || post.tag === 'Case Study';
+      // The button shows wherever a PDF is attached in Fibery; the lead
+      // handler rejects posts without one, so the button never promises a dead end.
+      const showDl = post.hasPdf;
       const imgDlBtn = showDl ? `<div style="margin-bottom:24px;">${dlBtn}</div>` : '';
       heroHtml = `<img src="${post.heroImg}" alt="${post.title}" style="width:100%;border-radius:var(--radius);margin-bottom:${showDl ? '16' : '32'}px;">${imgDlBtn}`;
     }
@@ -2571,6 +2574,12 @@ review, the verdict, and DESIGN.md.
           sitekey: TURNSTILE_SITE_KEY,
           size: 'invisible',
           callback: onWpTurnstileToken,
+          // A failed challenge never calls back; without this the button sits on "Sending…".
+          'error-callback': function () {
+            var errorEl = document.getElementById('wpError');
+            errorEl.textContent = 'Verification failed. Please try again.';
+            _afterWpError(errorEl);
+          },
         });
       } catch (e) {
         console.warn('Turnstile render failed:', e);
@@ -2660,8 +2669,16 @@ review, the verdict, and DESIGN.md.
       }
       if (r.status === 403) {
         errorEl.textContent = 'Verification failed. Please try again.';
-      } else if (r.status === 413 || r.status === 422) {
-        errorEl.textContent = 'Couldn\u2019t send \u2014 please double-check your email.';
+      } else if (r.status === 422) {
+        // 422 means either a bad email or a post with no PDF; the body says which.
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          errorEl.textContent = data && data.error === 'Unknown content'
+            ? 'This PDF is not available yet. Please try again later.'
+            : 'Please enter a valid email address.';
+          _afterWpError(errorEl);
+        });
+      } else if (r.status === 413) {
+        errorEl.textContent = 'Please enter a valid email address.';
       } else {
         errorEl.textContent = 'Something went wrong. Please try again.';
       }
@@ -2699,6 +2716,15 @@ review, the verdict, and DESIGN.md.
     document.getElementById('wpForm').classList.add('hidden');
     document.getElementById('wpSuccess').classList.add('visible');
   }
+  // Typing clears a stale error so the address is never flagged mid-entry.
+  document.getElementById('wpEmail').addEventListener('input', function () {
+    this.classList.remove('wp-error');
+    document.getElementById('wpError').classList.remove('visible');
+  });
+  // Enter submits, same as the button.
+  document.getElementById('wpEmail').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); submitWhitepaperEmail(); }
+  });
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && document.getElementById('wpOverlay').classList.contains('active')) {
       closeWhitepaperModal();

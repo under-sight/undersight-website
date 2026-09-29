@@ -53,14 +53,6 @@ EMAIL_REGEX = re.compile(
     r'^(?![.])[A-Za-z0-9._%+\-]{1,64}(?<![.])@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$'
 )
 
-# Hardcoded whitelist of asset names. Mirrors functions/api/whitepaper-lead.js
-# and worker/index.js. Update all three together when adding a new PDF asset.
-KNOWN_WHITEPAPERS = {
-    "Chat Advance Case Study",
-    "4D Financing Case Study",
-    "From Deterministic Scorecards to Agentic Credit Assessments",
-    "Unlocking Institutional Capital for Mid-Tier MCA Funds",
-}
 
 
 def _is_valid_email(email):
@@ -244,6 +236,11 @@ def fetch_all():
                         f"{FIBERY_SPACE}/Description",
                         "Collaboration~Documents/secret",
                     ],
+                    "Pdf": {
+                        "q/from": f"{FIBERY_SPACE}/PDF",
+                        "q/select": ["fibery/id"],
+                        "q/limit": 1,
+                    },
                     "Files": {
                         "q/from": f"{FIBERY_SPACE}/Assets",
                         "q/select": {
@@ -330,6 +327,7 @@ def fetch_all():
             "type": tag,
             "body": body,
             "files": bfiles,
+            "has_pdf": bool(be.get("Pdf")),
         })
     # Sort: Post Date desc, tie-break by creation date desc.
     blogs.sort(
@@ -689,8 +687,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if not _is_valid_whitepaper(whitepaper_name):
             self._send_json({"error": "Invalid request"}, status=422)
             return
-        if whitepaper_name not in KNOWN_WHITEPAPERS:
-            self._send_json({"error": "Unknown content"}, status=422)
             return
 
         masked = _mask_email(email)
@@ -709,7 +705,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "args": {
                     "query": {
                         "q/from": f"{FIBERY_SPACE}/Blog",
-                        "q/select": ["fibery/id"],
+                        "q/select": {
+                            "fibery/id": "fibery/id",
+                            "pdf": {"q/from": f"{FIBERY_SPACE}/PDF", "q/select": ["fibery/id"], "q/limit": 1},
+                        },
                         "q/where": ["=", [f"{FIBERY_SPACE}/name"], "$name"],
                         "q/limit": 1,
                     },
@@ -718,17 +717,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
             }])
             wp_id = None
             wp_matches = wp_results[0].get("result", [])
-            if wp_matches:
+            # Any post with a PDF attached is valid (mirrors
+            # functions/api/whitepaper-lead.js, no hardcoded title list).
+            if wp_matches and wp_matches[0].get("pdf"):
                 wp_id = wp_matches[0]["fibery/id"]
 
-            # Reject if the asset name passed the allowlist but no matching
-            # Fibery entity exists. Creating an unlinked lead causes the
+            # Reject if no matching Fibery entity with a PDF exists. Creating an unlinked lead causes the
             # dispatch automation to build a malformed `To` header — fail
             # fast instead of producing an orphan record that will silently
             # break delivery.
             if not wp_id:
                 print(f"  [LEAD] {masked} -> {whitepaper_name} (not found in Fibery)", file=sys.stderr)
-                self._send_json({"error": "Whitepaper not found"}, status=422)
+                self._send_json({"error": "Unknown content"}, status=422)
                 return
 
             # 2. Create the lead entity, linked to the blog post. The
