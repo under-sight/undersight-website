@@ -110,3 +110,13 @@ test('css defines sr-only and the gated post treatment', () => {
   assert.match(css, /\.sr-only\s*\{/);
   assert.match(css, /\.post-gated \.post-body\s*\{/);
 });
+
+// Turnstile's default `execution: 'render'` runs the challenge the moment the
+// widget renders, which the gate does on page load: a pass posted an empty
+// email and a fail showed "Verification failed" before the visitor typed.
+test('turnstile challenge runs only on submit', () => {
+  const render = html.slice(html.indexOf("window.turnstile.render('#wpTurnstile'"), html.indexOf('function closeWhitepaperModal('));
+  assert.match(render, /execution: 'execute'/);
+  const cb = html.slice(html.indexOf('function onWpTurnstileToken('), html.indexOf('function submitWhitepaperEmail('));
+  assert.match(cb, /if \(!_wpInFlight\) return;/);
+});

@@ -2632,9 +2632,13 @@ review, the verdict, and DESIGN.md.
         _wpTurnstileWidgetId = window.turnstile.render('#wpTurnstile', {
           sitekey: TURNSTILE_SITE_KEY,
           size: 'invisible',
+          // Challenge on submit only (turnstile.execute). The default runs it
+          // at render, which the blog gate does on page load.
+          execution: 'execute',
           callback: onWpTurnstileToken,
           // A failed challenge never calls back; without this the button sits on "Sending…".
           'error-callback': function () {
+            if (!_wpInFlight) return;
             var errorEl = document.getElementById('wpError');
             errorEl.textContent = 'Verification failed. Please try again.';
             _afterWpError(errorEl);
@@ -2671,6 +2675,7 @@ review, the verdict, and DESIGN.md.
   // Called by Turnstile when an invisible challenge succeeds. We stash the token
   // and forward to the actual fetch.
   function onWpTurnstileToken(token) {
+    if (!_wpInFlight) return;
     _postWhitepaperLead(token);
   }
   function submitWhitepaperEmail() {
