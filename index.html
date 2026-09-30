@@ -470,7 +470,7 @@ review, the verdict, and DESIGN.md.
 </footer>
 
 <!-- ============ WHITEPAPER MODAL ============ -->
-<div class="wp-overlay" id="wpOverlay" role="button" tabindex="-1" onclick="if(event.target===this)closeWhitepaperModal()">
+<div class="wp-overlay" id="wpOverlay" role="button" tabindex="-1" onclick="if(event.target===this&&!_wpGateMode)closeWhitepaperModal()">
   <div class="wp-modal" role="dialog" aria-labelledby="wpTitle" aria-modal="true">
     <button class="wp-close" onclick="closeWhitepaperModal()" aria-label="Close">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
@@ -487,17 +487,20 @@ review, the verdict, and DESIGN.md.
            first opens — see openWhitepaperModal(). -->
       <div id="wpTurnstile"></div>
       <button class="btn btn-primary wp-submit" onclick="submitWhitepaperEmail()">Send me the PDF</button>
+      <p class="wp-note" id="wpNote"></p>
+      <button type="button" class="wp-leave" id="wpLeave" onclick="closeWhitepaperModal()"></button>
     </div>
     <div class="wp-success" id="wpSuccess">
       <div class="wp-success-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <h4>Check your inbox</h4>
-      <p>We've sent the PDF to your email. It should arrive within a minute or two.</p>
+      <h4 id="wpSuccessTitle">Check your inbox</h4>
+      <p id="wpSuccessText">We've sent the PDF to your email. It should arrive within a minute or two.</p>
     </div>
   </div>
 </div>
 
+<script src="/resources/blog-gate.js"></script>
 <script>
   // ---- Helpers ----
   function getContent(data, key) { return (data[key] || {}).content || ''; }
@@ -2362,6 +2365,8 @@ review, the verdict, and DESIGN.md.
     const link = document.querySelector(`.nav-links > a[href="/${page}"], .nav-links > a[href="#${page}"]`);
     if (link) link.classList.add('active');
     closeMobileNav();
+    // Leaving the post (nav link, back button) takes the email gate with it.
+    if (page !== 'post' && _wpGateMode) _endBlogGate();
     window.scrollTo(0, 0);
     var path = opts.url || (page === 'home' ? '/' : '/' + page);
     var state = opts.state || { page: page };
@@ -2381,7 +2386,7 @@ review, the verdict, and DESIGN.md.
 
     document.getElementById('postTitle').style.display = '';
     document.getElementById('postMeta').style.display = '';
-    document.getElementById('postTitle').textContent = post.title;
+    document.getElementById('postTitle').innerHTML = BlogGate.headingHtml(post.title, BlogGate.summaryOf(post));
     document.getElementById('postMeta').innerHTML =
       (post.tag ? `<span class="blog-tag">${post.tag}</span> ` : '') +
       metaParts.join(' &middot; ');
@@ -2441,6 +2446,13 @@ review, the verdict, and DESIGN.md.
     navigate('post', post.slug
       ? { url: '/blog/' + post.slug, state: { page: 'post', slug: post.slug } }
       : undefined);
+
+    // Email gate: posts with a PDF open blurred behind the dialog until the
+    // visitor submits an email (once per browser, see resources/blog-gate.js).
+    const gated = BlogGate.shouldGate(post, BlogGate.isUnlocked(_safeLocalStorage()));
+    document.getElementById('page-post').classList.toggle('post-gated', gated);
+    if (gated) openBlogGate(wpName);
+    else if (_wpGateMode) _endBlogGate();
   }
 
   function filterBlog(tag) {
@@ -2554,13 +2566,60 @@ review, the verdict, and DESIGN.md.
       if (_wpOriginalBtnText) btn.textContent = _wpOriginalBtnText;
     }
   }
-  function openWhitepaperModal(name) {
+  // ---- Blog email gate ----
+  // Same dialog and endpoint as the PDF download, in gate mode: opened by
+  // openPost() on a post with a PDF, backdrop clicks ignored, closing it
+  // leaves for the blog list, and a successful submit unlocks the post.
+  const GATE_COPY = {
+    title: 'See the full post',
+    desc: 'Enter your work email to read the full post now and get a PDF copy in your inbox.',
+    button: 'Read the post',
+    // ponytail: no reassurance line until the list policy is confirmed.
+    note: '',
+    leave: 'All posts',
+    successTitle: 'The post is open',
+    successText: 'The PDF is on its way to your inbox.',
+  };
+  var _wpGateMode = false;
+  var _wpSuccessTimer = null;
+  function _safeLocalStorage() {
+    try { return window.localStorage; } catch (e) { return null; }
+  }
+  function openBlogGate(name) {
+    openWhitepaperModal(name, true);
+  }
+  // Closes the gate without leaving the page (unlock, or a navigation that
+  // already moved off the post).
+  function _endBlogGate() {
+    _wpGateMode = false;
+    closeWhitepaperModal();
+  }
+  function _unlockBlogPost() {
+    BlogGate.markUnlocked(_safeLocalStorage());
+    document.getElementById('page-post').classList.remove('post-gated');
+    _wpGateMode = false;
+    document.getElementById('wpOverlay').classList.remove('wp-gate');
+  }
+
+  function openWhitepaperModal(name, gate) {
     if (name) _activeWhitepaper = name;
+    _wpGateMode = !!gate;
+    clearTimeout(_wpSuccessTimer);
+    document.getElementById('wpOverlay').classList.toggle('wp-gate', _wpGateMode);
     // Always start with a clean submit state, even if a previous close didn't fire.
+    _wpOriginalBtnText = gate ? GATE_COPY.button : 'Send me the PDF';
     _resetWpSubmit();
+    document.getElementById('wpNote').textContent = gate ? GATE_COPY.note : '';
+    document.getElementById('wpLeave').textContent = gate ? GATE_COPY.leave : '';
+    document.getElementById('wpSuccessTitle').textContent = gate ? GATE_COPY.successTitle : 'Check your inbox';
+    document.getElementById('wpSuccessText').textContent = gate
+      ? GATE_COPY.successText
+      : 'We\u2019ve sent the PDF to your email. It should arrive within a minute or two.';
     // Update modal text based on the content type
-    document.getElementById('wpTitle').textContent = 'Get the PDF';
-    document.getElementById('wpDesc').textContent = name
+    document.getElementById('wpTitle').textContent = gate ? GATE_COPY.title : 'Get the PDF';
+    document.getElementById('wpDesc').textContent = gate
+      ? GATE_COPY.desc.replace('{title}', name || '')
+      : name
       ? 'Enter your email and we\u2019ll send you \u201c' + name + '\u201d as a PDF.'
       : 'Enter your email and we\u2019ll send you the full article as a PDF.';
     document.getElementById('wpOverlay').classList.add('active');
@@ -2588,7 +2647,11 @@ review, the verdict, and DESIGN.md.
     setTimeout(() => document.getElementById('wpEmail').focus(), 200);
   }
   function closeWhitepaperModal() {
-    document.getElementById('wpOverlay').classList.remove('active');
+    // Closing a still-locked gate means the visitor chose to leave the post.
+    var leaving = _wpGateMode;
+    _wpGateMode = false;
+    clearTimeout(_wpSuccessTimer);
+    document.getElementById('wpOverlay').classList.remove('active', 'wp-gate');
     document.body.style.overflow = '';
     // Reset form state
     document.getElementById('wpForm').classList.remove('hidden');
@@ -2603,6 +2666,7 @@ review, the verdict, and DESIGN.md.
     if (_wpTurnstileWidgetId !== null && window.turnstile) {
       try { window.turnstile.reset(_wpTurnstileWidgetId); } catch (e) {}
     }
+    if (leaving) navigate('blog');
   }
   // Called by Turnstile when an invisible challenge succeeds. We stash the token
   // and forward to the actual fetch.
@@ -2713,8 +2777,12 @@ review, the verdict, and DESIGN.md.
     _resetWpSubmit();
   }
   function showWhitepaperSuccess() {
+    var wasGate = _wpGateMode;
+    if (wasGate) _unlockBlogPost();
     document.getElementById('wpForm').classList.add('hidden');
     document.getElementById('wpSuccess').classList.add('visible');
+    // The unlocked post is already readable behind the confirmation.
+    if (wasGate) _wpSuccessTimer = setTimeout(closeWhitepaperModal, 2500);
   }
   // Typing clears a stale error so the address is never flagged mid-entry.
   document.getElementById('wpEmail').addEventListener('input', function () {
