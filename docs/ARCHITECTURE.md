@@ -493,6 +493,8 @@ PWA manifest with:
 
 Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automation. The system spans the website frontend, a server-side relay, Fibery CMS databases, and an email automation pipeline. The public route and frontend function names still use `whitepaper` for compatibility.
 
+Any `CMS/Blog` post with a file in its PDF field takes part; there is no hardcoded title list. A post with a PDF opens blurred behind the email dialog, headlined "See the full post". Submitting the email unlocks the post in place, stores the unlock in `localStorage` under `undersight:blog-unlocked` so later posts open freely in that browser, and posts the lead. Posts without a PDF stay open. The gate helpers live in `resources/blog-gate.js`, tested by `tests/blog-gate.test.mjs`.
+
 ```
 [Website Modal] → [Dev Server / Cloudflare Worker] → [Fibery API]
                                                           ↓
@@ -545,7 +547,12 @@ Gated blog PDF downloads capture email leads and deliver PDFs via Fibery automat
 - Creates `CMS/Website Leads` entity with linked blog relation
 - Logs: `[LEAD] email -> post_name (linked)` or `(no match)`
 
-**Production** (Cloudflare Worker at `worker/index.js`):
+**Production** (Cloudflare Pages Function at `functions/api/whitepaper-lead.js`, deployed with Pages):
+- Valid when the named `CMS/Blog` row has a file in its PDF field; any other name answers `422 Unknown content` before the rate limit
+- Verifies the Cloudflare Turnstile token (`CF_TURNSTILE_SECRET_KEY`; skipped when unset). The dialog renders the invisible widget with `execution: 'execute'`, so the challenge runs on submit, never on page load
+- `FIBERY_TOKEN` is a Pages environment variable
+
+**Cloudflare Worker** at `worker/index.js`:
 - Same logic: validate email → query blog post → create lead with relation
 - CORS headers for `undersight.ai` origin
 - Fibery API token stored as Worker secret (`FIBERY_TOKEN`)
