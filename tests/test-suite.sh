@@ -478,7 +478,7 @@ fi
 
 # Test: the Turnstile mount must not invite Cloudflare's page-load auto-scan.
 # api.js auto-renders every .cf-turnstile div at load; the lead-capture mount
-# starts with no sitekey (it is rendered explicitly on modal open), so a
+# starts with no sitekey (it is rendered explicitly on first submit), so a
 # cf-turnstile class or an empty data-sitekey throws TurnstileError on every
 # page load and masks real Turnstile regressions.
 WP_TS_DIV=$(echo "$HTML_SOURCE" | grep -oE '<div[^>]*id="wpTurnstile"[^>]*>' || true)
@@ -764,11 +764,10 @@ else
   pass "No dropdown trigger (no touch handler needed)"
 fi
 
-# Test: Google Fonts loaded with display=swap (consistent FOUT across browsers)
-if grep -q 'fonts.googleapis.com.*display=swap' "$SRC_HTML"; then
-  pass "Google Fonts loaded with display=swap (prevents FOIT)"
+if grep -q 'href="/css/fonts.css"' "$SRC_HTML" && grep -q 'font-display: swap' "$SITE_ROOT/css/fonts.css"; then
+  pass "Self-hosted fonts loaded with font-display: swap (prevents FOIT)"
 else
-  fail "Google Fonts loaded with display=swap" "Fonts may block rendering inconsistently"
+  fail "Self-hosted fonts loaded with font-display: swap" "Fonts may block rendering inconsistently"
 fi
 
 # Test: SVG favicon has PNG fallback (older browsers)

@@ -75,13 +75,10 @@
   "description": "AI underwriting infrastructure for private credit"
 }
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="/css/main.css">
-<!-- Cloudflare Turnstile bot protection (whitepaper lead capture). Loaded async so it doesn't block render. -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/resources/consent.js" defer></script>
 </head>
 <body>
 <!--
@@ -464,7 +461,10 @@ review, the verdict, and DESIGN.md.
   <div class="footer-bottom">
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
       <span id="footerCopy">&copy; <script>document.write(new Date().getFullYear())</script> undersight. All rights reserved.</span>
-      <button onclick="toggleTheme()" style="background:none;border:1px solid var(--pale);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--mid);cursor:pointer;font-family:inherit;">Toggle theme</button>
+      <span style="display:flex;gap:8px;">
+        <button type="button" data-consent-open style="background:none;border:1px solid var(--pale);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--mid);cursor:pointer;font-family:inherit;">Cookie settings</button>
+        <button onclick="toggleTheme()" style="background:none;border:1px solid var(--pale);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--mid);cursor:pointer;font-family:inherit;">Toggle theme</button>
+      </span>
     </div>
   </div>
 </footer>
@@ -480,11 +480,6 @@ review, the verdict, and DESIGN.md.
       <p class="wp-desc" id="wpDesc">Enter your email and we'll send you the full article as a PDF.</p>
       <input type="email" class="wp-input" id="wpEmail" placeholder="you@company.com" autocomplete="email" required>
       <div class="wp-error-msg" id="wpError">Please enter a valid email address.</div>
-      <!-- Invisible Turnstile mount point. No cf-turnstile class and no data-*
-           attrs: Cloudflare's api.js auto-scans .cf-turnstile divs at load and
-           throws TurnstileError on an empty sitekey. The widget is rendered
-           explicitly (turnstile.render with the baked key) when the modal
-           first opens — see openWhitepaperModal(). -->
       <div id="wpTurnstile"></div>
       <button class="btn btn-primary wp-submit" onclick="submitWhitepaperEmail()">Send me the PDF</button>
       <p class="wp-note" id="wpNote"></p>
@@ -2624,31 +2619,42 @@ review, the verdict, and DESIGN.md.
       : 'Enter your email and we\u2019ll send you the full article as a PDF.';
     document.getElementById('wpOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
-    // Render Turnstile widget on first open (only when a real key is configured)
-    if (_turnstileEnabled() && window.turnstile && _wpTurnstileWidgetId === null) {
-      try {
-        var el = document.getElementById('wpTurnstile');
-        el.setAttribute('data-sitekey', TURNSTILE_SITE_KEY);
-        _wpTurnstileWidgetId = window.turnstile.render('#wpTurnstile', {
-          sitekey: TURNSTILE_SITE_KEY,
-          size: 'invisible',
-          // Challenge on submit only (turnstile.execute). The default runs it
-          // at render, which the blog gate does on page load.
-          execution: 'execute',
-          callback: onWpTurnstileToken,
-          // A failed challenge never calls back; without this the button sits on "Sending…".
-          'error-callback': function () {
-            if (!_wpInFlight) return;
-            var errorEl = document.getElementById('wpError');
-            errorEl.textContent = 'Verification failed. Please try again.';
-            _afterWpError(errorEl);
-          },
-        });
-      } catch (e) {
-        console.warn('Turnstile render failed:', e);
-      }
-    }
     setTimeout(() => document.getElementById('wpEmail').focus(), 200);
+  }
+  var _turnstileLoad = null;
+  function _loadTurnstile() {
+    if (window.turnstile) return Promise.resolve(window.turnstile);
+    if (!_turnstileLoad) {
+      _turnstileLoad = new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        s.async = true;
+        s.onload = function () { resolve(window.turnstile); };
+        s.onerror = function () {
+          _turnstileLoad = null;
+          s.remove();
+          reject(new Error('Turnstile script failed to load'));
+        };
+        document.head.appendChild(s);
+      });
+    }
+    return _turnstileLoad;
+  }
+  function _renderWpTurnstile() {
+    if (_wpTurnstileWidgetId !== null) return _wpTurnstileWidgetId;
+    _wpTurnstileWidgetId = window.turnstile.render('#wpTurnstile', {
+      sitekey: TURNSTILE_SITE_KEY,
+      size: 'invisible',
+      execution: 'execute',
+      callback: onWpTurnstileToken,
+      'error-callback': function () {
+        if (!_wpInFlight) return;
+        var errorEl = document.getElementById('wpError');
+        errorEl.textContent = 'Verification failed. Please try again.';
+        _afterWpError(errorEl);
+      },
+    });
+    return _wpTurnstileWidgetId;
   }
   function closeWhitepaperModal() {
     // Closing a still-locked gate means the visitor chose to leave the post.
@@ -2697,14 +2703,14 @@ review, the verdict, and DESIGN.md.
     // Lock the submit button before any async work kicks off.
     _lockWpSubmit();
 
-    if (_turnstileEnabled() && _wpTurnstileWidgetId !== null && window.turnstile) {
-      // Kick off the invisible challenge; result arrives in onWpTurnstileToken.
-      try {
-        window.turnstile.execute(_wpTurnstileWidgetId);
-        return;
-      } catch (e) {
-        console.warn('Turnstile execute failed, sending without token:', e);
-      }
+    if (_turnstileEnabled()) {
+      _loadTurnstile().then(function () {
+        window.turnstile.execute(_renderWpTurnstile());
+      }).catch(function (e) {
+        console.warn('Turnstile unavailable, sending without token:', e);
+        _postWhitepaperLead(null);
+      });
+      return;
     }
     // No Turnstile (dev / placeholder key / API not loaded) \u2014 post directly.
     _postWhitepaperLead(null);
