@@ -52,7 +52,7 @@ test('page: noindex, canonical /workshop, site assets, headshot from /images', (
   assert.match(html, /href="\/favicon\.svg\?v=2"/);
   assert.match(html, /src="\/images\/sajit\.png"/);
   assert.ok(!/src="sajit\.png"/.test(html), 'no document-relative asset refs');
-  assert.match(html, /fonts\.googleapis\.com\/css2\?family=Inter.*DM\+Sans/, 'Inter + DM Sans loaded');
+  assert.match(html, /<link rel="stylesheet" href="\/css\/fonts\.css">/, 'Inter + DM Sans loaded from self-hosted fonts.css');
 });
 
 test('form: posts to the Pages Function with the GTM field set, honeypot and the week strip', () => {
