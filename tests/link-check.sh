@@ -6,7 +6,7 @@
 # Validates the baked build output in dist/:
 #   - internal links resolve to dist/ files, SPA routes, or in-page anchors
 #   - external links are alive (2xx/3xx) and TLS-only
-#   - Calendly links are single-sourced from the baked Site Config value
+#   - Booking CTAs point at the first-party /book page; no calendly.com in dist
 #   - Sign In links are pinned to staging (intentional until prod auth)
 #   - canonical + og:url point at production (intentional pre-promotion)
 #   - Turnstile placeholder key is gated by its render guard
@@ -86,7 +86,8 @@ urls_of() { echo "$URL_TABLE" | awk -F'\t' -v c="$1" '$1 == c {print $2}'; }
 section "internal_links_resolve"
 # =============================================================================
 # Every relative href/src must map to a file in dist/ or a SPA page section
-# (clean paths fall back to index.html via _redirects). In-page anchors must
+# (clean paths fall back to index.html via _redirects; static pages such as
+# /book map through a `_redirects` 200 rewrite). In-page anchors must
 # match an element id.
 
 INTERNAL_CHECKED=0
@@ -100,8 +101,11 @@ while IFS= read -r URL; do
     pass "Internal link resolves to file: $URL"
   elif grep -q "id=\"page-${ROUTE}\"" "$DIST/index.html"; then
     pass "Internal link resolves to SPA route: $URL"
+  elif REWRITE=$(awk -v p="$CLEAN_PATH" '$1 == p && $3 == "200" {print $2; exit}' "$DIST/_redirects" 2>/dev/null) \
+       && [ -n "$REWRITE" ] && [ -f "$DIST/${REWRITE#/}" ]; then
+    pass "Internal link resolves via _redirects rewrite: $URL -> $REWRITE"
   else
-    fail "Internal link resolves: $URL" "No dist file or id=\"page-${ROUTE}\" section"
+    fail "Internal link resolves: $URL" "No dist file, id=\"page-${ROUTE}\" section, or _redirects 200 rewrite"
   fi
 done <<< "$(urls_of internal)"
 
@@ -162,11 +166,12 @@ while IFS= read -r URL; do
 done <<< "$(urls_of external)"
 
 # =============================================================================
-section "calendly_single_source"
+section "booking_first_party"
 # =============================================================================
-# The baked Site Config "Calendly URL" is the single source of truth. The
-# legacy personal link must be gone from every deployed file, and every
-# calendly.com href in the build must equal the Site Config value.
+# Every "Book a Discovery Call" CTA points at the first-party /book page
+# (resources/book.html, served via _redirects). Calendly is retired: the
+# legacy personal link and any calendly.com URL must be gone from every
+# deployed file, including the baked CMS copy (Site Config / Contact Page).
 
 LEGACY_FILES=$(grep -rl 'kyle-undersight/30min' "$DIST" 2>/dev/null || true)
 if [ -z "$LEGACY_FILES" ]; then
@@ -175,7 +180,29 @@ else
   fail "No legacy 'kyle-undersight/30min' anywhere in dist/" "Found in: $(echo "$LEGACY_FILES" | tr '\n' ' ')"
 fi
 
-CONFIG_CALENDLY=$(python3 - "$DIST/index.html" <<'PY'
+CALENDLY_FILES=$(grep -rl 'calendly\.com' "$DIST" 2>/dev/null || true)
+if [ -z "$CALENDLY_FILES" ]; then
+  pass "No calendly.com anywhere in dist/ (hrefs or baked CMS copy)"
+else
+  fail "No calendly.com anywhere in dist/ (hrefs or baked CMS copy)" "Found in: $(echo "$CALENDLY_FILES" | tr '\n' ' ') - repoint Site Config 'Booking URL' and Contact Page 'Booking:' to https://undersight.ai/book"
+fi
+
+BOOKING_HREFS=$(grep -oE '<a [^>]*class="[^"]*booking-link[^"]*"[^>]*>' "$DIST/index.html" | grep -oE 'href="[^"]*"' | sed 's/^href="//;s/"$//' | sort | uniq -c | sed 's/^ *//')
+if [ -z "$BOOKING_HREFS" ]; then
+  fail "Booking CTAs present in dist/index.html" "No <a class=\"booking-link\"> found"
+else
+  while IFS= read -r LINE; do
+    COUNT=${LINE%% *}
+    HREF=${LINE#* }
+    if [ "$HREF" = "/book" ]; then
+      pass "Booking CTA href is /book ($COUNT links)"
+    else
+      fail "Booking CTA href is /book" "$COUNT link(s) point at: $HREF"
+    fi
+  done <<< "$BOOKING_HREFS"
+fi
+
+CONFIG_BOOKING=$(python3 - "$DIST/index.html" <<'PY'
 import json, re, sys
 html = open(sys.argv[1], encoding="utf-8").read()
 m = re.search(r'const data = (\{.*?\});\n', html, re.S)
@@ -184,30 +211,20 @@ if not m:
 data = json.loads(m.group(1).replace("<\\/", "</"))
 content = (data.get("Site Config") or {}).get("content", "")
 for line in content.split("\n"):
-    field = re.match(r"\*\*Calendly URL:\*\*\s*(\S+)", line.replace("\\", ""))
+    field = re.match(r"\*\*(Booking|Calendly) URL:\*\*\s*(\S+)", line.replace("\\", ""))
     if field:
-        print(field.group(1))
+        print(f"{field.group(1)} URL={field.group(2)}")
         break
 PY
 )
-if [ -n "$CONFIG_CALENDLY" ]; then
-  pass "Baked Site Config has a Calendly URL ($CONFIG_CALENDLY)"
-else
-  fail "Baked Site Config has a Calendly URL" "No 'Calendly URL' field in baked Site Config JSON"
-fi
-
-CALENDLY_HREFS=$(grep -oE 'href="https://calendly\.com[^"]*"' "$DIST/index.html" | sed 's/^href="//;s/"$//' | sort -u)
-if [ -z "$CALENDLY_HREFS" ]; then
-  fail "Calendly hrefs present in dist/index.html" "No calendly.com links found"
-else
-  while IFS= read -r HREF; do
-    if [ "$HREF" = "$CONFIG_CALENDLY" ]; then
-      pass "Calendly href matches Site Config: $HREF"
-    else
-      fail "Calendly href matches Site Config: $HREF" "Site Config says: ${CONFIG_CALENDLY:-<missing>}"
-    fi
-  done <<< "$CALENDLY_HREFS"
-fi
+case "$CONFIG_BOOKING" in
+  "Booking URL=/book"|"Booking URL=https://undersight.ai/book")
+    pass "Baked Site Config 'Booking URL' points at /book ($CONFIG_BOOKING)" ;;
+  "")
+    pass "Baked Site Config has no booking override (code default /book applies)" ;;
+  *)
+    fail "Baked Site Config 'Booking URL' points at /book" "Found: $CONFIG_BOOKING - rename the field to 'Booking URL' and set https://undersight.ai/book" ;;
+esac
 
 # =============================================================================
 section "signin_pinned_staging"

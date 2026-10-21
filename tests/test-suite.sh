@@ -234,22 +234,29 @@ else
   fail "Blog entries have post_date and slug metadata" "Missing in: $BLOG_META_OK"
 fi
 
-# Test: Contact entity has Calendly URL
-if echo "$CONTENT_JSON" | python3 -c "
-import sys, json
+# Test: Booking CTAs point at the first-party /book page (Calendly retired).
+# Site Config may carry an optional "Booking URL" override; if present it must
+# be /book. The rendered HTML must link to /book and never to calendly.com.
+BOOKING_CFG=$(echo "$CONTENT_JSON" | python3 -c "
+import sys, json, re
 data = json.load(sys.stdin)
-contact = data.get('Contact Page', {}).get('content', '')
-sys.exit(0 if 'calendly.com' in contact.lower() else 1)
-" 2>/dev/null; then
-  pass "Contact entity has Calendly URL"
+cfg = data.get('Site Config', {}).get('content', '')
+for line in cfg.split('\n'):
+    m = re.match(r'\*\*(Booking|Calendly) URL:\*\*\s*(\S+)', line.replace('\\\\', ''))
+    if m:
+        print(m.group(1) + ' URL=' + m.group(2)); break
+" 2>/dev/null || true)
+case "$BOOKING_CFG" in
+  ""|"Booking URL=/book"|"Booking URL=https://undersight.ai/book")
+    pass "Site Config booking field is /book or absent (${BOOKING_CFG:-no override})" ;;
+  *)
+    fail "Site Config booking field is /book or absent" "Found: $BOOKING_CFG" ;;
+esac
+HTML=$(fetch "$BASE/")
+if echo "$HTML" | grep -q 'class="[^"]*booking-link[^"]*"' && ! echo "$HTML" | grep -qi "calendly.com"; then
+  pass "Booking CTAs link to /book (no calendly.com in HTML)"
 else
-  # Check the HTML directly as fallback (Calendly link may be hardcoded)
-  HTML=$(fetch "$BASE/")
-  if echo "$HTML" | grep -qi "calendly.com"; then
-    pass "Contact entity has Calendly URL (found in HTML)"
-  else
-    fail "Contact entity has Calendly URL"
-  fi
+  fail "Booking CTAs link to /book (no calendly.com in HTML)"
 fi
 
 # =============================================================================

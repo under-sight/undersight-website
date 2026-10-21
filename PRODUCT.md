@@ -33,7 +33,7 @@ Agentic underwriting with determinism and human control as the trust mechanism �
 
 - Product lineup (confirmed unchanged 2026-08-04): **underscore** (underwriting API), **underchat agent** (autonomous chat intake agent), **underchat co-pilot** (human-in-the-loop review co-pilot). Three solution pages, one each.
 - Site is a statically-baked SPA; production has no runtime API calls. The build extracts `loadContent()` verbatim — its shape is frozen.
-- Conversion surfaces: "Book a Discovery Call" (Calendly) as primary CTA; whitepaper download modal with email lead capture (Cloudflare Turnstile-protected) as secondary.
+- Conversion surfaces: "Book a Discovery Call" (first-party `/book` page) as primary CTA; whitepaper download modal with email lead capture (Cloudflare Turnstile-protected) as secondary.
 - The word "undersight" is always lowercase — test-enforced.
 
 ## Brand Commitments
