@@ -130,6 +130,7 @@ Requires `FIBERY_TOKEN` env var or macOS Keychain entry
 | Landing page | `index.html` |
 | Favicon SVG | `favicon.svg` |
 | Design spec | `DESIGN.md` |
+| Voice and positioning | `SOUL.md` |
 | Token CSS | `tokens/tokens.css` |
 | Token JSON | `tokens/tokens.json` |
 | Preview catalog | `preview.html` |
