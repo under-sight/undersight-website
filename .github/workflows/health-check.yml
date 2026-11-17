@@ -70,7 +70,7 @@ jobs:
             BODY="$BODY"$'\n\n'"**Reason:** $REASON"
             BODY="$BODY"$'\n'"**Checked:** https://undersight.ai/ (expects HTTP 200 + live home markup, not the under-construction fallback)"
             BODY="$BODY"$'\n'"**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            BODY="$BODY"$'\n\n'"This issue auto-closes when the site recovers. Useful first moves: check the latest [deploy runs](${{ github.server_url }}/${{ github.repository }}/actions/workflows/deploy-production.yml) and the Cloudflare Pages dashboard."
+            BODY="$BODY"$'\n\n'"This issue auto-closes when the site recovers. Useful first moves: check the latest Railway deployment of the undersight-website service."
             gh issue create \
               --title "undersight.ai is DOWN" \
               --label site-down \

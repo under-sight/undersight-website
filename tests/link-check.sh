@@ -6,10 +6,8 @@
 # Validates the baked build output in dist/:
 #   - internal links resolve to dist/ files, SPA routes, or in-page anchors
 #   - external links are alive (2xx/3xx) and TLS-only
-#   - Calendly links are single-sourced from the baked Site Config value
 #   - Sign In links are pinned to staging (intentional until prod auth)
 #   - canonical + og:url point at production (intentional pre-promotion)
-#   - Turnstile placeholder key is gated by its render guard
 #
 # Run `python3 build.py` first to produce dist/.
 #
@@ -161,53 +159,30 @@ while IFS= read -r URL; do
   fi
 done <<< "$(urls_of external)"
 
-# =============================================================================
-section "calendly_single_source"
-# =============================================================================
-# The baked Site Config "Calendly URL" is the single source of truth. The
-# legacy personal link must be gone from every deployed file, and every
-# calendly.com href in the build must equal the Site Config value.
+section "booking_links_cal_com"
 
-LEGACY_FILES=$(grep -rl 'kyle-undersight/30min' "$DIST" 2>/dev/null || true)
-if [ -z "$LEGACY_FILES" ]; then
-  pass "No legacy 'kyle-undersight/30min' anywhere in dist/"
+BOOKING_URL="https://cal.com/adriany/quick-connect"
+CALENDLY_FILES=$(grep -rli 'calendly\.com' "$DIST" 2>/dev/null || true)
+if [ -z "$CALENDLY_FILES" ]; then
+  pass "No calendly.com anywhere in dist/"
 else
-  fail "No legacy 'kyle-undersight/30min' anywhere in dist/" "Found in: $(echo "$LEGACY_FILES" | tr '\n' ' ')"
+  fail "No calendly.com anywhere in dist/" "Found in: $(echo "$CALENDLY_FILES" | tr '\n' ' ')"
 fi
 
-CONFIG_CALENDLY=$(python3 - "$DIST/index.html" <<'PY'
-import json, re, sys
-html = open(sys.argv[1], encoding="utf-8").read()
-m = re.search(r'const data = (\{.*?\});\n', html, re.S)
-if not m:
-    sys.exit(0)
-data = json.loads(m.group(1).replace("<\\/", "</"))
-content = (data.get("Site Config") or {}).get("content", "")
-for line in content.split("\n"):
-    field = re.match(r"\*\*Calendly URL:\*\*\s*(\S+)", line.replace("\\", ""))
-    if field:
-        print(field.group(1))
-        break
-PY
-)
-if [ -n "$CONFIG_CALENDLY" ]; then
-  pass "Baked Site Config has a Calendly URL ($CONFIG_CALENDLY)"
-else
-  fail "Baked Site Config has a Calendly URL" "No 'Calendly URL' field in baked Site Config JSON"
-fi
-
-CALENDLY_HREFS=$(grep -oE 'href="https://calendly\.com[^"]*"' "$DIST/index.html" | sed 's/^href="//;s/"$//' | sort -u)
-if [ -z "$CALENDLY_HREFS" ]; then
-  fail "Calendly hrefs present in dist/index.html" "No calendly.com links found"
-else
+for PAGE in index.html resources/workshop.html; do
+  BOOKING_HREFS=$(grep -oE 'href="https://cal\.com[^"]*"' "$DIST/$PAGE" 2>/dev/null | sed 's/^href="//;s/"$//' | sort -u)
+  if [ -z "$BOOKING_HREFS" ]; then
+    fail "cal.com booking links present in dist/$PAGE" "No cal.com links found"
+    continue
+  fi
   while IFS= read -r HREF; do
-    if [ "$HREF" = "$CONFIG_CALENDLY" ]; then
-      pass "Calendly href matches Site Config: $HREF"
+    if [ "$HREF" = "$BOOKING_URL" ]; then
+      pass "Booking link in $PAGE is $BOOKING_URL"
     else
-      fail "Calendly href matches Site Config: $HREF" "Site Config says: ${CONFIG_CALENDLY:-<missing>}"
+      fail "Booking link in $PAGE is $BOOKING_URL" "Got: $HREF"
     fi
-  done <<< "$CALENDLY_HREFS"
-fi
+  done <<< "$BOOKING_HREFS"
+done
 
 # =============================================================================
 section "signin_pinned_staging"
@@ -249,21 +224,24 @@ else
   fail "og:url points at production" "Got: ${OG_URL:-<missing>}"
 fi
 
-# =============================================================================
-section "turnstile_placeholder_guarded"
-# =============================================================================
-# The Turnstile site key may legitimately be the placeholder string — but only
-# while the render guard that skips Turnstile rendering is also present.
+section "no_lead_capture"
 
-if grep -q "TURNSTILE_SITE_KEY_PLACEHOLDER" "$DIST/index.html"; then
-  if grep -q "TURNSTILE_SITE_KEY !== 'TURNSTILE_SITE_KEY_PLACEHOLDER'" "$DIST/index.html"; then
-    pass "Turnstile placeholder present AND render guard present"
+for PATTERN in turnstile whitepaper-lead workshop-apply /api/booking /unsubscribe blog-gate booking-widget; do
+  HITS=$(grep -rliF "$PATTERN" "$DIST" 2>/dev/null || true)
+  if [ -z "$HITS" ]; then
+    pass "No '$PATTERN' anywhere in dist/"
   else
-    fail "Turnstile placeholder is guarded" "Placeholder present but render guard condition missing"
+    fail "No '$PATTERN' anywhere in dist/" "Found in: $(echo "$HITS" | tr '\n' ' ')"
   fi
-else
-  pass "Turnstile site key configured (no placeholder in dist)"
-fi
+done
+
+for GONE in resources/book.html resources/booking-widget.js resources/blog-gate.js; do
+  if [ -e "$DIST/$GONE" ]; then
+    fail "dist/$GONE is gone" "File still built"
+  else
+    pass "dist/$GONE is gone"
+  fi
+done
 
 # =============================================================================
 section "Summary"

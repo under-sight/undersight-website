@@ -37,12 +37,6 @@ out/
 .next/
 .nuxt/
 
-# Local Fibery file download cache (speeds up incremental builds)
-.fibery-file-cache/
-
-# Wrangler local dev state
-.wrangler/
-
 # Local AI tooling (impeccable installer output) — not part of the site
 .claude/
 .github/agents/
@@ -55,5 +49,3 @@ versions/
 # impeccable local state (decision pages, sketches)
 .impeccable/
 
-# Local secrets for `wrangler pages dev` and editor/agent state
-.dev.vars

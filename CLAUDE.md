@@ -2,726 +2,100 @@
 
 ## Purpose
 
-Marketing and landing page for undersight.ai. Design-system-first: every visual
-decision flows from `DESIGN.md` and `tokens/tokens.css`. No hardcoded hex codes
-in components.
+The marketing site for undersight.ai: one static single-page app plus a few standalone pages, built from content kept in this repo and served on Railway. Its one job is the discovery call. Every booking CTA links to https://cal.com/adriany/quick-connect, and `/book` 302-redirects there. The site has no forms, no lead capture and no server-side API.
 
----
+Voice and positioning: `SOUL.md`. Product context and evidence on hand: `PRODUCT.md`. Visual system: `DESIGN.md`.
 
-## Development Workflow
-
-**All development integrates through the `dev` branch of the
-`under-sight/undersight-website` repo.** Local work happens in the local-only
-workspace at `/Users/kyle/LocalDev/undersight`, not in iCloud, Google Drive, or
-any synced folder.
-
-Read the workspace-level guide first when starting from the local root:
-`/Users/kyle/LocalDev/undersight/AGENT.md`.
-
-### Local Workspace Layout
-
-| Purpose | Path |
-| --- | --- |
-| Workspace root | `/Users/kyle/LocalDev/undersight` |
-| Canonical clone | `/Users/kyle/LocalDev/undersight/undersight-website` |
-| Agent worktrees | `/Users/kyle/LocalDev/undersight/undersight-website-worktrees/<agent-task>` |
-| Multi-agent workflow | `docs/AGENT-WORKTREES.md` |
-
-Avoid active work in these old or synced copies:
-
-| Path | Why |
-| --- | --- |
-| `/Users/kyle/Documents/undersight-website` | iCloud/Documents copy; Git metadata may be offloaded/dataless |
-| `/Users/kyle/My Drive (kyle@undersight.ai)/undersight-website` | Google Drive copy |
-| `/Users/kyle/repos/undersight-website` | previous local bootstrap clone |
-| `/Users/kyle/repos/undersight-website-work` | side checkout on `feat/cms-federation` |
-
-### Git Workflow
-
-1. **Every session**: update the canonical clone from `origin/dev`
-2. **Every agent/task**: create a dedicated worktree and branch from canonical local `dev`
-3. **No direct edits in the canonical clone** unless acting as the integrator
-4. **Commit only owned files**; avoid broad `git add .` in multi-agent work
-5. **Merge or rebase latest `origin/dev` before push**
-6. **Use PRs into `dev` when multiple agents are active**
-7. **Merge `dev` to `main`** only when ready for production build/deploy
-
-```bash
-# Start of session
-cd /Users/kyle/LocalDev/undersight/undersight-website
-git checkout dev
-git fetch origin
-git pull --ff-only origin dev
-git worktree prune
-
-# Create an isolated worktree for one agent task
-./scripts/new-agent-worktree.sh agent-a homepage-cms
-cd /Users/kyle/LocalDev/undersight/undersight-website-worktrees/<agent-task>
-
-# After changes in the worktree
-git status --short
-git add <owned-files>
-git commit -m "area: concise change"
-git fetch origin
-git merge origin/dev
-python3 build.py --verify
-bash tests/test-suite.sh
-git push -u origin HEAD
-
-# When ready for production
-git checkout main && git merge dev && git push && git checkout dev
-```
-
-### Production Hotfix Workflow (off `main`, not `dev`)
-
-For urgent fixes that must ship to `undersight.ai` immediately and **must not**
-pull in unmerged feature work from `dev` (which usually carries
-in-progress branches like `feat/website-v2`):
-
-1. Branch off `origin/main`, not `origin/dev`: `git checkout main && git pull && git checkout -b hotfix/<id>-<slug>`.
-2. Make the minimal change. Commit. Push the branch.
-3. Open a PR with `--base main` (never `--base dev`).
-4. Merge into `main`.
-5. `sync-dev.yml` auto-merges `main` → `dev` on every push to main, so the
-   hotfix lands on dev automatically — no manual back-merge.
-6. Trigger the production deploy if you don't want to wait for the hourly
-   cron: `gh workflow run deploy-production.yml --ref main`.
-
-Do **not** branch hotfixes off `dev` — when `dev` is ahead of `main` with
-unfinished features, those features will follow the hotfix into prod at
-the next `dev → main` merge.
-
-### Cross-Agent Collision Rules
-
-1. One agent gets one worktree and one branch.
-2. No two agents should edit the same file in parallel unless ownership is
-   explicitly assigned.
-3. If two tasks must touch the same file, name one integrating owner; the other
-   agent should produce notes or a patch plan.
-4. Prefer PRs into `dev` while multiple branches are active.
-5. Use direct local merges only in an explicit integrator session.
-
-### Dev Server
-
-```bash
-python3 undersight-serve.py
-# Serves on http://localhost:8088
-# Content from Fibery API (5s cache)
-# SPA fallback routing for clean paths
-```
-
-### Build & Deploy
-
-```bash
-python3 build.py          # Bakes Fibery content into dist/
-python3 build.py --verify  # Build + security checks
-```
-
-Requires `FIBERY_TOKEN` env var or macOS Keychain entry
-(`mcp-credentials / fibery-undersight`).
-
----
-
-## Repo & File Map
+## Repo Map
 
 | What | Path |
-|------|------|
-| GitHub repo | `under-sight/undersight-website` (`dev` branch) |
-| Landing page | `index.html` |
-| Favicon SVG | `favicon.svg` |
-| Design spec | `DESIGN.md` |
-| Voice and positioning | `SOUL.md` |
-| Token CSS | `tokens/tokens.css` |
-| Token JSON | `tokens/tokens.json` |
-| Preview catalog | `preview.html` |
-| Reference specs | `reference/<source>.DESIGN.md` |
-| Tests | `tests/test-suite.sh` |
-| Docs | `docs/ARCHITECTURE.md`, `docs/MAINTENANCE.md` |
-| Build output | `dist/` (committed, deployed to Cloudflare Pages) |
-| Dev server | `undersight-serve.py` |
-| Build script | `build.py` |
-| Cloudflare Worker (whitepaper backend) | `worker/index.js` + `worker/wrangler.toml` |
-| Markdown-for-Agents (edge) | `functions/_middleware.js` + `functions/_md-negotiation.mjs` (per-page `.md` emitted by `build.py`) |
-| Booking page (`/book`) | `resources/book.html` + `resources/booking-widget.js` (`<undersight-booking>` web component); route via `_redirects` |
-| Booking API (edge) | `functions/api/booking/{slots,book}.js` + `_slots.mjs` (slot engine) + `_google.mjs` (Calendar client); tests `tests/booking-*.test.mjs` |
-| Whitepapers | `whitepaper/` (PDFs + generation scripts) |
+| --- | --- |
+| Site copy, blog posts, integrations, Site Config | `content/content.json` |
+| Images and files the content references | `images/files/` |
+| Single-page app (renders the content map) | `index.html` |
+| Workshop offer page (`/workshop`) | `resources/workshop.html` |
+| Cookie consent banner | `resources/consent.js` |
+| Static site builder | `build.py` |
+| Static server for Railway and local preview | `serve.mjs` |
+| Markdown negotiation helpers | `md-negotiation.mjs` |
+| Redirect and rewrite rules | `_redirects` |
+| Response header rules | `_headers` |
+| Container build | `Dockerfile` |
+| CI | `.github/workflows/ci.yml` |
+| Uptime probe | `.github/workflows/health-check.yml` |
+| Styles | `css/main.css`, `css/tokens.css` |
+| Design tokens (source) | `tokens/tokens.css`, `tokens/tokens.json` |
+| Component preview catalog | `preview.html` |
+| Case study and research PDFs (not deployed) | `whitepaper/` |
+| Architecture and runbook | `docs/ARCHITECTURE.md`, `docs/MAINTENANCE.md` |
 
----
+`docs/BUILD-LOG.md` and `WIP.md` are historical records; leave them as they are.
 
-## Tech Stack
+## Content
 
-- HTML/CSS (static site, built via `build.py`)
-- Inter font with OpenType features (`cv01`, `ss03`)
-- Dark mode via `prefers-color-scheme` + manual toggle (`theme-dark`/`theme-light`)
-- SPA routing via `history.pushState` + `popstate` (clean paths: `/blog`, `/copilot`)
-- **CMS: Fibery (`subscript.fibery.io`) — single source of truth for all editable content.** Site baked at build (`build.py`) and deployed static. Dev refresh cadence: local server caches 5s; Cloudflare dev rebuilds via cron (~5-15 min) and on every push to `dev`.
-- Hosted at undersight.ai (Cloudflare Pages)
+`content/content.json` is the only content source. It maps each entity name to `{content, files}`, where `content` is the entity's markdown and `files` lists `{name, type, url}` entries pointing into `images/files/`. Three synthetic keys hold lists in a `_data` array: `_blogs` (blog posts), `_integrations` (the integration strip) and `_whitepapers` (case study and research titles with slugs).
 
----
+Every content change is a pull request:
 
-## Brand Tokens
+- Edit copy: change the entity's `content` string in `content/content.json`.
+- Add a blog post: append an object to `_blogs._data` with the same keys as the existing posts, and put its images in `images/files/`.
+- Add an image or file: place it in `images/files/` and add a `files` entry whose `url` is `images/files/<name>`.
+- Take the site down for maintenance: set `**Production Mode:** under-construction` in the `Site Config` entity. A production build then ships `under-construction.html` in place of the site. `**Dev Mode:**` is read by builds without `--env=production` and only recorded.
 
-| Token | Value |
-|-------|-------|
-| Charcoal | `#23262C` |
-| Amber Rust | `#C97A54` |
-| Eucalyptus | `#6B9E8C` |
-| BG Light | `#FFFFFF` |
-| BG Dark | `#1A1D21` |
-| Font (sans) | Inter, -apple-system, system-ui |
-| Font (display) | TBD (consider Space Grotesk or keep Inter) |
-| Font (mono) | JetBrains Mono |
+`data-content-entity` is a contract: an element that carries it renders its copy from the named entity, never from fallback text in the markup.
 
----
-
-## Content Source of Truth: Fibery CMS
-
-**Principle.** Marketing-grade content (copy, headlines, metrics, testimonials,
-case studies, blog posts, whitepapers) lives in Fibery. HTML is a *rendering
-layer*, not a content store. The default answer to "where do I change this
-text?" is always: **edit the Fibery entity**.
-
-**Editorial workflow.** Edit the Fibery entity → wait for cache refresh
-(5s on local dev; next push or cron rebuild on Cloudflare dev/prod). Never
-edit content directly in `index.html`.
-
-**Engineering workflow.** To add a new content surface: create the Fibery
-entity *first*, then wire the renderer in HTML via `data-content-entity` and
-`getContent()`. Do not ship hardcoded copy with a TODO to "move to Fibery
-later" — the contract is content-first.
-
-### Currently Fibery-driven
-
-- Hero (`Home - Hero`)
-- Solutions dropdown + cards + detail pages
-- Blog grid, post bodies, post images
-- Contact page (`Contact Page`)
-- Site Config (contact email, Calendly, copyright, sign-in URL)
-- Whitepapers + lead capture (`CMS/Blog` + `CMS/Website Leads`)
-- Deployment tracking (`CMS/Deployments`)
-
-### Migration backlog (currently hardcoded — should move to Fibery)
-
-- "Who We Serve" cards — `index.html:157-175`
-- Metrics bar with 71% / 22% / 650bps claims — `index.html:182-184`
-- "How It Works" timeline — `index.html:190-208`
-- Testimonial quote — `index.html:264-270`
-- CTA copy — `index.html:312-315`
-- Footer tagline — `index.html:392`
-
-### Hybrid drift risk
-
-Two case study sections carry `data-content-entity` attributes
-(`index.html:226` — Chat Advance; `index.html:275` — 4D Financing) but their
-copy is still hardcoded inline. The attribute is a **contract** — those
-sections must be fully wired so the Fibery entity is the live source. Any
-hardcoded fallback masks a missing render and lets content drift go
-undetected.
-
-### Legitimately hardcoded (exceptions)
-
-- JSON-LD structured data (crawler preference for inline literals)
-- Design tokens (`tokens/tokens.css`, `tokens/tokens.json`)
-- Layout scaffolding (grid wrappers, section containers, semantic structure)
-- Brand identity strings ("undersight")
-- Calendly / auth URLs — but these *do* live in the `Site Config` entity and
-  should be read from there, not duplicated in markup
-
----
-
-## Fibery Schema Reference
-
-| Type | Key Fields | Used By |
-|------|------------|---------|
-| `CMS/Pages` | `CMS/Name`, `CMS/Description` (markdown doc), `CMS/Assets` (files) | `build.py:97-200`, `undersight-serve.py:53-123` |
-| `CMS/Blog` | `CMS/name`, `CMS/Slug`, `CMS/PDF`, `CMS/Assets`, `CMS/Post Date`, `CMS/Tag`, `CMS/Subtitle`, `CMS/Author`, `CMS/Excerpt` | `build.py:183-194`, `functions/api/whitepaper-lead.js:79`, `undersight-serve.py:164-166` |
-| `CMS/Website Leads` | `CMS/Email`, `CMS/Blog Post`, `CMS/Sent` | `functions/api/whitepaper-lead.js:97-105` |
-| `CMS/Deployments` | `CMS/Commit`, `CMS/Site Mode`, `CMS/Content Hash`, `CMS/Build Status`, `CMS/URL`, `CMS/Deployed At` | `deploy-report.py:56-102` |
-| `Site Config` (entity in `CMS/Pages`) | contact email, Calendly URL, copyright, sign-in URL (markdown body keys) | `index.html:784-794` |
-
-**Markdown front-matter convention** used inside `CMS/Description` documents:
-`_title`, `_body` for primary copy; `Date`, `Excerpt`, `Tag`, `Subtitle`,
-`Author` for Blog metadata.
-
----
-
-## Design System Workflow
-
-This project uses the **design-md pipeline** from the agent workspace skills.
-Follow this exact sequence when creating or updating the design system:
-
-### Step 1: Fetch a Reference Spec
+## Build and Preview
 
 ```bash
-# Fetch a reference design system (e.g. Linear, Vercel, Stripe)
-mkdir -p /tmp/getdesign-probe && cd /tmp/getdesign-probe
-npx getdesign@latest add <site>
-cp DESIGN.md "projects/undersight-website/reference/<site>.DESIGN.md"
+python3 build.py                              # bake dist/ from content/content.json
+python3 build.py --env=production --verify    # production build plus output scan
+node serve.mjs                                # serve dist/ on http://localhost:8080
 ```
 
-Skill reference: `skills/design-md-fetch.md`
+Open http://localhost:8080 after `python3 build.py && node serve.mjs`. The unbuilt `index.html` fetches `/api/content`, which no server answers, so always preview `dist/`. `PORT` sets the port (Railway sets 8080) and `SITE_ROOT` overrides the served directory. `dist/` is gitignored.
 
-### Step 2: Adapt to undersight Brand
+`serve.mjs` answers `/healthz`, applies `_redirects` (3xx redirects first, then static files with directory `index.html` and `.html` pretty URLs, then 200 rewrites ending in the `/* /index.html` SPA fallback), applies `_headers`, serves per-page markdown on `Accept: text/markdown` or a `.md` URL, and gzips text responses over 1 KB.
 
-Apply the Keep/Swap/Invert/Drop/Extend framework to create
-`projects/undersight-website/DESIGN.md` from the reference.
+## Tests
 
-- **Keep:** 9-section Stitch structure, weight scales, spacing system, OpenType
-  identity, single chromatic accent rule, border-radius scale
-- **Swap:** All color hexes to undersight palette (Charcoal, Amber Rust,
-  Eucalyptus), display font choice
-- **Invert:** If reference is dark-native and undersight is light-first,
-  invert the depth model (shadows instead of luminance stepping)
-- **Extend:** Add undersight-specific patterns as needed
-
-Skill reference: `skills/design-md-adapt.md`
-
-### Step 3: Generate Token Files
-
-Produce in sync:
-- `tokens/tokens.css` - CSS custom properties
-- `tokens/tokens.json` - Design Tokens Community Group format
-- `DESIGN.md` - must match both token files exactly
-
-### Step 4: Generate Preview Catalog
-
-Build `preview.html` + `preview-dark.html` with all 13 canonical sections.
-
-Skill reference: `skills/design-md-preview.md`
-
-### Step 5: Verify
+CI (`.github/workflows/ci.yml`) runs on every pull request and every push to `main`. Run the same suite locally before pushing:
 
 ```bash
-open projects/undersight-website/preview.html
+python3 tests/build-from-repo.test.py
+python3 tests/md-pages.test.py
+bash tests/build-validation.sh
+node --test tests/*.test.mjs
+bash tests/test-suite.sh
 ```
 
-Check for: raw hex fallbacks, uniform type ramp, brand color used decoratively,
-invisible shadows.
-
----
-
-## Design Skills Reference
-
-These skills are available in the agent workspace and should be used for all
-design work on this project:
-
-### Design System Pipeline
-
-| Skill | File | Purpose |
-|-------|------|---------|
-| Fetch | `skills/design-md-fetch.md` | Import DESIGN.md for any catalogued site via `npx getdesign@latest` |
-| Adapt | `skills/design-md-adapt.md` | Transplant framework discipline onto undersight brand |
-| Preview | `skills/design-md-preview.md` | Generate visual QA catalogs from DESIGN.md |
-
-### Frontend Design Slash Commands (Impeccable Design Suite)
-
-These are available as slash commands in any Claude Code session:
-
-| Command | When to Use |
-|---------|-------------|
-| `/frontend-design` | Build new pages, components, or sections from scratch |
-| `/teach-impeccable` | One-time setup: gather design context, save to AI config |
-| `/animate` | Add purposeful animations, micro-interactions, motion |
-| `/polish` | Final quality pass: alignment, spacing, consistency |
-| `/critique` | UX evaluation with scoring and persona-based testing |
-| `/audit` | Technical quality: a11y, performance, responsive, anti-patterns |
-| `/delight` | Add joy, personality, unexpected touches |
-| `/distill` | Strip to essence, remove unnecessary complexity |
-| `/bolder` | Amplify safe designs, increase visual impact |
-| `/quieter` | Tone down aggressive designs, reduce intensity |
-| `/colorize` | Add strategic color to monochromatic designs |
-| `/typeset` | Fix typography: hierarchy, sizing, weight, readability |
-| `/arrange` | Fix layout, spacing, visual rhythm |
-| `/normalize` | Realign to design system standards |
-| `/extract` | Extract reusable components and tokens |
-| `/harden` | Error handling, i18n, edge cases, production-readiness |
-| `/adapt` | Responsive: breakpoints, fluid layouts, touch targets |
-| `/onboard` | Onboarding flows, empty states, first-run experiences |
-| `/clarify` | Improve UX copy, error messages, labels |
-| `/optimize` | Performance: loading, rendering, bundle size |
-| `/overdrive` | Technically ambitious: shaders, spring physics, 60fps |
-
-### Visual Assets
-
-| Skill | File | Purpose |
-|-------|------|---------|
-| Visual Assets | `skills/visual-assets.md` | Image gen, PNG export, SVG vectorization |
-| PNG Export | `skills/png-export/png-export.md` | Retina PNG from HTML/SVG |
-| Vectorize | `skills/vectorize-line-art.md` | PNG-to-SVG via potrace outline tracing |
-
-### Component Library
-
-| Tool | Type | Purpose |
-|------|------|---------|
-| 21st.dev Magic | MCP Server | Production-ready shadcn/ui component generation |
-| OpenAI Image Gen | MCP Server | AI image generation for brand assets |
-
----
-
-## Working Rules
-
-1. **Fibery is the CMS source of truth.** All editable content lives in
-   Fibery, not HTML. To add or change content, edit the Fibery entity first.
-2. **Never hardcode colors.** Import `tokens/tokens.css` and use CSS variables.
-3. **Inter text must have OpenType features.** Always apply
-   `font-feature-settings: 'cv01', 'ss03'` via `tokens.css` or explicitly.
-4. **UI weight is `510`**, not 500. Buttons, nav, labels, form fields.
-5. **Amber Rust is reserved** for CTAs, active states, and interactive elements.
-   Never decorative.
-6. **Token synchrony.** `DESIGN.md`, `tokens/tokens.css`, and `tokens/tokens.json`
-   must stay in sync. If you add a value to one, add it to all three.
-7. **`data-content-entity` is a contract.** If the attribute is set, the
-   rendered copy MUST come from Fibery. Never leave hardcoded fallback copy
-   that masks a missing Fibery render.
-8. **Preview before shipping.** New component patterns go to `preview.html` first.
-9. **"undersight" is always lowercase.** Never "Undersight" or "UNDERSIGHT".
-
----
-
-## Design Heritage
-
-Reference: `projects/agency-website/` has a fully worked Linear-to-grunion
-transplant as a model for how this pipeline works end-to-end.
-
----
-
-## Quick Reference
-
-| Task | Command |
-|------|---------|
-| Start dev server | `python3 undersight-serve.py` → `http://localhost:8088` |
-| Build for production | `python3 build.py --verify` |
-| Run tests | `bash tests/test-suite.sh` |
-| Design preview | `open preview.html` |
-| Fetch design ref | `npx getdesign@latest add <site>` |
-| Push to dev | `git add . && git commit -m "msg" && git push` |
-| Merge to main | `git checkout main && git merge dev && git push && git checkout dev` |
-| Trigger test lead | `curl -s -X POST http://localhost:8088/api/whitepaper-lead -H "Content-Type: application/json" -d '{"email":"kyle.adriany@gmail.com","whitepaper":"Chat Advance Case Study"}'` |
-
----
-
-## Fibery Task
-
-[undersight website - design & build #812 - Startup](https://adriany.fibery.io/Task_Management/Task/812)
-
----
-
-## Patterns
-
-- Logo: pen nib with eye motif (insight through writing)
-- Dark mode support via `prefers-color-scheme`
-- Design-system-first: DESIGN.md is source of truth, tokens are derived
-- Brand colors match `skills/png-export/png-export.md` defaults
-
----
-
-## Markdown for Agents (free content negotiation)
-
-A self-hosted equivalent of Cloudflare's **Pro** "Markdown for Agents" feature,
-running for **$0** on the Pages/Workers free tier. AI agents that fetch the site
-get clean Markdown instead of the HTML SPA; browsers are unaffected. Shipped to
-production 2026-07-12 (PR #32).
-
-### How it works
-
-- **Edge:** `functions/_middleware.js` (a Pages Function that runs on every
-  request) serves the built Markdown when a request either sends
-  `Accept: text/markdown` **or** targets a `.md` URL. Everything else falls
-  through to the normal HTML response via `next()`.
-- **Pure helpers:** `functions/_md-negotiation.mjs` — `acceptsMarkdown()`,
-  `markdownAssetPath()` (route → `.md` asset), `isHtmlDocument()`. No
-  Workers-runtime APIs, so they're unit-tested with `node --test`.
-- **Build:** `build.py` emits one `dist/<route>.md` per page/post (home is
-  `dist/index.md`) plus `dist/_md-manifest.json` listing the available `.md`
-  assets. Markdown is generated from the Fibery CMS source at build time —
-  higher fidelity than edge HTML-scraping.
-- **Response headers on markdown:** `content-type: text/markdown; charset=utf-8`,
-  `vary: Accept` (so caches don't serve MD to browsers), `x-robots-tag: all`,
-  `cache-control: public, max-age=300`.
-
-### Gotcha: the SPA fallback lies about content-type
-
-`_redirects` has `/* /index.html 200`, so an unknown path — including an unknown
-`.md` — resolves to the HTML shell at **status 200**, and the asset server types
-that response `text/markdown` (it keys off the request path's `.md` extension).
-So the middleware detects a real miss by **body**, not content-type
-(`isHtmlDocument()` sniffs for `<!doctype html>`/`<html>`). On a miss: an
-explicit `.md` URL returns a genuine **404**; an `Accept`-negotiated request
-falls through to normal HTML.
-
-### Tests (TDD)
-
-- `tests/md-negotiation.test.mjs` — pure helpers (`node --test tests/md-negotiation.test.mjs`).
-- `tests/md-pages.test.py` — per-page `.md` + manifest generation (`python3 tests/md-pages.test.py`).
-- `tests/build-validation.sh` — `.md` asset presence checks against `dist/`.
-
-### Verify against production
-
-```bash
-curl -H "Accept: text/markdown" https://undersight.ai/          # → 200 text/markdown
-curl https://undersight.ai/underscore.md                        # → 200 text/markdown
-curl -o /dev/null -w '%{http_code}\n' https://undersight.ai/nope.md   # → 404 (real miss)
-curl -H "Accept: text/html" https://undersight.ai/              # → 200 text/html (SPA intact)
-```
-
-Do **not** re-enable Cloudflare's Pro "Markdown for Agents" toggle — it would
-double-convert. This function already provides the behavior.
-
----
-
-## Blog PDF Lead Capture & Delivery
-
-### Overview
-
-Research articles and case studies are gated behind an email capture modal.
-When a visitor submits their email, a lead entity is created in Fibery and linked
-to the corresponding blog/case-study asset. A Fibery automation ("undersight research dispatch")
-sends the PDF to the visitor's email automatically. Public route/function names
-still say `whitepaper` for compatibility.
-
-### Data Flow
-
-```
-Website modal → submitWhitepaperEmail()
-  → POST /api/whitepaper-lead { email, whitepaper }
-  → Dev: undersight-serve.py _capture_lead()
-  → Prod: Cloudflare Worker (WORKER_URL — TODO: deploy)
-  → Fibery API:
-      1. Query CMS/Blog by name → get fibery/id
-      2. Create CMS/Website Leads entity
-         - CMS/Email: submitted email
-         - CMS/Blog Post: linked to blog/case-study entity
-  → Fibery Automation triggers on new lead
-  → Sends email with PDF attachment from blog/case-study entity
-  → Sets CMS/Sent = true on the lead
-```
-
-### Fibery Schema
-
-**CMS/Blog** (catalog of downloadable PDFs):
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `CMS/name` | text | Entity name — must match the `whitepaper` param from the modal |
-| `CMS/PDF` | file | The PDF attachment sent to leads |
-| `CMS/Leads` | relation (1:M) | Back-reference to all leads for this asset |
-
-**CMS/Website Leads** (captured submissions):
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `CMS/Email` | text | Visitor's email |
-| `CMS/Blog Post` | relation (M:1) | Link to the blog/case-study entity |
-| `CMS/Sent` | bool | Set to true by Fibery automation when email is sent |
-| `fibery/creation-date` | date-time | (system) When the lead was captured |
-
-### Current PDF Assets (must exist in Fibery with PDF attached)
-
-| Name (exact match required) | Type | Slug |
-|----|------|------|
-| `Chat Advance Case Study` | Case Study | `chat-advance` |
-| `From Deterministic Scorecards to Agentic Credit Assessments` | Research | `deterministic-scorecards` |
-| `Unlocking Institutional Capital for Mid-Tier MCA Funds` | Research | `institutional-capital` |
-
-### PDF Asset Name Mapping (JS → Fibery)
-
-The modal receives a whitepaper name via `openWhitepaperModal(name)`. This name
-**must exactly match** the `CMS/name` field in the Fibery Blog database.
-
-- Homepage case study CTA → hardcoded `'Chat Advance Case Study'`
-- Blog posts with tag `Research` or `Case Study` → uses `post.title` directly,
-  except posts containing "Chat Advance" which map to `'Chat Advance Case Study'`
-
-### Adding a New PDF Asset
-
-1. Create a `CMS/Blog` entity in Fibery with the exact name
-2. Attach the PDF file to the `CMS/PDF` field
-3. In `index.html`, add a download button that calls
-   `openWhitepaperModal('Exact Whitepaper Name')` — OR ensure the blog post
-   title matches the whitepaper name and has tag `Research` or `Case Study`
-4. The Fibery automation will handle delivery — no code changes needed
-
-### Testing Lead Capture
-
-```bash
-# Trigger a test lead (dev server must be running on :8088)
-curl -s -X POST http://localhost:8088/api/whitepaper-lead \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","whitepaper":"Chat Advance Case Study"}'
-```
-
-Verify in Fibery: CMS/Website Leads should show the new entity linked to
-the correct blog/case-study asset, with `Sent` eventually set to true by the automation.
-
-### Production Status
-
-- **Dev server**: POST `/api/whitepaper-lead` handled by `undersight-serve.py`
-- **Production**: POST `/api/whitepaper-lead` handled by Cloudflare Pages Function
-  (`functions/api/whitepaper-lead.js` — deploys automatically with the site)
-- **Fibery automation**: Active — "undersight research dispatch" triggers on new leads
-- **Setup required**: Set `FIBERY_TOKEN` in Cloudflare Pages dashboard →
-  Settings → Environment variables (Production + Preview)
-
-### Lead Capture Security
-
-The lead capture endpoint is hardened against spam and abuse via four layers:
-input validation, Cloudflare Turnstile, per-IP rate limiting, and a strict
-whitepaper allowlist. All four are wired up; the Turnstile and rate-limit
-layers no-op gracefully (with a logged warning) until the user provisions the
-required Cloudflare resources, so the site stays functional in the meantime.
-
-**Required environment variables / bindings (Cloudflare Pages → Settings):**
-
-| Setting | Type | Purpose |
-|---|---|---|
-| `FIBERY_TOKEN` | Secret env var | Fibery API auth (existing) |
-| `CF_TURNSTILE_SECRET_KEY` | Secret env var | Server-side Turnstile verification |
-| `RATE_LIMIT_KV` | KV namespace binding | Per-IP counters for rate limit |
-
-**Client-side (`index.html`):** replace the `TURNSTILE_SITE_KEY_PLACEHOLDER`
-constant with the public site key from the Cloudflare Turnstile dashboard.
-
-**Provision Turnstile keys:**
-
-1. Cloudflare dashboard → Turnstile → Add site
-2. Mode: **Invisible** (least friction, matches the modal UX)
-3. Hostnames: `undersight.ai`, `dev.undersight-website.pages.dev`, `localhost`
-4. Copy the **Site Key** into `index.html` (the `TURNSTILE_SITE_KEY` constant)
-5. Copy the **Secret Key** into Cloudflare Pages → Settings → Environment
-   variables → `CF_TURNSTILE_SECRET_KEY` (Production + Preview)
-
-**Provision KV namespace for rate limiting:**
-
-```bash
-wrangler kv:namespace create RATE_LIMIT_KV
-# Then in Cloudflare Pages dashboard:
-#   Settings → Functions → KV namespace bindings
-#   Variable name: RATE_LIMIT_KV
-#   KV namespace:  (select the one just created)
-```
-
-**Rate limit budgets:**
-
-| Environment | Per-minute | Per-day | Key |
-|---|---|---|---|
-| Production (Pages Function + Worker) | 3 | 20 | `CF-Connecting-IP` |
-| Dev server | 5 | — | peer socket IP |
-
-**Validation rules (all environments):**
-
-- Request body capped at 4096 bytes → `413` if exceeded
-- Email: 5-254 chars, strict regex (2+ char TLD), no `<>"'`, no `..` → `422`
-- Whitepaper name: 1-200 chars, no `<>`, must match `KNOWN_WHITEPAPERS`
-  allowlist → `422`
-- Turnstile token required when `CF_TURNSTILE_SECRET_KEY` is set → `403`
-- Per-IP rate limit exceeded → `429` with `Retry-After` header
-
-**CORS allowlist:** `https://undersight.ai`, `https://www.undersight.ai`,
-`https://undersight-website.pages.dev`, `https://dev.undersight-website.pages.dev`,
-`http://localhost:8088`. Unknown origins receive **no**
-`Access-Control-Allow-Origin` header (the browser rejects the response).
-
-**Adding a new PDF asset (post-launch):** update the `KNOWN_WHITEPAPERS`
-constant in all three handlers (`functions/api/whitepaper-lead.js`,
-`worker/index.js`, `undersight-serve.py`) when adding a new entity in Fibery.
-
-**P1 hardening in place** (alongside the four layers above): responses use
-generic error messages with details to stderr only; dev logs mask emails
-(`agent@undersight.ai` → `a***t@undersight.ai`); Fibery error bodies are
-redacted to `status + body_len` in Cloudflare logs; the email regex enforces
-local-part 1-64 chars with no leading/trailing dot; all handlers reject
-non-`application/json` Content-Type with `415`; and `worker/index.js` carries
-a `DEPRECATED` header — production traffic flows through the Pages Function.
-
----
-
-## Booking Page (`/book`)
-
-Replaces the Calendly link with a first-party booking flow: a static page
-(`resources/book.html`) hosts the `<undersight-booking>` Shadow-DOM widget
-(`resources/booking-widget.js`), which talks to two Pages Functions:
-
-- `GET /api/booking/slots?from&to` — open 30-minute starts (Mon–Fri, 09:00–17:00
-  Pacific, 4h notice, 45-day horizon) minus Google Calendar free/busy across the
-  host's calendars. Rules live in `functions/api/booking/_slots.mjs`
-  (`rulesFromEnv` reads optional `BOOKING_*` overrides).
-- `POST /api/booking/book` — validates, re-checks free/busy, inserts the event on
-  the host calendar with a Google Meet link and emails the guest the invite.
-  Honeypot + `RATE_LIMIT_KV` (shared with lead capture) guard the endpoint.
-
-**Required environment (Cloudflare Pages → Settings → Environment variables,
-Production + Preview; locally `.dev.vars`, gitignored):**
-
-| Setting | Type | Purpose |
-|---|---|---|
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REFRESH_TOKEN` | Secret env vars | OAuth refresh-token grant for the host's Workspace account (`calendar` + `calendar.events` scopes) |
-| `BOOKING_CALENDAR_ID` | Env var | Calendar that owns the events (default `primary`) |
-| `BOOKING_BUSY_CALENDARS` | Env var | Comma-separated calendars whose busy time also blocks a slot |
-
-Without the Google secrets the API answers `503 booking_not_configured` and the
-widget shows the email fallback, so the page is safe to deploy first and wire up
-second. Tests: `node --test tests/booking-*.test.mjs` (slot engine incl. DST,
-validation, both handlers with Google stubbed, widget helpers). Local end-to-end:
-`python3 build.py && npx wrangler pages dev dist --port 8788` then open `/book`.
-
----
-
-## Launch Readiness Checklist
-
-### CMS robustness
-
-- [ ] Hardcoded marketing copy migrated to Fibery (per migration backlog above)
-- [ ] Hybrid case study sections fully wired (no hardcoded fallback)
-- [ ] Blog consolidation complete (all posts in `CMS/Blog`, not `CMS/Pages`)
-- [ ] `/blog` sorted by post date desc
-
-### Safeguards
-
-- [ ] `build.py --verify` passes
-- [ ] Schema guard active in CI (`.github/workflows/deploy-production.yml`)
-- [ ] Under-construction fallback verified (auto-deploys if build fails)
-
-### Security
-
-- [ ] `FIBERY_TOKEN` set in Cloudflare Pages env (Production + Preview)
-- [ ] No secrets in committed `dist/` (Fibery URLs, UUIDs, file endpoints)
-- [ ] Rate-limit / abuse protection on `/api/whitepaper-lead`
-
-### Tests
-
-- [ ] `tests/test-suite.sh` passing
-- [ ] `tests/build-validation.sh` (13 checks) passing
-- [ ] Lead capture E2E test (submit → entity created → automation email sent)
-- [ ] Visual regression on dev before main merge
-
-### Content
-
-- [ ] Metrics bar (71% / 22% / 650bps) attributed with source
-- [ ] All whitepaper entities exist in Fibery with PDFs attached
-
-### Performance
-
-- [ ] Dev rebuild reliable at sub-5-min cadence
-- [ ] Fibery webhook for push-based freshness
-
----
+`tests/test-suite.sh` builds `dist/` and starts `serve.mjs` on :8088 when nothing answers there. `tests/nav-e2e.mjs`, `tests/visual-regress.mjs` and `tests/link-check.sh` are run by hand.
+
+## Ship
+
+1. Branch off `origin/main` and open a pull request against `main`. There is no `dev` branch or dev environment.
+2. CI must be green before merge.
+3. Railway builds the `Dockerfile` and deploys on every push to `main`. The build stage (`python:3.12-slim`) runs `python3 build.py --env=production --verify`; the runtime stage (`node:22-alpine`) runs `node serve.mjs`.
+4. Verify the deploy: `curl -s https://undersight.ai/healthz` returns `ok`, and the changed page renders on https://undersight.ai.
+
+DNS for undersight.ai is on Cloudflare and points at the Railway service. The old Cloudflare Pages project stays in place, unused, as a rollback target. `health-check.yml` probes https://undersight.ai every 15 minutes and opens a GitHub issue on real downtime or when the under-construction page is live.
+
+## Design Rules
+
+1. `DESIGN.md` is the source of truth; `tokens/tokens.css` and `tokens/tokens.json` derive from it. A value added to one goes into all three. The live site loads `css/tokens.css`, which currently differs from `tokens/tokens.css`; carry a token change into both.
+2. No hardcoded hex in components. Reference token variables.
+3. Inter carries `font-feature-settings: 'cv01', 'ss03'`.
+4. UI weight is `510`, not 500: buttons, nav, labels.
+5. Amber Rust is reserved for CTAs, active states and interactive elements, never decoration.
+6. New component patterns go into `preview.html` first.
+7. "undersight" and "underchat" are always lowercase. `tests/test-suite.sh` fails on "Undersight" or "UNDERSIGHT".
+8. Dark mode (`prefers-color-scheme` plus the `theme-dark` and `theme-light` classes) and `prefers-reduced-motion` are required.
 
 ## Known Issues
 
-- Cloudflare Pages needs `FIBERY_TOKEN` env var set in dashboard for whitepaper leads
-- Sign In links point to the production app `app.underchat.ai/login`
-  (2026-07-10; CMS Site Config `Sign In URL` matches). Fibery #307 tracks
-  the full login-gate design. The earlier interim staging routing is
-  superseded; `tests/test-suite.sh` asserts no `staging.app.underchat.ai`
-  reference remains in `index.html`.
-  (The old `/docs` gate is gone — Docs now links to
-  https://documentation.underchat.ai/ and bare `/docs` visits redirect there.)
-- Font stack validated (Inter) but display font TBD
-- Test suite has curl flakes on large HTML responses from Python dev server
-  (meta tags, OG tags occasionally fail — not real issues)
-
----
+- Sign In links point to `https://app.underchat.ai/login`; `tests/test-suite.sh` asserts no `staging.app.underchat.ai` reference remains in `index.html`.
+- `/docs` 302-redirects to https://documentation.underchat.ai/.
+- The display font is still Inter; a separate display face is undecided.
 
 ## Learnings
 
-See `tasks/lessons.md` for session-by-session log.
+Session notes: `tasks/lessons.md`.

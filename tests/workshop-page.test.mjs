@@ -1,12 +1,4 @@
 // /workshop — the AI Implementation Workshop offer page.
-//
-// Two halves:
-//   1. Static gates on resources/workshop.html, _redirects and build.py (no
-//      network). Run: node --test tests/workshop-page.test.mjs
-//   2. Copy gates on the LIVE CMS entity when CONTENT_URL is set (the bash
-//      suite passes the dev server's /api/content). Every [data-cms] slot in
-//      the HTML must have a value in the entity — the content-first contract —
-//      and the copy must hold the house style Kyle signed off on 2026-08-25.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -37,7 +29,7 @@ test('content-first: no hardcoded copy in a data-cms slot, and the render loop e
   for (const m of html.matchAll(/<([a-z0-9]+)[^>]*data-cms="[^"]+"[^>]*>([^<]*)</g)) {
     assert.equal(m[2].trim(), '', `slot ships with hardcoded text: ${m[0].slice(0, 80)}`);
   }
-  assert.ok(slots.length >= 40, `expected a slot per copy string, got ${slots.length}`);
+  assert.ok(slots.length >= 38, `expected a slot per copy string, got ${slots.length}`);
   assert.equal(new Set(slots).size, slots.length, 'each slot key appears once');
   assert.match(html, /async function loadContent\(\) \{/, 'loadContent() exists for build.py to bake');
   assert.match(html, /fetch\('\/api\/content'\)/, 'dev server content endpoint');
@@ -55,39 +47,37 @@ test('page: noindex, canonical /workshop, site assets, headshot from /images', (
   assert.match(html, /<link rel="stylesheet" href="\/css\/fonts\.css">/, 'Inter + DM Sans loaded from self-hosted fonts.css');
 });
 
-test('form: posts to the Pages Function with the GTM field set, honeypot and the week strip', () => {
-  const form = html.slice(html.indexOf('<form'), html.indexOf('</form>'));
-  assert.match(html, /fetch\('\/api\/workshop-apply'/);
-  assert.match(html, /data\.offer = 'funder-workshop'/);
-  assert.match(form, /name="website"/, 'honeypot');
-  for (const f of ['company', 'address', 'volume', 'vendor', 'data_systems', 'basic_counts',
-    'repayment_history', 'refresh_access', 'signer_name', 'signer_title', 'signer_email', 'signer_phone']) {
-    assert.match(form, new RegExp(`name="${f}"`), f);
+test('booking: the claim card links to cal.com quick-connect, with no form and no backend call', () => {
+  const claim = html.slice(html.indexOf('<section id="claim">'), html.indexOf('</section>', html.indexOf('<section id="claim">')));
+  assert.ok(claim.length > 0, 'claim section present');
+  const cta = claim.match(/<a\b[^>]*>/g) || [];
+  assert.equal(cta.length, 1, 'one call to action in the claim card');
+  assert.match(cta[0], /href="https:\/\/cal\.com\/adriany\/quick-connect"/);
+  assert.match(cta[0], /target="_blank"/);
+  assert.match(cta[0], /rel="noopener"/);
+  assert.match(cta[0], /data-cms="Form Button"/);
+  assert.doesNotMatch(html, /<form\b|<input\b|<select\b|<textarea\b/, 'no form controls');
+  assert.doesNotMatch(html, /workshop-apply|calendly|turnstile|\/unsubscribe/i);
+  assert.deepEqual([...html.matchAll(/fetch\('([^']+)'/g)].map((m) => m[1]), ['/api/content'], 'only the build-time content fetch');
+  for (const gone of ['Form Consent', 'Done Heading', 'Done Body']) {
+    assert.ok(!slots.includes(gone), `form-only slot removed: ${gone}`);
   }
-  assert.equal((form.match(/type="radio"/g) || []).length, 6, 'six week tiles');
-  assert.equal((form.match(/disabled/g) || []).length, 5, 'only next week is selectable');
-  assert.equal((html.match(/>Booked</g) || []).length, 10, 'five booked tiles in the hero strip and five in the form');
+  assert.equal((html.match(/>Booked</g) || []).length, 5, 'five booked tiles in the hero strip');
   assert.ok(!/spot left/i.test(html), 'weeks are booked or open, never counted');
-  for (const q of [/Which systems hold deal data today\?/, /Can active deals be counted by broker, industry or underwriter today\?/,
-    /Is repayment history held in one place\?/, /Is bank data refreshed on deals after funding\?/]) {
-    assert.match(form, q, `self-assessment label must be a question: ${q}`);
-  }
   assert.ok((html.match(/<svg/g) || []).length >= 4, 'the process is carried by diagrams');
 });
 
-// ---- live copy gates (CONTENT_URL) --------------------------------------------
-const CONTENT_URL = process.env.CONTENT_URL;
-test('cms copy: every slot has a value and the copy holds house style', { skip: !CONTENT_URL && 'set CONTENT_URL' }, async () => {
-  const data = await (await fetch(CONTENT_URL)).json();
+test('cms copy: every slot has a value and the copy holds house style', () => {
+  const data = JSON.parse(readFileSync(join(root, 'content/content.json'), 'utf8'));
   const md = (data[ENTITY] || {}).content || '';
-  assert.ok(md, `entity "${ENTITY}" missing from ${CONTENT_URL}`);
+  assert.ok(md, `entity "${ENTITY}" missing from content/content.json`);
   const meta = {};
   for (const line of md.split('\n')) {
     const m = line.match(/^\*\*(.+?):\*\*\s*(.+)/);
     if (m) meta[m[1].trim()] = m[2].trim();
     else if (line.startsWith('# ')) meta._title = line.replace(/^#+\s*/, '');
   }
-  for (const k of [...slots, ...hrefSlots, 'Page Title', 'Meta Description', 'Send Failed']) {
+  for (const k of [...slots, ...hrefSlots, 'Page Title', 'Meta Description']) {
     assert.ok(meta[k], `CMS entity lacks "${k}"`);
   }
   assert.match(meta['Engineer LinkedIn'], /^https:\/\/www\.linkedin\.com\//);

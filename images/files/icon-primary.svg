@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- undersight fountain pen nib icon - simplified -->
+  <!-- Canonical geometry: 64x64, all other icons scale from this -->
+  <g fill="#23262C">
+    <!-- Cap -->
+    <rect x="22" y="8" width="20" height="10" rx="1"/>
+    <!-- Nib body -->
+    <path d="M20 21 L44 21 L44 36 L32 56 L20 36 Z"/>
+  </g>
+  <!-- Slit (from top of body through to tip) -->
+  <rect x="31" y="21" width="2" height="35" fill="#FFFFFF"/>
+  <!-- Circle (insight eye) -->
+  <circle cx="32" cy="32" r="5" fill="#FFFFFF"/>
+</svg>

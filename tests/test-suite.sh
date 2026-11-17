@@ -4,7 +4,7 @@
 # =============================================================================
 #
 # Validates the dev server, content API, HTML structure, CSS tokens, security,
-# and accessibility. Assumes the dev server is running on localhost:8088.
+# and accessibility. Builds dist/ and serves it with serve.mjs on :8088.
 #
 # Usage:
 #   bash tests/test-suite.sh
@@ -17,6 +17,14 @@
 set -euo pipefail
 
 BASE="http://localhost:8088"
+SITE_ROOT_EARLY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if ! curl -s -o /dev/null --max-time 2 "$BASE/healthz"; then
+  python3 "$SITE_ROOT_EARLY/build.py" > /dev/null
+  PORT=8088 node "$SITE_ROOT_EARLY/serve.mjs" > /dev/null 2>&1 &
+  SERVE_PID=$!
+  trap 'kill $SERVE_PID 2>/dev/null' EXIT
+  for _ in $(seq 1 50); do curl -s -o /dev/null --max-time 1 "$BASE/healthz" && break; sleep 0.1; done
+fi
 PASS_COUNT=0
 FAIL_COUNT=0
 SKIP_COUNT=0
@@ -85,18 +93,18 @@ else
   fail "Server responds on :8088" "Got HTTP $STATUS"
 fi
 
-# Test: /api/content returns 200 with JSON
-STATUS=$(fetch_status "$BASE/api/content")
-CONTENT_JSON=$(fetch "$BASE/api/content")
+# Test: content.json is valid JSON
+STATUS=200
+CONTENT_JSON=$(cat "$SITE_ROOT/content/content.json")
 if [ "$STATUS" = "200" ]; then
   # Verify it's valid JSON
   if echo "$CONTENT_JSON" | python3 -m json.tool > /dev/null 2>&1; then
-    pass "/api/content returns 200 with valid JSON"
+    pass "content/content.json is valid JSON"
   else
-    fail "/api/content returns 200 with valid JSON" "Response is not valid JSON"
+    fail "content/content.json is valid JSON" "Response is not valid JSON"
   fi
 else
-  fail "/api/content returns 200 with valid JSON" "Got HTTP $STATUS"
+  fail "content/content.json is valid JSON" "Got HTTP $STATUS"
 fi
 
 # Test: All entity types present in content API
@@ -109,9 +117,9 @@ data = json.load(sys.stdin)
 found = any(k.startswith('$ENTITY_PREFIX') for k in data)
 sys.exit(0 if found else 1)
 " 2>/dev/null; then
-    pass "Entity type '$ENTITY_PREFIX' present in /api/content"
+    pass "Entity type '$ENTITY_PREFIX' present in content.json"
   else
-    fail "Entity type '$ENTITY_PREFIX' present in /api/content"
+    fail "Entity type '$ENTITY_PREFIX' present in content.json"
   fi
 done
 
@@ -122,9 +130,9 @@ data = json.load(sys.stdin)
 blogs = (data.get('_blogs') or {}).get('_data') or []
 sys.exit(0 if blogs else 1)
 " 2>/dev/null; then
-  pass "Blog list present in /api/content (_blogs._data)"
+  pass "Blog list present in content.json (_blogs._data)"
 else
-  fail "Blog list present in /api/content (_blogs._data)"
+  fail "Blog list present in content.json (_blogs._data)"
 fi
 
 # Test: Static files serve correctly
@@ -234,22 +242,16 @@ else
   fail "Blog entries have post_date and slug metadata" "Missing in: $BLOG_META_OK"
 fi
 
-# Test: Contact entity has Calendly URL
+# Test: Contact entity booking link is the cal.com page
 if echo "$CONTENT_JSON" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-contact = data.get('Contact Page', {}).get('content', '')
-sys.exit(0 if 'calendly.com' in contact.lower() else 1)
+cfg = data.get('Site Config', {}).get('content', '') + data.get('Contact Page', {}).get('content', '')
+sys.exit(0 if 'calendly' not in cfg.lower() else 1)
 " 2>/dev/null; then
-  pass "Contact entity has Calendly URL"
+  pass "Content has no Calendly link"
 else
-  # Check the HTML directly as fallback (Calendly link may be hardcoded)
-  HTML=$(fetch "$BASE/")
-  if echo "$HTML" | grep -qi "calendly.com"; then
-    pass "Contact entity has Calendly URL (found in HTML)"
-  else
-    fail "Contact entity has Calendly URL"
-  fi
+  fail "Content has no Calendly link"
 fi
 
 # =============================================================================
@@ -476,21 +478,6 @@ else
   fail "All Sign In anchors point at https://app.underchat.ai/login" "found $SIGNIN_HREF_COUNT Sign In anchor(s), $SIGNIN_HREF_CORRECT correct"
 fi
 
-# Test: the Turnstile mount must not invite Cloudflare's page-load auto-scan.
-# api.js auto-renders every .cf-turnstile div at load; the lead-capture mount
-# starts with no sitekey (it is rendered explicitly on first submit), so a
-# cf-turnstile class or an empty data-sitekey throws TurnstileError on every
-# page load and masks real Turnstile regressions.
-WP_TS_DIV=$(echo "$HTML_SOURCE" | grep -oE '<div[^>]*id="wpTurnstile"[^>]*>' || true)
-if [ -z "$WP_TS_DIV" ]; then
-  fail "Turnstile mount #wpTurnstile present" "div not found"
-elif echo "$WP_TS_DIV" | grep -q 'cf-turnstile'; then
-  fail "Turnstile mount is not auto-scanned at page load" "cf-turnstile class present on #wpTurnstile"
-elif echo "$WP_TS_DIV" | grep -q 'data-sitekey=""'; then
-  fail "Turnstile mount is not auto-scanned at page load" 'empty data-sitekey="" present on #wpTurnstile'
-else
-  pass "Turnstile mount #wpTurnstile is explicit-render only (no auto-scan)"
-fi
 
 # =============================================================================
 section "Accessibility Tests"
@@ -598,8 +585,7 @@ else
   fail "Asset refs are root-relative" "$COUNT document-relative ref(s) break /blog/<slug> deep links"
 fi
 
-# Test: Dev server has SPA fallback
-if grep -q 'serve_static_or_spa\|_serve_static_or_spa' "$SITE_ROOT/undersight-serve.py" 2>/dev/null; then
+if grep -qE '^/\*[[:space:]]+/index\.html[[:space:]]+200' "$SITE_ROOT/_redirects"; then
   pass "Dev server has SPA fallback routing"
 else
   fail "Dev server has SPA fallback" "Direct URLs will 404 on dev server"
@@ -850,7 +836,7 @@ else
 fi
 
 # =============================================================================
-section "Fibery Content Linkage Tests"
+section "Content Linkage Tests"
 # =============================================================================
 # Verifies 1:1 mapping between Fibery entities and site consumption.
 #
@@ -901,7 +887,7 @@ print('content' if has_content else 'empty' if '$ENTITY' in data else 'missing')
       fail "Required entity has content: $ENTITY" "Entity exists but content is empty"
       ;;
     *)
-      fail "Required entity has content: $ENTITY" "Entity missing from /api/content"
+      fail "Required entity has content: $ENTITY" "Entity missing from content.json"
       ;;
   esac
 done
@@ -973,9 +959,9 @@ else:
     print('none')
 " 2>/dev/null)
 if [ "$ORPHANS" = "none" ]; then
-  pass "No orphan entities in /api/content (all entities consumed by site)"
+  pass "No orphan entities in content.json (all entities consumed by site)"
 else
-  fail "No orphan entities in /api/content" "Unconsumed: $ORPHANS"
+  fail "No orphan entities in content.json" "Unconsumed: $ORPHANS"
 fi
 
 # -- Source code audit: every getContent() call maps to a real entity --
@@ -1015,15 +1001,6 @@ print('yes' if '$SOL' in data else 'no')
   fi
 done
 
-# -- Content freshness: API cache refreshes --
-# The dev server has a 5s cache TTL. Verify two fetches return valid data.
-
-CONTENT_JSON_2=$(fetch "$BASE/api/content")
-if echo "$CONTENT_JSON_2" | python3 -m json.tool > /dev/null 2>&1; then
-  pass "Second /api/content fetch returns valid JSON (cache or fresh)"
-else
-  fail "Second /api/content fetch returns valid JSON" "Possible Fibery connection issue"
-fi
 
 # -- Entity content not stale: key fields are non-trivial --
 
@@ -1212,52 +1189,6 @@ print('yes' if found else 'no')
 done
 
 # =============================================================================
-section "Whitepaper Download Capture Tests"
-# =============================================================================
-# Research posts gated behind email capture must store submissions in a Fibery
-# database (CMS/Blog). The PDF modal must reference
-# a functioning endpoint, not be in mock mode.
-
-# Test: WORKER_URL is configured (not empty string)
-WORKER_CONFIGURED=$(grep -c "const WORKER_URL = ''" "$SRC_HTML" || true)
-if [ "$WORKER_CONFIGURED" = "0" ]; then
-  pass "WORKER_URL is configured (not empty/mock mode)"
-else
-  fail "WORKER_URL is configured (not empty/mock mode)" "Still set to empty string — submissions only log to console"
-fi
-
-# Test: Whitepaper modal HTML exists with required elements (check source file)
-for ELEM_ID in "wpOverlay" "wpForm" "wpEmail" "wpError" "wpSuccess"; do
-  if grep -q "id=\"$ELEM_ID\"" "$SRC_HTML"; then
-    pass "Whitepaper modal element present: #$ELEM_ID"
-  else
-    fail "Whitepaper modal element present: #$ELEM_ID"
-  fi
-done
-
-# Test: submitWhitepaperEmail function exists
-if grep -q "function submitWhitepaperEmail" "$SRC_HTML"; then
-  pass "submitWhitepaperEmail() function exists"
-else
-  fail "submitWhitepaperEmail() function exists"
-fi
-
-# Test: openWhitepaperModal function exists
-if grep -q "function openWhitepaperModal" "$SRC_HTML"; then
-  pass "openWhitepaperModal() function exists"
-else
-  fail "openWhitepaperModal() function exists"
-fi
-
-# Test: Research blog posts have a download CTA that triggers the modal
-# (At least one call to openWhitepaperModal must exist in the page)
-if grep -q "openWhitepaperModal" "$SRC_HTML"; then
-  pass "openWhitepaperModal() is called somewhere in the page"
-else
-  fail "openWhitepaperModal() is called somewhere in the page"
-fi
-
-# =============================================================================
 section "Image & Asset Provenance Tests"
 # =============================================================================
 # All images referenced in code must exist on disk. Solution narrative images
@@ -1391,292 +1322,6 @@ if [ "$CONTACT_EMAIL" = "contact@undersight.ai" ]; then
   pass "Contact Page entity email is contact@undersight.ai"
 else
   fail "Contact Page entity email is contact@undersight.ai" "Got: $CONTACT_EMAIL"
-fi
-
-# =============================================================================
-section "Whitepaper Lead Capture"
-# =============================================================================
-
-# Test: Whitepaper modal HTML exists
-if grep -q 'wp-overlay' "$SITE_ROOT/index.html"; then
-  pass "Whitepaper modal HTML present in index.html"
-else
-  fail "Whitepaper modal HTML present in index.html"
-fi
-
-# Test: Modal CSS classes defined
-if grep -q '\.wp-overlay' "$SITE_ROOT/css/main.css"; then
-  pass "Whitepaper modal CSS defined in main.css"
-else
-  fail "Whitepaper modal CSS defined in main.css"
-fi
-
-# Test: openWhitepaperModal function exists
-if grep -q 'function openWhitepaperModal' "$SITE_ROOT/index.html"; then
-  pass "openWhitepaperModal() function defined"
-else
-  fail "openWhitepaperModal() function defined"
-fi
-
-# Test: typing clears a stale email error (it used to stay red mid-entry)
-if grep -q "getElementById('wpEmail').addEventListener('input'" "$SITE_ROOT/index.html"; then
-  pass "Email input clears its error on input"
-else
-  fail "Email input clears its error on input"
-fi
-
-# Test: PDF button gated on an attached PDF, never on a hardcoded list
-if grep -q "const showDl = post.hasPdf;" "$SITE_ROOT/index.html" && grep -q '"has_pdf": bool(be.get("Pdf"))' "$SITE_ROOT/build.py" \
-   && ! grep -q "KNOWN_WHITEPAPERS" "$SITE_ROOT/functions/api/whitepaper-lead.js" "$SITE_ROOT/undersight-serve.py"; then
-  pass "PDF download follows the Fibery PDF field"
-else
-  fail "PDF download follows the Fibery PDF field"
-fi
-
-# Test: Download button in Chat Advance case study section
-if grep -q "Home - Case Study: Chat Advance" "$SITE_ROOT/index.html" && grep -q "openWhitepaperModal" "$SITE_ROOT/index.html"; then
-  pass "Download button present in Chat Advance case study"
-else
-  fail "Download button present in Chat Advance case study"
-fi
-
-# Test: Download button in 4D Financing case study section
-if grep -q "Home - Case Study: 4D Financing" "$SITE_ROOT/index.html" && grep -q "openWhitepaperModal" "$SITE_ROOT/index.html"; then
-  pass "Download button present in 4D Financing case study"
-else
-  fail "Download button present in 4D Financing case study"
-fi
-
-# Test: Modal title is generic (not hardcoded to a specific case study)
-MODAL_TITLE=$(grep 'id="wpTitle"' "$SITE_ROOT/index.html" | head -1 || true)
-if echo "$MODAL_TITLE" | grep -qi "chat advance"; then
-  fail "Modal title is generic" "Hardcoded to 'Chat Advance'"
-else
-  pass "Modal title is generic (not hardcoded to a specific post)"
-fi
-
-# Test: Modal description is generic (not hardcoded to a specific case study)
-MODAL_DESC=$(grep 'id="wpDesc"\|class="wp-desc"' "$SITE_ROOT/index.html" | head -1 || true)
-if echo "$MODAL_DESC" | grep -qi "chat advance"; then
-  fail "Modal description is generic" "Hardcoded to 'Chat Advance'"
-else
-  pass "Modal description is generic (not hardcoded to a specific post)"
-fi
-
-# Test: Modal description is dynamically set by openWhitepaperModal
-if grep -q "wpDesc.*textContent" "$SITE_ROOT/index.html"; then
-  pass "openWhitepaperModal() dynamically sets modal description"
-else
-  fail "openWhitepaperModal() dynamically sets modal description"
-fi
-
-# Test: Success message is generic (not "case study")
-SUCCESS_MSG=$(sed -n '/id="wpSuccess"/,/<\/div>/p' "$SITE_ROOT/index.html" | head -10)
-if echo "$SUCCESS_MSG" | grep -qi "case study"; then
-  fail "Success message is generic" "Still mentions 'case study'"
-else
-  pass "Success message is generic (says 'PDF' not 'case study')"
-fi
-
-# Test: No staging URLs in source. Sign In previously pointed at
-# staging.app.underchat.ai as an interim measure (TODO Fibery #307); fixed
-# 2026-07-10 to point straight at the production app.
-if grep -q "staging.app.underchat.ai" "$SITE_ROOT/index.html"; then
-  fail "No staging.app.underchat.ai reference in index.html source" "found a staging sign-in reference"
-else
-  pass "No staging.app.underchat.ai reference in index.html source"
-fi
-
-# Test: Dist modal has no hardcoded "Chat Advance" in static HTML
-# (catches the bug where baked dist still shows old hardcoded modal text)
-if [ -d "$DIST_DIR" ] && [ -f "$DIST_DIR/index.html" ]; then
-  # Check the static modal HTML (not JS-generated content)
-  DIST_MODAL=$(sed -n '/id="wpTitle"/,/id="wpSuccess"/p' "$DIST_DIR/index.html" | head -5)
-  if echo "$DIST_MODAL" | grep -qi "chat advance"; then
-    fail "Dist modal text is generic" "Baked dist still has hardcoded 'Chat Advance' in modal HTML"
-  else
-    pass "Dist modal text is generic (no hardcoded post name)"
-  fi
-
-  # Check that the default _activeWhitepaper is empty (not pre-set to Chat Advance)
-  if grep -q "_activeWhitepaper = 'Chat Advance" "$DIST_DIR/index.html"; then
-    fail "Dist _activeWhitepaper is not hardcoded" "Default is still 'Chat Advance Case Study'"
-  else
-    pass "Dist _activeWhitepaper is not hardcoded to a specific post"
-  fi
-else
-  skip "dist/ not present — skipping baked modal checks"
-fi
-
-# Test: WORKER_URL uses the shared local/prod API route
-if grep -q "const WORKER_URL = '/api/whitepaper-lead'" "$SITE_ROOT/index.html"; then
-  pass "WORKER_URL uses shared /api/whitepaper-lead route"
-else
-  fail "WORKER_URL uses shared /api/whitepaper-lead route"
-fi
-
-# Test: Modal has email input
-if grep -q 'id="wpEmail"' "$SITE_ROOT/index.html"; then
-  pass "Modal contains email input field"
-else
-  fail "Modal contains email input field"
-fi
-
-# Test: Modal has success state
-if grep -q 'id="wpSuccess"' "$SITE_ROOT/index.html"; then
-  pass "Modal contains success state element"
-else
-  fail "Modal contains success state element"
-fi
-
-# Test: Escape key closes modal
-if grep -q "key === 'Escape'" "$SITE_ROOT/index.html"; then
-  pass "Escape key handler for modal close"
-else
-  fail "Escape key handler for modal close"
-fi
-
-# Test: No hardcoded whitepaper name in submit (uses _activeWhitepaper)
-if grep -q '_activeWhitepaper' "$SITE_ROOT/index.html"; then
-  pass "Submit uses _activeWhitepaper variable (supports multiple whitepapers)"
-else
-  fail "Submit uses _activeWhitepaper variable"
-fi
-
-# Test: stripContents function for blog posts
-if grep -q 'function stripContents' "$SITE_ROOT/index.html"; then
-  pass "stripContents() removes table of contents from blog posts"
-else
-  fail "stripContents() removes table of contents from blog posts"
-fi
-
-# Test: Every downloadable blog post has a matching Blog entity in Fibery
-# Frontend maps case-study display titles to delivery entities and sends that name.
-WP_MATCH=$(echo "$CONTENT_JSON" | python3 -c "
-import sys, json, subprocess, urllib.request
-data = json.load(sys.stdin)
-token = subprocess.run(['security','find-generic-password','-s','mcp-credentials','-a','fibery-undersight','-w'], capture_output=True, text=True).stdout.strip()
-# Get downloadable posts (Research + Case Study tags)
-downloadable = []
-for name, entity in data.items():
-    if not name.startswith('Blog - '): continue
-    content = entity.get('content', '')
-    if '**Tag:** Research' in content or '**Tag:** Case Study' in content:
-        title = name.replace('Blog - ', '')
-        if 'Chat Advance' in title:
-            title = 'Chat Advance Case Study'
-        elif '4D Financing' in title:
-            title = '4D Financing Case Study'
-        downloadable.append(title)
-# Get all Blog delivery entity names
-try:
-    req = urllib.request.Request('https://subscript.fibery.io/api/commands',
-        data=json.dumps([{'command':'fibery.entity/query','args':{'query':{'q/from':'CMS/Blog','q/select':['CMS/name'],'q/limit':50}}}]).encode(),
-        headers={'Authorization':'Token '+token,'Content-Type':'application/json'})
-    resp = urllib.request.urlopen(req)
-    wp_data = json.loads(resp.read())
-    wp_names = set(e.get('CMS/name','') for e in wp_data[0].get('result',[]))
-except:
-    print('ERROR:could not query Blog database')
-    sys.exit(0)
-missing = [t for t in downloadable if t not in wp_names]
-if missing:
-    print('MISSING:' + ';'.join(missing))
-else:
-    print('ALL_MATCHED:' + str(len(downloadable)))
-" 2>/dev/null)
-if [[ "$WP_MATCH" == ALL_MATCHED* ]]; then
-  COUNT=$(echo "$WP_MATCH" | sed 's/ALL_MATCHED://')
-  pass "All $COUNT downloadable posts have matching Blog delivery entities in Fibery"
-elif [[ "$WP_MATCH" == ERROR* ]]; then
-  skip "Could not query Blog database"
-else
-  MISSING=$(echo "$WP_MATCH" | sed 's/MISSING://')
-  fail "All downloadable posts have matching Blog delivery entities" "Missing: $MISSING"
-fi
-
-# Test: Lead capture endpoint responds (dev server)
-# NOTE: The opt-in deliverable send tests have moved to the
-# "Deliverable Lead Capture Tests (opt-in)" section near the end of this suite.
-# That section fires exactly ONE POST per known whitepaper asset using
-# agent@undersight.ai as the recipient, gated by RUN_DELIVERABLE_SEND_TESTS=1.
-skip "POST /api/whitepaper-lead write test (see Deliverable Lead Capture section; set RUN_DELIVERABLE_SEND_TESTS=1)"
-
-# Test: Lead capture validates email
-WP_INVALID_RESPONSE=$(curl -s -X POST "$BASE/api/whitepaper-lead" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"not-an-email","whitepaper":"test"}' 2>/dev/null)
-if echo "$WP_INVALID_RESPONSE" | grep -q '"error"'; then
-  pass "Lead capture rejects invalid email"
-else
-  skip "Lead capture rejects invalid email (dev server may not be running)"
-fi
-
-# Test: Lead capture returns error for empty email
-WP_EMPTY_RESPONSE=$(curl -s -X POST "$BASE/api/whitepaper-lead" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"","whitepaper":"test"}' 2>/dev/null)
-if echo "$WP_EMPTY_RESPONSE" | grep -q '"error"'; then
-  pass "Lead capture rejects empty email"
-else
-  skip "Lead capture rejects empty email (dev server may not be running)"
-fi
-
-# Test: Whitepaper PDFs exist
-WP_DIR="$SITE_ROOT/whitepaper"
-WP_PDF_COUNT=0
-for pdf in "chat-advance-case-study.pdf" "deterministic-scorecards.pdf" "institutional-capital.pdf"; do
-  if [ -f "$WP_DIR/$pdf" ]; then
-    WP_PDF_COUNT=$((WP_PDF_COUNT + 1))
-  fi
-done
-if [ "$WP_PDF_COUNT" -eq 3 ]; then
-  pass "All 3 whitepaper PDFs generated ($WP_PDF_COUNT/3)"
-else
-  fail "All 3 whitepaper PDFs generated" "Found $WP_PDF_COUNT/3"
-fi
-
-# Test: PDF generation script exists
-if [ -f "$WP_DIR/generate-all.js" ]; then
-  pass "PDF generation script (generate-all.js) exists"
-else
-  fail "PDF generation script (generate-all.js) exists"
-fi
-
-# Test: Cloudflare Worker source exists
-WORKER_DIR="$SITE_ROOT/worker"
-if [ -f "$WORKER_DIR/index.js" ] && [ -f "$WORKER_DIR/wrangler.toml" ]; then
-  pass "Cloudflare Worker source files present (index.js + wrangler.toml)"
-else
-  fail "Cloudflare Worker source files present"
-fi
-
-# Test: Worker has CORS headers
-if grep -q 'Access-Control-Allow-Origin' "$WORKER_DIR/index.js"; then
-  pass "Worker includes CORS headers"
-else
-  fail "Worker includes CORS headers"
-fi
-
-# Test: Worker does not hardcode API token
-if grep -q 'env.FIBERY_TOKEN' "$WORKER_DIR/index.js" && ! grep -q 'Token [a-f0-9]' "$WORKER_DIR/index.js"; then
-  pass "Worker uses env secret for Fibery token (not hardcoded)"
-else
-  fail "Worker uses env secret for Fibery token"
-fi
-
-# Test: Dev server whitepaper relay has param syntax
-if grep -q '"\$name"' "$SITE_ROOT/undersight-serve.py"; then
-  pass "Dev server uses Fibery param syntax for whitepaper lookup"
-else
-  fail "Dev server uses Fibery param syntax for whitepaper lookup"
-fi
-
-# Test: blog posts with a PDF get the download button
-if grep -q "wpName" "$SITE_ROOT/index.html" && grep -q "const showDl = post.hasPdf;" "$SITE_ROOT/index.html"; then
-  pass "Blog posts with a PDF include download button with dynamic whitepaper name"
-else
-  fail "Blog posts with a PDF include download button"
 fi
 
 # =============================================================================
@@ -2176,213 +1821,6 @@ else
 fi
 
 # =============================================================================
-section "Lead Capture Security Tests"
-# =============================================================================
-# Exercises /api/whitepaper-lead against the dev server. Dev server skips
-# Turnstile by design, so we verify production wire-up via source grep.
-#
-# Dev server enforces a 5-POST-per-60s per-IP rate limit (see
-# undersight-serve.py: _check_rate_limit). Earlier sections fire ~2 POSTs to
-# /api/whitepaper-lead, and this section fires 5 more (1 oversized + 3
-# invalid emails + 1 unknown whitepaper). Without spacing them out, the
-# later POSTs come back as 429 instead of the expected 4xx validation
-# status, which previously caused 2 spurious failures here.
-#
-# Strategy: wait 65s up-front to clear any prior accumulation in the
-# limiter's window, then sleep 13s (60s / 5 = 12s, +1s buffer) between
-# each negative-path POST so each request sits in its own window slice.
-echo "  (waiting 65s to clear dev server rate-limit window…)"
-sleep 65
-
-# Helper: pause long enough that the next POST doesn't share a rate-limit
-# window with prior POSTs in this section. 13s = (60s / 5) + 1s buffer.
-wait_for_rate_limit_window() {
-  sleep 13
-}
-
-# Oversized payload → 413
-BIG=$(python3 -c "print('a'*5000)")
-STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
-  -H 'Content-Type: application/json' \
-  --data "{\"email\":\"$BIG@x.com\",\"whitepaper\":\"x\"}" \
-  "$BASE/api/whitepaper-lead" 2>/dev/null || echo "000")
-if [ "$STATUS" = "413" ]; then
-  pass "Oversized payload rejected (413)"
-else
-  fail "Oversized payload rejected" "Got $STATUS"
-fi
-
-# Invalid email forms → 422 (test each individually for clearer failure output)
-for BAD in '"not-an-email"' '"<script>@x.com"' '"a..b@x.com"'; do
-  wait_for_rate_limit_window
-  STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
-    -H 'Content-Type: application/json' \
-    --data "{\"email\":$BAD,\"whitepaper\":\"Chat Advance Case Study\"}" \
-    "$BASE/api/whitepaper-lead" 2>/dev/null || echo "000")
-  if [ "$STATUS" = "422" ]; then
-    pass "Invalid email rejected: $BAD"
-  else
-    fail "Invalid email rejected: $BAD" "Got $STATUS"
-  fi
-done
-
-# Unknown whitepaper → 422
-wait_for_rate_limit_window
-STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
-  -H 'Content-Type: application/json' \
-  --data '{"email":"test@example.com","whitepaper":"Bogus Asset"}' \
-  "$BASE/api/whitepaper-lead" 2>/dev/null || echo "000")
-if [ "$STATUS" = "422" ]; then
-  pass "Unknown whitepaper rejected (422)"
-else
-  fail "Unknown whitepaper rejected" "Got $STATUS"
-fi
-
-# Body size cap present in production handler source
-if grep -q "MAX_BODY_BYTES" "$SITE_ROOT/functions/api/whitepaper-lead.js"; then
-  pass "Body size cap configured in Pages Function"
-else
-  fail "Body size cap configured in Pages Function"
-fi
-
-# Turnstile widget referenced in client
-if grep -q "turnstile" "$SITE_ROOT/index.html"; then
-  pass "Turnstile widget referenced in index.html"
-else
-  fail "Turnstile widget referenced in index.html"
-fi
-
-# Turnstile verification wired in production handler
-if grep -q "CF_TURNSTILE_SECRET_KEY" "$SITE_ROOT/functions/api/whitepaper-lead.js"; then
-  pass "Turnstile verification wired in Pages Function"
-else
-  fail "Turnstile verification wired in Pages Function"
-fi
-
-# Turnstile site key is a real key, not the placeholder. While the assignment
-# still reads TURNSTILE_SITE_KEY_PLACEHOLDER, _turnstileEnabled() returns false,
-# the client never sends a token, and prod bot protection silently no-ops.
-# Real site keys are issued by Cloudflare with an 0x prefix.
-if grep -qE "const TURNSTILE_SITE_KEY = '0x[0-9A-Za-z_-]{10,}'" "$SITE_ROOT/index.html"; then
-  pass "Turnstile site key configured (placeholder replaced)"
-else
-  fail "Turnstile site key configured (placeholder replaced)"
-fi
-
-# =============================================================================
-section "Deliverable Lead Capture Tests (opt-in)"
-# =============================================================================
-# Fires exactly ONE POST per known whitepaper asset against the dev server
-# and verifies that exactly ONE matching lead lands in Fibery for each.
-#
-# This is the only place in the suite that triggers real Fibery writes and
-# real outbound email (via the "undersight research dispatch" automation),
-# so it is gated behind RUN_DELIVERABLE_SEND_TESTS=1 and OFF by default.
-#
-#   Enable:   RUN_DELIVERABLE_SEND_TESTS=1 bash tests/test-suite.sh
-#   Endpoint: $LEAD_ENDPOINT (defaults to $BASE/api/whitepaper-lead)
-#   Recipient: agent@undersight.ai (owned by the user; delivery is confirmed)
-#
-# Between POSTs we sleep 13s to stay safely under the dev server's 5/min
-# per-IP rate limit, even when run back-to-back with the Lead Capture
-# Security Tests section above.
-
-LEAD_ENDPOINT="${LEAD_ENDPOINT:-$BASE/api/whitepaper-lead}"
-LEAD_RECIPIENT="${LEAD_RECIPIENT:-agent@undersight.ai}"
-
-KNOWN_WHITEPAPERS=(
-  "Chat Advance Case Study"
-  "4D Financing Case Study"
-  "From Deterministic Scorecards to Agentic Credit Assessments"
-  "Unlocking Institutional Capital for Mid-Tier MCA Funds"
-)
-
-if [ "${RUN_DELIVERABLE_SEND_TESTS:-0}" != "1" ]; then
-  for WP in "${KNOWN_WHITEPAPERS[@]}"; do
-    skip "Deliverable POST for: $WP (set RUN_DELIVERABLE_SEND_TESTS=1 to enable)"
-    skip "Fibery lead created exactly once for: $WP (set RUN_DELIVERABLE_SEND_TESTS=1 to enable)"
-  done
-else
-  # Capture a window start timestamp so the Fibery lookup only sees leads
-  # created by THIS test pass. Fibery stores creation-date as an ISO 8601
-  # UTC string; we use a UTC timestamp from a few seconds before the first
-  # POST to absorb any clock skew between the test runner and Fibery.
-  TEST_WINDOW_START="$(python3 -c 'import datetime; print((datetime.datetime.utcnow() - datetime.timedelta(seconds=10)).strftime("%Y-%m-%dT%H:%M:%S.000Z"))')"
-  echo "  (test window start: $TEST_WINDOW_START — leads created before this are ignored)"
-
-  # Resolve FIBERY_TOKEN for the verification step. We accept either an
-  # env var or the macOS Keychain entry described in CLAUDE.md.
-  if [ -z "${FIBERY_TOKEN:-}" ]; then
-    FIBERY_TOKEN="$(security find-generic-password -s 'mcp-credentials' -a 'fibery-undersight' -w 2>/dev/null || echo '')"
-  fi
-  export FIBERY_TOKEN
-
-  FIRST=1
-  for WP in "${KNOWN_WHITEPAPERS[@]}"; do
-    if [ "$FIRST" = "1" ]; then
-      FIRST=0
-    else
-      echo "  (sleeping 13s to respect dev server 5/min rate limit…)"
-      sleep 13
-    fi
-
-    # Build the JSON body with python3 to safely encode the whitepaper name.
-    BODY=$(python3 -c "import json,sys; print(json.dumps({'email': sys.argv[1], 'whitepaper': sys.argv[2]}))" "$LEAD_RECIPIENT" "$WP")
-
-    STATUS=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 -X POST \
-      -H 'Content-Type: application/json' \
-      --data "$BODY" \
-      "$LEAD_ENDPOINT" 2>/dev/null || echo "000")
-
-    if [ "$STATUS" = "200" ]; then
-      pass "POST /api/whitepaper-lead 200 for: $WP"
-    else
-      fail "POST /api/whitepaper-lead 200 for: $WP" "Got HTTP $STATUS"
-      continue
-    fi
-
-    # Verify Fibery received exactly ONE new lead for this asset in our window.
-    # Uses the fibery CLI (subscript workspace). Filters on the linked Blog
-    # entity name plus the recipient email plus creation date >= start.
-    if [ -z "${FIBERY_TOKEN:-}" ]; then
-      skip "Fibery lead created exactly once for: $WP (FIBERY_TOKEN not available)"
-      continue
-    fi
-
-    LEAD_COUNT=$(/Users/kyle/bin/fibery -o json subscript query 'CMS/Website Leads' \
-      --where "CMS/Email=$LEAD_RECIPIENT" \
-      --where "CMS/Blog Post.CMS/name=$WP" \
-      --where "fibery/creation-date>=$TEST_WINDOW_START" \
-      --select 'fibery/id,CMS/Email,fibery/creation-date' \
-      --limit 10 2>/dev/null | python3 -c "
-import sys, json
-try:
-    data = json.load(sys.stdin)
-    # CLI returns a list of entities (or {'result': [...]})
-    if isinstance(data, dict) and 'result' in data:
-        rows = data['result']
-    elif isinstance(data, list):
-        rows = data
-    else:
-        rows = []
-    print(len(rows))
-except Exception as e:
-    print('ERR:' + str(e))
-" 2>/dev/null || echo "ERR:query-failed")
-
-    if [ "$LEAD_COUNT" = "1" ]; then
-      pass "Fibery lead created exactly once for: $WP"
-    elif [ "$LEAD_COUNT" = "0" ]; then
-      fail "Fibery lead created exactly once for: $WP" "No lead found — automation may not have fired or query window too tight"
-    elif [[ "$LEAD_COUNT" == ERR* ]]; then
-      skip "Fibery lead created exactly once for: $WP (query failed: $LEAD_COUNT)"
-    else
-      fail "Fibery lead created exactly once for: $WP" "Duplicate lead created — got $LEAD_COUNT rows (expected 1)"
-    fi
-  done
-fi
-
-# =============================================================================
 section "Docs External Link"
 # =============================================================================
 # The Docs tab now points at the external documentation site. Same-tab plain
@@ -2657,18 +2095,12 @@ fi
 
 # Test: static page gates + live CMS copy gates (every data-cms slot has a value
 # in the "Offer - AI Implementation Workshop" Pages entity; house style holds)
-if CONTENT_URL="$BASE/api/content" node --test tests/workshop-page.test.mjs >/tmp/workshop-page.log 2>&1; then
+if node --test tests/workshop-page.test.mjs >/tmp/workshop-page.log 2>&1; then
   pass "workshop page: static gates + CMS copy gates (node --test)"
 else
   fail "workshop page: static gates + CMS copy gates (node --test)" "$(grep -E "^not ok|error:|AssertionError" /tmp/workshop-page.log | head -5 | tr '\n' ' ')"
 fi
 
-# Test: the form endpoint unit tests
-if node --test tests/workshop-apply.test.mjs >/tmp/workshop-apply.log 2>&1; then
-  pass "workshop apply function: validation, entity shape, Fibery round trip (node --test)"
-else
-  fail "workshop apply function (node --test)" "$(grep -E "^not ok|error:" /tmp/workshop-apply.log | head -5 | tr '\n' ' ')"
-fi
 
 section "Summary"
 # =============================================================================

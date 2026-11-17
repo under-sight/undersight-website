@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56" width="220" height="56">
+  <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&amp;display=swap');</style>
+
+  <!-- Wordmark on left -->
+  <text x="16" y="32" font-family="Inter, sans-serif" font-weight="600" font-size="24" fill="#23262C" letter-spacing="-0.02em">undersight</text>
+
+  <!-- Horizontal line being "written" from left to right -->
+  <line x1="8" y1="44" x2="180" y2="44" stroke="#23262C" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Pen: tip at right end of line, cap points upper-right (NE) at 45° -->
+  <g transform="translate(180, 44) rotate(45) scale(0.45) translate(0, -24)">
+    <g fill="#23262C">
+      <rect x="-10" y="-24" width="20" height="10" rx="1"/>
+      <path d="M-12 -11 L12 -11 L12 4 L0 24 L-12 4 Z"/>
+    </g>
+    <rect x="-1" y="-11" width="2" height="35" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="5" fill="#FFFFFF"/>
+  </g>
+</svg>

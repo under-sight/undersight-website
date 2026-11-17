@@ -2,17 +2,11 @@
 
 ## Updating Content
 
-All website text content is managed in Fibery CMS. No code changes are needed for content updates.
-
-### Fibery Workspace
-
-- **Workspace**: `subscript.fibery.io`
-- **Database**: `Website / Pages`
-- **Access**: Requires a Fibery account with access to the workspace
+All website content lives in `content/content.json`, and the images it references live in `images/files/`. A content change is a pull request against `main`; it reaches production when Railway deploys the merge.
 
 ### Entity Naming Conventions
 
-Entity names determine how content is routed and rendered. Follow these naming patterns exactly:
+Entity names (the top-level keys of `content/content.json`) determine how content is routed and rendered. `index.html` looks them up by exact name.
 
 | Entity Name | Renders As |
 |-------------|-----------|
@@ -24,23 +18,25 @@ Entity names determine how content is routed and rendered. Follow these naming p
 | `Home - Testimonial` | Homepage testimonial |
 | `Home - Case Study: 4D Financing` | Second homepage case study |
 | `Home - CTA` | Homepage final CTA |
-| `Site Config` | Global settings: Sign In URL, Privacy Policy URL, Contact Email, Copyright |
+| `Site Config` | Global settings: sign-in URL, privacy policy URL, contact email, copyright, booking URL, LinkedIn URL, Production Mode, Dev Mode |
 | `Contact Page` | Contact section headline and description |
+| `Footer` | Footer copy |
+| `SEO` | Meta and Open Graph content |
 | `Solutions - underscore` | underscore solution page |
 | `Solutions - underchat agent` | underchat agent solution page (formerly `Solutions - Agentic Client RFI`) |
 | `Solutions - AI Underwriting Copilot` | Copilot solution page |
-| `Blog - [Title]` | Blog post (the part after `Blog - ` becomes the display title) |
+| `Offer - AI Implementation Workshop` | `/workshop` page |
+
+Blog posts are rows in `_blogs._data`, integrations are rows in `_integrations._data`, and case study and research titles are rows in `_whitepapers._data`.
 
 ### Content Format
 
-Each entity's Description field uses a markdown-like format:
+Each entity is `{"content": "<markdown>", "files": [...]}`. The markdown uses this format:
 
 ```markdown
 # Title Goes Here
 
-**Date:** 2026-05-01
-**Excerpt:** Short preview text for blog cards
-**Tag:** Risk Scoring
+**Key:** Value
 
 ---
 
@@ -49,74 +45,59 @@ Supports **bold**, [links](https://example.com), and paragraph breaks.
 ```
 
 - The `# Title` becomes the rendered title (or page heading)
-- `**Key:** Value` pairs become metadata (Date, Excerpt, Tag, etc.)
+- `**Key:** Value` pairs become metadata
 - Everything after `---` is the body content
 - Paragraphs are separated by blank lines
 
+`content` is a JSON string, so newlines are `\n` and double quotes are escaped. Each `files` entry is `{"name": "<file>", "type": "<mime type>", "url": "images/files/<file>"}`.
+
 ### Workflow: Edit Existing Content
 
-1. Log in to [Fibery](https://subscript.fibery.io)
-2. Navigate to Website > Pages
-3. Find the entity by name
-4. Edit the Description field
-5. For dev preview: refresh `localhost:8088` (content refreshes every 5 seconds)
-6. For production: run `python3 build.py` and deploy `dist/`
+1. Branch off `origin/main`.
+2. Find the entity in `content/content.json` and edit its `content` string.
+3. Preview: `python3 build.py && node serve.mjs`, then open http://localhost:8080.
+4. Run the test suite (see CLAUDE.md) and open a pull request against `main`.
+5. After merge, confirm the change on https://undersight.ai.
+
+### Workflow: Maintenance Mode
+
+Set the `Site Config` line `**Production Mode:** under-construction` and ship it. The next production build serves `under-construction.html` in place of the site, and `health-check.yml` opens an alert issue while it is live. Set the line back to `live` to restore the site.
 
 ---
 
 ## Adding a New Blog Post
 
-1. **Create entity in Fibery**: Name it `Blog - [Your Title]`. The title after `Blog - ` is what displays on the site.
+1. **Add the images** to `images/files/`. For the card image, use a 1536x1024 PNG in the monochrome editorial illustration style.
 
-2. **Write content** in the Description field:
-   ```markdown
-   # Your Blog Post Title
+2. **Append a row** to `_blogs._data` in `content/content.json`, copying the keys of an existing post:
 
-   **Date:** 2026-05-15
-   **Excerpt:** A one-sentence summary that appears on the blog card.
+   | Key | Value |
+   |-----|-------|
+   | `name` | Post title |
+   | `slug` | URL slug; the post lives at `/blog/<slug>` |
+   | `type` | `Insight`, `Research` or `Case Study` (also the blog filter tag) |
+   | `post_date` | ISO date; falls back to `creation_date` |
+   | `creation_date` | ISO timestamp |
+   | `author`, `subtitle`, `excerpt` | Post metadata; `excerpt` shows on the blog card |
+   | `body` | Post body in markdown |
+   | `files` | Image entries; the first image is the card thumbnail |
+   | `has_pdf` | `false` for a new post |
 
-   ---
+3. **Preview** at http://localhost:8080/blog after `python3 build.py && node serve.mjs`.
 
-   First paragraph of your blog post.
-
-   Second paragraph with **bold text** and a [link](https://example.com).
-
-   ## Subheading
-
-   More content under the subheading.
-   ```
-
-3. **Add an image** (optional): Attach an image file to the entity's Assets. The first image attachment will be used as the blog card thumbnail. For best results, use a 1536x1024 PNG in the monochrome editorial illustration style.
-
-4. **Map the image locally** (if using a local image instead of Fibery attachment): Add an entry to the `BLOG_IMAGES` object in `index.html`:
-   ```javascript
-   const BLOG_IMAGES = {
-     // ... existing entries ...
-     'Your Blog Post Title': 'images/blog/your-image.png',
-   };
-   ```
-   Place the image file in `images/blog/`.
-
-5. **Preview**: Run the dev server and navigate to the Blog page.
-
-6. **Build and deploy**:
-   ```bash
-   python3 build.py --verify
-   # Deploy dist/
-   ```
+4. **Ship** through a pull request. The build adds the post to `sitemap.xml`, `llms.txt`, `llms-full.txt`, the BlogPosting JSON-LD and `/blog/<slug>.md`.
 
 ---
 
 ## Adding a New Solution Page
 
-Adding a new solution page requires both Fibery content and code changes:
+Adding a new solution page requires both content and code changes:
 
-1. **Create the Fibery entity**: Name it `Solutions - [Product Name]`.
+1. **Add the content entity** `Solutions - [Product Name]` to `content/content.json`, with its images in `images/files/`.
 
 2. **Add to `SOLUTION_MAP`** in `index.html`:
    ```javascript
    const SOLUTION_MAP = {
-     // ... existing entries ...
      'Solutions - [Product Name]': { page: 'newproduct', icon: 'N', tag: 'Category' },
    };
    ```
@@ -126,26 +107,18 @@ Adding a new solution page requires both Fibery content and code changes:
    <section class="page" id="page-newproduct"></section>
    ```
 
-4. **Add solution images** (optional): Create 3 narrative images and add to `SOLUTION_IMAGES` and `SOLUTION_NARRATIVES`:
-   ```javascript
-   SOLUTION_IMAGES['newproduct'] = 'images/solutions/new1.png';
-   SOLUTION_NARRATIVES['newproduct'] = [
-     { img: 'images/solutions/new1.png', title: 'Step 1', desc: 'Description...' },
-     { img: 'images/solutions/new2.png', title: 'Step 2', desc: 'Description...' },
-     { img: 'images/solutions/new3.png', title: 'Step 3', desc: 'Description...' },
-   ];
-   ```
+4. **Add homepage pills and narrative copy** in `SOLUTION_PILLS`, `SOLUTION_NARRATIVE_TITLES` and `SOLUTION_NARRATIVE_DESCS` in `index.html`.
 
 5. **Update footer links** in `index.html`:
    ```html
-   <a href="#newproduct" onclick="event.preventDefault();navigate('newproduct')">[Product Name]</a>
+   <a href="/newproduct" onclick="event.preventDefault();navigate('newproduct')">[Product Name]</a>
    ```
 
-6. **Update `sitemap.xml`**: Add the new solution page URL.
+6. **Update `build.py`**: add the path to `SITEMAP_PAGES` and to the markdown targets so the page gets a sitemap entry and a `.md` file.
 
-7. **Update `llms.txt`**: Add the product description and link.
+7. **Update `llms.txt`**: add the product description and link.
 
-8. **Update JSON-LD structured data**: Add a new Offer entry in the Organization schema.
+8. **Update JSON-LD structured data**: add a new Offer entry in the Organization schema in `index.html`.
 
 ---
 
@@ -153,20 +126,20 @@ Adding a new solution page requires both Fibery content and code changes:
 
 The design system has three files that must stay in sync:
 
-| File | Location | Purpose |
-|------|----------|---------|
-| `DESIGN.md` | Agent workspace root | Source of truth specification |
-| `tokens/tokens.css` | Agent workspace `tokens/` | CSS custom properties |
-| `tokens/tokens.json` | Agent workspace `tokens/` | Design Tokens Community Group format |
+| File | Purpose |
+|------|---------|
+| `DESIGN.md` | Source of truth specification |
+| `tokens/tokens.css` | CSS custom properties |
+| `tokens/tokens.json` | Design Tokens Community Group format |
 
-The live site uses `css/tokens.css` at `/Users/kyle/Documents/underchat/undersight/undersight/css/tokens.css`.
+The live site loads `css/tokens.css`.
 
 ### Workflow: Change a Token Value
 
 1. Update the value in `DESIGN.md` (the specification)
 2. Update the corresponding CSS custom property in `tokens/tokens.css`
 3. Update the corresponding entry in `tokens/tokens.json`
-4. Copy `tokens/tokens.css` to the site's `css/tokens.css`
+4. Carry the change into `css/tokens.css`
 5. Verify in both light and dark mode
 6. Check that no components break by previewing the site
 
@@ -203,165 +176,97 @@ Solution and blog images were created using Higgsfield AI image generation.
 1. **Generate the image** using Higgsfield with a prompt matching the monochrome editorial style:
    - Style: clean line work, grayscale/monochrome, conceptual illustration
    - Avoid: color, photorealism, stock photo aesthetics
-   - Reference existing images in `images/blog/` and `images/solutions/` for style consistency
+   - Reference existing images in `images/files/` for style consistency
 
-2. **Download and resize**:
+2. **Resize**:
    ```bash
-   # Resize to web-appropriate dimensions (1024px longest side)
    sips -Z 1024 downloaded-image.png
-
-   # Create WebP variant
-   sips -s format webp downloaded-image.png --out downloaded-image.webp
    ```
 
-3. **Place in correct directory**:
-   - Solution images: `images/solutions/` (named `us1.png`, `rfi2.png`, `cop3.png`, etc.)
-   - Blog images: `images/blog/` (named descriptively)
-
-4. **Update code references** if adding new images (see adding blog post or solution page sections above).
+3. **Place it in `images/files/`** and point the entity's or post's `files` entry at it.
 
 ---
 
-## Running the Dev Server
+## Local Preview
 
-### Prerequisites
-
-- Python 3.x
-- macOS with Keychain entry for Fibery token:
-  ```bash
-  security add-generic-password -s mcp-credentials -a fibery-undersight -w "YOUR_TOKEN"
-  ```
-
-### Start Server
+Requires Python 3.12 and Node 22. No credentials are needed.
 
 ```bash
-cd /Users/kyle/Documents/underchat/undersight/undersight/
-python3 undersight-serve.py          # Starts on http://localhost:8088
-python3 undersight-serve.py 3000     # Custom port
+python3 build.py && node serve.mjs    # http://localhost:8080
+PORT=3000 node serve.mjs              # custom port
 ```
 
-### Server Behavior
-
-- Serves all static files from the working directory
-- Proxies `/api/content` to Fibery API (2 API calls: entity query + batch doc fetch)
-- Proxies `/api/file/{opaque_id}` to Fibery file downloads
-- Caches content for 5 seconds (configurable via `CACHE_TTL`)
-- Only logs API requests (static file requests are silent)
-
-### Content Refresh
-
-Content is cached for 5 seconds. To see Fibery content changes:
-- Wait 5 seconds and refresh the page, or
-- Restart the dev server
+`serve.mjs` serves the built `dist/`. Rebuild after every content or source change. The server reads files from disk on each request, so a rebuild needs no restart; it reads `_redirects` and `_headers` once at start, so a change to either needs one.
 
 ---
 
 ## Building for Production
 
-### Basic Build
-
 ```bash
-cd /Users/kyle/Documents/underchat/undersight/undersight/
-python3 build.py
+python3 build.py --env=production --verify
 ```
 
-### Build with Security Verification
-
-```bash
-python3 build.py --verify
-```
-
-This adds a full scan of `dist/` for leaked secrets, Fibery URLs, API endpoints, and UUIDs.
+`--env=production` reads the `Production Mode` line of `Site Config`; without it the build reads `Dev Mode`, which never triggers the under-construction page. `--verify` scans `dist/` for API calls, auth tokens and UUIDs and exits non-zero on a failure.
 
 ### What the Build Does
 
-1. Retrieves Fibery API token from macOS Keychain
-2. Fetches all content from Fibery (entities + documents + file metadata)
-3. Creates clean `dist/` directory
-4. Copies all static assets (CSS, images, favicons, robots.txt, etc.)
-5. Downloads Fibery file attachments to `dist/images/files/`
-6. Bakes content JSON directly into `loadContent()` in `index.html`
-7. Strips Fibery references from markdown content
-8. Writes final `dist/index.html`
-
-### Build Output
-
-The `dist/` directory contains everything needed for deployment. It is fully self-contained -- no runtime API calls, no server dependencies.
+1. Reads `content/content.json` and the site mode
+2. Creates a clean `dist/` directory
+3. Copies `css/`, `images/`, `resources/` and the root static files
+4. Bakes the content map into `loadContent()` in `index.html`, and the workshop entity into `resources/workshop.html`
+5. Writes the sitemap, `llms.txt`, `llms-full.txt`, BlogPosting JSON-LD and per-page markdown
+6. Writes `dist/.build-meta.json`
 
 ---
 
 ## Deploying
 
-### Static Host Options
+Railway builds the `Dockerfile` and deploys on every push to `main`. There is no manual deploy step and no dev environment.
 
-Upload the contents of `dist/` to any static hosting provider:
+1. Open a pull request against `main`. CI runs the full test suite.
+2. Merge when CI is green. Railway builds the image (production build with `--verify`) and starts `node serve.mjs`.
+3. A failed build leaves the previous deploy serving.
 
-```bash
-# Cloudflare Pages
-npx wrangler pages deploy dist/
+### DNS
 
-# Vercel
-npx vercel dist/
-
-# Netlify
-# Drag dist/ to netlify.com
-
-# GitHub Pages
-# Push dist/ contents to gh-pages branch
-```
-
-### DNS Requirements
-
-- `undersight.ai` A/CNAME record pointing to the static host
-- `legal.undersight.ai` must resolve (hosts the privacy policy)
-- HTTPS must be enforced (the host handles TLS)
+- undersight.ai DNS is on Cloudflare and points at the Railway service.
+- The old Cloudflare Pages project is kept, unused, as a rollback target: pointing the DNS record back at it restores the previous host.
+- `legal.undersight.ai` must resolve (hosts the privacy policy).
 
 ### Post-Deploy Verification
 
-1. Visit `https://undersight.ai` and confirm content loads
-2. Check dark mode (toggle OS setting)
-3. Check mobile layout (resize or use device)
-4. Verify all images load (solutions, blog, OG image)
-5. Test "Book a Discovery Call" links (should open Calendly)
-6. Test "Sign In" links (should go to the correct app URL)
-7. Check `https://undersight.ai/robots.txt` returns correct content
-8. Check `https://undersight.ai/llms.txt` returns correct content
-9. Test OG image by pasting URL into LinkedIn or Twitter share preview tools
+1. `curl -s https://undersight.ai/healthz` returns `ok`
+2. Visit `https://undersight.ai` and confirm content loads
+3. Check dark mode (toggle OS setting)
+4. Check mobile layout (resize or use device)
+5. Verify all images load (solutions, blog, OG image)
+6. "Book a Discovery Call" opens https://cal.com/adriany/quick-connect, and `/book` redirects there
+7. "Sign In" goes to `https://app.underchat.ai/login`
+8. `curl -H "Accept: text/markdown" https://undersight.ai/` returns markdown
+9. Check `https://undersight.ai/robots.txt` and `https://undersight.ai/llms.txt`
+10. Test the OG image by pasting the URL into LinkedIn or Twitter share preview tools
 
 ---
 
 ## Troubleshooting
 
-### Content Not Loading (Dev Server)
+### Content Not Loading
 
 **Symptom**: Hero shows the pen nib loading animation with "Loading content..."
 
-**Causes**:
-1. Dev server not running: Start with `python3 undersight-serve.py`
-2. Fibery API down or token expired: Check `security find-generic-password -s mcp-credentials -a fibery-undersight -w` returns a valid token
-3. Fibery workspace URL changed: Verify `WORKSPACE = "subscript.fibery.io"` in `undersight-serve.py`
-4. Network issue: Check that `https://subscript.fibery.io` is reachable
+**Cause**: The page is the unbuilt `index.html`, whose `loadContent()` still calls `fetch('/api/content')`. Nothing answers that path.
 
-**Diagnosis**: Check the terminal running `undersight-serve.py` for API error messages.
-
-### Content Not Loading (Production)
-
-**Symptom**: Same loading animation on the deployed site.
-
-**Cause**: The build likely failed to bake content. The `loadContent()` function still contains `fetch('/api/content')` instead of inline data.
-
-**Fix**: Re-run `python3 build.py --verify` and check for errors. Ensure the `_extract_function()` parser correctly found and replaced `loadContent()`.
+**Fix**: Serve `dist/` (`python3 build.py && node serve.mjs`). If the deployed site shows it, check the Railway build log for a `build.py` error such as "Could not find loadContent() function".
 
 ### Images Missing
 
-**Symptom**: Empty gray boxes where solution or blog images should appear.
+**Symptom**: Empty gray boxes where images should appear.
 
 **Causes**:
-1. Image files not in the correct directory
-2. Image path mismatch in `SOLUTION_IMAGES`, `BLOG_IMAGES`, or `SOLUTION_NARRATIVES`
-3. For Fibery-hosted images: file download failed during build (check build output for "SKIPPED" warnings)
+1. The file is missing from `images/files/`
+2. The `url` in the entity's `files` entry does not match the file name
 
-**Fix**: Verify file exists at the referenced path. Check the browser console for 404 errors.
+**Fix**: Verify the file exists at the referenced path. Check the browser console for 404 errors.
 
 ### Dark Mode Problems
 
@@ -385,14 +290,15 @@ npx vercel dist/
 **Symptom**: `build.py` exits with an error.
 
 **Common causes**:
-- "Could not retrieve Fibery token from macOS Keychain": Add the token with `security add-generic-password -s mcp-credentials -a fibery-undersight -w "TOKEN"`
-- "Could not find loadContent() function": The function signature in `index.html` changed. Update the regex pattern in `_extract_function()`.
-- "HTTP error" during Fibery fetch: Check network connectivity and token validity
-- Security verification failures: Run with `--verify` for details. Common: leftover Fibery URLs in markdown content
+- JSON syntax error in `content/content.json`: check it with `python3 -m json.tool content/content.json > /dev/null`
+- "Could not find loadContent() function": the function signature in `index.html` changed. Update `_extract_function()` in `build.py`.
+- Security verification failures: the output lists each `FAIL` with file and line. Common cause: a `/api/` string in content or markup.
 
-### Theme Toggle Not Working
+### Site Shows the Under-Construction Page
 
-**Known limitation**: The toggle button only works for users whose OS is in dark mode. It adds `theme-light` class to force light mode. For light-mode OS users, the toggle has no visible effect because there is no `theme-dark` class. This is a known issue documented in the adversarial review.
+**Cause**: `Site Config` has `**Production Mode:** under-construction`.
+
+**Fix**: Set it to `live` and ship the change.
 
 ---
 
