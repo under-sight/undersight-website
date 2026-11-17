@@ -12,18 +12,6 @@
 // history around this file for the fix (navigate() now takes {url, state}
 // opts so the final URL is written exactly once, atomically).
 //
-// Usage:
-//   node tests/nav-e2e.mjs                       # against http://localhost:8088
-//   BASE=http://localhost:8088 node tests/nav-e2e.mjs
-//
-// Prereqs:
-//   - A dev server must already be running at BASE, e.g.:
-//       FIBERY_SPACE="CMS Staging" python3 undersight-serve.py
-//   - The `playwright` package (with chromium) must be resolvable. It does
-//     not need to be a project devDependency; this script also looks in
-//     ~/node_modules and NODE_PATH so a machine-global Playwright install
-//     works too.
-//
 // Exit code 0 = all assertions passed, 1 = at least one failed/crashed.
 
 import { createRequire } from 'node:module';
@@ -57,7 +45,8 @@ function resolvePlaywright() {
 }
 
 const { chromium } = resolvePlaywright();
-const BASE = process.env.BASE || 'http://localhost:8088';
+const BASE = process.env.BASE || 'http://localhost:8080';
+const BOOKING_URL = 'https://cal.com/adriany/quick-connect';
 
 let failures = 0;
 function assert(cond, msg) {
@@ -86,12 +75,13 @@ async function main() {
   const page = await browser.newPage();
   const pageErrors = [];
   page.on('pageerror', (err) => pageErrors.push(String(err)));
+  const requests = [];
+  page.on('request', (req) => requests.push(req.url()));
 
   // ---- Flow A: home -> blog (nav click) -> post -> back(blog) -> back(home) ----
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#page-home.active', { timeout: 10000 });
   await page.waitForFunction(() => document.readyState === 'complete');
-  // Give the Fibery-backed content fetch time to populate nav + blog grid.
   await page.waitForTimeout(1200);
 
   await page.click('a[href="/blog"]');
@@ -132,6 +122,18 @@ async function main() {
     info = await activePageInfo(page);
     assert(info.activeId === 'page-post', `direct deep link /blog/${slug} opens the post (got activeId=${info.activeId})`);
 
+    const bookingHrefs = await page.evaluate(() =>
+      [...document.querySelectorAll('a')].map((a) => a.getAttribute('href') || '').filter((h) => /cal\.com|calendly\.com/.test(h)));
+    assert(bookingHrefs.length > 0, `booking links present (got ${bookingHrefs.length})`);
+    assert(bookingHrefs.every((h) => h === BOOKING_URL), `every booking link is ${BOOKING_URL} (got ${[...new Set(bookingHrefs)].join(', ')})`);
+
+    const postState = await page.evaluate(() => ({
+      gated: !!document.querySelector('.post-gated'),
+      overlay: !!document.getElementById('wpOverlay'),
+      blogGate: typeof window.BlogGate !== 'undefined',
+    }));
+    assert(!postState.gated && !postState.overlay && !postState.blogGate, `blog posts render without an email gate (${JSON.stringify(postState)})`);
+
     await page.goBack();
     await page.waitForTimeout(400);
     info = await activePageInfo(page);
@@ -146,12 +148,10 @@ async function main() {
     );
   }
 
-  // The lead-capture Turnstile mount (#wpTurnstile) is rendered explicitly on
-  // modal open and must never be auto-scanned at page load (no cf-turnstile
-  // class, no empty data-sitekey — see index.html). A load-time TurnstileError
-  // is therefore a real regression now and is NOT filtered out.
-  const routingErrors = pageErrors;
-  assert(routingErrors.length === 0, `no uncaught page errors during navigation${routingErrors.length ? ': ' + routingErrors.join(' | ') : ''}`);
+  const leadRequests = requests.filter((u) => /challenges\.cloudflare\.com|calendly\.com/.test(u) || /\/api\//.test(u));
+  assert(leadRequests.length === 0, `no lead-capture or backend requests${leadRequests.length ? ': ' + leadRequests.join(' | ') : ''}`);
+
+  assert(pageErrors.length === 0, `no uncaught page errors during navigation${pageErrors.length ? ': ' + pageErrors.join(' | ') : ''}`);
 
   await browser.close();
 
@@ -161,5 +161,6 @@ async function main() {
 
 main().catch((err) => {
   console.error('nav-e2e crashed:', err);
+  console.error(`Needs the static preview at ${BASE}: python3 build.py && node serve.mjs (PORT defaults to 8080).`);
   process.exit(1);
 });

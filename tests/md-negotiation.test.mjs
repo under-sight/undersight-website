@@ -1,12 +1,10 @@
-// Unit tests for the content-negotiation pure functions used by
-// functions/_middleware.js. Run: node --test tests/md-negotiation.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   acceptsMarkdown,
   markdownAssetPath,
   isHtmlDocument,
-} from "../functions/_md-negotiation.mjs";
+} from "../md-negotiation.mjs";
 
 test("acceptsMarkdown: explicit text/markdown wins", () => {
   assert.equal(acceptsMarkdown("text/markdown"), true);

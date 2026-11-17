@@ -91,38 +91,13 @@
   .because{background:var(--amber-soft);border:1px solid #EBD2C2;padding:16px 22px;border-radius:10px;margin:20px 0 6px}
   .because p{margin:4px 0;font-size:15px}
 
-  /* form */
   .formcard{background:var(--graphite-900);border-radius:16px;padding:36px 40px;margin:24px 0 0;color:#fff}
   .formcard h2{color:#fff;margin-bottom:4px}
   .formcard .lede{color:#AEB3BC}
-  fieldset{border:none;margin:22px 0 0;padding:0}
-  legend{font-family:"Inter",sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:12px;padding:0}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
-  @media(max-width:680px){.row,.row3{grid-template-columns:1fr}}
-  .field{margin-bottom:14px}
-  label{display:block;font-size:12.5px;font-weight:500;color:#C7CBD3;margin-bottom:5px}
-  input,select,textarea{width:100%;background:#2C3037;border:1px solid #3E434C;border-radius:8px;color:#fff;font-size:14.5px;padding:11px 13px;font-family:inherit}
-  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239AA1AC' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;background-size:12px 8px;padding-right:38px;cursor:pointer}
-  input:focus,select:focus{outline:2px solid var(--amber);border-color:transparent}
-  .check{display:flex;gap:10px;align-items:flex-start;margin:16px 0;font-size:13.5px;color:#C7CBD3}
-  .check input{width:auto;margin-top:3px}
-  .weeks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
-  @media(max-width:680px){.weeks{grid-template-columns:1fr}}
-  .week{position:relative}
-  .week input{position:absolute;opacity:0;inset:0;cursor:pointer}
-  .week span{display:block;border:1px solid #3E434C;background:#2C3037;border-radius:8px;padding:11px 12px;font-size:13.5px;text-align:center;color:#fff}
-  .week input:checked + span{border-color:var(--amber);background:var(--amber);color:#0F1115;font-weight:600}
-  .week input:focus-visible + span{outline:2px solid var(--amber)}
-  button{background:#9A5432;color:#fff;border:none;font-weight:600;font-size:16px;padding:15px 30px;border-radius:9px;cursor:pointer;width:100%;margin-top:8px}
-  button:hover{background:#874A2B}
-  button:disabled{opacity:.6;cursor:default}
+  .cta{display:block;text-align:center;text-decoration:none;font-family:"Inter",sans-serif;background:#9A5432;color:#fff;font-weight:600;font-size:16px;padding:15px 30px;border-radius:9px;margin-top:22px}
+  .cta:hover{background:#874A2B}
   .fine{font-size:12px;color:#9AA1AC;margin-top:12px;text-align:center}
-  .hp{position:absolute;left:-9999px;opacity:0}
   body.loading [data-cms]{min-height:1em}
-  #done{display:none;text-align:center;padding:30px 0}
-  #done h3{color:#fff;font-size:22px;margin:0 0 8px}
-  #done p{color:#AEB3BC;font-size:15px;margin:0}
   .livebar{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
   .livebar>span:last-child{font-size:12.5px;color:#C7CBD3}
   .dots{display:flex;gap:6px}
@@ -155,18 +130,12 @@
   @media(max-width:760px){.weekstrip{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:460px){.weekstrip{grid-template-columns:repeat(2,1fr)}}
   .weekstrip .wk{position:relative;border-radius:9px;padding:10px 8px;text-align:center;border:1px solid #3E434C;background:#2C3037;display:block}
-  .weekstrip .wk input{position:absolute;opacity:0;inset:0;cursor:pointer}
   .weekstrip .wk b{display:block;font-family:"Inter",sans-serif;font-size:12.5px;font-weight:600;color:#fff;line-height:1.3}
   .weekstrip .wk em{display:block;font-style:normal;font-size:11px;color:#9AA1AC;margin-top:2px}
   .weekstrip .wk i{display:inline-block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:7px;padding:3px 9px;border-radius:99px;background:#3E434C;color:#8A9099}
   .weekstrip .wk.open{border-color:var(--amber);background:#3A2C24}
   .weekstrip .wk.open i{background:var(--amber);color:#0F1115}
   .weekstrip .wk.booked{opacity:.6}
-  .weeks .wk.open input:checked ~ i{background:#0F1115;color:var(--amber)}
-  .weeks .wk.open:has(input:checked){background:var(--amber);border-color:var(--amber)}
-  .weeks .wk.open:has(input:checked) b{color:#0F1115}
-  .weeks .wk.open:has(input:checked) em{color:#3A2A20}
-  .weeks .wk input:disabled{cursor:default}
   .stage .sno{font-size:12px}
 </style>
 <script src="/resources/consent.js" defer></script>
@@ -372,81 +341,10 @@
 <section id="claim">
   <div class="wrap">
     <div class="formcard">
-      <form id="f" autocomplete="on">
-        <h2 data-cms="Form Heading"></h2>
-        <p class="lede" data-cms="Form Lede"></p>
-
-        <fieldset>
-          <legend>The week</legend>
-          <div class="weekstrip weeks" id="weeks">
-            <label class="wk booked"><input type="radio" name="onsite_week" value="" data-week="0" disabled>
-              <b>This week</b><em class="wkdate"></em><i>Booked</i></label>
-            <label class="wk open"><input type="radio" name="onsite_week" value="Next week" data-week="1" required>
-              <b>Next week</b><em class="wkdate"></em><i>Open</i></label>
-            <label class="wk booked"><input type="radio" name="onsite_week" value="" data-week="2" disabled>
-              <b>In 2 weeks</b><em class="wkdate"></em><i>Booked</i></label>
-            <label class="wk booked"><input type="radio" name="onsite_week" value="" data-week="3" disabled>
-              <b>In 3 weeks</b><em class="wkdate"></em><i>Booked</i></label>
-            <label class="wk booked"><input type="radio" name="onsite_week" value="" data-week="4" disabled>
-              <b>In 4 weeks</b><em class="wkdate"></em><i>Booked</i></label>
-            <label class="wk booked"><input type="radio" name="onsite_week" value="" data-week="5" disabled>
-              <b>In 5 weeks</b><em class="wkdate"></em><i>Booked</i></label>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Company</legend>
-          <div class="row">
-            <div class="field"><label for="company">Company name</label><input id="company" name="company" required></div>
-            <div class="field"><label for="address">Office location for the week</label><input id="address" name="address" placeholder="City, or full address" required></div>
-          </div>
-          <div class="row">
-            <div class="field"><label for="volume">Submissions per month</label>
-              <select id="volume" name="volume" required>
-                <option value="">Select</option><option>Under 50</option><option>50 to 250</option><option>250 to 500</option><option>500 to 1,000</option><option>More than 1,000</option>
-              </select></div>
-            <div class="field"><label for="vendor">Current vendors (optional)</label><input id="vendor" name="vendor" placeholder="Ocrolus, Heron, in-house"></div>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Current position on the four layers</legend>
-          <div class="field"><label for="data_systems">Which systems hold deal data today?</label><input id="data_systems" name="data_systems" placeholder="CRM, email, shared drive, bank data vendor, spreadsheets" required></div>
-          <div class="field"><label for="basic_counts">Can active deals be counted by broker, industry or underwriter today?</label>
-            <select id="basic_counts" name="basic_counts" required>
-              <option value="">Select</option><option>Yes, any cut you ask for</option><option>Partly, we have a few standard reports</option><option>No</option>
-            </select></div>
-          <div class="field"><label for="repayment_history">Is repayment history held in one place?</label>
-            <select id="repayment_history" name="repayment_history" required>
-              <option value="">Select</option><option>Yes, every funded deal</option><option>Partly, some deals or some systems</option><option>No</option>
-            </select></div>
-          <div class="field"><label for="refresh_access">Is bank data refreshed on deals after funding?</label>
-            <select id="refresh_access" name="refresh_access" required>
-              <option value="">Select</option><option>Yes, through Plaid</option><option>Yes, through another provider</option><option>No</option>
-            </select></div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Contact</legend>
-          <div class="row">
-            <div class="field"><label for="signer_name">Full name</label><input id="signer_name" name="signer_name" required></div>
-            <div class="field"><label for="signer_title">Title</label><input id="signer_title" name="signer_title" required></div>
-          </div>
-          <div class="row">
-            <div class="field"><label for="signer_email">Work email</label><input id="signer_email" name="signer_email" type="email" required></div>
-            <div class="field"><label for="signer_phone">Phone</label><input id="signer_phone" name="signer_phone" type="tel"></div>
-          </div>
-        </fieldset>
-
-        <input class="hp" name="website" tabindex="-1" autocomplete="off">
-        <div class="check"><input type="checkbox" id="auth" required><label for="auth" style="margin:0" data-cms="Form Consent"></label></div>
-        <button type="submit" id="go" data-cms="Form Button"></button>
-        <p class="fine" data-cms="Form Fine Print"></p>
-      </form>
-      <div id="done">
-        <h3 data-cms="Done Heading"></h3>
-        <p data-cms="Done Body"></p>
-      </div>
+      <h2 data-cms="Form Heading"></h2>
+      <p class="lede" data-cms="Form Lede"></p>
+      <a class="cta" href="https://cal.com/adriany/quick-connect" target="_blank" rel="noopener" data-cms="Form Button"></a>
+      <p class="fine" data-cms="Form Fine Print"></p>
     </div>
   </div>
 </section>
@@ -506,44 +404,17 @@ async function loadContent() {
 loadContent();
 </script>
 <script>
-// Workshop weeks run Monday to Friday. Only next week takes bookings, so every
-// other tile ships disabled.
 (function () {
   const now = new Date();
   const thisMonday = new Date(now);
   thisMonday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
   const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
-  document.querySelectorAll('.weekstrip .wk').forEach(tile => {
-    const control = tile.querySelector('input');
-    const i = Number(control ? control.dataset.week : tile.dataset.week ?? [...tile.parentElement.children].indexOf(tile));
+  document.querySelectorAll('.weekstrip .wk').forEach((tile, i) => {
     const start = new Date(thisMonday); start.setDate(thisMonday.getDate() + i * 7);
     const end = new Date(start); end.setDate(start.getDate() + 4);
-    if (control && !control.disabled) control.value = 'Week of ' + fmt.format(start) + ' (' + start.getFullYear() + ')';
     tile.querySelector('.wkdate').textContent = fmt.format(start) + ' to ' + fmt.format(end);
   });
 })();
-document.getElementById('f').addEventListener('submit', async e => {
-  e.preventDefault();
-  const btn = document.getElementById('go');
-  btn.disabled = true; btn.textContent = 'Sending...';
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  data.submitted_at = new Date().toISOString();
-  data.offer = 'funder-workshop';
-  try {
-    const r = await fetch('/api/workshop-apply', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!r.ok) throw new Error('bad status ' + r.status);
-    document.getElementById('f').style.display = 'none';
-    document.getElementById('done').style.display = 'block';
-    document.getElementById('claim').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  } catch (err) {
-    btn.disabled = false; btn.textContent = (window.__cms || {})['Form Button'] || 'Send request';
-    alert((window.__cms || {})['Send Failed'] || 'That did not send.');
-  }
-});
 </script>
 </body>
 </html>

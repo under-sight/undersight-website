@@ -1,0 +1,11 @@
+.git
+dist
+node_modules
+docs
+tests
+whitepaper
+versions
+reference
+tasks
+.impeccable
+.claude

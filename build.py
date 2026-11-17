@@ -2,14 +2,13 @@
 """
 Static site builder for undersight.ai
 
-Fetches all content from Fibery, downloads file assets, and bakes everything
+Reads content/content.json and the repo's static assets, and bakes everything
 into a self-contained static site in dist/.
 
 Usage:
     python3 build.py            # Build to dist/
     python3 build.py --verify   # Build + run security checks on output
 
-Requires: FIBERY_TOKEN env var, or macOS Keychain entry (service='mcp-credentials', account='fibery-undersight')
 """
 
 import hashlib
@@ -17,25 +16,18 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import sys
 import time
-import urllib.error
-import urllib.request
-from concurrent.futures import ThreadPoolExecutor
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
-WORKSPACE = "subscript.fibery.io"
-FIBERY_SPACE = os.environ.get("FIBERY_SPACE", "CMS")
-DB = f"{FIBERY_SPACE}/Pages"
 SITE_URL = "https://undersight.ai"
 DOCS_URL = "https://documentation.underchat.ai/"
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(SRC_DIR, "dist")
-CACHE_DIR = os.path.join(SRC_DIR, ".fibery-file-cache")
+CONTENT_PATH = os.path.join(SRC_DIR, "content", "content.json")
 
 # Static files and directories to copy into dist/
 # NOTE: sitemap.xml and llms.txt are copied as fallbacks and then REGENERATED
@@ -56,647 +48,6 @@ STATIC_FILES = [
     "apple-touch-icon.png",
     "_redirects",
 ]
-
-# ---------------------------------------------------------------------------
-# Fibery API (mirrors undersight-serve.py)
-# ---------------------------------------------------------------------------
-
-
-def get_token():
-    """Retrieve Fibery API token from env var or macOS Keychain."""
-    token = os.environ.get("FIBERY_TOKEN")
-    if token:
-        return token
-    try:
-        return subprocess.check_output(
-            [
-                "security",
-                "find-generic-password",
-                "-s",
-                "mcp-credentials",
-                "-a",
-                "fibery-undersight",
-                "-w",
-            ],
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("ERROR: Could not retrieve Fibery token.")
-        print("       Set FIBERY_TOKEN env var, or on macOS add keychain entry:")
-        print("       service='mcp-credentials', account='fibery-undersight'")
-        sys.exit(1)
-
-
-def api_post(path, body, token):
-    """POST to Fibery API and return parsed JSON."""
-    headers = {
-        "Authorization": f"Token {token}",
-        "Content-Type": "application/json",
-    }
-    req = urllib.request.Request(
-        f"https://{WORKSPACE}{path}",
-        data=json.dumps(body).encode(),
-        headers=headers,
-    )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        data = json.loads(resp.read())
-    # Fibery returns HTTP 200 with success:false on command errors (e.g. a
-    # missing database). Raise so the under-construction fallback fires
-    # instead of building a content-empty "full" site.
-    if isinstance(data, list):
-        for item in data:
-            if isinstance(item, dict) and item.get("success") is False:
-                raise RuntimeError(f"Fibery command failed: {item.get('result')}")
-    return data
-
-
-def _normalize_doc_markdown(text):
-    """
-    Normalize migration-created escape artifacts that would otherwise render as
-    visible backslashes in markdown-derived site copy.
-    """
-    if not text or not isinstance(text, str):
-        return text or ""
-    text = re.sub(
-        r"\\+u([0-9a-fA-F]{4})",
-        lambda m: chr(int(m.group(1), 16)),
-        text,
-    )
-    text = re.sub(r"\\+([*~])", r"\1", text)
-    text = re.sub(r"\\+\s*(?=\n|$)", "", text)
-    # Fibery exports soft breaks as literal <br> (2026-08); parseMeta and the
-    # case-study parser split on newlines, so a <br>-joined meta line leaks
-    # the next key into the rendered value.
-    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
-    return text
-
-
-def fetch_all(token):
-    """
-    Fetch all entities + docs from Fibery.
-    Returns (content_map, file_map) where:
-      - content_map: {name: {content, files}} (same shape as serve.py)
-        plus a synthetic '_blogs' key holding the structured blog list.
-      - file_map: {opaque_id: fibery_secret} for downloading files
-    """
-    print("  Querying Pages entities...")
-    entities = api_post(
-        "/api/commands",
-        [
-            {
-                "command": "fibery.entity/query",
-                "args": {
-                    "query": {
-                        "q/from": DB,
-                        "q/select": {
-                            "Name": f"{FIBERY_SPACE}/Name",
-                            "DocSecret": [
-                                f"{FIBERY_SPACE}/Description",
-                                "Collaboration~Documents/secret",
-                            ],
-                            "Files": {
-                                "q/from": f"{FIBERY_SPACE}/Assets",
-                                "q/select": {
-                                    "FileSecret": "fibery/secret",
-                                    "FileName": "fibery/name",
-                                    "ContentType": "fibery/content-type",
-                                },
-                                "q/limit": 20,
-                            },
-                        },
-                        "q/limit": 100,
-                    }
-                },
-            }
-        ],
-        token,
-    )[0]["result"]
-    # Filter out non-dict entries (Fibery API sometimes returns metadata strings)
-    entities = [e for e in entities if isinstance(e, dict)]
-    print(f"  Found {len(entities)} Pages entities")
-
-    # Filter out any legacy 'Blog -*' entries that still linger in
-    # CMS/Pages — blog content now lives in CMS/Blog. The CI guard
-    # in .github/workflows/deploy-production.yml will eventually fail on
-    # regressions once the user deletes the migration leftovers manually.
-    stale_blog_pages = [
-        e.get("Name") for e in entities
-        if isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -")
-    ]
-    if stale_blog_pages:
-        print(f"  WARNING: Ignoring {len(stale_blog_pages)} stale 'Blog -*' entries in {DB}")
-        for n in stale_blog_pages:
-            print(f"    - {n} (delete this in Fibery UI)")
-        entities = [
-            e for e in entities
-            if not (isinstance(e.get("Name"), str) and e["Name"].startswith("Blog -"))
-        ]
-
-    print("  Querying Blog entities...")
-    blog_entities = api_post(
-        "/api/commands",
-        [
-            {
-                "command": "fibery.entity/query",
-                "args": {
-                    "query": {
-                        "q/from": f"{FIBERY_SPACE}/Blog",
-                        "q/select": {
-                            "Name": f"{FIBERY_SPACE}/name",
-                            "Slug": f"{FIBERY_SPACE}/Slug",
-                            "Subtitle": f"{FIBERY_SPACE}/Subtitle",
-                            "Author": f"{FIBERY_SPACE}/Author",
-                            "Excerpt": f"{FIBERY_SPACE}/Excerpt",
-                            "PostDate": f"{FIBERY_SPACE}/Post Date",
-                            "CreationDate": "fibery/creation-date",
-                            "Status": [f"{FIBERY_SPACE}/Status", "enum/name"],
-                            "Type": [f"{FIBERY_SPACE}/Type", "enum/name"],
-                            "DocSecret": [
-                                f"{FIBERY_SPACE}/Description",
-                                "Collaboration~Documents/secret",
-                            ],
-                            "Pdf": {
-                                "q/from": f"{FIBERY_SPACE}/PDF",
-                                "q/select": ["fibery/id"],
-                                "q/limit": 1,
-                            },
-                            "Files": {
-                                "q/from": f"{FIBERY_SPACE}/Assets",
-                                "q/select": {
-                                    "FileSecret": "fibery/secret",
-                                    "FileName": "fibery/name",
-                                    "ContentType": "fibery/content-type",
-                                },
-                                "q/limit": 20,
-                            },
-                        },
-                        "q/limit": 100,
-                    }
-                },
-            }
-        ],
-        token,
-    )[0]["result"]
-    blog_entities = [e for e in blog_entities if isinstance(e, dict)]
-    print(f"  Found {len(blog_entities)} Blog entities")
-
-    print("  Querying Integrations entities...")
-    integration_entities = api_post(
-        "/api/commands",
-        [
-            {
-                "command": "fibery.entity/query",
-                "args": {
-                    "query": {
-                        "q/from": f"{FIBERY_SPACE}/Integrations",
-                        "q/select": {
-                            "Name": f"{FIBERY_SPACE}/name",
-                            "Rank": f"{FIBERY_SPACE}/Rank",
-                            "Logo": {
-                                "q/from": f"{FIBERY_SPACE}/Logo",
-                                "q/select": {
-                                    "FileSecret": "fibery/secret",
-                                    "FileName": "fibery/name",
-                                    "ContentType": "fibery/content-type",
-                                },
-                                "q/limit": 5,
-                            },
-                            "Pages": {
-                                "q/from": f"{FIBERY_SPACE}/Used On Pages",
-                                "q/select": {"Name": f"{FIBERY_SPACE}/Name"},
-                                "q/limit": 20,
-                            },
-                        },
-                        "q/limit": 50,
-                    }
-                },
-            }
-        ],
-        token,
-    )[0]["result"]
-    integration_entities = [e for e in integration_entities if isinstance(e, dict)]
-    print(f"  Found {len(integration_entities)} Integrations entities")
-
-    # Batch doc fetch (Pages + Blog secrets in one call)
-    secrets = [e["DocSecret"] for e in entities if e.get("DocSecret")]
-    secrets += [e["DocSecret"] for e in blog_entities if e.get("DocSecret")]
-    # Dedupe but preserve order
-    seen = set()
-    unique_secrets = [s for s in secrets if not (s in seen or seen.add(s))]
-    docs = {}
-    if unique_secrets:
-        print(f"  Fetching {len(unique_secrets)} documents...")
-        doc_results = api_post(
-            "/api/documents/commands?format=md",
-            {"command": "get-documents", "args": [{"secret": s} for s in unique_secrets]},
-            token,
-        )
-        for d in doc_results:
-            docs[d["secret"]] = d.get("content", "")
-
-    # Build content map and file map (opaque_id -> fibery_secret)
-    file_map = {}
-    result = {}
-    for e in entities:
-        files = []
-        for f in e.get("Files") or []:
-            sec = f.get("FileSecret", "")
-            if sec:
-                opaque = hashlib.sha256(sec.encode()).hexdigest()[:12]
-                file_map[opaque] = sec
-                files.append(
-                    {
-                        "name": f.get("FileName", ""),
-                        "type": f.get("ContentType", ""),
-                        "url": f"/api/file/{opaque}",
-                    }
-                )
-        result[e["Name"]] = {
-            "content": _normalize_doc_markdown(docs.get(e.get("DocSecret", ""), "")),
-            "files": files,
-        }
-
-    # Build the structured _blogs array. Skip entities without a Name or Slug
-    # (e.g., the B8 "Test Blog" / B9 null-stub entries kept around in Fibery
-    # for the user to delete manually).
-    blogs = []
-    whitepapers = []
-    for be in blog_entities:
-        name = be.get("Name")
-        slug = be.get("Slug")
-        if not name or not slug:
-            continue
-        # Draft posts never reach the built site. Entries with no Status
-        # (everything created before the field existed) are published.
-        if be.get("Status") == "Draft":
-            print(f"  Skipping draft blog post: {name}")
-            continue
-        files = []
-        for f in be.get("Files") or []:
-            sec = f.get("FileSecret", "")
-            if sec:
-                opaque = hashlib.sha256(sec.encode()).hexdigest()[:12]
-                file_map[opaque] = sec
-                files.append(
-                    {
-                        "name": f.get("FileName", ""),
-                        "type": f.get("ContentType", ""),
-                        "url": f"/api/file/{opaque}",
-                    }
-                )
-        body_raw = docs.get(be.get("DocSecret", ""), "")
-        # Blog Description docs hold plain markdown (the migration-era JSON
-        # envelopes were repaired at rest, Fibery #408). Fibery's md export
-        # still escapes literal * and ~ (e.g. "\~8"), so normalize here.
-        body = _normalize_doc_markdown(body_raw)
-        tag = ""
-        if isinstance(be.get("Type"), list) and be["Type"]:
-            tag = be["Type"][0] or ""
-        elif isinstance(be.get("Type"), str):
-            tag = be["Type"]
-        blogs.append({
-            "name": name,
-            "slug": slug,
-            "subtitle": _normalize_doc_markdown(be.get("Subtitle") or ""),
-            "author": be.get("Author") or "",
-            "excerpt": _normalize_doc_markdown(be.get("Excerpt") or ""),
-            "post_date": be.get("PostDate") or "",
-            "creation_date": be.get("CreationDate") or "",
-            "type": tag,
-            "body": body,
-            "files": files,
-            # The PDF download button renders only when a PDF is attached.
-            "has_pdf": bool(be.get("Pdf")),
-        })
-        whitepapers.append({"name": name, "slug": slug})
-
-    # Sort: Post Date desc, tie-break by creation date desc
-    blogs.sort(
-        key=lambda b: (b.get("post_date") or "", b.get("creation_date") or ""),
-        reverse=True,
-    )
-    # Embed via files=[] / content="" placeholder for the entity map shape,
-    # plus _data carrying the structured array (renderContent reads _data).
-    integrations = []
-    for ie in integration_entities:
-        name = ie.get("Name")
-        if not name:
-            continue
-        ifiles = []
-        for f in ie.get("Logo") or []:
-            sec = f.get("FileSecret", "")
-            if sec:
-                opaque = hashlib.sha256(sec.encode()).hexdigest()[:12]
-                file_map[opaque] = sec
-                ifiles.append({
-                    "name": f.get("FileName", ""),
-                    "type": f.get("ContentType", ""),
-                    "url": f"/api/file/{opaque}",
-                })
-        pages = []
-        for p in ie.get("Pages") or []:
-            pn = p.get("Name")
-            if pn:
-                pages.append(pn)
-        integrations.append({
-            "name": name,
-            "rank": ie.get("Rank") or 0,
-            "files": ifiles,
-            "pages": pages,
-        })
-    integrations.sort(key=lambda i: (i.get("rank") or 0, i.get("name") or ""))
-    result["_integrations"] = {"content": "", "files": [], "_data": integrations}
-    print(f"  Integrations: {len(integrations)} entities")
-
-    result["_blogs"] = {"content": "", "files": [], "_data": blogs}
-    result["_whitepapers"] = {"content": "", "files": [], "_data": whitepapers}
-    print(f"  Blog catalog: {len(blogs)} posts (sorted by Post Date desc)")
-
-    return result, file_map
-
-
-def fetch_all_with_retry(token, attempts=3, base_delay=15):
-    """fetch_all with exponential backoff for transient failures (429/5xx).
-
-    Re-raises the last error after exhausting attempts — the caller must
-    fail the build, never fall back to the under-construction page (that
-    path is reserved for a deliberate Site Mode switch or a missing token).
-    """
-    for attempt in range(1, attempts + 1):
-        try:
-            return fetch_all(token)
-        except Exception as e:
-            if attempt == attempts:
-                raise
-            delay = base_delay * (2 ** (attempt - 1))
-            print(f"  Fetch attempt {attempt}/{attempts} failed ({e}); "
-                  f"retrying in {delay}s...")
-            time.sleep(delay)
-
-
-def download_file(secret, token, return_headers=False, max_retries=4):
-    """
-    Download a file from Fibery by its secret. Retries on 429 / transient errors
-    with exponential backoff.
-
-    Returns bytes (default) or (bytes, headers_dict) if return_headers=True.
-    Returns None / (None, {}) on failure.
-    """
-    headers = {"Authorization": f"Token {token}"}
-    url = f"https://{WORKSPACE}/api/files/{secret}"
-    last_err = None
-    for attempt in range(max_retries):
-        req = urllib.request.Request(url, headers=headers)
-        try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                data = resp.read()
-                if return_headers:
-                    h = resp.headers
-                    size = h.get("Content-Length")
-                    hdrs = {
-                        "size": int(size) if size and size.isdigit() else len(data),
-                        "etag": h.get("ETag"),
-                        "last_modified": h.get("Last-Modified"),
-                    }
-                    return data, hdrs
-                return data
-        except urllib.error.HTTPError as e:
-            last_err = e
-            # Back off on 429 / 5xx and retry; fail fast on 4xx other than 429
-            if e.code == 429 or 500 <= e.code < 600:
-                time.sleep(0.5 * (2 ** attempt))
-                continue
-            break
-        except Exception as e:
-            last_err = e
-            time.sleep(0.5 * (2 ** attempt))
-            continue
-    print(f"    WARNING: Failed to download file {secret[:8]}...: {last_err}")
-    return (None, {}) if return_headers else None
-
-
-# ---------------------------------------------------------------------------
-# Local file cache (speeds up repeat builds by skipping unchanged downloads)
-# ---------------------------------------------------------------------------
-
-
-def _cache_key(secret):
-    """Hash a Fibery file secret to an opaque cache key."""
-    return hashlib.sha256(secret.encode()).hexdigest()[:16]
-
-
-def _cache_paths(secret):
-    """Return (bytes_path, metadata_path) for a given Fibery secret."""
-    key = _cache_key(secret)
-    return (
-        os.path.join(CACHE_DIR, f"{key}.bin"),
-        os.path.join(CACHE_DIR, f"{key}.json"),
-    )
-
-
-def _cache_read_meta(secret):
-    """Return cached metadata dict for a secret, or None if no cache."""
-    _, meta_path = _cache_paths(secret)
-    if not os.path.isfile(meta_path):
-        return None
-    try:
-        with open(meta_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return None
-
-
-def _cache_read_bytes(secret):
-    """Return cached file bytes for a secret, or None if no cache."""
-    bytes_path, _ = _cache_paths(secret)
-    if not os.path.isfile(bytes_path):
-        return None
-    try:
-        with open(bytes_path, "rb") as f:
-            return f.read()
-    except Exception:
-        return None
-
-
-def _cache_write(secret, data, meta):
-    """Persist file bytes + metadata for a secret."""
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    bytes_path, meta_path = _cache_paths(secret)
-    tmp_bytes = bytes_path + ".tmp"
-    tmp_meta = meta_path + ".tmp"
-    with open(tmp_bytes, "wb") as f:
-        f.write(data)
-    with open(tmp_meta, "w", encoding="utf-8") as f:
-        json.dump(meta, f)
-    os.replace(tmp_bytes, bytes_path)
-    os.replace(tmp_meta, meta_path)
-
-
-def download_file_cached(secret, token, use_cache=True):
-    """
-    Download a Fibery file, transparently using the local cache when possible.
-
-    Returns (bytes, was_cached) where was_cached is True if served from cache.
-
-    Fibery `fibery/secret` is immutable: replacing a file in the source entity
-    yields a new secret, which surfaces as a new opaque_id in the file_map.
-    So a cache hit on secret is always content-correct — no HEAD probe needed.
-    """
-    if not use_cache:
-        data, hdrs = download_file(secret, token, return_headers=True)
-        return data, False
-
-    cached_bytes = _cache_read_bytes(secret)
-    if cached_bytes is not None:
-        return cached_bytes, True
-
-    # Miss — download and populate the cache
-    data, hdrs = download_file(secret, token, return_headers=True)
-    if data is not None:
-        meta = {
-            "size": len(data),
-            "etag": hdrs.get("etag"),
-            "last_modified": hdrs.get("last_modified"),
-        }
-        try:
-            _cache_write(secret, data, meta)
-        except Exception as e:
-            print(f"    WARNING: Could not write cache for {secret[:8]}...: {e}")
-    return data, False
-
-
-# ---------------------------------------------------------------------------
-# Content baking
-# ---------------------------------------------------------------------------
-
-
-def determine_local_path(opaque_id, files_info):
-    """
-    Given an opaque file ID, figure out a local filename for it.
-    Returns a path relative to dist/ (e.g. 'images/files/abc123def456.png').
-
-    Walks both top-level entity files and nested `_data[i].files` lists
-    (used by `_blogs` / `_whitepapers` synthetic entries).
-    """
-    def _match(file_list):
-        for f in file_list or []:
-            if f.get("url") == f"/api/file/{opaque_id}":
-                return f
-        return None
-
-    found = None
-    for entity_data in files_info.values():
-        found = _match(entity_data.get("files"))
-        if found:
-            break
-        nested = entity_data.get("_data")
-        if isinstance(nested, list):
-            for item in nested:
-                if isinstance(item, dict):
-                    found = _match(item.get("files"))
-                    if found:
-                        break
-            if found:
-                break
-
-    if found:
-        name = found.get("name", opaque_id)
-        content_type = found.get("type", "")
-        # Sanitize filename
-        safe_name = re.sub(r"[^a-zA-Z0-9._-]", "_", name)
-        if not safe_name:
-            ext = ""
-            if "png" in content_type:
-                ext = ".png"
-            elif "jpeg" in content_type or "jpg" in content_type:
-                ext = ".jpg"
-            elif "webp" in content_type:
-                ext = ".webp"
-            elif "svg" in content_type:
-                ext = ".svg"
-            safe_name = f"{opaque_id}{ext}"
-        return f"images/files/{safe_name}"
-    return f"images/files/{opaque_id}"
-
-
-def download_fibery_files(content_map, file_map, token, use_cache=True):
-    """
-    Download all Fibery file attachments to dist/images/files/.
-    Returns (local_paths, stats) where:
-      - local_paths: mapping of opaque_id -> local_relative_path
-      - stats: {"total", "cached", "downloaded", "skipped"}
-    """
-    stats = {"total": 0, "cached": 0, "downloaded": 0, "skipped": 0}
-    if not file_map:
-        return {}, stats
-
-    files_dir = os.path.join(DIST_DIR, "images", "files")
-    os.makedirs(files_dir, exist_ok=True)
-
-    local_paths = {}
-
-    def _fetch_one(item):
-        opaque_id, secret = item
-        local_rel = determine_local_path(opaque_id, content_map)
-        local_abs = os.path.join(DIST_DIR, local_rel)
-        os.makedirs(os.path.dirname(local_abs), exist_ok=True)
-        data, was_cached = download_file_cached(
-            secret, token, use_cache=use_cache
-        )
-        if data:
-            with open(local_abs, "wb") as f:
-                f.write(data)
-        return opaque_id, local_rel, data, was_cached
-
-    # Parallelize the network I/O. Keep worker count modest to avoid Fibery 429s;
-    # download_file() has its own retry-with-backoff for transient rate limits.
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        results = list(pool.map(_fetch_one, file_map.items()))
-
-    for opaque_id, local_rel, data, was_cached in results:
-        stats["total"] += 1
-        tag = "cached" if was_cached else "downloaded"
-        print(f"    {tag:>10}: {opaque_id} -> {local_rel}")
-        if data:
-            local_paths[opaque_id] = local_rel
-            if was_cached:
-                stats["cached"] += 1
-            else:
-                stats["downloaded"] += 1
-        else:
-            stats["skipped"] += 1
-            print(f"    SKIPPED: {opaque_id}")
-
-    return local_paths, stats
-
-
-def rewrite_file_urls(content_map, local_paths):
-    """
-    Rewrite /api/file/{opaque_id} URLs in the content map to local paths.
-    Modifies content_map in place. Handles both top-level entity files and
-    nested `_data[i].files` lists (used by `_blogs` synthetic entry).
-    """
-    def _rewrite_list(file_list):
-        for f in file_list or []:
-            url = f.get("url", "")
-            match = re.match(r"/api/file/([0-9a-f]{12})", url)
-            if match:
-                opaque_id = match.group(1)
-                if opaque_id in local_paths:
-                    f["url"] = local_paths[opaque_id]
-                else:
-                    # File download failed - use empty string
-                    f["url"] = ""
-
-    for entity_name, entity_data in content_map.items():
-        _rewrite_list(entity_data.get("files"))
-        nested = entity_data.get("_data")
-        if isinstance(nested, list):
-            for item in nested:
-                if isinstance(item, dict):
-                    _rewrite_list(item.get("files"))
-
 
 def bake_content_into_html(html, content_json):
     """
@@ -800,7 +151,7 @@ def _extract_function(html, func_name):
 
 def strip_serve_references(html):
     """
-    Remove any references to the dev server, /api/ endpoints, or Fibery
+    Remove any references to the dev server or /api/ endpoints
     that shouldn't be in production output.
     """
     # Remove comments mentioning serve.py
@@ -817,7 +168,7 @@ def strip_serve_references(html):
 # Agent discoverability artifacts (sitemap / JSON-LD / llms.txt / llms-full.txt)
 #
 # All generated at build time from the CMS content map so blog titles, dates,
-# and URLs always track Fibery. Pure functions — unit-tested with fixture data
+# and URLs always track content/content.json. Pure functions — unit-tested with fixture data
 # in tests/test-suite.sh, validated against dist/ in tests/build-validation.sh.
 # ---------------------------------------------------------------------------
 
@@ -833,8 +184,6 @@ SITEMAP_PAGES = [
     ("/contact", "monthly", "0.5"),
     # Standalone GEO/SEO landing page (static file in resources/, not in nav)
     ("/cash-flow-underwriting", "monthly", "0.7"),
-    # Booking page (static file in resources/, served at /book via _redirects)
-    ("/book", "monthly", "0.7"),
 ]
 
 # CMS/Pages entities that are site configuration rather than content —
@@ -865,7 +214,7 @@ def strip_legacy_frontmatter(md):
     """Drop legacy migration front-matter from a blog body, mirroring
     index.html's parseMeta: `**Key:** value` lines, `# title` lines, and the
     `---` separator are metadata; everything else is body. Post metadata is
-    emitted from first-class Fibery fields instead, so these stale lines
+    emitted from first-class content fields instead, so these stale lines
     (notably the old **Date:**) must never leak into llms-full.txt."""
     body_lines = []
     past_separator = False
@@ -1249,19 +598,14 @@ def copy_static_files():
 
 def verify_output():
     """
-    Scan all files in dist/ for leaked secrets, Fibery references, and
-    proxy URLs. Returns (pass_count, fail_count, issues).
+    Scan all files in dist/ for leaked secrets and server API calls. Returns (pass_count, fail_count, issues).
     """
     checks = [
-        ("fibery.io", "Fibery workspace URL"),
-        ("subscript.fibery.io", "Fibery workspace domain"),
-        ("/api/content", "Dev server content endpoint"),
-        ("/api/file/", "Dev server file proxy"),
-        ("/api/files/", "Fibery files API"),
+        ("'/api/", "Server API call on a static site"),
+        ('"/api/', "Server API call on a static site"),
         ("Token ", "Possible auth token header (in non-meta context)"),
     ]
 
-    # UUID pattern (Fibery secrets are UUIDs)
     uuid_pattern = re.compile(
         r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
         re.IGNORECASE,
@@ -1319,7 +663,6 @@ def verify_output():
                                 f"  FAIL: {rel}:{i} - {desc}: {line.strip()[:80]}"
                             )
 
-            # Check for UUIDs (potential Fibery secrets)
             for i, line in enumerate(content.split("\n"), 1):
                 matches = uuid_pattern.findall(line)
                 for m in matches:
@@ -1354,7 +697,6 @@ def format_size(nbytes):
 
 def main():
     do_verify = "--verify" in sys.argv
-    use_cache = "--no-cache" not in sys.argv
 
     # Parse --env flag (production or dev)
     env_name = "dev"
@@ -1370,66 +712,34 @@ def main():
 
     start_time = time.time()
 
-    # 1. Get Fibery token
-    print("\n[1/6] Retrieving Fibery API token...")
-    content_map = None
-    file_map = {}
+    print("\n[1/5] Reading content/content.json...")
+    with open(CONTENT_PATH, encoding="utf-8") as f:
+        content_map = json.load(f)
+    print(f"  Entities: {', '.join(content_map.keys())}")
+
     site_mode = "live"
-    try:
-        token = get_token()
-        print("  OK")
-    except SystemExit:
-        print("  No token available — will build under-construction fallback")
-        token = None
+    site_config_md = content_map.get("Site Config", {}).get("content", "")
+    mode_key = f"**{'Production' if env_name == 'production' else 'Dev'} Mode:**"
+    fallback_key = "**Site Mode:**"
+    for line in site_config_md.split("\n"):
+        if mode_key in line:
+            site_mode = line.split(mode_key)[1].strip().rstrip("\\").strip().lower()
+            break
+        elif fallback_key in line:
+            site_mode = line.split(fallback_key)[1].strip().rstrip("\\").strip().lower()
+    print(f"  Site Mode: {site_mode} (env={env_name})")
+    if env_name == "production" and site_mode == "under-construction":
+        print("\n  Site Mode is 'under-construction' — building fallback page")
+        content_map = None
 
-    # 2. Fetch content from Fibery
-    if token:
-        print("\n[2/6] Fetching content from Fibery...")
-        try:
-            content_map, file_map = fetch_all_with_retry(token)
-            entity_names = list(content_map.keys())
-            print(f"  Entities: {', '.join(entity_names)}")
-            print(f"  File attachments: {len(file_map)}")
-
-            # Extract Site Mode from Site Config (per-env: Production Mode / Dev Mode)
-            site_config_md = content_map.get("Site Config", {}).get("content", "")
-            mode_key = f"**{'Production' if env_name == 'production' else 'Dev'} Mode:**"
-            fallback_key = "**Site Mode:**"
-            for line in site_config_md.split("\n"):
-                if mode_key in line:
-                    site_mode = line.split(mode_key)[1].strip().rstrip("\\").strip().lower()
-                    break
-                elif fallback_key in line:
-                    site_mode = line.split(fallback_key)[1].strip().rstrip("\\").strip().lower()
-            print(f"  Site Mode: {site_mode} (env={env_name})")
-
-            # Production respects Site Mode; dev always builds full site
-            if env_name == "production" and site_mode == "under-construction":
-                print(f"\n  Site Mode is 'under-construction' — building fallback page")
-                content_map = None
-                file_map = {}
-
-        except Exception as e:
-            # Fail closed: a fetch error (e.g. a transient Fibery 429) must
-            # never ship the under-construction fallback over a live site.
-            # The fallback is only for a deliberate Site Mode switch or a
-            # missing token. Exiting non-zero keeps the previous deploy live.
-            print(f"::error::Failed to fetch content from Fibery after "
-                  f"retries: {e} — failing build (2026-08-19 outage guard)")
-            sys.exit(1)
-    else:
-        print("\n[2/6] Skipping Fibery fetch (no token)")
-
-    # 3. Prepare dist directory
-    print("\n[3/6] Preparing dist/ directory...")
+    print("\n[2/5] Preparing dist/ directory...")
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR, exist_ok=True)
     print(f"  Created {DIST_DIR}")
 
-    # --- Under-construction fallback if Fibery content unavailable ---
     if content_map is None:
-        print("\n[4/6] Building under-construction fallback...")
+        print("\n[3/5] Building under-construction fallback...")
         # Copy only essential static files for the fallback page
         for static_dir in ["css", "images/brand"]:
             src = os.path.join(SRC_DIR, static_dir)
@@ -1464,57 +774,12 @@ def main():
             json.dump(meta, f)
         return
 
-    # 4. Copy static files (before file downloads so directory structure exists)
-    print("\n[4/6] Copying static files...")
+    print("\n[3/5] Copying static files...")
     file_count, static_bytes = copy_static_files()
 
-    # 5. Download Fibery file attachments and rewrite URLs
-    print("\n[5/6] Downloading file attachments...")
-    if file_map:
-        if not use_cache:
-            print("  (cache disabled via --no-cache)")
-        local_paths, file_stats = download_fibery_files(
-            content_map, file_map, token, use_cache=use_cache
-        )
-        rewrite_file_urls(content_map, local_paths)
-        dl_count = len(local_paths)
-        # Add downloaded files to totals
-        for rel_path in local_paths.values():
-            abs_path = os.path.join(DIST_DIR, rel_path)
-            if os.path.isfile(abs_path):
-                static_bytes += os.path.getsize(abs_path)
-                file_count += 1
-        total = file_stats["total"] or 1
-        hit_rate = 100.0 * file_stats["cached"] / total
-        print(
-            f"  Files: {file_stats['total']} total, "
-            f"{file_stats['cached']} cached, "
-            f"{file_stats['downloaded']} downloaded "
-            f"(cache hit rate {hit_rate:.0f}%)"
-        )
-        if file_stats["skipped"]:
-            print(f"  SKIPPED: {file_stats['skipped']}")
-    else:
-        print("  No file attachments to download")
-
-    # 6. Bake content into HTML
-    print("\n[6/6] Baking content into index.html...")
+    print("\n[4/5] Baking content into index.html...")
     with open(os.path.join(SRC_DIR, "index.html"), "r", encoding="utf-8") as f:
         html = f.read()
-
-    # Strip Fibery secrets from content (document secrets in the content field)
-    # The content_map values should only contain markdown text and local file paths
-    # But double-check: remove any lingering Fibery references from markdown content
-    fibery_url_re = re.compile(r"https?://[a-z0-9.-]*fibery\.io[^\s\)\"']*")
-    for entity_name, entity_data in content_map.items():
-        md = entity_data.get("content", "")
-        entity_data["content"] = fibery_url_re.sub("", md)
-        # Also scrub nested blog bodies.
-        nested = entity_data.get("_data")
-        if isinstance(nested, list):
-            for item in nested:
-                if isinstance(item, dict) and "body" in item:
-                    item["body"] = fibery_url_re.sub("", item.get("body") or "")
 
     html = bake_content_into_html(html, content_map)
     html = strip_serve_references(html)

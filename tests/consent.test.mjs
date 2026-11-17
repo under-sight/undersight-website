@@ -1,13 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import consent from '../resources/consent.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const STATIC_DIRS = ['css', 'images', 'resources'];
-const VISITOR_PAGES = ['index.html', 'under-construction.html', 'resources/book.html', 'resources/cash-flow-underwriting.html', 'resources/workshop.html'];
+const VISITOR_PAGES = ['index.html', 'under-construction.html', 'resources/cash-flow-underwriting.html', 'resources/workshop.html'];
+const BOOKING_URL = 'https://cal.com/adriany/quick-connect';
+const BOOKING_PAGES = ['index.html', 'resources/workshop.html'];
+const GONE_FILES = ['resources/book.html', 'resources/booking-widget.js', 'resources/blog-gate.js'];
 
 function walk(dir) {
   return readdirSync(dir).flatMap(name => {
@@ -110,11 +113,40 @@ test('the home page footer can reopen the banner', () => {
   assert.match(read('index.html'), /<button[^>]*data-consent-open/);
 });
 
-test('Turnstile loads only from the lead form submit, never at page load', () => {
+test('no visitor page captures leads, loads Turnstile or links Calendly', () => {
+  for (const rel of VISITOR_PAGES) {
+    const html = read(rel);
+    assert.doesNotMatch(html, /calendly\.com/i, `${rel}: calendly`);
+    assert.doesNotMatch(html, /turnstile/i, `${rel}: turnstile`);
+    assert.doesNotMatch(html, /whitepaper-lead|workshop-apply|\/api\/booking|\/unsubscribe|blog-gate|booking-widget|BlogGate|post-gated|wpOverlay/, rel);
+    assert.doesNotMatch(html, /<form\b/i, `${rel}: form`);
+    const apiCalls = [...html.matchAll(/['"`](\/api\/[^'"`]*)/g)].map(m => m[1]).filter(p => p !== '/api/content');
+    assert.deepEqual(apiCalls, [], `${rel}: only the build-time /api/content stub may name /api/`);
+  }
+});
+
+test('the booking page, widget and blog gate are gone', () => {
+  for (const rel of GONE_FILES) assert.ok(!existsSync(join(ROOT, rel)), rel);
+});
+
+test('every booking call to action opens cal.com quick-connect in a new tab', () => {
+  for (const rel of BOOKING_PAGES) {
+    const links = tags(read(rel), 'a').filter(t => /cal\.com/.test(t));
+    assert.ok(links.length > 0, `${rel}: no cal.com booking link`);
+    for (const t of links) {
+      assert.ok(t.includes(`href="${BOOKING_URL}"`), `${rel}: ${t}`);
+      assert.match(t, /target="_blank"/, `${rel}: ${t}`);
+      assert.match(t, /rel="noopener"/, `${rel}: ${t}`);
+    }
+  }
+  const homeBooking = tags(read('index.html'), 'a').filter(t => t.includes(BOOKING_URL));
+  assert.equal(homeBooking.length, 12, 'all twelve home page booking CTAs point at cal.com');
+});
+
+test('blog posts render in full with the summary kept in the H1', () => {
   const html = read('index.html');
-  assert.equal((html.match(/_loadTurnstile\(/g) || []).length, 2);
-  const submit = html.slice(html.indexOf('function submitWhitepaperEmail()'), html.indexOf('function _postWhitepaperLead('));
-  assert.match(submit, /_loadTurnstile\(\)/);
-  const open = html.slice(html.indexOf('function openWhitepaperModal('), html.indexOf('var _turnstileLoad'));
-  assert.doesNotMatch(open, /turnstile\.render|_loadTurnstile/);
+  assert.doesNotMatch(html, /openWhitepaperModal|hasPdf|has_pdf|Download as PDF/);
+  assert.match(html, /function postHeadingHtml\(/);
+  assert.match(html, /getElementById\('postTitle'\)\.innerHTML = postHeadingHtml\(post\)/);
+  assert.match(html, /class="sr-only">: /);
 });
